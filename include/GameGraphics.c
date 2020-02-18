@@ -2,6 +2,8 @@
 #include "core/Game.h"
 #include "Resources.h"
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 void GameComposeFrame(void *attributes[])
 {
     Game *game = (Game *)attributes[GAttrib_Game];
@@ -11,7 +13,7 @@ void GameComposeFrame(void *attributes[])
     Input *input = (Input *)attributes[GAttrib_Input];
 
     for (int i = 0; i < 4; i++)
-        CameraDraw(camera, res->db[i]);
+        Draw(game, res->db[i]);
 
     //GameDraw( myTriList);
 }

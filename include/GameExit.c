@@ -2,6 +2,8 @@
 #include "core/Game.h"
 #include "Resources.h"
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 void GameExit(void *attributes[])
 {
     Game *game = (Game *)attributes[GAttrib_Game];

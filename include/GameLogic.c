@@ -3,6 +3,8 @@
 #include "Resources.h"
 #include <SDL2/SDL.h>
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 void GameUpdateLogic(void *attributes[])
 {
     Game *game = (Game *)attributes[GAttrib_Game];

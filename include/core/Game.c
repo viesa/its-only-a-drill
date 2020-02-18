@@ -48,3 +48,8 @@ void GameUpdateComponents(Game *game)
 {
     CameraUpdate(game->m_camera);
 }
+
+void Draw(Game *game, Drawable drawable)
+{
+    CameraDraw(game->m_camera, drawable);
+}

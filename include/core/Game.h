@@ -29,4 +29,6 @@ void GameRun(Game *game);
 
 void GameUpdateComponents(Game *game);
 
+void Draw(Game *game, Drawable drawable);
+
 #endif
