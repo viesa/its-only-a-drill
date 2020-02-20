@@ -16,7 +16,7 @@ struct Graphics
 Graphics *GraphicsCreate()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        fprintf(stderr, "Unable to initialize SDL");
+        fprintf(stderr, "Error: Could not initialize video");
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
