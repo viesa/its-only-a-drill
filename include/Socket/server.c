@@ -1,67 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "SDL2/SDL_net.h"
+#include "SocketWrapper.h"
+//gcc client.c SocketWrapper.c -L/usr/lib/x86_64-linux-gnu -lSDL2_net -o client.out
+//gcc server.c SocketWrapper.c -L/usr/lib/x86_64-linux-gnu -lSDL2_net -o server.out
 int main(int argc, char **argv) 
 { 
-    TCPsocket sd, csd;      /* Socket descriptor, Client socket descriptor */ 
-    IPaddress ip, *remoteIP;
-    int quit, quit2;
-    char buffer[512];
-    if (SDLNet_Init() < 0) 
-    { 
-        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError()); 
-        exit(EXIT_FAILURE); 
-    } 
-    if (SDLNet_ResolveHost(&ip, NULL, 2000) < 0)
-    { 
-        fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError()); 
-        exit(EXIT_FAILURE); 
-    }
-
-    /* Open a connection with the IP provided (listen on the host's port) */ 
-    if (!(sd = SDLNet_TCP_Open(&ip))) 
-    { 
-        fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError()); 
-        exit(EXIT_FAILURE); 
-    }
-        quit = 0; 
-        while (!quit) 
-        { 
-            /* This check the sd if there is a pending connection. * If there is one, accept that, and open a new socket for communicating */ 
-            if ((csd = SDLNet_TCP_Accept(sd))) 
-            { 
-                /* Now we can communicate with the client using csd socket * sd will remain opened waiting other connections */
-                /* Get the remote address */ 
-                if ((remoteIP = SDLNet_TCP_GetPeerAddress(csd))) /* Print the address, converting in the host format */ 
-                    printf("Host connected: %x %d\n", SDLNet_Read32(&remoteIP->host), SDLNet_Read16(&remoteIP->port));
-                else 
-                    fprintf(stderr, "SDLNet_TCP_GetPeerAddress: %s\n", SDLNet_GetError());
-                quit2 = 0;
-                while (!quit2) 
-                {
-                    if (SDLNet_TCP_Recv(csd, buffer, 512) > 0) 
-                    { 
-                        printf("Client say: %s\n", buffer);
-
-                        if(strcmp(buffer, "exit") == 0) /* Terminate this connection */ 
-                        { 
-                            quit2 = 1;
-                            printf("Terminate connection\n");
-                        } 
-                        if(strcmp(buffer, "quit") == 0) /* Quit the program */ 
-                        { 
-                            quit2 = 1; 
-                            quit = 1; 
-                            printf("Quit program\n");
-                        
-                        } 
-                    }
-                }
-                /* Close the client socket */ 
-                SDLNet_TCP_Close(csd); 
-            }
+    SocketClient server = SocketClientInit("127.0.0.1", 2000, SDL_TRUE);
+    char buffer[BUFFER_LENGTH];
+    while (1){
+        SocketClientListen(server, buffer);
+        if (strlen(buffer) > 0){
+            printf("Message: %s\n", buffer);
+            strcpy(buffer, "");
         }
-    SDLNet_TCP_Close(sd); SDLNet_Quit();
-    return EXIT_SUCCESS; 
+    }
 }
