@@ -24,6 +24,8 @@ Graphics *GraphicsCreate()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetSwapInterval(1);
 
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "8");
+
     Graphics *gfx_ret = (Graphics *)SDL_malloc(sizeof(Graphics));
     gfx_ret->m_mainWindow = SDL_CreateWindow("Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
