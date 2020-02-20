@@ -7,7 +7,10 @@
 void GameInit(void *attributes[])
 {
     Game *game = (Game *)attributes[GAttrib_Game];
+    Audio *audio = (Audio *)attributes[GAttrib_Audio];
     Resources *res = (Resources *)attributes[GAttrib_Resources];
+
+    res->test = SoundCreate(audio, SF_Test);
 
     res->db[0] = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, 10, 50, 50}, SS_Tilemap);
     res->db[1] = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, 10, 50, 50}, SS_Tilemap);

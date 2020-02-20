@@ -16,13 +16,15 @@ struct Graphics
 Graphics *GraphicsCreate()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        fprintf(stderr, "Unable to initialize SDL");
+        fprintf(stderr, "Error: Could not initialize video");
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetSwapInterval(1);
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "8");
 
     Graphics *gfx_ret = (Graphics *)SDL_malloc(sizeof(Graphics));
     gfx_ret->m_mainWindow = SDL_CreateWindow("Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);

@@ -1,7 +1,6 @@
 #include <SDL2/SDL.h>
 #include "include/core/Game.h"
 #include "include/core/Event.h"
-#include <GL/gl.h>
 
 int main()
 {

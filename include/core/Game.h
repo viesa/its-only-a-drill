@@ -8,11 +8,13 @@
 #include "GameGraphics.h"
 #include "GameInit.h"
 #include "GameExit.h"
+#include "Sound.h"
 
 typedef enum GAttributes
 {
     GAttrib_Game = 0,
     GAttrib_Graphics,
+    GAttrib_Audio,
     GAttrib_Resources,
     GAttrib_Camera,
     GAttrib_Clock,

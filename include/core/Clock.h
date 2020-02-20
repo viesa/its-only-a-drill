@@ -10,5 +10,6 @@ void ClockDestroy(Clock *clock);
 
 void ClockTick(Clock *clock);
 const float ClockGetDeltaTime(Clock *clock);
+const float ClockGetDeltaTimeMS(Clock *clock);
 
 #endif

@@ -20,9 +20,7 @@ ENTRY = MainWin.c
 SRC := include
 SRCS := $(wildcard $(SRC)/*.c)
 SRCSCORE := $(wildcard $(SRC)/core/*.c)
-SRCSSHADERS := $(wildcard $(SRC)/shaders/*.c)
-SRCSSHAPES := $(wildcard $(SRC)/shapes/*.c)
-LIBS := -lSDL2 -lSDL2_image
+LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer
 
 
 myOS:
