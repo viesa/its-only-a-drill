@@ -3,7 +3,9 @@
 
 typedef enum SpriteSheet
 {
-    SS_Tilemap,
+    SS_Legacy,
+    SS_Tiles,
+    SS_Characters,
     SS_Count
 } SpriteSheet;
 

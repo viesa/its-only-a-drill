@@ -24,10 +24,10 @@ Graphics *GraphicsCreate()
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetSwapInterval(1);
 
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "8");
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "8");
 
     Graphics *gfx_ret = (Graphics *)SDL_malloc(sizeof(Graphics));
-    gfx_ret->m_mainWindow = SDL_CreateWindow("Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill...", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
         fprintf(stderr, "Unable to create window");
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -36,7 +36,19 @@ Graphics *GraphicsCreate()
     SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/tilemap.png");
     if (!tilemap)
         fprintf(stderr, "Error: Could not load tilemap.png\n");
-    gfx_ret->m_allTextures[SS_Tilemap] = tilemap;
+    gfx_ret->m_allTextures[SS_Legacy] = tilemap;
+
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheet_tiles.png");
+    if (!tilemap)
+        fprintf(stderr, "Error: Could not load spritesheet_tiles.png\n");
+    gfx_ret->m_allTextures[SS_Tiles] = tilemap;
+
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheet_characters.png");
+    if (!tilemap)
+        fprintf(stderr, "Error: Could not load spritesheet_characters.png\n");
+    gfx_ret->m_allTextures[SS_Characters] = tilemap;
 
     return gfx_ret;
 }

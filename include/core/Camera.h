@@ -11,6 +11,7 @@ void CameraDestroy(Camera *camera);
 
 void CameraUpdate(Camera *camera);
 void CameraDraw(Camera *camera, Drawable drawable);
+void PlayerDraw(Camera *camera, Drawable drawable);
 
 SDL_Point CameraMiddle(Camera *camera);
 void CameraAddRotation(Camera *camera, float ammount);

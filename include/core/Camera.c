@@ -48,6 +48,12 @@ void CameraDraw(Camera *camera, Drawable drawable)
     GraphicsDraw(camera->gfx, drawable);
 }
 
+void PlayerDraw(Camera *camera, Drawable drawable)
+{
+    drawable.rot = 0;
+    GraphicsDraw(camera->gfx, drawable);
+}
+
 SDL_Point CameraMiddle(Camera *camera)
 {
     SDL_Rect *vp = &camera->m_viewport;

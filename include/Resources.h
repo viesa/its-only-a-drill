@@ -3,7 +3,7 @@
 
 typedef struct Resources
 {
-    Drawable db[4];
+    Drawable db[3000];
     Vec2 follow;
 } Resources;
 
