@@ -20,13 +20,13 @@ void GameUpdateLogic(void *attributes[])
         CameraAddRotation(camera, 1.0f);
 
     if (InputGet(input, KEY_A))
-        res->follow.x -= 1.0f;
+        res->follow.x -= 3.0f;
     if (InputGet(input, KEY_W))
-        res->follow.y -= 1.0f;
+        res->follow.y -= 3.0f;
     if (InputGet(input, KEY_D))
-        res->follow.x += 1.0f;
+        res->follow.x += 3.0f;
     if (InputGet(input, KEY_S))
-        res->follow.y += 1.0f;
+        res->follow.y += 3.0f;
     if (InputGet(input, KEY_M))
         SoundPlay(res->test, 0);
     if (InputGet(input, KEY_O))
