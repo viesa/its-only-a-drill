@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "sdl.h": "c",
-        "gamegraphics.h": "c"
+        "gamegraphics.h": "c",
+        "socketwrapper.h": "c"
     }
 }

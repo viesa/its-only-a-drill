@@ -7,6 +7,7 @@
 void GameInit(void *attributes[])
 {
     Game *game = (Game *)attributes[GAttrib_Game];
+    Audio *audio = (Audio *)attributes[GAttrib_Audio];
     Resources *res = (Resources *)attributes[GAttrib_Resources];
     
     int cnt = 0;
@@ -32,6 +33,8 @@ void GameInit(void *attributes[])
     }
 
     res->db[2999] = DrawableCreate(tileWomanDefaultGun, (SDL_Rect){496,344,57,43}, SS_Characters);
+    
+    res->test = SoundCreate(audio, SF_Test);
 
     res->follow = (Vec2){0.0f, 0.0f};
     //MyResCreate();
