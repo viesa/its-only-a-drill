@@ -1,5 +1,5 @@
 #include "Vec4.h"
-#include "Library.h"
+#include "../core/Library.h"
 
 Vec4 Vec4Create(float x, float y, float z, float w)
 {

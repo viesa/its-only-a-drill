@@ -1,5 +1,5 @@
 #include "Vec2.h"
-#include "Library.h"
+#include "../core/Library.h"
 
 Vec2 Vec2Create(float x, float y)
 {

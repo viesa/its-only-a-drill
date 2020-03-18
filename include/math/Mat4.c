@@ -1,9 +1,11 @@
 #include "Mat4.h"
 
-#include "Library.h"
+#include "../core/Library.h"
 #include <math.h>
 
 #include <assert.h>
+
+#pragma GCC diagnostic ignored "-Wmissing-braces"
 
 Mat4 Mat4Add(const Mat4 m1, const Mat4 m2)
 {

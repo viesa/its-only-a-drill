@@ -1,5 +1,5 @@
 #include "Vec3.h"
-#include "Library.h"
+#include "../core/Library.h"
 
 Vec3 Vec3Create(float x, float y, float z)
 {
