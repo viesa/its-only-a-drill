@@ -20,14 +20,16 @@ ENTRY = MainWin.c
 SRC := include
 SRCS := $(wildcard $(SRC)/*.c)
 SRCSCORE := $(wildcard $(SRC)/core/*.c)
-LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer
+SRCSNET := $(wildcard $(SRC)/net/*.c)
+SRCSMATH := $(wildcard $(SRC)/math/*.c)
+LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net
 
 
 myOS:
 	@echo $(detected_OS)
 
 b: $(ENTRY)
-	$(CC) $(ENTRY) $(SRCS) $(SRCSCORE) $(SRCSSHADERS) $(SRCSSHAPES) $(OUTFLAG) $(OUTPUT) $(LIBLOC) $(LIBS) $(FLAGS)
+	$(CC) $(ENTRY) $(SRCS) $(SRCSCORE) $(SRCSNET) $(SRCSMATH) $(OUTFLAG) $(OUTPUT) $(LIBLOC) $(LIBS) $(FLAGS)
 
 r: $(ENTRY)
 	./$(OUTPUT)
