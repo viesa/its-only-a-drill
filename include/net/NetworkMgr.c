@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "../core/List.h"
+
 struct NetworkMgr
 {
     List m_clients;
@@ -22,12 +24,12 @@ void NetworkMgrDestroy(NetworkMgr *networkMgr)
 
 void NetworkMgrPollAll(NetworkMgr *networkMgr)
 {
+#ifdef CLIENT
     for (Node *node = networkMgr->m_clients.front; node; node = node->next)
         for (Payload payload = ClientPopFront(*(Client **)node->data);
              payload.query != Empty;
              payload = ClientPopFront(*(Client **)node->data))
         {
-            printf("QUERY: %d", payload.query);
             switch (payload.query)
             {
             case Connect:
@@ -41,13 +43,13 @@ void NetworkMgrPollAll(NetworkMgr *networkMgr)
                 break;
             }
         }
-
+#endif
+#ifdef SERVER
     for (Node *node = networkMgr->m_servers.front; node; node = node->next)
         for (Payload payload = ServerPopFront(*(Server **)node->data);
              payload.query != Empty;
              payload = ServerPopFront(*(Server **)node->data))
         {
-            printf("QUERY: %d", payload.query);
             switch (payload.query)
             {
             case Connect:
@@ -61,13 +63,18 @@ void NetworkMgrPollAll(NetworkMgr *networkMgr)
                 break;
             }
         }
+#endif
 }
 
+#ifdef CLIENT
 void NetworkMgrAddClient(NetworkMgr *networkMgr, Client *client)
 {
     ListPushBack(&networkMgr->m_clients, (void *)&client, sizeof(Client *));
 }
+#endif
+#ifdef SERVER
 void NetworkMgrAddServer(NetworkMgr *networkMgr, Server *server)
 {
     ListPushBack(&networkMgr->m_servers, (void *)&server, sizeof(Server *));
 }
+#endif

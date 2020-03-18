@@ -5,49 +5,58 @@ else
 endif
 
 ifeq ($(detected_OS), Windows)
-OUTPUT := client.exe
-OUTPUTSERVER := server.exe
-LIBLOC := -Llib
-FLAGS := -Iinclude -Wall -g -pthread
+C_OUT := client.exe
+S_OUT := server.exe
+LIB_LOC := -Llib
+FLAGS_COMPILER := -Iinclude -Wall -g -pthread
 else
-OUTPUT := client.out
-OUTPUTSERVER := server.out
-LIBLOC := -L/usr/lib/x86_64-linux-gnu
-FLAGS := -Wall -g -pthread -lm
+C_OUT := client.out
+S_OUT := server.out
+LIB_LOC := -L/usr/lib/x86_64-linux-gnu
+FLAGS_COMPILER := -Wall -g -pthread -lm
 endif
 
 CC := gcc
-OUTFLAG := -o
+
 ENTRY_CLIENT = Main_Client.c
 ENTRY_SERVER = Main_Server.c
-CLIENT := $(wildcard _client/*.c)
-SERVER := $(wildcard _server/*.c)
-INC := $(wildcard include/*.c)
-INC_CORE := $(wildcard include/core/*.c)
-INC_NET := $(wildcard include/net/*.c)
-INC_MATH := $(wildcard include/math/*.c)
-INC_CORE_CLIENT := $(wildcard include/core/_client/*.c)
-INC_CORE_SERVER := $(wildcard include/core/_server/*.c)
+
+FLAGS_OUT := -o
+FLAGS_CLIENT = -DCLIENT
+FLAGS_SERVER = -DSERVER
+FLAGS_DEBUG = -DDEBUG
+
+INC_DIRS = ./include/*.c ./include/core/*.c ./include/net/*.c ./include/math/*.c
+INC_DIRS_CLIENT := $(INC_DIRS) ./_client/*.c ./include/core/_client/*.c
+INC_DIRS_SERVER := $(INC_DIRS) ./_server/*.c ./include/core/_server/*.c
+INC_CLIENT := $(wildcard $(INC_DIRS_CLIENT))
+INC_SERVER := $(wildcard $(INC_DIRS_SERVER))
+
 LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net
 
+CLEAN_BUILD_CLIENT := $(CC) $(ENTRY_CLIENT) $(FLAGS_OUT) $(C_OUT) $(FLAGS_CLIENT) $(INC_CLIENT) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)
+CLEAN_BUILD_SERVER := $(CC) $(ENTRY_SERVER) $(FLAGS_OUT) $(S_OUT) $(FLAGS_SERVER) $(INC_SERVER) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)
+
+RUN_CLIENT := ./$(C_OUT)
+RUN_SERVER := ./$(S_OUT)
 
 myOS:
 	@echo $(detected_OS)
 
-b: $(ENTRY_CLIENT)
-	$(CC) $(ENTRY_CLIENT) $(INC) $(INC_CORE) $(INC_NET) $(INC_MATH) $(INC_CORE_CLIENT) $(CLIENT) $(OUTFLAG) $(OUTPUT) $(LIBLOC) $(LIBS) $(FLAGS)
+bc: $(ENTRY_CLIENT)
+	$(CLEAN_BUILD_CLIENT)
 
-r: $(ENTRY_CLIENT)
-	./$(OUTPUT)
+rc: $(ENTRY_CLIENT)
+	$(RUN_CLIENT)
 
-br: $(ENTRY_CLIENT)
-	make b && make r
+brc: $(ENTRY_CLIENT)
+	make bc && make rc
 
 bs: $(ENTRY_SERVER)
-	$(CC) $(ENTRY_SERVER) $(INC) $(INC_CORE) $(INC_NET) $(INC_MATH) $(INC_CORE_SERVER) $(SERVER) $(OUTFLAG) $(OUTPUTSERVER) $(LIBLOC) $(LIBS) $(FLAGS)
+	$(CLEAN_BUILD_SERVER)
 
 rs: $(ENTRY_SERVER)
-	./$(OUTPUTSERVER)
+	$(RUN_SERVER)
 
 brs: $(ENTRY_SERVER)
 	make bs && make rs
