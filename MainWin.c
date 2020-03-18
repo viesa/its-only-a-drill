@@ -1,9 +1,22 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_net.h>
 #include "include/core/Game.h"
 #include "include/core/Event.h"
 
 int main()
 {
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        fprintf(stderr, "Error: Could not initialize video");
+        return EXIT_FAILURE;
+    }
+    if (SDLNet_Init() == -1)
+    {
+        fprintf(stderr, "Error: Could not initialize net");
+        return EXIT_FAILURE;
+    }
+
     SDL_bool m_running = SDL_TRUE;
 
     Clock *m_clock = ClockCreate();
