@@ -2,7 +2,7 @@
 
 void C_Graphics(void *attributes[])
 {
-    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT_CLIENT;
 
     for (int i = 0; i < 2880; i++)
         Draw(game, res->db[i]);

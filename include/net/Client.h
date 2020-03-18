@@ -14,6 +14,7 @@ typedef struct Client
     PacketMgr m_packetMgr;
 
     SDL_bool m_active;
+    SDL_bool m_connected;
 
     SDL_Thread *m_worker;
 } Client;

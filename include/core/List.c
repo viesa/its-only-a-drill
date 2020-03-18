@@ -21,6 +21,7 @@ List ListCreate()
 }
 void ListDestroy(List *list)
 {
+    SDL_DestroyMutex(list->lock);
     if (list->len > 0)
         for (Node *node = list->front; node; node = node->next)
             NodeDelete(node);
@@ -245,21 +246,25 @@ size_t ListSearch(List *list, const void *key, const size_t size)
     {
         size_t index = 0;
         char *cmp1 = (char *)SDL_malloc(size + 1);
+        SDL_memcpy(cmp1, key, size);
         cmp1[size] = 0;
 
         for (Node *node = list->front; node; node = node->next, index++)
         {
             char *cmp2 = (char *)SDL_malloc(node->size + 1);
+            SDL_memcpy(cmp2, node->data, size);
             cmp2[size] = 0;
 
             if (!strcmp(cmp1, cmp2))
             {
+                SDL_free(cmp1);
                 SDL_free(cmp2);
                 SDL_UnlockMutex(list->lock);
                 return index;
             }
             SDL_free(cmp2);
         }
+        SDL_free(cmp1);
     }
     SDL_UnlockMutex(list->lock);
     return list->len;

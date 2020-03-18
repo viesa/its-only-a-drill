@@ -1,7 +1,6 @@
 #ifndef PACKETMGR_H
 #define PACKETMGR_H
 
-#include "../core/Flags.h"
 #include <SDL2/SDL_net.h>
 
 #include "../core/List.h"
@@ -50,6 +49,8 @@ typedef struct PacketMgr
     List incoming;
     List outgoing;
     Payload fallback;
+    SDL_mutex *sendLock;
+    SDL_mutex *recvLock;
 } PacketMgr;
 
 Payload PayloadCreate(Query query, void *data, size_t size);

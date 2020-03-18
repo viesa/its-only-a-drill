@@ -2,7 +2,7 @@
 
 void C_Logic(void *attributes[])
 {
-    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT_CLIENT;
 
     if (InputGet(input, KEY_Q))
         CameraAddRotation(camera, -1.0f);

@@ -2,7 +2,7 @@
 
 void C_Init(void *attributes[])
 {
-    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT_CLIENT;
 
     int cnt = 0;
 
@@ -33,6 +33,10 @@ void C_Init(void *attributes[])
     res->test = SoundCreate(audio, SF_Test);
 
     res->cameraFollow = (Vec2){0.0f, 0.0f};
+
+    ClientConnect(client);
+
+    ClientSend(client, Test, "THIS IS A TEST", 15);
 
     //MyResCreate();
 }

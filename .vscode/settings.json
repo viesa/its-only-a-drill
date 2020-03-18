@@ -4,6 +4,10 @@
         "gamegraphics.h": "c",
         "socketwrapper.h": "c",
         "c_includes.h": "c",
-        "sdl_net.h": "c"
+        "sdl_net.h": "c",
+        "c_game.h": "c",
+        "networkmgr.h": "c",
+        "s_resources.h": "c",
+        "s_includes.h": "c"
     }
 }

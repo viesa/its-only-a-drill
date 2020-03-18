@@ -31,7 +31,7 @@ Server *ServerCreate(Uint16 port)
 void ServerDestroy(Server *server)
 {
     server->m_active = SDL_FALSE;
-
+    PacketMgrDestroy(&server->m_packetMgr);
     for (Node *node = server->m_clients.front; node; node = node->next)
     {
         SDLNet_TCP_DelSocket(server->m_socketSet, ((Connection *)node->data)->socket);
@@ -79,7 +79,12 @@ void ServerMgr(Server *server)
                         if (!PacketMgrReceivePackage(&server->m_packetMgr, (Connection *)node->data))
                         {
                             ServerDisconnectClient(server, (Connection *)node->data);
-                            node = ListErase(&server->m_clients, ListSearch(&server->m_clients, node->data, node->size))->prev;
+                            node = ListErase(&server->m_clients, ListSearch(&server->m_clients, node->data, node->size));
+                            if (!node)
+                                break;
+                            if (!node->prev)
+                                break;
+                            node = node->prev;
                         }
         }
         PacketMgrSendAllPackages(&server->m_packetMgr);

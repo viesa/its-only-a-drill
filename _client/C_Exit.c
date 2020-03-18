@@ -2,7 +2,7 @@
 
 void C_Exit(void *attributes[])
 {
-    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT_CLIENT;
 
     //SDL_free(myResource);
 }

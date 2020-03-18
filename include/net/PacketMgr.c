@@ -99,6 +99,8 @@ PacketMgr PacketMgrCreate()
     packetMgr.incoming = ListCreate();
     packetMgr.outgoing = ListCreate();
     packetMgr.fallback = PayloadCreate(Empty, NULL, 0);
+    packetMgr.sendLock = SDL_CreateMutex();
+    packetMgr.recvLock = SDL_CreateMutex();
     return packetMgr;
 }
 void PacketMgrDestroy(PacketMgr *packetMgr)
@@ -113,37 +115,50 @@ void PacketMgrDestroy(PacketMgr *packetMgr)
     }
     ListDestroy(&packetMgr->incoming);
     ListDestroy(&packetMgr->outgoing);
+    SDL_DestroyMutex(packetMgr->sendLock);
+    SDL_DestroyMutex(packetMgr->recvLock);
 }
 
 void PacketMgrSend(PacketMgr *packetMgr, Query query, void *data, size_t size, Connection *connection)
 {
+    SDL_LockMutex(packetMgr->sendLock);
     Payload payload = PayloadCreate(query, data, size);
     Packet packet = PacketCreate(payload, connection);
-
     ListPushBack(&packetMgr->outgoing, &packet, sizeof(packet));
+    SDL_UnlockMutex(packetMgr->sendLock);
 }
 
 Payload PacketMgrPopFront(PacketMgr *packetMgr)
 {
+    SDL_LockMutex(packetMgr->recvLock);
     if (packetMgr->incoming.len > 0)
     {
         Payload ret = (*(Packet *)packetMgr->incoming.front->data).payload;
         ListPopFront(&packetMgr->incoming);
+        SDL_UnlockMutex(packetMgr->recvLock);
         return ret;
     }
     else
+    {
+        SDL_UnlockMutex(packetMgr->recvLock);
         return packetMgr->fallback;
+    }
 }
 Payload PacketMgrPopBack(PacketMgr *packetMgr)
 {
+    SDL_LockMutex(packetMgr->recvLock);
     if (packetMgr->incoming.len > 0)
     {
         Payload ret = (*(Packet *)packetMgr->incoming.back->data).payload;
         ListPopBack(&packetMgr->incoming);
+        SDL_UnlockMutex(packetMgr->recvLock);
         return ret;
     }
     else
+    {
+        SDL_UnlockMutex(packetMgr->recvLock);
         return packetMgr->fallback;
+    }
 }
 
 void Strip(char *str, size_t size, char stipFrom)
@@ -181,12 +196,15 @@ int PacketMgrReceivePackage(PacketMgr *packetMgr, Connection *connection)
     SDL_memcpy(data, rest + TOKEN_SIZE + QUERY_SIZE, dataSize);
     Query query = atoi(query_str);
 
+    SDL_LockMutex(packetMgr->recvLock);
     PacketMgrAddIncoming(packetMgr, PacketCreate(PayloadCreate(query, data, dataSize), connection));
+    SDL_UnlockMutex(packetMgr->recvLock);
     SDL_free(data);
     return 1;
 }
 void PacketMgrSendAllPackages(PacketMgr *packetMgr)
 {
+    SDL_LockMutex(packetMgr->sendLock);
     for (Node *node = packetMgr->outgoing.front; node; node = node->next)
     {
         Packet *packet = (Packet *)node->data;
@@ -198,6 +216,7 @@ void PacketMgrSendAllPackages(PacketMgr *packetMgr)
     for (Node *node = packetMgr->outgoing.front; node; node = node->next)
         if (((Packet *)node->data)->sent)
             ListEraseNode(&packetMgr->outgoing, node);
+    SDL_UnlockMutex(packetMgr->sendLock);
 }
 
 void PacketMgrAddOutgoing(PacketMgr *packetMgr, const Packet packet)

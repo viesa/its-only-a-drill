@@ -13,11 +13,13 @@ Client *ClientCreate(const char *ip, Uint16 port)
     ret->m_socketSet = SDLNet_AllocSocketSet(1);
     ret->m_packetMgr = PacketMgrCreate();
     ret->m_active = SDL_TRUE;
+    ret->m_connected = SDL_FALSE;
     return ret;
 }
 void ClientDestroy(Client *client)
 {
     client->m_active = SDL_FALSE;
+    PacketMgrDestroy(&client->m_packetMgr);
     ClientDisconnect(client);
     SDL_free(client->m_ip);
     SDL_WaitThread(client->m_worker, NULL);
@@ -42,12 +44,18 @@ void ClientConnect(Client *client)
     SDLNet_TCP_AddSocket(client->m_socketSet, client->m_server.socket);
 
     client->m_worker = SDL_CreateThread((SDL_ThreadFunction)ClientMgr, "MGR", client);
+    client->m_connected = SDL_TRUE;
 }
 void ClientDisconnect(Client *client)
 {
-    SDLNet_TCP_DelSocket(client->m_socketSet, client->m_server.socket);
-    SDLNet_FreeSocketSet(client->m_socketSet);
-    ConnectionDestroy(&client->m_server);
+    if (client->m_connected)
+    {
+        client->m_connected = SDL_FALSE;
+        SDLNet_TCP_DelSocket(client->m_socketSet, client->m_server.socket);
+        SDLNet_FreeSocketSet(client->m_socketSet);
+        ConnectionDestroy(&client->m_server);
+        client->m_server.socket = NULL;
+    }
 }
 
 Payload ClientPopFront(Client *client)
@@ -61,7 +69,8 @@ Payload ClientPopBack(Client *client)
 
 void ClientSend(Client *client, Query query, void *data, size_t size)
 {
-    PacketMgrSend(&client->m_packetMgr, query, data, size, &client->m_server);
+    if (client->m_connected)
+        PacketMgrSend(&client->m_packetMgr, query, data, size, &client->m_server);
 }
 
 void ClientSetToken(Client *client, char token[TOKEN_SIZE])
@@ -73,12 +82,15 @@ void ClientMgr(Client *client)
 {
     while (client->m_active)
     {
-        if (SDLNet_CheckSockets(client->m_socketSet, 100))
-            if (SDLNet_SocketReady(client->m_server.socket))
-                if (!PacketMgrReceivePackage(&client->m_packetMgr, &client->m_server))
-                {
-                    ClientDisconnect(client);
-                }
-        PacketMgrSendAllPackages(&client->m_packetMgr);
+        if (client->m_connected)
+        {
+            if (SDLNet_CheckSockets(client->m_socketSet, 100))
+                if (SDLNet_SocketReady(client->m_server.socket))
+                    if (!PacketMgrReceivePackage(&client->m_packetMgr, &client->m_server))
+                    {
+                        ClientDisconnect(client);
+                    }
+            PacketMgrSendAllPackages(&client->m_packetMgr);
+        }
     }
 }
