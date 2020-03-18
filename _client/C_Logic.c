@@ -1,10 +1,8 @@
-#include "GameIncludes.h"
+#include "../include/C_Includes.h"
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
-void GameUpdateLogic(void *attributes[])
+void C_Logic(void *attributes[])
 {
-    GAME_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
 
     if (InputGet(input, KEY_Q))
         CameraAddRotation(camera, -1.0f);

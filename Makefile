@@ -5,34 +5,49 @@ else
 endif
 
 ifeq ($(detected_OS), Windows)
-OUTPUT := main.exe
+OUTPUT := client.exe
+OUTPUTSERVER := server.exe
 LIBLOC := -Llib
 FLAGS := -Iinclude -Wall -g -pthread
 else
-OUTPUT := main.out
+OUTPUT := client.out
+OUTPUTSERVER := server.out
 LIBLOC := -L/usr/lib/x86_64-linux-gnu
 FLAGS := -Wall -g -pthread -lm
 endif
 
 CC := gcc
 OUTFLAG := -o
-ENTRY = MainWin.c
-SRC := include
-SRCS := $(wildcard $(SRC)/*.c)
-SRCSCORE := $(wildcard $(SRC)/core/*.c)
-SRCSNET := $(wildcard $(SRC)/net/*.c)
-SRCSMATH := $(wildcard $(SRC)/math/*.c)
+ENTRY_CLIENT = Main_Client.c
+ENTRY_SERVER = Main_Server.c
+CLIENT := $(wildcard _client/*.c)
+SERVER := $(wildcard _server/*.c)
+INC := $(wildcard include/*.c)
+INC_CORE := $(wildcard include/core/*.c)
+INC_NET := $(wildcard include/net/*.c)
+INC_MATH := $(wildcard include/math/*.c)
+INC_CORE_CLIENT := $(wildcard include/core/_client/*.c)
+INC_CORE_SERVER := $(wildcard include/core/_server/*.c)
 LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net
 
 
 myOS:
 	@echo $(detected_OS)
 
-b: $(ENTRY)
-	$(CC) $(ENTRY) $(SRCS) $(SRCSCORE) $(SRCSNET) $(SRCSMATH) $(OUTFLAG) $(OUTPUT) $(LIBLOC) $(LIBS) $(FLAGS)
+b: $(ENTRY_CLIENT)
+	$(CC) $(ENTRY_CLIENT) $(INC) $(INC_CORE) $(INC_NET) $(INC_MATH) $(INC_CORE_CLIENT) $(CLIENT) $(OUTFLAG) $(OUTPUT) $(LIBLOC) $(LIBS) $(FLAGS)
 
-r: $(ENTRY)
+r: $(ENTRY_CLIENT)
 	./$(OUTPUT)
 
-br: $(ENTRY)
+br: $(ENTRY_CLIENT)
 	make b && make r
+
+bs: $(ENTRY_SERVER)
+	$(CC) $(ENTRY_SERVER) $(INC) $(INC_CORE) $(INC_NET) $(INC_MATH) $(INC_CORE_SERVER) $(SERVER) $(OUTFLAG) $(OUTPUTSERVER) $(LIBLOC) $(LIBS) $(FLAGS)
+
+rs: $(ENTRY_SERVER)
+	./$(OUTPUTSERVER)
+
+brs: $(ENTRY_SERVER)
+	make bs && make rs

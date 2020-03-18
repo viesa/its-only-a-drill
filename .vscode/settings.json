@@ -2,6 +2,8 @@
     "files.associations": {
         "sdl.h": "c",
         "gamegraphics.h": "c",
-        "socketwrapper.h": "c"
+        "socketwrapper.h": "c",
+        "c_includes.h": "c",
+        "sdl_net.h": "c"
     }
 }

@@ -2,6 +2,10 @@
 
 Client *ClientCreate(const char *ip, Uint16 port)
 {
+    if (SDLNet_Init() == -1)
+    {
+        fprintf(stderr, "Error: Could not initialize net");
+    }
     Client *ret = (Client *)SDL_malloc(sizeof(Client));
     ret->m_ip = (char *)SDL_malloc(strlen(ip));
     strcpy(ret->m_ip, ip);

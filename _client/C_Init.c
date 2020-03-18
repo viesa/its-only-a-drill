@@ -1,10 +1,8 @@
-#include "GameIncludes.h"
+#include "../include/C_Includes.h"
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-
-void GameInit(void *attributes[])
+void C_Init(void *attributes[])
 {
-    GAME_AUIDO_RES_CAMERA_CLK_INPUT;
+    GAME_GFX_AUIDO_RES_CAMERA_CLK_INPUT;
 
     int cnt = 0;
 

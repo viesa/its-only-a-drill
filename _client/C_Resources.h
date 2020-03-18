@@ -1,14 +1,14 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#include "GameIncludes.h"
+#include "../include/C_Includes.h"
 
-typedef struct Resources
+typedef struct C_Resources
 {
     Drawable db[3000];
     Vec2 cameraFollow;
     Sound test;
 
-} Resources;
+} C_Resources;
 
 #endif
