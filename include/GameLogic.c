@@ -12,18 +12,17 @@ void GameUpdateLogic(void *attributes[])
         CameraAddRotation(camera, 1.0f);
 
     if (InputGet(input, KEY_A))
-        res->cameraFollow.x -= 1.0f;
+        res->cameraFollow.x -= 3.0f;
     if (InputGet(input, KEY_W))
-        res->cameraFollow.y -= 1.0f;
+        res->cameraFollow.y -= 3.0f;
     if (InputGet(input, KEY_D))
-        res->cameraFollow.x += 1.0f;
+        res->cameraFollow.x += 3.0f;
     if (InputGet(input, KEY_S))
-        res->cameraFollow.y += 1.0f;
+        res->cameraFollow.y += 3.0f;
     if (InputGet(input, KEY_M))
         SoundPlay(res->test, 0);
     if (InputGet(input, KEY_O))
         SoundStop(res->test);
 
-    NetworkMgrPollAll(res->netMgr);
     //MyResUpdateLogic(dt)
 }
