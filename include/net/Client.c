@@ -34,7 +34,8 @@ void ClientConnect(Client *client)
         //Error Failed to open port
         return;
     }
-    SDLNet_AddSocket(client->m_socketSet, client->m_server.socket);
+
+    SDLNet_TCP_AddSocket(client->m_socketSet, client->m_server.socket);
 
     client->m_worker = SDL_CreateThread((SDL_ThreadFunction)ClientMgr, "MGR", client);
 }
