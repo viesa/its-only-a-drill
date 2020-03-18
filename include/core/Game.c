@@ -19,7 +19,7 @@ Game *GameCreate(Clock *clock, SDL_bool *running, Input *input)
     game_ret->m_gfx = GraphicsCreate();
     game_ret->m_audio = AudioCreate();
     game_ret->m_resources = (Resources *)SDL_malloc(sizeof(Resources));
-    game_ret->m_camera = CameraCreate(game_ret->m_gfx, &game_ret->m_resources->follow);
+    game_ret->m_camera = CameraCreate(game_ret->m_gfx, &game_ret->m_resources->cameraFollow);
     game_ret->m_clock = clock;
     game_ret->m_input = input;
     game_ret->m_attributes[GAttrib_Game] = game_ret;
