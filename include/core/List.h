@@ -37,4 +37,6 @@ Node *ListEraseNode(List *list, const Node *node);
 
 size_t ListSearch(List *list, const void *key, const size_t size);
 
+void ListClear(List *list);
+
 #endif

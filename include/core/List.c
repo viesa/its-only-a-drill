@@ -22,9 +22,7 @@ List ListCreate()
 void ListDestroy(List *list)
 {
     SDL_DestroyMutex(list->lock);
-    if (list->len > 0)
-        for (Node *node = list->front; node; node = node->next)
-            NodeDelete(node);
+    ListClear(list);
 }
 
 Node *ListPushFront(List *list, const void *data, const size_t size)
@@ -268,4 +266,14 @@ size_t ListSearch(List *list, const void *key, const size_t size)
     }
     SDL_UnlockMutex(list->lock);
     return list->len;
+}
+
+void ListClear(List *list)
+{
+    if (list->len > 0)
+        for (Node *node = list->front; node; node = node->next)
+            NodeDelete(node);
+    list->front = NULL;
+    list->back = NULL;
+    list->len = 0;
 }
