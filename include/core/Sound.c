@@ -1,5 +1,7 @@
 #include "Sound.h"
 
+#include "Log.h"
+
 Sound SoundCreate(Audio *audio, SoundFile soundFile)
 {
     Sound ret;
@@ -17,13 +19,13 @@ void SoundPlay(Sound sound, int loops)
 {
     if (Mix_PlayChannel(sound.m_channel, sound.m_chunk, loops) == -1)
     {
-        fprintf(stderr, "Error: Could not play channel!\n");
+        log_warn("Could not play channel: %s", Mix_GetError());
     }
 }
 void SoundStop(Sound sound)
 {
     if (Mix_HaltChannel(sound.m_channel) == -1)
     {
-        fprintf(stderr, "Error: Could not halt channel!\n");
+        log_warn("Could not halt channel: %s", Mix_GetError());
     }
 }

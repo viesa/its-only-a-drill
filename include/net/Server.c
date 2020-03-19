@@ -1,29 +1,40 @@
 #include "Server.h"
 
+#include "../core/Log.h"
 #include "../core/List.h"
 
 Server *ServerCreate(Uint16 port)
 {
+    if (SDLNet_Init() == -1)
+    {
+        log_error("Could not initialize net: %s", SDLNet_GetError());
+        return NULL;
+    }
+
     Server *ret = (Server *)SDL_malloc(sizeof(Server));
 
     if (SDLNet_ResolveHost(&ret->m_ip, NULL, port) == -1)
     {
-        //Error count not resolve host
+        log_error("Could not resolve host: %s", SDLNet_GetError());
         return NULL;
     }
     ret->m_serverSocket = SDLNet_TCP_Open(&ret->m_ip);
     if (ret->m_serverSocket == NULL)
     {
-        //Error Failed to open port
+        log_error("Failed to open port: %s", SDLNet_GetError());
         return NULL;
     }
 
     ret->m_clients = ListCreate();
     ret->m_socketSet = SDLNet_AllocSocketSet(100);
-    SDLNet_TCP_AddSocket(ret->m_socketSet, ret->m_serverSocket);
+    if (SDLNet_TCP_AddSocket(ret->m_socketSet, ret->m_serverSocket) == -1)
+    {
+        log_error("Failed to add socket to socket set: %s", SDLNet_GetError());
+        return NULL;
+    }
+
     ret->m_packetMgr = PacketMgrCreate();
     ret->m_active = SDL_TRUE;
-
     ret->m_worker = SDL_CreateThread((SDL_ThreadFunction)ServerMgr, "MGR", ret);
 
     return ret;
@@ -40,8 +51,8 @@ void ServerDestroy(Server *server)
     ListDestroy(&server->m_clients);
     SDLNet_FreeSocketSet(server->m_socketSet);
     SDL_WaitThread(server->m_worker, NULL);
-
     SDL_free(server);
+    SDLNet_Quit();
 }
 
 Payload ServerPopFront(Server *server)
@@ -69,7 +80,13 @@ void ServerMgr(Server *server)
 {
     while (server->m_active)
     {
-        if (SDLNet_CheckSockets(server->m_socketSet, 100))
+        int rdy = SDLNet_CheckSockets(server->m_socketSet, 100);
+        if (rdy == -1)
+        {
+            log_error("Failed to check socket in socket set: %s", SDLNet_GetError());
+            SDL_Delay(200);
+        }
+        else if (rdy)
         {
             if (SDLNet_SocketReady(server->m_serverSocket))
                 ServerTryAcceptSocket(server);

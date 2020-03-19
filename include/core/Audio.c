@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "Log.h"
+
 #define N_CHANNELS 128
 
 struct Audio
@@ -13,17 +15,17 @@ struct Audio
 Audio *AudioCreate()
 {
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
-        fprintf(stderr, "Error: Could not initialize audio");
+        log_error("Could not initialize audio: %s", SDL_GetError());
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
-        fprintf(stderr, "Error: %s\n", Mix_GetError());
+        log_error("Could configure audio: %s", Mix_GetError());
 
     Audio *ret = (Audio *)SDL_malloc(sizeof(Audio));
 
     //Audio files
     Mix_Chunk *test = Mix_LoadWAV("assets/sound/test.wav");
     if (!test)
-        fprintf(stderr, "Error: Could not load test.wave!\n");
+        log_warn("Could not log test.wave");
     ret->m_chunks[SF_Test] = test;
 
     for (int i = 0; i < N_CHANNELS; i++)

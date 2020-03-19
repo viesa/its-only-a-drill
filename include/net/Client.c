@@ -1,11 +1,15 @@
 #include "Client.h"
 
+#include "../core/Log.h"
+
 Client *ClientCreate(const char *ip, Uint16 port)
 {
     if (SDLNet_Init() == -1)
     {
-        fprintf(stderr, "Error: Could not initialize net");
+        log_error("Could not initialize net: %s", SDLNet_GetError());
+        return NULL;
     }
+
     Client *ret = (Client *)SDL_malloc(sizeof(Client));
     ret->m_ip = (char *)SDL_malloc(strlen(ip));
     strcpy(ret->m_ip, ip);
@@ -24,6 +28,7 @@ void ClientDestroy(Client *client)
     SDL_free(client->m_ip);
     SDL_WaitThread(client->m_worker, NULL);
     SDL_free(client);
+    SDLNet_Quit();
 }
 
 void ClientConnect(Client *client)
@@ -31,13 +36,13 @@ void ClientConnect(Client *client)
     IPaddress serverIP;
     if (SDLNet_ResolveHost(&serverIP, client->m_ip, client->m_port) == -1)
     {
-        //Error count not resolve host
+        log_error("Could not resolve host: %s", SDLNet_GetError());
         return;
     }
     client->m_server = ConnectionCreate(SDLNet_TCP_Open(&serverIP), "");
     if (client->m_server.socket == NULL)
     {
-        //Error Failed to open port
+        log_error("Failed to open port: %s", SDLNet_GetError());
         return;
     }
 

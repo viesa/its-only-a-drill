@@ -30,4 +30,5 @@ int main()
     EventDestroy(m_event);
     ClientDestroy(m_client);
     C_GameDestroy(m_game);
+    SDL_Quit();
 }
