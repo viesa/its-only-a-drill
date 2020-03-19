@@ -53,6 +53,18 @@ Graphics *GraphicsCreate()
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = tilemap;
 
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/tools.png");
+    if (!tilemap)
+        log_warn("Could not load tools.png");
+    gfx_ret->m_allTextures[SS_Tools] = tilemap;
+
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/weapons.png");
+    if (!tilemap)
+        log_warn("Could not load weapons.png");
+    gfx_ret->m_allTextures[SS_Weapons] = tilemap;
+
     return gfx_ret;
 }
 
