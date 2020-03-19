@@ -1,9 +1,11 @@
 #include "Server.h"
 
+#include <assert.h>
+
 #include "../core/Log.h"
 #include "../core/List.h"
 
-Server *ServerCreate(Uint16 port)
+Server *ServerCreate()
 {
     if (SDLNet_Init() == -1)
     {
@@ -12,47 +14,75 @@ Server *ServerCreate(Uint16 port)
     }
 
     Server *ret = (Server *)SDL_malloc(sizeof(Server));
-
-    if (SDLNet_ResolveHost(&ret->m_ip, NULL, port) == -1)
-    {
-        log_error("Could not resolve host: %s", SDLNet_GetError());
-        return NULL;
-    }
-    ret->m_serverSocket = SDLNet_TCP_Open(&ret->m_ip);
-    if (ret->m_serverSocket == NULL)
-    {
-        log_error("Failed to open port: %s", SDLNet_GetError());
-        return NULL;
-    }
-
+    ret->m_port = 0;
     ret->m_clients = ListCreate();
     ret->m_socketSet = SDLNet_AllocSocketSet(100);
-    if (SDLNet_TCP_AddSocket(ret->m_socketSet, ret->m_serverSocket) == -1)
-    {
-        log_error("Failed to add socket to socket set: %s", SDLNet_GetError());
-        return NULL;
-    }
-
     ret->m_packetMgr = PacketMgrCreate();
-    ret->m_active = SDL_TRUE;
-    ret->m_worker = SDL_CreateThread((SDL_ThreadFunction)ServerMgr, "MGR", ret);
-
+    ret->m_active = SDL_FALSE;
+    ret->m_started = SDL_FALSE;
+    ret->m_worker = NULL;
     return ret;
 }
 void ServerDestroy(Server *server)
 {
-    server->m_active = SDL_FALSE;
+    ServerStop(server);
     PacketMgrDestroy(&server->m_packetMgr);
+
+    SDLNet_FreeSocketSet(server->m_socketSet);
+    SDL_free(server);
+    SDLNet_Quit();
+}
+
+void ServerSetPort(Server *server, Uint16 port)
+{
+    server->m_port = port;
+}
+
+void ServerStart(Server *server)
+{
+    if (!server->m_port)
+    {
+        log_error("Could not start server: Port was not set");
+        return;
+    }
+    if (SDLNet_ResolveHost(&server->m_ip, NULL, server->m_port) == -1)
+    {
+        log_error("Could not resolve host: %s", SDLNet_GetError());
+        return;
+    }
+    server->m_serverSocket = SDLNet_TCP_Open(&server->m_ip);
+    if (!server->m_serverSocket)
+    {
+        log_error("Failed to open port: %s", SDLNet_GetError());
+        return;
+    }
+    if (SDLNet_TCP_AddSocket(server->m_socketSet, server->m_serverSocket) == -1)
+    {
+        log_error("Failed to add socket to socket set: %s", SDLNet_GetError());
+        return;
+    }
+    server->m_active = SDL_TRUE;
+    server->m_started = SDL_TRUE;
+    SDL_CreateThread((SDL_ThreadFunction)ServerMgr, "MGR", server);
+}
+void ServerStop(Server *server)
+{
+    if (!server->m_started)
+    {
+        log_error("Could not stop server: Server was not started");
+        return;
+    }
+
+    server->m_active = SDL_FALSE;
+    server->m_started = SDL_FALSE;
+    SDL_WaitThread(server->m_worker, NULL);
+
     for (Node *node = server->m_clients.front; node; node = node->next)
     {
         SDLNet_TCP_DelSocket(server->m_socketSet, ((Connection *)node->data)->socket);
         ConnectionDestroy((Connection *)node->data);
     }
-    ListDestroy(&server->m_clients);
-    SDLNet_FreeSocketSet(server->m_socketSet);
-    SDL_WaitThread(server->m_worker, NULL);
-    SDL_free(server);
-    SDLNet_Quit();
+    ListClear(&server->m_clients);
 }
 
 Payload ServerPopFront(Server *server)

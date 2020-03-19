@@ -8,6 +8,7 @@
         "c_game.h": "c",
         "networkmgr.h": "c",
         "s_resources.h": "c",
-        "s_includes.h": "c"
+        "s_includes.h": "c",
+        "list.h": "c"
     }
 }

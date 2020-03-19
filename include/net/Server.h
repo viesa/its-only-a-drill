@@ -6,6 +6,7 @@
 typedef struct Server
 {
     IPaddress m_ip;
+    Uint16 m_port;
 
     TCPsocket m_serverSocket;
     List m_clients;
@@ -14,12 +15,18 @@ typedef struct Server
     PacketMgr m_packetMgr;
 
     SDL_bool m_active;
+    SDL_bool m_started;
 
     SDL_Thread *m_worker;
 } Server;
 
-Server *ServerCreate(Uint16 port);
+Server *ServerCreate();
 void ServerDestroy(Server *server);
+
+void ServerSetPort(Server *server, Uint16 port);
+
+void ServerStart(Server *server);
+void ServerStop(Server *server);
 
 Payload ServerPopFront(Server *server);
 Payload ServerPopBack(Server *server);

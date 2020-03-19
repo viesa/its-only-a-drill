@@ -34,8 +34,8 @@ void C_Init(void *attributes[])
 
     res->cameraFollow = (Vec2){0.0f, 0.0f};
 
-    ClientConnect(client);
-
+    ClientSetNet(client, "127.0.0.1", 4000);
+    ClientStart(client);
     ClientSend(client, Test, "THIS IS A TEST", 15);
 
     //MyResCreate();

@@ -161,6 +161,12 @@ Payload PacketMgrPopBack(PacketMgr *packetMgr)
     }
 }
 
+void PacketMgrClearBuffers(PacketMgr *packetMgr)
+{
+    ListClear(&packetMgr->incoming);
+    ListClear(&packetMgr->outgoing);
+}
+
 void Strip(char *str, size_t size, char stipFrom)
 {
     for (int i = 0; i < size; i++)

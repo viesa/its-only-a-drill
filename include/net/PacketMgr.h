@@ -73,6 +73,8 @@ void PacketMgrSend(PacketMgr *packetMgr, Query query, void *data, size_t size, C
 Payload PacketMgrPopFront(PacketMgr *packetMgr);
 Payload PacketMgrPopBack(PacketMgr *packetMgr);
 
+void PacketMgrClearBuffers(PacketMgr *packetMgr);
+
 int PacketMgrReceivePackage(PacketMgr *packetMgr, Connection *connection);
 void PacketMgrSendAllPackages(PacketMgr *packetMgr);
 
