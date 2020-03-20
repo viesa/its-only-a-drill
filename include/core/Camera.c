@@ -68,6 +68,11 @@ void CameraAddRotation(Camera *camera, float ammount)
     camera->m_centerRotation += ammount;
 }
 
+void CameraSetFollow(Camera *camera, Vec2 *follow)
+{
+    camera->m_follow = follow;
+}
+
 // Vec2 CameraRemoveRotation(Camera *camera, Vec2 vector)
 // {
 //     float oldX = vector.x;
