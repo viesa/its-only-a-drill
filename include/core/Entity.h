@@ -2,6 +2,7 @@
 #define ENTITY_H
 #include "Graphics.h"
 #include "Camera.h"
+#include "Clock.h"
 typedef enum EntityPresets{
     EntityWoman
 }EntityPresets;
@@ -12,5 +13,5 @@ typedef struct Entity{
 Entity EntityCreate(int x, int, int moveSpeed, int rotSpeed, EntityPresets preset);
 void EntityDraw(Camera *camera, Entity entity);
 //Entity moves move_x and move_y is amount of times to step, moveSpeed is how large the footstep is
-void UpdateEntity(Entity *entity);
+void UpdateEntity(Entity *entity, Clock *clk);
 #endif

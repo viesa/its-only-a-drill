@@ -22,6 +22,6 @@ void C_Logic(void *attributes[])
     if (InputGet(input, KEY_O))
         SoundStop(res->test);
 
-    UpdateEntity(&res->entity);
+    UpdateEntity(&res->entity, clk);
     //MyResUpdateLogic(dt)
 }

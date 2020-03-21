@@ -15,29 +15,29 @@ Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets pre
     }
     return e;
 }
-void UpdateEntity(Entity *entity){
+void UpdateEntity(Entity *entity, Clock *clk){
     if (entity->move_x > 0){
-        entity->drawable.dst.x += entity->moveSpeed;
+        entity->drawable.dst.x += entity->moveSpeed * ClockGetDeltaTime(clk);
         entity->move_x -= 1;
     }
     if (entity->move_x < 0){
-        entity->drawable.dst.x -= entity->moveSpeed;
+        entity->drawable.dst.x -= entity->moveSpeed * ClockGetDeltaTime(clk);
         entity->move_x -= 1;
     }
     if (entity->move_y > 0){
-        entity->drawable.dst.y += entity->moveSpeed;
+        entity->drawable.dst.y += entity->moveSpeed * ClockGetDeltaTime(clk);
         entity->move_y -= 1;
     }
     if (entity->move_y < 0){
-        entity->drawable.dst.y -= entity->moveSpeed;
+        entity->drawable.dst.y -= entity->moveSpeed * ClockGetDeltaTime(clk);
         entity->move_y -= 1;
     }
     if (entity->rot > 0){
-        entity->drawable.rot += entity->rotSpeed;
+        entity->drawable.rot += entity->rotSpeed * ClockGetDeltaTime(clk);
         entity->rot -=1;
     }
     if (entity->rot < 0){
-        entity->drawable.rot -= entity->rotSpeed;
+        entity->drawable.rot -= entity->rotSpeed * ClockGetDeltaTime(clk);
         entity->rot -=1;
     }
 }
