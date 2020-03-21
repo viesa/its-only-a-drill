@@ -38,5 +38,10 @@ void C_Init(void *attributes[])
     ClientStart(client);
     ClientSend(client, Test, "THIS IS A TEST", 15);
 
+    res->entity = EntityCreate(0, 0, 2, 20, EntityWoman);
+    res->entity.move_x = 50;
+    res->entity.move_y = 50;
+    
+    res->item = ItemCreate(ItemWoodenSword);
     //MyResCreate();
 }

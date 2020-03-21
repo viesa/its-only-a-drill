@@ -15,5 +15,9 @@
 #include "core/_client/C_Game.h"
 #include "core/_client/C_Logic.h"
 #include "core/_client/C_Graphics.h"
+#include "core/Entity.h"
 #include "net/NetworkMgr.h"
 #include "../_client/C_Resources.h"
+
+
+#include "Items.h"
