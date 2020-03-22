@@ -2,6 +2,8 @@
 
 Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets preset){
     Entity e;
+    e.move_x = 0;
+    e.move_y = 0;
     switch (preset)
     {
         case EntityWoman:
@@ -15,7 +17,7 @@ Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets pre
     }
     return e;
 }
-void UpdateEntity(Entity *entity, Clock *clk){
+void EntityUpdate(Entity *entity, Clock *clk){
     if (entity->move_x > 0){
         entity->drawable.dst.x += entity->moveSpeed * ClockGetDeltaTime(clk);
         entity->move_x -= 1;
@@ -40,6 +42,38 @@ void UpdateEntity(Entity *entity, Clock *clk){
         entity->drawable.rot -= entity->rotSpeed * ClockGetDeltaTime(clk);
         entity->rot -=1;
     }
+}
+SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSelfIndex, Clock *clk){
+    Entity test = user;
+    if (test.move_x > 0){
+        test.drawable.dst.x += test.moveSpeed * ClockGetDeltaTime(clk);
+        test.move_x -= 1;
+    }
+    if (test.move_x < 0){
+        test.drawable.dst.x -= test.moveSpeed * ClockGetDeltaTime(clk);
+        test.move_x -= 1;
+    }
+    if (test.move_y > 0){
+        test.drawable.dst.y += test.moveSpeed * ClockGetDeltaTime(clk);
+        test.move_y -= 1;
+    }
+    if (test.move_y < 0){
+        test.drawable.dst.y -= test.moveSpeed * ClockGetDeltaTime(clk);
+        test.move_y -= 1;
+    }
+    for(int i = 0; i < nrEnts; i++){
+        if (i != nrSelfIndex){
+            if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0}))
+                return SDL_TRUE;
+        }
+        
+    }
+    return SDL_FALSE;
+}
+void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
+    if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
+        return;
+    EntityUpdate(user, clk);
 }
 void EntityDraw(Camera *camera, Entity entity){
     CameraDraw(camera, entity.drawable);

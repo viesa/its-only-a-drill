@@ -12,6 +12,7 @@ typedef struct Entity{
 }Entity;
 Entity EntityCreate(int x, int, int moveSpeed, int rotSpeed, EntityPresets preset);
 void EntityDraw(Camera *camera, Entity entity);
-//Entity moves move_x and move_y is amount of times to step, moveSpeed is how large the footstep is
-void UpdateEntity(Entity *entity, Clock *clk);
+void EntityUpdate(Entity *entity, Clock *clk);
+void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk);
+SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSelfIndex, Clock *clk);
 #endif

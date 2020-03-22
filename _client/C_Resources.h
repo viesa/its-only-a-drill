@@ -9,7 +9,7 @@ typedef struct C_Resources
     Vec2 cameraFollow;
     Sound test;
     Item item;
-    Entity entity;
+    Entity entities[2];
 } C_Resources;
 
 #endif
