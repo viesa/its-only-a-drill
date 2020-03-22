@@ -1,7 +1,8 @@
 #include "Entity.h"
 
-Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets preset){
+Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider){
     Entity e;
+    e.isCollider = isCollider;
     e.move_x = 0;
     e.move_y = 0;
     switch (preset)
@@ -62,7 +63,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
         test.move_y -= 1;
     }
     for(int i = 0; i < nrEnts; i++){
-        if (i != nrSelfIndex){
+        if (i != nrSelfIndex && entities[i].isCollider){
             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0}))
                 return SDL_TRUE;
         }
@@ -71,8 +72,10 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
     return SDL_FALSE;
 }
 void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
-    if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
-        return;
+    if (user->isCollider){
+        if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
+            return;
+    }
     EntityUpdate(user, clk);
 }
 void EntityDraw(Camera *camera, Entity entity){

@@ -38,9 +38,9 @@ void C_Init(void *attributes[])
     ClientStart(client);
     ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    res->entities[0] = EntityCreate(0, 0, 100, 20, EntityWoman);
+    res->entities[0] = EntityCreate(0, 0, 100, 20, EntityWoman, SDL_TRUE);
     res->entities[0].move_x = 500;
-    res->entities[1] = EntityCreate(300, 0, 100, 20, EntityWoman);
+    res->entities[1] = EntityCreate(300, 0, 100, 20, EntityWoman, SDL_TRUE);
 
     res->item = ItemCreate(ItemWoodenSword);
     //MyResCreate();
