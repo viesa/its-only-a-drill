@@ -1,8 +1,9 @@
 #include "Entity.h"
 
-Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider){
+Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider, SDL_bool isMovable){
     Entity e;
     e.isCollider = isCollider;
+    e.isMovable = isMovable;
     e.move_x = 0;
     e.move_y = 0;
     switch (preset)
@@ -49,30 +50,75 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
     if (test.move_x > 0){
         test.drawable.dst.x += test.moveSpeed * ClockGetDeltaTime(clk);
         test.move_x -= 1;
+
+        for(int i = 0; i < nrEnts; i++){
+            if (i != nrSelfIndex && entities[i].isCollider){
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
+                    //connects
+                    if (entities[i].isMovable){
+                        entities[i].drawable.dst.x = test.drawable.dst.x + test.drawable.dst.w;
+                    }
+                }
+            }
+        }
     }
     if (test.move_x < 0){
         test.drawable.dst.x -= test.moveSpeed * ClockGetDeltaTime(clk);
         test.move_x -= 1;
+
+        for(int i = 0; i < nrEnts; i++){
+            if (i != nrSelfIndex && entities[i].isCollider){
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
+                    //connects
+                    if (entities[i].isMovable){
+                        entities[i].drawable.dst.x = test.drawable.dst.x;
+                    }
+                }
+            }
+        }
     }
     if (test.move_y > 0){
         test.drawable.dst.y += test.moveSpeed * ClockGetDeltaTime(clk);
         test.move_y -= 1;
+
+        for(int i = 0; i < nrEnts; i++){
+            if (i != nrSelfIndex && entities[i].isCollider){
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
+                    //connects
+                    if (entities[i].isMovable){
+                        entities[i].drawable.dst.y = test.drawable.dst.y + test.drawable.dst.h;
+                    }
+                }
+            }
+        }
     }
     if (test.move_y < 0){
         test.drawable.dst.y -= test.moveSpeed * ClockGetDeltaTime(clk);
         test.move_y -= 1;
+
+        for(int i = 0; i < nrEnts; i++){
+            if (i != nrSelfIndex && entities[i].isCollider){
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
+                    //connects
+                    if (entities[i].isMovable){
+                        entities[i].drawable.dst.y = test.drawable.dst.y;
+                    }
+                }
+            }
+        }
     }
     for(int i = 0; i < nrEnts; i++){
         if (i != nrSelfIndex && entities[i].isCollider){
-            if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0}))
+            if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
+                //connects
                 return SDL_TRUE;
+            }
         }
-        
     }
     return SDL_FALSE;
 }
 void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
-    if (user->isCollider){
+    if (user->isCollider || user->isMovable){
         if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
             return;
     }

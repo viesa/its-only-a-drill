@@ -9,9 +9,10 @@ typedef enum EntityPresets{
 typedef struct Entity{
     int move_x, move_y, rot, rotSpeed, moveSpeed;
     SDL_bool isCollider;
+    SDL_bool isMovable;
     Drawable drawable;
 }Entity;
-Entity EntityCreate(int x, int, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider);
+Entity EntityCreate(int x, int, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider, SDL_bool isMovable);
 void EntityDraw(Camera *camera, Entity entity);
 void EntityUpdate(Entity *entity, Clock *clk);
 void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk);
