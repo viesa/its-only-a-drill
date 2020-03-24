@@ -22,7 +22,7 @@ void C_Logic(void *attributes[])
     if (InputGet(input, KEY_O))
         SoundStop(res->test);
 
-    EntityUpdateWithCollision(res->entities, 2, &res->entities[0], 0, clk);
-    EntityUpdateWithCollision(res->entities, 2, &res->entities[1], 1, clk);
+    EntityUpdate(res->entities, 2, &res->entities[0], 0, clk);
+    EntityUpdate(res->entities, 2, &res->entities[1], 1, clk);
     //MyResUpdateLogic(dt)
 }

@@ -19,32 +19,6 @@ Entity EntityCreate(int x, int y, int moveSpeed, int rotSpeed, EntityPresets pre
     }
     return e;
 }
-void EntityUpdate(Entity *entity, Clock *clk){
-    if (entity->move_x > 0){
-        entity->drawable.dst.x += entity->moveSpeed * ClockGetDeltaTime(clk);
-        entity->move_x -= 1;
-    }
-    if (entity->move_x < 0){
-        entity->drawable.dst.x -= entity->moveSpeed * ClockGetDeltaTime(clk);
-        entity->move_x -= 1;
-    }
-    if (entity->move_y > 0){
-        entity->drawable.dst.y += entity->moveSpeed * ClockGetDeltaTime(clk);
-        entity->move_y -= 1;
-    }
-    if (entity->move_y < 0){
-        entity->drawable.dst.y -= entity->moveSpeed * ClockGetDeltaTime(clk);
-        entity->move_y -= 1;
-    }
-    if (entity->rot > 0){
-        entity->drawable.rot += entity->rotSpeed * ClockGetDeltaTime(clk);
-        entity->rot -=1;
-    }
-    if (entity->rot < 0){
-        entity->drawable.rot -= entity->rotSpeed * ClockGetDeltaTime(clk);
-        entity->rot -=1;
-    }
-}
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSelfIndex, Clock *clk){
     Entity test = user;
     if (test.move_x > 0){
@@ -117,12 +91,37 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
     }
     return SDL_FALSE;
 }
-void EntityUpdateWithCollision(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
-    if (user->isCollider || user->isMovable){
-        if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
-            return;
+void EntityUpdate(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
+    if (entities){
+        if (user->isCollider || user->isMovable){
+            if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
+                return;
+        }
     }
-    EntityUpdate(user, clk);
+    if (user->move_x > 0){
+        user->drawable.dst.x += user->moveSpeed * ClockGetDeltaTime(clk);
+        user->move_x -= 1;
+    }
+    if (user->move_x < 0){
+        user->drawable.dst.x -= user->moveSpeed * ClockGetDeltaTime(clk);
+        user->move_x -= 1;
+    }
+    if (user->move_y > 0){
+        user->drawable.dst.y += user->moveSpeed * ClockGetDeltaTime(clk);
+        user->move_y -= 1;
+    }
+    if (user->move_y < 0){
+        user->drawable.dst.y -= user->moveSpeed * ClockGetDeltaTime(clk);
+        user->move_y -= 1;
+    }
+    if (user->rot > 0){
+        user->drawable.rot += user->rotSpeed * ClockGetDeltaTime(clk);
+        user->rot -=1;
+    }
+    if (user->rot < 0){
+        user->drawable.rot -= user->rotSpeed * ClockGetDeltaTime(clk);
+        user->rot -=1;
+    }
 }
 void EntityDraw(Camera *camera, Entity entity){
     CameraDraw(camera, entity.drawable);
