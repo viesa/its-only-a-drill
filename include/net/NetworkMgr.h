@@ -1,5 +1,7 @@
 #ifndef NETWORKMGR_H
 #define NETWORKMGR_H
+#define CLIENT
+#define SERVER
 
 #ifdef CLIENT
 #include "Client.h"
