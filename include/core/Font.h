@@ -5,8 +5,14 @@
 
 typedef struct Font Font;
 
-Font *FontsCreate();
-void FontsDestroy(Font *font);
+typedef enum FontSheet
+{
+    TTF_Arial,
+    TTF_Count
+} FontSheet;
 
+Font *FontCreate(Graphics *gfx);
+void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, SDL_Color color);
+void FontDestroy(Font *font);
 
 #endif

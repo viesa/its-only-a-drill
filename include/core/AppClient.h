@@ -1,6 +1,7 @@
 #ifndef C_GAME_H
 #define C_GAME_H
 #include "Graphics.h"
+#include "Font.h"
 #include "Camera.h"
 #include "Clock.h"
 #include "Input.h"

@@ -54,13 +54,13 @@ bc: $(APP_C)
 rc: $(ENTRY_C)
 	./$(APP_C)
 brc:	
-	make b && make r
+	make bc && make rc
 
 bs: $(APP_S)
 rs: $(ENTRY_S)
 	./$(APP_S)
 brs:	
-	make b && make r
+	make bs && make rs
 
 $(APP_C): buildrepo-c $(OBJS_C)
 	$(CC) $(ENTRY_C) $(OBJS_C) $(LIBS) $(CFLAGS) -o $@

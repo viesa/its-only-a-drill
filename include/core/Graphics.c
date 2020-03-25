@@ -99,3 +99,8 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      &drawable.rot_anchor,
                      SDL_FLIP_NONE);
 }
+
+SDL_Renderer *GraphicsGetRenderer(Graphics *gfx)
+{
+    return gfx->m_renderer;
+}
