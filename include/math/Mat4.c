@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #pragma GCC diagnostic ignored "-Wmissing-braces"
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 Mat4 Mat4Add(const Mat4 m1, const Mat4 m2)
 {

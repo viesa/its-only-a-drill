@@ -33,4 +33,6 @@ int main()
     ClientDestroy(m_client);
     AppClientDestroy(m_app);
     SDL_Quit();
+
+    return EXIT_SUCCESS;
 }

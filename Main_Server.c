@@ -31,4 +31,6 @@ int main()
     ServerDestroy(m_server);
     AppServerDestroy(m_app);
     SDL_Quit();
+
+    return EXIT_SUCCESS;
 }

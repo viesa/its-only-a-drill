@@ -74,10 +74,10 @@ FormatPacket FormatPacketCreate(const Packet *packet)
         SDL_memcpy(tokenFormatted, connection->token, TOKEN_SIZE);
         SDL_itoa(payload->size, headerFormatted, 10);
         SDL_itoa(payload->query, queryFormatted, 10);
-        SDL_memcpy(ret.data, headerFormatted, HEADER_SIZE);
-        SDL_memcpy(ret.data + HEADER_SIZE, tokenFormatted, TOKEN_SIZE);
-        SDL_memcpy(ret.data + HEADER_SIZE + TOKEN_SIZE, queryFormatted, QUERY_SIZE);
-        SDL_memcpy(ret.data + HEADER_SIZE + TOKEN_SIZE + QUERY_SIZE, payload->data, payload->size);
+        SDL_memcpy((char *)ret.data, headerFormatted, HEADER_SIZE);
+        SDL_memcpy((char *)ret.data + HEADER_SIZE, tokenFormatted, TOKEN_SIZE);
+        SDL_memcpy((char *)ret.data + HEADER_SIZE + TOKEN_SIZE, queryFormatted, QUERY_SIZE);
+        SDL_memcpy((char *)ret.data + HEADER_SIZE + TOKEN_SIZE + QUERY_SIZE, payload->data, payload->size);
         return ret;
     }
     else
