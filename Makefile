@@ -1,62 +1,98 @@
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
-    detected_OS := Windows
+detected_OS := Windows
 else
-    detected_OS := $(shell uname)  # same as "uname -s"
+detected_OS := $(shell uname)  # same as "uname -s"
 endif
 
 ifeq ($(detected_OS), Windows)
-C_OUT := client.exe
-S_OUT := server.exe
-LIB_LOC := -Llib
-FLAGS_COMPILER := -Iinclude -Wall -g -pthread
+APP_C		:= app_client.exe
+APP_S		:= app_server.exe
+LIB_LOC 	:= -LC:/lib/
+INC_LOC 	:= -IC:/include/
 else
-C_OUT := client.out
-S_OUT := server.out
-LIB_LOC := -L/usr/lib/x86_64-linux-gnu
-FLAGS_COMPILER := -Wall -g -pthread -lm
+APP_C		:= app_client.out
+APP_S		:= app_server.out
+LIB_LOC 	:= -L/usr/lib/x86_64-linux-gnu
+INC_LOC 	:=
 endif
 
-CC := gcc
+CC 			:= gcc
+ENTRY_C		:= Main_Client.c
+ENTRY_S 	:= Main_Server.c
 
-ENTRY_CLIENT = Main_Client.c
-ENTRY_SERVER = Main_Server.c
+SRCDIR  	:= ./include
+SRCDIRS 	:= ./ ./core ./net ./math
+OBJDIR		:= ./bin
+OBJDIR_C	:= $(OBJDIR)/CLIENT
+OBJDIR_S	:= $(OBJDIR)/SERVER
 
-FLAGS_OUT := -o
-FLAGS_CLIENT = -DCLIENT
-FLAGS_SERVER = -DSERVER
-FLAGS_DEBUG = -DDEBUG
+# Files and folders
+ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/core/*.c $(SRCDIR)/net/*.c $(SRCDIR)/math/*.c)
+SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
+SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 
-INC_DIRS = ./include/*.c ./include/core/*.c ./include/net/*.c ./include/math/*.c
-INC_DIRS_CLIENT := $(INC_DIRS) ./_client/*.c ./include/core/_client/*.c
-INC_DIRS_SERVER := $(INC_DIRS) ./_server/*.c ./include/core/_server/*.c
-INC_CLIENT := $(wildcard $(INC_DIRS_CLIENT))
-INC_SERVER := $(wildcard $(INC_DIRS_SERVER))
+OBJS_C		:= $(patsubst $(SRCDIR)/%.c,$(OBJDIR_C)/%.o,$(SRCS_C))
+OBJS_S		:= $(patsubst $(SRCDIR)/%.c,$(OBJDIR_S)/%.o,$(SRCS_S))
 
-LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf
+# Flags
+CFLAGS  	:= -std=c11 -Wall -pedantic -pthread -g -lm $(INC_LOC)
+LDFLAGS 	:= -std=c11
 
-CLEAN_BUILD_CLIENT := $(CC) $(ENTRY_CLIENT) $(FLAGS_OUT) $(C_OUT) $(FLAGS_CLIENT) $(INC_CLIENT) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)
-CLEAN_BUILD_SERVER := $(CC) $(ENTRY_SERVER) $(FLAGS_OUT) $(S_OUT) $(FLAGS_SERVER) $(INC_SERVER) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)
+# Libraries
+LIBS 		:= $(LIB_LOC) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf
 
-RUN_CLIENT := ./$(C_OUT)
-RUN_SERVER := ./$(S_OUT)
-
-myOS:
+# Targets
+help:
+	@echo Usage: make \<option\>
+	@echo Options:
+	@echo -b Builds app
+	@echo -r Runs app
+	@echo -br Builds and runs app
+os:
 	@echo $(detected_OS)
+bc: $(APP_C)
+rc: $(ENTRY_C)
+	./$(APP_C)
+brc:	
+	make b && make r
 
-bc: $(ENTRY_CLIENT)
-	$(CLEAN_BUILD_CLIENT)
+bs: $(APP_S)
+rs: $(ENTRY_S)
+	./$(APP_S)
+brs:	
+	make b && make r
 
-rc: $(ENTRY_CLIENT)
-	$(RUN_CLIENT)
+$(APP_C): buildrepo-c $(OBJS_C)
+	$(CC) $(ENTRY_C) $(OBJS_C) $(LIBS) $(CFLAGS) -o $@
+$(APP_S): buildrepo-s $(OBJS_S)
+	$(CC) $(ENTRY_S) $(OBJS_S) $(LIBS) $(CFLAGS) -o $@
 
-brc: $(ENTRY_CLIENT)
-	make bc && make rc
+$(OBJDIR_C)/%.o: $(SRCDIR)/%.c
+	$(CC) $(LDFLAGS) -c $< -o $@
+$(OBJDIR_S)/%.o: $(SRCDIR)/%.c
+	$(CC) $(LDFLAGS) -c $< -o $@
+	
+clean:
+	rm $(OBJDIR) -Rf
 
-bs: $(ENTRY_SERVER)
-	$(CLEAN_BUILD_SERVER)
+buildrepo-c:
+	@$(call make-repo-c)
+buildrepo-s:
+	@$(call make-repo-s)
 
-rs: $(ENTRY_SERVER)
-	$(RUN_SERVER)
+# Create obj directory structure
+define make-repo-c
+	mkdir -p $(OBJDIR_C)
+	for dir in $(SRCDIRS); \
+	do \
+		mkdir -p $(OBJDIR_C)/$$dir; \
+	done
+endef
 
-brs: $(ENTRY_SERVER)
-	make bs && make rs
+define make-repo-s
+	mkdir -p $(OBJDIR_S)
+	for dir in $(SRCDIRS); \
+	do \
+		mkdir -p $(OBJDIR_S)/$$dir; \
+	done
+endef
