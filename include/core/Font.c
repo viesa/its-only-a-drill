@@ -16,7 +16,7 @@ Font *FontsCreate(Graphics *gfx, char filePath[], int size){
     TTF_Init();
     Font font;
     font.gfx = gfx;
-    font.font = TTF_OpenFont("../assets/fonts/Comic Sans MS.ttf", 25); //filepath, size
+    font.font = TTF_OpenFont("../assets/fonts/arial.ttf", 25); //filepath, size
     return &font;
 }
 
