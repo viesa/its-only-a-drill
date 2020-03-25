@@ -31,9 +31,11 @@ void CameraUpdate(Camera *camera)
     Vec2 *p = &camera->m_position;
     SDL_Rect *vp = &camera->m_viewport;
     Vec2 *f = camera->m_follow;
-
-    p->x = f->x - vp->w / 2.0f;
-    p->y = f->y - vp->h / 2.0f;
+    if (f)
+    {
+        p->x = f->x - vp->w / 2.0f;
+        p->y = f->y - vp->h / 2.0f;
+    }
 }
 
 void CameraDraw(Camera *camera, Drawable drawable)

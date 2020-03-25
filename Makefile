@@ -22,8 +22,8 @@ ENTRY_CLIENT = Main_Client.c
 ENTRY_SERVER = Main_Server.c
 
 FLAGS_OUT := -o
-FLAGS_CLIENT = -DCLIENT
-FLAGS_SERVER = -DSERVER
+FLAGS_CLIENT = 
+FLAGS_SERVER = 
 FLAGS_DEBUG = -DDEBUG
 
 INC_DIRS = ./include/*.c ./include/core/*.c ./include/net/*.c ./include/math/*.c

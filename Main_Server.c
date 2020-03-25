@@ -1,8 +1,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
-#include "include/core/_server/S_Game.h"
 #include "include/core/Event.h"
 #include "include/net/Server.h"
+
+#include "include/core/AppServer.h"
 
 int main()
 {
@@ -12,7 +13,7 @@ int main()
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input);
     Server *m_server = ServerCreate(4000);
-    S_Game *m_game = S_GameCreate(m_clock, &m_running, m_input, m_server);
+    AppServer *m_app = AppServerCreate(m_clock, &m_running, m_input, m_server);
 
     while (m_running)
     {
@@ -21,13 +22,13 @@ int main()
             m_running = SDL_FALSE;
 
         ClockTick(m_clock);
-        S_GameRun(m_game);
+        AppServerRun(m_app);
     }
 
     ClockDestroy(m_clock);
     InputDestroy(m_input);
     EventDestroy(m_event);
     ServerDestroy(m_server);
-    S_GameDestroy(m_game);
+    AppServerDestroy(m_app);
     SDL_Quit();
 }
