@@ -22,8 +22,8 @@ ENTRY_CLIENT = Main_Client.c
 ENTRY_SERVER = Main_Server.c
 
 FLAGS_OUT := -o
-FLAGS_CLIENT = 
-FLAGS_SERVER = 
+FLAGS_CLIENT = -DCLIENT
+FLAGS_SERVER = -DSERVER
 FLAGS_DEBUG = -DDEBUG
 
 INC_DIRS = ./include/*.c ./include/core/*.c ./include/net/*.c ./include/math/*.c
@@ -32,7 +32,7 @@ INC_DIRS_SERVER := $(INC_DIRS) ./_server/*.c ./include/core/_server/*.c
 INC_CLIENT := $(wildcard $(INC_DIRS_CLIENT))
 INC_SERVER := $(wildcard $(INC_DIRS_SERVER))
 
-LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net
+LIBS := -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf
 
 CLEAN_BUILD_CLIENT := $(CC) $(ENTRY_CLIENT) $(FLAGS_OUT) $(C_OUT) $(FLAGS_CLIENT) $(INC_CLIENT) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)
 CLEAN_BUILD_SERVER := $(CC) $(ENTRY_SERVER) $(FLAGS_OUT) $(S_OUT) $(FLAGS_SERVER) $(INC_SERVER) $(LIBLOC) $(LIBS) $(FLAGS) $(FLAGS_COMPILER)

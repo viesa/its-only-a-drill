@@ -36,31 +36,31 @@ Graphics *GraphicsCreate()
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     //INIT ALL TEXTURES
-    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/tilemap.png");
+    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
     if (!tilemap)
         log_warn("Could not load tilemap.png");
     gfx_ret->m_allTextures[SS_Legacy] = tilemap;
 
     //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheet_tiles.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_tiles.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_tiles.png");
     gfx_ret->m_allTextures[SS_Tiles] = tilemap;
 
     //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheet_characters.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_characters.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = tilemap;
 
     //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/tools.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tools.png");
     if (!tilemap)
         log_warn("Could not load tools.png");
     gfx_ret->m_allTextures[SS_Tools] = tilemap;
 
     //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/weapons.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/weapons.png");
     if (!tilemap)
         log_warn("Could not load weapons.png");
     gfx_ret->m_allTextures[SS_Weapons] = tilemap;
