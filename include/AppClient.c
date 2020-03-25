@@ -66,9 +66,9 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     ClientStart(client);
     ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate(0, 0, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
+    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
     app->entities[0].move_x = 500;
-    app->entities[1] = EntityCreate(300, 0, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
+    app->entities[1] = EntityCreate((Vec2){-500, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
 
     app->item = ItemCreate(ItemWoodenSword);
 
@@ -126,7 +126,7 @@ void AppClientDraw(AppClient *app)
     for (int i = 0; i < 2880; i++)
         GraphicsDraw(app->gfx, app->db[i]);
     ItemDraw(app->camera, &app->item);
-    EntityDraw(app->camera, app->entities[0]);
-    EntityDraw(app->camera, app->entities[1]);
+    EntityDraw(app->camera, &app->entities[0]);
+    EntityDraw(app->camera, &app->entities[1]);
     PlayerDraw(app->camera, app->db[2999]);
 }
