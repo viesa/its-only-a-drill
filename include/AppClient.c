@@ -8,6 +8,7 @@ struct AppClient
     Graphics *gfx;
     Audio *audio;
     Font *font;
+    Gui *gui;
     Camera *camera;
     Clock *clock;
     Input *input;
@@ -27,6 +28,7 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
+    app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->clock = clock;
     app->input = input;
@@ -133,5 +135,5 @@ void AppClientDraw(AppClient *app)
     PlayerDraw(app->camera, app->db[2999]);
 
     //GUI
-    FontDraw(app->font, TTF_Arial, "Hello World!", 20, 20, (SDL_Color){255, 255, 255});
+    GuiLoop(app->gui);
 }
