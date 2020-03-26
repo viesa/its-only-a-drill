@@ -46,7 +46,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects
                     if (entities[i].isMovable){
-                        entities[i].vector.x = test.vector.x;
+                        entities[i].vector.x = test.vector.x - test.drawable.dst.w;
                     }
                 }
             }
@@ -76,7 +76,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects
                     if (entities[i].isMovable){
-                        entities[i].vector.y = test.vector.y;
+                        entities[i].vector.y = test.vector.y - test.drawable.dst.h;
                     }
                 }
             }
