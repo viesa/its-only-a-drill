@@ -64,7 +64,7 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
-    ClientSetNet(client, "85.226.233.210", 1337);
+    ClientSetNet(client, "drill.pierrelf.com", 1337);
     ClientStart(client);
     ClientSend(client, Test, "THIS IS A TEST", 15);
 
