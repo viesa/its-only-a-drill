@@ -1,13 +1,13 @@
-programing guidlines
+programing guidelines
 
 när vi skriver kåd så skriver vi funktioner på detta sätt
 
-main
+int main()
 {
 }
 
-när du includear en file så ska biblotek vara <> och egena skrivna functioner ""
-exemple:
+när du inkluderar en fil så ska biblotek vara <> och egena skrivna functioner ""
+exempel:
 #include <stdio.h> #include <STD.h> #include <STD_net.h>
 #include "exemplefile.h" #include "./../server.h" #include "./include/core/mathlib.h"
 
