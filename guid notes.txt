@@ -1,0 +1,40 @@
+programing guidlines
+
+när vi skriver kåd så skriver vi funktioner på detta sätt
+
+main
+{
+}
+
+när du includear en file så ska biblotek vara <> och egena skrivna functioner ""
+exemple:
+#include <stdio.h> #include <STD.h> #include <STD_net.h>
+#include "exemplefile.h" #include "./../server.h" #include "./include/core/mathlib.h"
+
+när du gör en function ifall do gör en bibloket med flera funktioner skriv namnet 
+sedan functions namnet. 
+vi går men först vad det är sedan vad den gör.
+varje ord börjar med storbokstav.
+Skriv hälst ut ordet om inte skriv en commentar med hella namnet.
+exemple:
+InputCreate() ClockCreate()
+Server_ServerCreate()
+
+när om du har en funktion som tar många input så skriver vi det vertikalt
+exemple:
+examplefunc(a, b, c, d, e)  ---inte---> examplefunc(variable1,
+						    variable2,
+						    variable3)
+
+när du skriver en funktion är det viktigt att du skriver vad den får och ändrar
+exemple:
+//collision(SDL_rect, SDL_rect){was there a collision};return true or false
+collision(SDL_rect, SDL_rect)
+{
+}
+skriv förklaringen över funktionen
+
+När du gör error hantering 
+använde EXIT_SUCCESS eller EXIT_FAILIURE
+om det kan bli errors skriv en error funtion
+
