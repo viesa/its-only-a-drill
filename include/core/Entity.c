@@ -31,18 +31,17 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
         {
             if (i != j)
             {
-                if (SDL_Intersection(&entities[i].drawable.dst, &entities[j].drawable.dst, &result))
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &result))
                 {
-                    printf("test");
                     if (entities[i].isMovable == 1)
                     {
                         if (result.w < result.h) // assume the smallest number is the interaction point
                         {
-                            entities[i].vector.x += result.w;
+                            entities[j].vector.x += result.w;
                         }
                         else
                         {
-                            entities[i].vector.y += result.h;
+                            entities[j].vector.y += result.h;
                         }
                     }
                     else
