@@ -8,14 +8,15 @@ typedef enum EntityPresets{
     EntityWoman
 }EntityPresets;
 typedef struct Entity{
-    int move_x, move_y, rot, rotSpeed, moveSpeed;
+    int rot, rotSpeed, moveSpeed;
     SDL_bool isCollider;
     SDL_bool isMovable;
     Drawable drawable;
-    Vec2 vector;
+    Vec2 posVec;
+    Vec2 moveVec;
 }Entity;
 //Returns an entity struct that contains the nessecary arguments for a basic funktional entity
-Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider, SDL_bool isMovable);
+Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset);
 //Draw the entity relative to the camera
 void EntityDraw(Camera *camera, Entity *entity);
 //If entities == NULL it will ignore other entities, if entities != NULL it will update the targeted user with respect to the entities

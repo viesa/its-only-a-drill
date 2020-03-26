@@ -70,10 +70,10 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     // ClientStart(client);
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
-    app->entities[0].move_x = 500;
-    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_TRUE);
-    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_TRUE);
+    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman);
+    app->entities[0].moveVec.x = 500;
+    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman);
+    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman);
 
     app->item = ItemCreate(ItemWoodenSword);
 
