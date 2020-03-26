@@ -18,7 +18,7 @@ struct AppClient
     Vec2 cameraFollow;
     Sound test;
     Item item;
-    Entity entities[2];
+    Entity entities[3];
 };
 
 AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
@@ -64,13 +64,14 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
-    ClientSetNet(client, "drill.pierrelf.com", 1337);
-    ClientStart(client);
-    ClientSend(client, Test, "THIS IS A TEST", 15);
+    ClientSetNet(client, "85.226.233.210", 1337);
+    // ClientStart(client);
+    // ClientSend(client, Test, "THIS IS A TEST", 15);
 
     app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
     app->entities[0].move_x = 500;
-    app->entities[1] = EntityCreate((Vec2){-500, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
+    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_TRUE);
+    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_TRUE);
 
     app->item = ItemCreate(ItemWoodenSword);
 
@@ -118,9 +119,9 @@ void AppClientUpdate(AppClient *app)
         SoundPlay(app->test, 0);
     if (InputGet(app->input, KEY_O))
         SoundStop(app->test);
-
-    EntityUpdate(app->entities, 2, &app->entities[0], 0, app->clock);
-    EntityUpdate(app->entities, 2, &app->entities[1], 1, app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[0], 0, app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[1], 1, app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[2], 2, app->clock);
 }
 
 void AppClientDraw(AppClient *app)
@@ -130,6 +131,7 @@ void AppClientDraw(AppClient *app)
     ItemDraw(app->camera, &app->item);
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
+    EntityDraw(app->camera, &app->entities[2]);
     PlayerDraw(app->camera, app->db[2999]);
 
     //GUI
