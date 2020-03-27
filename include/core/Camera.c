@@ -17,7 +17,7 @@ Camera *CameraCreate(Graphics *gfx, Vec2 *follow)
     ret->gfx = gfx;
     ret->m_follow = follow;
     ret->m_centerRotation = 0.0f;
-    ret->m_viewport = (SDL_Rect){0, 0, 1024, 720};
+    ret->m_viewport = (SDL_Rect){0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
     return ret;
 }
 
@@ -47,12 +47,6 @@ void CameraDraw(Camera *camera, Drawable drawable)
     middle.x += camera->m_viewport.w / 2.0f - drawable.dst.x;
     middle.y += camera->m_viewport.h / 2.0f - drawable.dst.y;
     drawable.rot_anchor = middle;
-    GraphicsDraw(camera->gfx, drawable);
-}
-
-void PlayerDraw(Camera *camera, Drawable drawable)
-{
-    drawable.rot = 0;
     GraphicsDraw(camera->gfx, drawable);
 }
 
