@@ -55,3 +55,4 @@ include/SDL2
 lib/
 .vscode
 sdl2-config
+Makefile

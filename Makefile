@@ -7,8 +7,8 @@ endif
 ifeq ($(detected_OS), Windows)
 APP_C		:= app_client.exe
 APP_S		:= app_server.exe
-LIB_LOC 	:= -LC:/lib/
-INC_LOC 	:= -IC:/include/
+LIB_LOC 	:= -LC:\library\Chaos_SDL\Chaos_SDL\lib
+INC_LOC 	:= -IC:\library\Chaos_SDL\Chaos_SDL\include
 else
 APP_C		:= app_client.out
 APP_S		:= app_server.out
