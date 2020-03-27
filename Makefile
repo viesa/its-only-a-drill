@@ -28,7 +28,7 @@ SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
 SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 
 # Flags
-CFLAGS  	:= -std=c11 -Wall -pedantic -pthread -g -lm $(INC_LOC)
+CFLAGS  	:= -std=c11 -Wall -pthread -g -lm $(INC_LOC)
 
 # Libraries
 LIBS 		:= $(LIB_LOC) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf

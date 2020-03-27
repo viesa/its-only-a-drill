@@ -13,7 +13,7 @@ Font *FontCreate(Graphics *gfx)
         log_error("Could not initialize fonts: %s", SDL_GetError());
     }
 
-    Font *font = (Font *)SDL_malloc(sizeof(font));
+    Font *font = (Font *)SDL_malloc(sizeof(Font));
     font->gfx = gfx;
 
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
@@ -33,6 +33,8 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, SDL_Col
     SDL_Rect dstrect = {x, y, texW, texH};
 
     SDL_RenderCopy(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 }
 
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])

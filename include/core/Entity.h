@@ -8,20 +8,21 @@ typedef enum EntityPresets{
     EntityWoman
 }EntityPresets;
 typedef struct Entity{
-    int move_x, move_y, rot, rotSpeed, moveSpeed;
+    int rot, rotSpeed, moveSpeed, id;
     SDL_bool isCollider;
     SDL_bool isMovable;
     Drawable drawable;
-    Vec2 vector;
+    Vec2 posVec;
+    Vec2 moveVec;
 }Entity;
 //Returns an entity struct that contains the nessecary arguments for a basic funktional entity
-Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, SDL_bool isCollider, SDL_bool isMovable);
+Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
 //Draw the entity relative to the camera
 void EntityDraw(Camera *camera, Entity *entity);
 //If entities == NULL it will ignore other entities, if entities != NULL it will update the targeted user with respect to the entities
-void EntityUpdate(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk);
-//Returns a SDL_bool based on if the user entity is colliding with anything else in the entities array, nrEnts are length of array, nrSelfIndex is the index in the array in which the entity is located at (if it doesnt exist in that context simply put a higher number than the nrEnts)
-SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSelfIndex, Clock *clk);
+void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk);
+//Returns a SDL_bool based on if the user entity is illegally colliding and should not be moved
+SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *clk);
 #endif
 
 //drawable följer en vec2 istället
