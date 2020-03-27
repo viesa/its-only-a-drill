@@ -5,8 +5,8 @@ Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets pres
     Entity e;
     e.id = uniqueIdentifier;
     e.posVec = posVec;
-    e.moveVec.x = 0;
-    e.moveVec.x = 0;
+    e.velocity.x = 0;
+    e.velocity.x = 0;
     switch (preset)
     {
     case EntityWoman:
@@ -25,10 +25,10 @@ Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets pres
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *clk)
 {
     Entity test = user;
-    if (test.moveVec.x > 0)
+    if (test.velocity.x > 0)
     {
         test.posVec.x += test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.x -= 1;
+        test.velocity.x -= 1;
 
         for (int i = 0; i < nrEnts; i++)
         {
@@ -45,10 +45,10 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             }
         }
     }
-    if (test.moveVec.x < 0)
+    if (test.velocity.x < 0)
     {
         test.posVec.x -= test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.x += 1;
+        test.velocity.x += 1;
 
         for (int i = 0; i < nrEnts; i++)
         {
@@ -65,10 +65,10 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             }
         }
     }
-    if (test.moveVec.y > 0)
+    if (test.velocity.y > 0)
     {
         test.posVec.y += test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.y -= 1;
+        test.velocity.y -= 1;
 
         for (int i = 0; i < nrEnts; i++)
         {
@@ -85,10 +85,10 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             }
         }
     }
-    if (test.moveVec.y < 0)
+    if (test.velocity.y < 0)
     {
         test.posVec.y -= test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.y += 1;
+        test.velocity.y += 1;
 
         for (int i = 0; i < nrEnts; i++)
         {
@@ -129,25 +129,25 @@ void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk)
         }
     }
 
-    if (user->moveVec.x > 0)
+    if (user->velocity.x > 0)
     {
         user->posVec.x += user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.x -= 1;
+        user->velocity.x -= 1;
     }
-    if (user->moveVec.x < 0)
+    if (user->velocity.x < 0)
     {
         user->posVec.x -= user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.x += 1;
+        user->velocity.x += 1;
     }
-    if (user->moveVec.y > 0)
+    if (user->velocity.y > 0)
     {
         user->posVec.y += user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.y -= 1;
+        user->velocity.y -= 1;
     }
-    if (user->moveVec.y < 0)
+    if (user->velocity.y < 0)
     {
         user->posVec.y -= user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.y += 1;
+        user->velocity.y += 1;
     }
     if (user->rot > 0)
     {
@@ -166,3 +166,10 @@ void EntityDraw(Camera *camera, Entity *entity)
     entity->drawable.dst.y = entity->posVec.y;
     CameraDraw(camera, entity->drawable);
 }
+
+/*
+
+    ent +=1;
+    ent.vol += 1; // f=ma
+
+*/
