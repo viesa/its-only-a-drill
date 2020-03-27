@@ -79,13 +79,13 @@ void GuiUpdate(Gui *gui)
         {gui->loopSwing, 19, 87},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 1, F3D_BL, 9, vitalsColor); //83
+    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 0, 1, F3D_BL, 9, vitalsColor); //83
 
     SDL_Color objColor[2] = {
         {102, 16, 9},
         {239, 193, 92}};
 
     // Objective
-    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, offset3d, F3D_TC, 2, objColor);
-    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, offset3d, F3D_TC, 2, objColor);
+    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
+    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
 }

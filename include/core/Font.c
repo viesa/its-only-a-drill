@@ -22,7 +22,7 @@ Font *FontCreate(Graphics *gfx)
     return font;
 }
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, SDL_Color color)
+void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int boxWidth, SDL_Color color)
 {
     int alignOffsetX = 0;
 
@@ -41,7 +41,10 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAli
         break;
     }
 
-    SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, color);
+    if (!boxWidth)
+        boxWidth = drawSize.w;
+
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font->fonts[fontEnum], text, color, boxWidth);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(GraphicsGetRenderer(font->gfx), surface);
     SDL_FreeSurface(surface);
 
@@ -71,38 +74,38 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
     return (SDL_Rect){x, y, texW, texH};
 }
 
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int offset, Font3dDirection dir, int layers, SDL_Color color[])
+void FontDraw3D(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int boxWidth, int offset, Font3dDirection dir, int layers, SDL_Color color[])
 {
     for (size_t i = 0; i < layers; i++)
     {
         switch (dir)
         {
         case F3D_TL:
-            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y - offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TC:
-            FontDraw(font, TTF_Robot_Crush, text, x, y - offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TR:
-            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y - offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_CL:
-            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_CC:
-            FontDraw(font, TTF_Robot_Crush, text, x, y, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x, y, align, boxWidth, color[i]);
             break;
         case F3D_CR:
-            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_BL:
-            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y + offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x - offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BC:
-            FontDraw(font, TTF_Robot_Crush, text, x, y + offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BR:
-            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y + offset * i, align, color[i]);
+            FontDraw(font, TTF_Robot_Crush, text, x + offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         }
     }
