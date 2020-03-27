@@ -3,7 +3,7 @@
 Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets preset, int uniqueIdentifier)
 {
     Entity e;
-    e.id;
+    e.id = uniqueIdentifier;
     e.posVec = posVec;
     e.moveVec.x = 0;
     e.moveVec.x = 0;
@@ -39,7 +39,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
                     //connects with first thing
                     if (entities[i].isMovable)
                     {
-                        entities[i].posVec.x = test.posVec.x - test.drawable.dst.w;
+                        entities[i].posVec.x = test.posVec.x + test.drawable.dst.w;
                     }
                 }
             }
@@ -139,15 +139,15 @@ void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk)
         user->posVec.x -= user->moveSpeed * ClockGetDeltaTime(clk);
         user->moveVec.x += 1;
     }
-    if (user->moveVec.x > 0)
+    if (user->moveVec.y > 0)
     {
         user->posVec.y += user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.x -= 1;
+        user->moveVec.y -= 1;
     }
-    if (user->moveVec.x < 0)
+    if (user->moveVec.y < 0)
     {
         user->posVec.y -= user->moveSpeed * ClockGetDeltaTime(clk);
-        user->moveVec.x += 1;
+        user->moveVec.y += 1;
     }
     if (user->rot > 0)
     {
@@ -159,8 +159,6 @@ void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk)
         user->drawable.rot -= user->rotSpeed * ClockGetDeltaTime(clk);
         user->rot += 1;
     }
-    //printf("x, y: %d %d\n", user->posVec.x, user->posVec.y);
-    //AJJA BAJJA! INTE PUSHA MED PRINTS!!!
 }
 void EntityDraw(Camera *camera, Entity *entity)
 {
