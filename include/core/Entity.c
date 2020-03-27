@@ -24,124 +24,164 @@ Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets pres
 }
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *clk)
 {
-    Entity test = user;
-    if (test.velocity.x > 0)
-    {
-        test.posVec.x += test.moveSpeed * ClockGetDeltaTime(clk);
-        test.velocity.x -= 1;
-
-        for (int i = 0; i < nrEnts; i++)
-        {
-            if (entities[i].id != user.id && entities[i].isCollider)
-            {
-                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
-                {
-                    //connects with first thing
-                    if (entities[i].isMovable)
-                    {
-                        for (int j = 0; j < nrEnts; j++){
-                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
-                                //doesnt connect with any more things
-                                entities[i].posVec.x = test.posVec.x + test.drawable.dst.w;
-                                break;
-                            }
-                        }
-                    }
-                }
-                break;
-            }
-        }
-    }
-    if (test.velocity.x < 0)
-    {
-        test.posVec.x -= test.moveSpeed * ClockGetDeltaTime(clk);
-        test.velocity.x += 1;
-
-        for (int i = 0; i < nrEnts; i++)
-        {
-            if (entities[i].id != user.id && entities[i].isCollider)
-            {
-                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
-                {
-                    //connects with first thing
-                    if (entities[i].isMovable)
-                    {
-                        for (int j = 0; j < nrEnts; j++){
-                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
-                                //doesnt connect with any more things
-                                entities[i].posVec.x = test.posVec.x - test.drawable.dst.w;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (test.velocity.y > 0)
-    {
-        test.posVec.y += test.moveSpeed * ClockGetDeltaTime(clk);
-        test.velocity.y -= 1;
-
-        for (int i = 0; i < nrEnts; i++)
-        {
-            if (entities[i].id != user.id && entities[i].isCollider)
-            {
-                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
-                {
-                    //connects with first thing
-                    if (entities[i].isMovable)
-                    {
-                        for (int j = 0; j < nrEnts; j++){
-                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
-                                //doesnt connect with any more things
-                                entities[i].posVec.y = test.posVec.y + test.drawable.dst.h;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (test.velocity.y < 0)
-    {
-        test.posVec.y -= test.moveSpeed * ClockGetDeltaTime(clk);
-        test.velocity.y += 1;
-
-        for (int i = 0; i < nrEnts; i++)
-        {
-            if (entities[i].id != user.id && entities[i].isCollider)
-            {
-                if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
-                {
-                    //connects with first thing
-                    if (entities[i].isMovable)
-                    {
-                        for (int j = 0; j < nrEnts; j++){
-                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
-                                //doesnt connect with any more things
-                                entities[i].posVec.x = test.posVec.y - test.drawable.dst.h;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    SDL_Rect result;
     for (int i = 0; i < nrEnts; i++)
     {
-        if (entities[i].id != user.id && entities[i].isCollider)
+        for (int j = 0; j < nrEnts; j++)
         {
-            if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+            if (i != j)
             {
-                //connects
-                return SDL_TRUE;
+                if (SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &result))
+                {
+                    if (entities[j].isMovable == SDL_TRUE)
+                    {
+                        if (result.w < result.h) // assume the smallest number is the interaction point
+                        {
+                            entities[j].vector.x += result.w;
+                        }
+                        else
+                        {
+                            entities[j].vector.y += result.h;
+                        }
+                    }
+                }
             }
         }
     }
-    return SDL_FALSE;
+    //             if (SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &result))
+    //             {
+    //                 if (entities[j].isMovable == SDL_TRUE)
+    //                 {
+    //                     if (result.w < result.h) // assume the smallest number is the interaction point
+    //                     {
+    //                         entities[j].vector.x += result.w;
+    //                     }
+    //                     else
+    //                     {
+    //                         entities[j].vector.y += result.h;
+    //                     }
+    //                 }
+    //                 else
+    //                 {
+    //                     if (result.w < result.h) // assume the smallest number is the interaction point
+    //                     {
+    //                         entities[i].vector.x -= result.w;
+    //                     }
+    //                     else
+    //                     {
+    //                         entities[i].vector.y -= result.h;
+    //                     }
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 return SDL_FALSE;
+    //             }
+    //         }
+    //     }
+    // }
+    // return SDL_TRUE;
+    // all ents
+    // loop
+    // has interset = result
+    // if ent = movable
+    // do result player --> ent
+    // else
+    // do result ent --> player
+
+    // Entity test = user; // player = ent
+    // if (test.move_x > 0)
+    // {
+    //     test.vector.x += test.moveSpeed * ClockGetDeltaTime(clk);
+    //     test.move_x -= 1;
+
+    //     for (int i = 0; i < nrEnts; i++)
+    //     {
+    //         if (i != nrSelfIndex && entities[i].isCollider)
+    //         {
+    //             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+    //             {
+    //                 //connects with first thing
+    //                 if (entities[i].isMovable)
+    //                 {
+    //                     entities[i].vector.x = test.vector.x + test.drawable.dst.w;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // if (test.move_x < 0)
+    // {
+    //     test.vector.x -= test.moveSpeed * ClockGetDeltaTime(clk);
+    //     test.move_x += 1;
+
+    //     for (int i = 0; i < nrEnts; i++)
+    //     {
+    //         if (i != nrSelfIndex && entities[i].isCollider)
+    //         {
+    //             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+    //             {
+    //                 //connects
+    //                 if (entities[i].isMovable)
+    //                 {
+    //                     entities[i].vector.x = test.vector.x - test.drawable.dst.w;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // if (test.move_y > 0)
+    // {
+    //     test.vector.y += test.moveSpeed * ClockGetDeltaTime(clk);
+    //     test.move_y -= 1;
+
+    //     for (int i = 0; i < nrEnts; i++)
+    //     {
+    //         if (i != nrSelfIndex && entities[i].isCollider)
+    //         {
+    //             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+    //             {
+    //                 //connects
+    //                 if (entities[i].isMovable)
+    //                 {
+    //                     entities[i].vector.y = test.vector.y + test.drawable.dst.h;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // if (test.move_y < 0)
+    // {
+    //     test.vector.y -= test.moveSpeed * ClockGetDeltaTime(clk);
+    //     test.move_y += 1;
+
+    //     for (int i = 0; i < nrEnts; i++)
+    //     {
+    //         if (i != nrSelfIndex && entities[i].isCollider)
+    //         {
+    //             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+    //             {
+    //                 //connects
+    //                 if (entities[i].isMovable)
+    //                 {
+    //                     entities[i].vector.y = test.vector.y - test.drawable.dst.h;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // for (int i = 0; i < nrEnts; i++)
+    // {
+    //     if (i != nrSelfIndex && entities[i].isCollider)
+    //     {
+    //         if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
+    //         {
+    //             //connects
+    //             return SDL_TRUE;
+    //         }
+    //     }
+    // }
+    // return SDL_FALSE;
 }
 void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk)
 {
