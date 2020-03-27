@@ -68,14 +68,18 @@ void GuiUpdate(Gui *gui)
     sprintf(pts, "%ld pts", gui->points);
 
     // Vitals
-    SDL_Color vitalsColor[5] = {
+    SDL_Color vitalsColor[9] = {
         {gui->loopSwing, 159, 227},
+        {gui->loopSwing, 139, 207},
         {gui->loopSwing, 119, 187},
+        {gui->loopSwing, 99, 167},
         {gui->loopSwing, 79, 147},
+        {gui->loopSwing, 59, 127},
         {gui->loopSwing, 39, 107},
+        {gui->loopSwing, 19, 87},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 2, F3D_BL, 5, vitalsColor); //83
+    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 1, F3D_BL, 9, vitalsColor); //83
 
     SDL_Color objColor[2] = {
         {102, 16, 9},
