@@ -28,12 +28,12 @@ struct AppClient
 AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    app->clock = clock;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
-    app->gui = GuiCreate(app->font);
+    app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->clock = clock;
     app->input = input;
     app->client = client;
     app->netMgr = NetworkMgrCreate();

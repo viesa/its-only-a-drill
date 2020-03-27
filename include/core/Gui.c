@@ -1,4 +1,5 @@
 #include "Gui.h"
+#include "Clock.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -7,9 +8,10 @@
 #include <stdio.h>
 #include <time.h>
 
-Gui *GuiCreate(Font *font)
+Gui *GuiCreate(Font *font, Clock *clock)
 {
     Gui *gui = (Gui *)SDL_malloc(sizeof(Gui));
+    gui->clock = clock;
     gui->font = font;
     gui->points = 3;
     gui->loopCount = 0;
@@ -63,11 +65,11 @@ void GuiUpdate(Gui *gui)
         gui->loopSwing--;
     }
 
+    // Points
+
     char pts[10];
 
     sprintf(pts, "%ld pts", gui->points);
-
-    // Vitals
     SDL_Color vitalsColor[9] = {
         {gui->loopSwing, 159, 227},
         {gui->loopSwing, 139, 207},
@@ -81,11 +83,15 @@ void GuiUpdate(Gui *gui)
 
     FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 0, 1, F3D_BL, 9, vitalsColor); //83
 
+    // Objective
     SDL_Color objColor[2] = {
         {102, 16, 9},
         {239, 193, 92}};
 
-    // Objective
     FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
     FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
+
+    char fps[10];
+    sprintf(fps, "%d FPS", (int)ClockGetFPS(gui->clock));
+    FontDraw3D(gui->font, TTF_Robot_Crush, fps, edge, edge, FAL_L, 0, 1, F3D_BR, 9, vitalsColor); //83
 }
