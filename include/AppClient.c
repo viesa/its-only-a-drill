@@ -70,10 +70,10 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     // ClientStart(client);
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman);
+    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, 0);
     app->entities[0].moveVec.x = 500;
-    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman);
-    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman);
+    app->entities[1] = EntityCreate((Vec2){300, 300}, 100, 20, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 500}, 100, 20, EntityWoman, 2);
 
     app->item = ItemCreate(ItemWoodenSword);
 
@@ -121,9 +121,9 @@ void AppClientUpdate(AppClient *app)
         SoundPlay(app->test, 0);
     if (InputGet(app->input, KEY_O))
         SoundStop(app->test);
-    EntityUpdate(app->entities, 3, &app->entities[0], 0, app->clock);
-    EntityUpdate(app->entities, 3, &app->entities[1], 1, app->clock);
-    EntityUpdate(app->entities, 3, &app->entities[2], 2, app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[0], app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[1], app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[2], app->clock);
 }
 
 void AppClientDraw(AppClient *app)

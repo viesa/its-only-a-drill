@@ -1,7 +1,8 @@
 #include "Entity.h"
 
-Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets preset){
+Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets preset, int uniqueIdentifier){
     Entity e;
+    e.id;
     e.posVec = posVec;
     e.moveVec.x = 0;
     e.moveVec.x = 0;
@@ -20,18 +21,18 @@ Entity EntityCreate(Vec2 posVec, int moveSpeed, int rotSpeed, EntityPresets pres
     }
     return e;
 }
-SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSelfIndex, Clock *clk){
+SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *clk){
     Entity test = user;
     if (test.moveVec.x > 0){
         test.posVec.x += test.moveSpeed * ClockGetDeltaTime(clk);
         test.moveVec.x -= 1;
 
         for(int i = 0; i < nrEnts; i++){
-            if (i != nrSelfIndex && entities[i].isCollider){
+            if (entities[i].id != user.id && entities[i].isCollider){
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects with first thing
                     if (entities[i].isMovable){
-                        entities[i].posVec.x = test.posVec.x + test.drawable.dst.w;
+                        entities[i].posVec.x = test.posVec.x - test.drawable.dst.w;
                     }
                 }
             }
@@ -42,7 +43,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
         test.moveVec.x += 1;
 
         for(int i = 0; i < nrEnts; i++){
-            if (i != nrSelfIndex && entities[i].isCollider){
+            if (entities[i].id != user.id && entities[i].isCollider){
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects
                     if (entities[i].isMovable){
@@ -52,12 +53,12 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
             }
         }
     }
-    if (test.moveVec.x > 0){
+    if (test.moveVec.y > 0){
         test.posVec.y += test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.x -= 1;
+        test.moveVec.y -= 1;
 
         for(int i = 0; i < nrEnts; i++){
-            if (i != nrSelfIndex && entities[i].isCollider){
+            if (entities[i].id != user.id && entities[i].isCollider){
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects
                     if (entities[i].isMovable){
@@ -67,12 +68,12 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
             }
         }
     }
-    if (test.moveVec.x < 0){
+    if (test.moveVec.y < 0){
         test.posVec.y -= test.moveSpeed * ClockGetDeltaTime(clk);
-        test.moveVec.x += 1;
+        test.moveVec.y += 1;
 
         for(int i = 0; i < nrEnts; i++){
-            if (i != nrSelfIndex && entities[i].isCollider){
+            if (entities[i].id != user.id && entities[i].isCollider){
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                     //connects
                     if (entities[i].isMovable){
@@ -83,7 +84,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
         }
     }
     for(int i = 0; i < nrEnts; i++){
-        if (i != nrSelfIndex && entities[i].isCollider){
+        if (entities[i].id != user.id && entities[i].isCollider){
             if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0,0,0,0})){
                 //connects
                 return SDL_TRUE;
@@ -92,13 +93,14 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, int nrSel
     }
     return SDL_FALSE;
 }
-void EntityUpdate(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, Clock *clk){
+void EntityUpdate(Entity entities[], int nrEnts, Entity *user, Clock *clk){
     if (entities){
         if (user->isCollider || user->isMovable){
-            if (EntityOnCollision(entities, nrEnts, *user, nrSelfIndex, clk))
+            if (EntityOnCollision(entities, nrEnts, *user, clk))
                 return;
         }
     }
+    
     if (user->moveVec.x > 0){
         user->posVec.x += user->moveSpeed * ClockGetDeltaTime(clk);
         user->moveVec.x -= 1;
@@ -123,6 +125,7 @@ void EntityUpdate(Entity entities[], int nrEnts, Entity *user, int nrSelfIndex, 
         user->drawable.rot -= user->rotSpeed * ClockGetDeltaTime(clk);
         user->rot +=1;
     }
+    printf("x, y: %d %d\n", user->posVec.x, user->posVec.y);
 }
 void EntityDraw(Camera *camera, Entity *entity){
     entity->drawable.dst.x = entity->posVec.x;
