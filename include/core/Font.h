@@ -44,9 +44,18 @@ typedef struct Font
 } Font;
 
 Font *FontCreate(Graphics *gfx);
+
+// Draws one line of text from string.
+// x is dependent on which alignment setting is used.
 void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, SDL_Color color);
+
+// Queries the predicted size of the font to be printed, enabling center and right alignment.
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
+
+// Enables 3d text display. Requires a 3d direction.
+// Draws from the furthest-back layer to the first, following the color array.
 void FontDraw3D(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int offset, Font3dDirection dir, int layers, SDL_Color color[]);
+
 void FontDestroy(Font *font);
 
 #endif

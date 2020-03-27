@@ -43,6 +43,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAli
 
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(GraphicsGetRenderer(font->gfx), surface);
+    SDL_FreeSurface(surface);
 
     int texW = 0;
     int texH = 0;
@@ -53,7 +54,6 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAli
 
     //SDL_RenderCopyEx(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect, 90, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
     SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
 }
 
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
@@ -65,10 +65,10 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
     int texW = 0;
     int texH = 0;
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
-    return (SDL_Rect){x, y, texW, texH};
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+    return (SDL_Rect){x, y, texW, texH};
 }
 
 void FontDraw3D(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int offset, Font3dDirection dir, int layers, SDL_Color color[])
