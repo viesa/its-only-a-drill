@@ -6,7 +6,7 @@
 #include "core/Clock.h"
 #include "core/Camera.h"
 
-#define RADIUS 100
+#define RADIUS 35
 
 typedef struct Player
 {

@@ -21,8 +21,6 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Graphics *gfx)
     int pos_y = 0;
     SDL_GetMouseState(&pos_x, &pos_y);
 
-    printf("posx : %d and posy: %d\n", pos_x, pos_y);
-
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 playerPos = Vec2Create((float)(gfx->gfxWindowWidth / 2), (float)(gfx->gfxWindowHeight / 2));
 
