@@ -82,7 +82,7 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->item = ItemCreate(ItemWoodenSword);
 
-    CameraSetFollow(app->camera, &app->player.entity.posVec);
+    CameraSetFollow(app->camera, &app->player.aimFollow);
 
     return app;
 }
@@ -119,7 +119,7 @@ void AppClientUpdate(AppClient *app)
     EntityUpdate(app->entities, 3, &app->entities[1], app->clock);
     EntityUpdate(app->entities, 3, &app->entities[2], app->clock);
 
-    PlayerUpdate(&app->player, app->input, app->clock);
+    PlayerUpdate(&app->player, app->input, app->clock, app->gfx);
 }
 
 void AppClientDraw(AppClient *app)
