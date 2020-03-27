@@ -119,7 +119,7 @@ void AppClientUpdate(AppClient *app)
     EntityUpdate(app->entities, 3, &app->entities[1], app->clock);
     EntityUpdate(app->entities, 3, &app->entities[2], app->clock);
 
-    PlayerUpdate(&app->player, app->input, app->clock, app->gfx);
+    PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 }
 
 void AppClientDraw(AppClient *app)

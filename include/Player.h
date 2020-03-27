@@ -6,7 +6,7 @@
 #include "core/Clock.h"
 #include "core/Camera.h"
 
-#define RADIUS 35
+#define RADIUS 25
 
 typedef struct Player
 {
@@ -17,7 +17,7 @@ typedef struct Player
 Player PlayerCreate();
 void PlayerDestroy(Player *player);
 
-void PlayerUpdate(Player *player, Input *input, Clock *clock, Graphics *gfx);
+void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera);
 void PlayerDraw(Player *player, Camera *camera);
 
 #endif

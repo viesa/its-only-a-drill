@@ -15,22 +15,20 @@ void PlayerDestroy(Player *player)
 {
 }
 
-void PlayerUpdate(Player *player, Input *input, Clock *clock, Graphics *gfx)
+void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
 {
     int pos_x = 0;
     int pos_y = 0;
     SDL_GetMouseState(&pos_x, &pos_y);
 
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
-    Vec2 playerPos = Vec2Create((float)(gfx->gfxWindowWidth / 2), (float)(gfx->gfxWindowHeight / 2));
+    Vec2 cameraPos = CameraGetPos(camera);
+    Vec2 playerPos = Vec2Sub(&player->entity.posVec, &cameraPos);
 
     Vec2 aim = Vec2Sub(&mousePos, &playerPos);
 
-    if (Vec2Len(&aim) > RADIUS)
-    {
-        aim = Vec2Unit(&aim);
-        aim = Vec2MulL(&aim, RADIUS);
-    }
+    aim = Vec2Unit(&aim);
+    aim = Vec2MulL(&aim, RADIUS);
 
     player->aimFollow = Vec2Add(&aim, &player->entity.posVec);
 

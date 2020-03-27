@@ -69,6 +69,11 @@ void CameraSetFollow(Camera *camera, Vec2 *follow)
     camera->m_follow = follow;
 }
 
+Vec2 CameraGetPos(Camera *camera)
+{
+    return camera->m_position;
+}
+
 // Vec2 CameraRemoveRotation(Camera *camera, Vec2 vector)
 // {
 //     float oldX = vector.x;

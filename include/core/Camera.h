@@ -17,4 +17,6 @@ void CameraAddRotation(Camera *camera, float ammount);
 
 void CameraSetFollow(Camera *camera, Vec2 *follow);
 
+Vec2 CameraGetPos(Camera *camera);
+
 #endif
