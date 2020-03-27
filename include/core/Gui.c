@@ -68,13 +68,20 @@ void GuiUpdate(Gui *gui)
     sprintf(pts, "%ld pts", gui->points);
 
     // Vitals
-    SDL_Rect pointsSize = FontGetSize(gui->font, TTF_Robot_Crush, pts);
-    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - pointsSize.w - edge, edge, 3, (SDL_Color){gui->loopSwing, 39, 107}, (SDL_Color){255 - gui->loopSwing, 180, 184}); //83
+    SDL_Color vitalsColor[5] = {
+        {gui->loopSwing, 159, 227},
+        {gui->loopSwing, 119, 187},
+        {gui->loopSwing, 79, 147},
+        {gui->loopSwing, 39, 107},
+        {255 - gui->loopSwing, 180, 184}};
+
+    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 2, F3D_BL, 5, vitalsColor); //83
+
+    SDL_Color objColor[2] = {
+        {102, 16, 9},
+        {239, 193, 92}};
 
     // Objective
-    SDL_Rect objLine1 = FontGetSize(gui->font, TTF_Robot_Crush, "The target is a briefcase.");
-    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2 - objLine1.w / 2, wH - (edge + 2 * size), offset3d, (SDL_Color){102, 16, 9}, (SDL_Color){239, 193, 92});
-
-    SDL_Rect objLine2 = FontGetSize(gui->font, TTF_Robot_Crush, "Discretion is of essence.");
-    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2 - objLine2.w / 2, wH - (edge + size), offset3d, (SDL_Color){102, 16, 9}, (SDL_Color){239, 193, 92});
+    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, offset3d, F3D_TC, 2, objColor);
+    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, offset3d, F3D_TC, 2, objColor);
 }

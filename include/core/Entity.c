@@ -39,9 +39,16 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
                     //connects with first thing
                     if (entities[i].isMovable)
                     {
-                        entities[i].posVec.x = test.posVec.x + test.drawable.dst.w;
+                        for (int j = 0; j < nrEnts; j++){
+                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
+                                //doesnt connect with any more things
+                                entities[i].posVec.x = test.posVec.x + test.drawable.dst.w;
+                                break;
+                            }
+                        }
                     }
                 }
+                break;
             }
         }
     }
@@ -56,10 +63,16 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             {
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
                 {
-                    //connects
+                    //connects with first thing
                     if (entities[i].isMovable)
                     {
-                        entities[i].posVec.x = test.posVec.x - test.drawable.dst.w;
+                        for (int j = 0; j < nrEnts; j++){
+                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
+                                //doesnt connect with any more things
+                                entities[i].posVec.x = test.posVec.x - test.drawable.dst.w;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -76,10 +89,16 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             {
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
                 {
-                    //connects
+                    //connects with first thing
                     if (entities[i].isMovable)
                     {
-                        entities[i].posVec.y = test.posVec.y + test.drawable.dst.h;
+                        for (int j = 0; j < nrEnts; j++){
+                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
+                                //doesnt connect with any more things
+                                entities[i].posVec.y = test.posVec.y + test.drawable.dst.h;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -96,10 +115,16 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Entity user, Clock *cl
             {
                 if (SDL_IntersectRect(&entities[i].drawable.dst, &test.drawable.dst, &(SDL_Rect){0, 0, 0, 0}))
                 {
-                    //connects
+                    //connects with first thing
                     if (entities[i].isMovable)
                     {
-                        entities[i].posVec.y = test.posVec.y - test.drawable.dst.h;
+                        for (int j = 0; j < nrEnts; j++){
+                            if (!SDL_IntersectRect(&entities[i].drawable.dst, &entities[j].drawable.dst, &(SDL_Rect){0,0,0,0}) && entities[j].id != user.id){
+                                //doesnt connect with any more things
+                                entities[i].posVec.x = test.posVec.y - test.drawable.dst.h;
+                                break;
+                            }
+                        }
                     }
                 }
             }
