@@ -7,6 +7,9 @@ typedef struct Gui
 {
     Font *font;
     long int points;
+    int loopCount;
+    int loopSwing;
+    int swingDir;
 } Gui;
 
 typedef enum GuiWindow
@@ -16,6 +19,6 @@ typedef enum GuiWindow
 } GuiWindow;
 
 Gui *GuiCreate(Font *font);
-void GuiLoop(Gui *gui);
+void GuiUpdate(Gui *gui);
 
 #endif

@@ -137,5 +137,5 @@ void AppClientDraw(AppClient *app)
     PlayerDraw(app->camera, app->db[2999]);
 
     //GUI
-    GuiLoop(app->gui);
+    GuiUpdate(app->gui);
 }

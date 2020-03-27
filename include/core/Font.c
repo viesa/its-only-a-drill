@@ -33,6 +33,8 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, SDL_Col
     SDL_Rect dstrect = {x, y, texW, texH};
 
     SDL_RenderCopy(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 }
 
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
