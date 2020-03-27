@@ -4,10 +4,11 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <string.h>
+#include <time.h>
 
 Gui *GuiCreate(Font *font)
 {
-    Gui *gui = (Gui *)SDL_malloc(sizeof(gui));
+    Gui *gui = (Gui *)SDL_malloc(sizeof(Gui));
     gui->font = font;
     gui->points = 3;
     gui->loopCount = 0;

@@ -13,7 +13,7 @@ Font *FontCreate(Graphics *gfx)
         log_error("Could not initialize fonts: %s", SDL_GetError());
     }
 
-    Font *font = (Font *)SDL_malloc(sizeof(font));
+    Font *font = (Font *)SDL_malloc(sizeof(Font));
     font->gfx = gfx;
 
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
