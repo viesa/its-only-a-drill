@@ -7,6 +7,7 @@
 
 typedef enum FontSheet
 {
+    TTF_Antilles,
     TTF_Robot_Crush,
     TTF_Arial,
     TTF_Count
@@ -55,7 +56,7 @@ Font *FontCreate(Graphics *gfx);
 // boxWidth: allows maximum textbox width, enables wrapping.
 // color: color to display text in.
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int boxWidth, SDL_Color color);
+void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
 
 // Queries the predicted size of the font to be printed, enabling center and right alignment.
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
@@ -76,7 +77,9 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
 // direction: direction of the offset, from the POV of viewing text.
 // layers: length of color[]
 // color[]: array of all colors to be displayed on text layers.
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], int x, int y, FontAlign align, int boxWidth, int offset, Font3dDirection dir, int layers, SDL_Color color[]);
+void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
+
+void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
 
 void FontDestroy(Font *font);
 

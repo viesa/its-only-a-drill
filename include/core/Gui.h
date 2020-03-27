@@ -9,9 +9,12 @@ typedef struct Gui
     Font *font;
     Clock *clock;
     long int points;
-    int loopCount;
-    int loopSwing;
-    int swingDir;
+    float loopCount;
+    float loopSwing;
+    float swingDir;
+    float defaultEdge;
+    float defaultSize;
+    float defaultOffset;
 } Gui;
 
 typedef enum GuiWindow
