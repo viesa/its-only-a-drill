@@ -76,8 +76,9 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, 0);
     app->entities[0].velocity.x = 500;
-    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
-    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
+    app->entities[0].velocity.y = 500;
+    app->entities[1] = EntityCreate((Vec2){300, 300}, 100, 20, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 500}, 100, 20, EntityWoman, 2);
 
     app->item = ItemCreate(ItemWoodenSword);
 
