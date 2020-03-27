@@ -4,17 +4,19 @@
 #include "Camera.h"
 #include "Clock.h"
 #include "math.h"
-typedef enum EntityPresets{
+typedef enum EntityPresets
+{
     EntityWoman
-}EntityPresets;
-typedef struct Entity{
+} EntityPresets;
+typedef struct Entity
+{
     int rot, rotSpeed, moveSpeed, id;
     SDL_bool isCollider;
     SDL_bool isMovable;
     Drawable drawable;
     Vec2 posVec;
-    Vec2 moveVec;
-}Entity;
+    Vec2 velocity;
+} Entity;
 //Returns an entity struct that contains the nessecary arguments for a basic funktional entity
 Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
 //Draw the entity relative to the camera

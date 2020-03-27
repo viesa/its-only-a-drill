@@ -7,8 +7,8 @@ endif
 ifeq ($(detected_OS), Windows)
 APP_C		:= app_client.exe
 APP_S		:= app_server.exe
-LIB_LOC 	:= -LC:\library\Chaos_SDL\Chaos_SDL\lib
-INC_LOC 	:= -IC:\library\Chaos_SDL\Chaos_SDL\include
+LIB_LOC 	:= -LC:\libarys\Chaos_SDL\lib
+INC_LOC 	:= -IC:\libarys\Chaos_SDL\include
 else
 APP_C		:= app_client.out
 APP_S		:= app_server.out
@@ -28,7 +28,7 @@ SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
 SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 
 # Flags
-CFLAGS  	:= -std=c11 -Wall -pedantic -pthread -g -lm $(INC_LOC)
+CFLAGS  	:= -std=c11 -Wall -pthread -g -lm $(INC_LOC)
 
 # Libraries
 LIBS 		:= $(LIB_LOC) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf

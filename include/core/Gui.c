@@ -4,18 +4,23 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <string.h>
+#include <stdio.h>
+#include <time.h>
 
 Gui *GuiCreate(Font *font)
 {
-    Gui *gui = (Gui *)SDL_malloc(sizeof(gui));
+    Gui *gui = (Gui *)SDL_malloc(sizeof(Gui));
     gui->font = font;
     gui->points = 3;
+    gui->loopCount = 0;
+    gui->loopSwing = 0;
+    gui->swingDir = 0;
     srand(time(NULL));
 
     return gui;
 }
 
-void GuiLoop(Gui *gui)
+void GuiUpdate(Gui *gui)
 {
     //Gui vars
     int wW = gui->font->gfx->gfxWindowWidth;
@@ -30,19 +35,57 @@ void GuiLoop(Gui *gui)
     if (gui->points > 50000)
         gui->points = 0;
 
+    if (gui->loopCount < 256)
+    {
+        gui->loopCount++;
+    }
+    else
+    {
+        gui->loopCount = 0;
+    }
+
+    if (gui->loopSwing == 255)
+    {
+        gui->swingDir = 0; // go back down
+    }
+
+    if (gui->loopSwing == 0)
+    {
+        gui->swingDir = 1; //go back up
+    }
+
+    if (gui->swingDir)
+    {
+        gui->loopSwing++;
+    }
+    else
+    {
+        gui->loopSwing--;
+    }
+
     char pts[10];
 
-    sprintf(pts, "%d pts", gui->points);
+    sprintf(pts, "%ld pts", gui->points);
 
     // Vitals
-    SDL_Rect pointsSize = FontGetSize(gui->font, TTF_Robot_Crush, pts);
-    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - pointsSize.w - edge, edge, 3, (SDL_Color){186, 39, 107}, (SDL_Color){87, 180, 184});
+    SDL_Color vitalsColor[9] = {
+        {gui->loopSwing, 159, 227},
+        {gui->loopSwing, 139, 207},
+        {gui->loopSwing, 119, 187},
+        {gui->loopSwing, 99, 167},
+        {gui->loopSwing, 79, 147},
+        {gui->loopSwing, 59, 127},
+        {gui->loopSwing, 39, 107},
+        {gui->loopSwing, 19, 87},
+        {255 - gui->loopSwing, 180, 184}};
+
+    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 0, 1, F3D_BL, 9, vitalsColor); //83
+
+    SDL_Color objColor[2] = {
+        {102, 16, 9},
+        {239, 193, 92}};
 
     // Objective
-
-    SDL_Rect objLine1 = FontGetSize(gui->font, TTF_Robot_Crush, "The target is a briefcase.");
-    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2 - objLine1.w / 2, wH - (edge + 2 * size), offset3d, (SDL_Color){102, 16, 9}, (SDL_Color){239, 193, 92});
-
-    SDL_Rect objLine2 = FontGetSize(gui->font, TTF_Robot_Crush, "Discretion is of essence.");
-    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2 - objLine2.w / 2, wH - (edge + size), offset3d, (SDL_Color){102, 16, 9}, (SDL_Color){239, 193, 92});
+    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
+    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, 0, offset3d, F3D_TC, 2, objColor);
 }
