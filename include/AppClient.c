@@ -21,7 +21,16 @@ struct AppClient
 
     Drawable db[3000];
     Vec2 cameraFollow;
+
     Sound test;
+    Sound door;
+    Sound foot;
+    Sound gun;
+    Sound notification;
+    Sound sms;
+    Sound knife;
+    Sound bomp;
+
     Item item;
     Entity entities[3];
 
@@ -72,6 +81,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->db[2999] = DrawableCreate(tileWomanDefaultGun, (SDL_Rect){496, 344, 57, 43}, SS_Characters);
 
     app->test = SoundCreate(app->audio, SF_Test);
+    app->door = SoundCreate(app->audio, SF_Door);
+    app->foot = SoundCreate(app->audio, SF_Footsteps);
+    app->gun = SoundCreate(app->audio, SF_Gun);
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
@@ -120,11 +132,20 @@ void AppClientUpdate(AppClient *app)
     CameraUpdate(app->camera);
     NetworkMgrPollAll(app->netMgr);
 
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_M))
-        SoundPlay(app->test, 0);
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_O))
-        SoundStop(app->test);
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_L))
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_W) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_D) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_S) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_A))
+        SoundPlay(&app->foot, -1);
+    else
+        SoundStop(&app->foot);
+
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_M))
+        SoundPlay(&app->test, 0);
+    else
+        SoundStop(&app->test);
+
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
         app->entities[1].Force.x += 50;
     if (InputIsKeyPressed(app->input, SDL_SCANCODE_J))
         app->entities[1].Force.x -= 50;
