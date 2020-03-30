@@ -67,6 +67,8 @@ void MenuUpdate(Menu *menu, Input *input)
     case MS_MainMenu:
         MenuUpdateMainMenu(menu, input);
         break;
+    default:
+        break;
     }
 }
 
