@@ -28,12 +28,12 @@ struct AppClient
 AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    app->clock = clock;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
-    app->gui = GuiCreate(app->font);
+    app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->clock = clock;
     app->input = input;
     app->client = client;
     app->netMgr = NetworkMgrCreate();
@@ -82,7 +82,7 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->item = ItemCreate(ItemWoodenSword);
 
-    CameraSetFollow(app->camera, &app->player.entity.position);
+    CameraSetFollow(app->camera, &app->player.aimFollow);
 
     return app;
 }
@@ -119,7 +119,7 @@ void AppClientUpdate(AppClient *app)
         app->entities[1].Force.x = -500;
     EntityUpdate(app->entities, 3, app->clock);
 
-    PlayerUpdate(&app->player, app->input, app->clock);
+    PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 }
 
 void AppClientDraw(AppClient *app)

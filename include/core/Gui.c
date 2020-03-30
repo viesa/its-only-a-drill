@@ -1,4 +1,6 @@
 #include "Gui.h"
+#include "Clock.h"
+#include <math.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -7,14 +9,21 @@
 #include <stdio.h>
 #include <time.h>
 
-Gui *GuiCreate(Font *font)
+#define PI 3.14159265359
+
+Gui *GuiCreate(Font *font, Clock *clock)
 {
     Gui *gui = (Gui *)SDL_malloc(sizeof(Gui));
+    gui->clock = clock;
     gui->font = font;
     gui->points = 3;
     gui->loopCount = 0;
-    gui->loopSwing = 0;
+    gui->loopSwing = 87;
     gui->swingDir = 0;
+
+    gui->defaultEdge = 30;
+    gui->defaultSize = 50;
+    gui->defaultOffset = 3;
     srand(time(NULL));
 
     return gui;
@@ -22,12 +31,9 @@ Gui *GuiCreate(Font *font)
 
 void GuiUpdate(Gui *gui)
 {
-    //Gui vars
+    // Update window size
     int wW = gui->font->gfx->gfxWindowWidth;
     int wH = gui->font->gfx->gfxWindowHeight;
-    int edge = 30;
-    int size = 50;
-    int offset3d = 3;
 
     if (rand() % 30 < 3)
         gui->points += rand() % 500;
@@ -35,21 +41,21 @@ void GuiUpdate(Gui *gui)
     if (gui->points > 50000)
         gui->points = 0;
 
-    if (gui->loopCount < 256)
+    if (gui->loopCount < 2 * PI)
     {
-        gui->loopCount++;
+        gui->loopCount += .1f;
     }
     else
     {
         gui->loopCount = 0;
     }
 
-    if (gui->loopSwing == 255)
+    if (gui->loopSwing >= 255)
     {
         gui->swingDir = 0; // go back down
     }
 
-    if (gui->loopSwing == 0)
+    if (gui->loopSwing <= 200)
     {
         gui->swingDir = 1; //go back up
     }
@@ -63,12 +69,10 @@ void GuiUpdate(Gui *gui)
         gui->loopSwing--;
     }
 
+    // Points
     char pts[10];
-
     sprintf(pts, "%ld pts", gui->points);
-
-    // Vitals
-    SDL_Color vitalsColor[9] = {
+    SDL_Color vitalsColor[10] = {
         {gui->loopSwing, 159, 227},
         {gui->loopSwing, 139, 207},
         {gui->loopSwing, 119, 187},
@@ -77,15 +81,20 @@ void GuiUpdate(Gui *gui)
         {gui->loopSwing, 59, 127},
         {gui->loopSwing, 39, 107},
         {gui->loopSwing, 19, 87},
+        {255 - gui->loopSwing, 180, 184},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3D(gui->font, TTF_Robot_Crush, pts, wW - edge, edge, FAL_R, 1, F3D_BL, 9, vitalsColor); //83
+    FontDraw3DCustom(gui->font, TTF_Antilles, pts, wW - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
+    // Objective
     SDL_Color objColor[2] = {
         {102, 16, 9},
         {239, 193, 92}};
+    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
+    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
-    // Objective
-    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (edge + 2 * size), FAL_C, offset3d, F3D_TC, 2, objColor);
-    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (edge + size), FAL_C, offset3d, F3D_TC, 2, objColor);
+    // FPS
+    char fps[10];
+    sprintf(fps, "%d FPS", (int)ClockGetFPS(gui->clock));
+    FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
 }

@@ -11,6 +11,7 @@
                 "s_includes.h": "c",
                 "list.h": "c",
                 "sdl_ttf.h": "c",
-                "client.h": "c"
+                "client.h": "c",
+                "time.h": "c"
         }
 }

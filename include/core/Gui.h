@@ -2,14 +2,19 @@
 #define GUI_H
 
 #include "Font.h"
+#include "Clock.h"
 
 typedef struct Gui
 {
     Font *font;
+    Clock *clock;
     long int points;
-    int loopCount;
-    int loopSwing;
-    int swingDir;
+    float loopCount;
+    float loopSwing;
+    float swingDir;
+    float defaultEdge;
+    float defaultSize;
+    float defaultOffset;
 } Gui;
 
 typedef enum GuiWindow
@@ -18,7 +23,7 @@ typedef enum GuiWindow
     GUI_Count
 } GuiWindow;
 
-Gui *GuiCreate(Font *font);
+Gui *GuiCreate(Font *font, Clock *clock);
 void GuiUpdate(Gui *gui);
 
 #endif
