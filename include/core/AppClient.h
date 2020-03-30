@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "Menu.h"
 #include "Sound.h"
+#include "Music.h"
 #include "../core/Log.h"
 #include "../net/NetworkMgr.h"
 #include "../net/Client.h"

@@ -22,7 +22,7 @@ struct AppClient
     Drawable db[3000];
     Vec2 cameraFollow;
 
-    Sound test;
+    Sound testSound;
     Sound door;
     Sound foot;
     Sound gun;
@@ -30,6 +30,8 @@ struct AppClient
     Sound sms;
     Sound knife;
     Sound bomp;
+
+    Music testMusic;
 
     Item item;
     Entity entities[3];
@@ -75,10 +77,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
 
     app->db[2999] = DrawableCreate(tileWomanDefaultGun, (SDL_Rect){496, 344, 57, 43}, SS_Characters);
 
-    app->test = SoundCreate(app->audio, SF_Test);
+    app->testSound = SoundCreate(app->audio, SF_Test);
     app->door = SoundCreate(app->audio, SF_Door);
     app->foot = SoundCreate(app->audio, SF_Footsteps);
     app->gun = SoundCreate(app->audio, SF_Gun);
+
+    app->testMusic = MusicCreate(app->audio, MF_Test);
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
@@ -136,9 +140,14 @@ void AppClientUpdate(AppClient *app)
         SoundStop(&app->foot);
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_M))
-        SoundPlay(&app->test, 0);
+        SoundPlay(&app->testSound, 0);
     else
-        SoundStop(&app->test);
+        SoundStop(&app->testSound);
+
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_N))
+        MusicPlay(&app->testMusic, 0);
+    else
+        MusicStop(&app->testMusic);
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
         app->entities[1].Force.x += 50;

@@ -9,6 +9,7 @@
 struct Audio
 {
     Mix_Chunk *m_chunks[SF_Count];
+    Mix_Music *m_music[MF_Count];
     SDL_bool m_availableChannels[N_CHANNELS];
 };
 
@@ -22,11 +23,13 @@ Audio *AudioCreate()
 
     Audio *ret = (Audio *)SDL_malloc(sizeof(Audio));
 
-    //Audio files
-    Mix_Chunk *test = Mix_LoadWAV("assets/sound/test.wav");
-    if (!test)
+    //-------------------------------------------------
+    //------------------ Sound files ------------------
+    //-------------------------------------------------
+    Mix_Chunk *testSound = Mix_LoadWAV("assets/sound/test.wav");
+    if (!testSound)
         log_warn("Could not load test.wav");
-    ret->m_chunks[SF_Test] = test;
+    ret->m_chunks[SF_Test] = testSound;
 
     Mix_Chunk *door = Mix_LoadWAV("assets/sound/doorOpen.wav");
     if (!door)
@@ -63,6 +66,15 @@ Audio *AudioCreate()
         log_warn("Could not load notification.wav");
     ret->m_chunks[SF_Notification] = notification;
 
+    //-------------------------------------------------
+    //------------------ Music files ------------------
+    //-------------------------------------------------
+
+    Mix_Music *testMusic = Mix_LoadMUS("assets/music/test.mp3");
+    if (!testMusic)
+        log_warn("Could not load test.mp3");
+    ret->m_music[MF_Test] = testMusic;
+
     for (int i = 0; i < N_CHANNELS; i++)
         ret->m_availableChannels[i] = SDL_TRUE;
     return ret;
@@ -77,9 +89,14 @@ void AudioDestroy(Audio *audio)
     SDL_free(audio);
 }
 
-Mix_Chunk *AudioGet(Audio *audio, SoundFile soundFile)
+Mix_Chunk *AudioGetSound(Audio *audio, SoundFile soundFile)
 {
     return audio->m_chunks[soundFile];
+}
+
+Mix_Music *AudioGetMusic(Audio *audio, MusicFile musicFile)
+{
+    return audio->m_music[musicFile];
 }
 
 int AudioGenChannel(Audio *audio)
