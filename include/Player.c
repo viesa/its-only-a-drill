@@ -23,14 +23,14 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
 
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(&player->entity.posVec, &cameraPos);
+    Vec2 playerPos = Vec2Sub(&player->entity.position, &cameraPos);
 
     Vec2 aim = Vec2Sub(&mousePos, &playerPos);
 
     aim = Vec2Unit(&aim);
     aim = Vec2MulL(&aim, RADIUS);
 
-    player->aimFollow = Vec2Add(&aim, &player->entity.posVec);
+    player->aimFollow = Vec2Add(&aim, &player->entity.position);
 
     Vec2 delta = {0.0f, 0.0f};
     if (InputGet(input, KEY_A))
