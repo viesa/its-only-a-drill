@@ -75,10 +75,10 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
     app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, 0);
-    app->entities[0].velocity.x = 500;
-    app->entities[0].velocity.y = 500;
-    app->entities[1] = EntityCreate((Vec2){300, 300}, 100, 20, EntityWoman, 1);
-    app->entities[2] = EntityCreate((Vec2){500, 500}, 100, 20, EntityWoman, 2);
+    app->entities[0].Force.x = 500;
+    app->entities[0].Force.y = 800;
+    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
 
     app->item = ItemCreate(ItemWoodenSword);
 
@@ -114,10 +114,10 @@ void AppClientUpdate(AppClient *app)
     if (InputGet(app->input, KEY_O))
         SoundStop(app->test);
     if (InputGet(app->input, KEY_L))
-        app->entities[1].velocity.x = 500;
-    EntityUpdate(app->entities, 3, &app->entities[0], app->clock);
-    EntityUpdate(app->entities, 3, &app->entities[1], app->clock);
-    EntityUpdate(app->entities, 3, &app->entities[2], app->clock);
+        app->entities[1].Force.x = 500;
+    if (InputGet(app->input, KEY_J))
+        app->entities[1].Force.x = -500;
+    EntityUpdate(app->entities, 3, app->clock);
 
     PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 }
