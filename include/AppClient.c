@@ -56,11 +56,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
 
     int cnt = 0;
 
-    //Cut tiles from spritesheets
-    //SS_Legacy
-    SDL_Rect tileSand = {16, 112, 16, 16};
-    SDL_Rect tileCowHead = {352, 1088, 16, 16};
-
     //SS_Characters
     SDL_Rect tileWomanDefaultGun = {0, 44, 57, 43};
 
