@@ -67,6 +67,11 @@ void MenuUpdate(Menu *menu, Input *input)
     case MS_MainMenu:
         MenuUpdateMainMenu(menu, input);
         break;
+    case MS_Options:
+        MenuUpdateOptions(menu, input);
+        break;
+    default:
+        break;
     }
 }
 
@@ -129,4 +134,8 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
             FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
         }
     }
+}
+
+void MenuUpdateOptions(Menu *menu, Input *input)
+{
 }
