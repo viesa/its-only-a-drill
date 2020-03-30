@@ -114,9 +114,13 @@ void AppClientUpdate(AppClient *app)
     if (InputGet(app->input, KEY_O))
         SoundStop(app->test);
     if (InputGet(app->input, KEY_L))
-        app->entities[1].Force.x = 500;
+        app->entities[1].Force.x += 50;
     if (InputGet(app->input, KEY_J))
-        app->entities[1].Force.x = -500;
+        app->entities[1].Force.x -= 50;
+    if (InputGet(app->input, KEY_I))
+        app->entities[1].Force.y -= 50;
+    if (InputGet(app->input, KEY_K))
+        app->entities[1].Force.y += 50;
     EntityUpdate(app->entities, 3, app->clock);
 
     PlayerUpdate(&app->player, app->input, app->clock, app->camera);

@@ -46,15 +46,18 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
                             {
                                 // ent i --> ent j
                                 // i -> F -> j
-                                entities[Recessive].Force.x += (entities[Dominant].Force.x / 2);
-                                entities[Dominant].Force.x -= (entities[Dominant].Force.x / 2);
-                                //entities[i].Force.x = (entities[i].Force.x - (entities[i].Force.x * entities[i].Friction));
-                                //entities[i].Force.x = entities[i].Force.x * -1;
+                                //entities[Recessive].Force.x += (entities[Dominant].Force.x / 2);
+                                //entities[Dominant].Force.x -= (entities[Dominant].Force.x / 2);
+                                //entities[Dominant].Force.x = (entities[Dominant].Force.x - (entities[Dominant].Force.x * entities[Dominant].Friction));
+                                entities[Dominant].Force.x = entities[Dominant].Force.x * -1;
+                                entities[Recessive].Force.x += entities[Dominant].Force.x;
                                 //entities[j].Force.x = entities[j].Force.x / 2;
                             }
                             else
                             {
-                                entities[Recessive].Force.y += result.h;
+                                //entities[Recessive].Force.y += result.h;
+                                entities[Dominant].Force.y = entities[Dominant].Force.y * -1;
+                                entities[Recessive].Force.y += entities[Dominant].Force.y;
                             }
                         }
                     }
