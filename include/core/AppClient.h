@@ -6,6 +6,7 @@
 #include "Gui.h"
 #include "Camera.h"
 #include "Input.h"
+#include "Menu.h"
 #include "Sound.h"
 #include "../net/NetworkMgr.h"
 #include "../net/Client.h"

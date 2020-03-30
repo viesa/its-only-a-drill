@@ -8,7 +8,6 @@
 
 int main()
 {
-
     SDL_bool m_running = SDL_TRUE;
 
     Clock *m_clock = ClockCreate();
@@ -20,7 +19,7 @@ int main()
     while (m_running)
     {
         EventPollAll(m_event);
-        if (InputGet(m_input, KEY_ESC) || InputGet(m_input, EVENT_QUIT))
+        if (InputGet(m_input, EVENT_QUIT))
             m_running = SDL_FALSE;
 
         ClockTick(m_clock);
