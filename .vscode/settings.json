@@ -1,19 +1,17 @@
 {
-    "files.associations": {
-        "sdl.h": "c",
-        "gamegraphics.h": "c",
-        "socketwrapper.h": "c",
-        "c_includes.h": "c",
-        "sdl_net.h": "c",
-        "c_game.h": "c",
-        "networkmgr.h": "c",
-        "s_resources.h": "c",
-        "s_includes.h": "c",
-        "list.h": "c",
-<<<<<<< HEAD
-        "sdl_ttf.h": "c"
-=======
-        "client.h": "c"
->>>>>>> d1c4e8b60e83c656d33236f98653b2d3f5d3c4ac
-    }
+        "files.associations": {
+                "sdl.h": "c",
+                "gamegraphics.h": "c",
+                "socketwrapper.h": "c",
+                "c_includes.h": "c",
+                "sdl_net.h": "c",
+                "c_game.h": "c",
+                "networkmgr.h": "c",
+                "s_resources.h": "c",
+                "s_includes.h": "c",
+                "list.h": "c",
+                "sdl_ttf.h": "c",
+                "client.h": "c",
+                "time.h": "c"
+        }
 }

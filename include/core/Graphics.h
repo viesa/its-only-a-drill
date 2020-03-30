@@ -5,7 +5,16 @@
 
 #include <SDL2/SDL_render.h>
 
-typedef struct Graphics Graphics;
+typedef struct Graphics
+{
+    int gfxWindowWidth;
+    int gfxWindowHeight;
+
+    SDL_Window *m_mainWindow;
+    SDL_Renderer *m_renderer;
+
+    SDL_Texture *m_allTextures[SS_Count];
+} Graphics;
 
 Graphics *GraphicsCreate();
 void GraphicsDestroy(Graphics *gfx);

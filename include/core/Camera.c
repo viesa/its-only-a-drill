@@ -17,7 +17,7 @@ Camera *CameraCreate(Graphics *gfx, Vec2 *follow)
     ret->gfx = gfx;
     ret->m_follow = follow;
     ret->m_centerRotation = 0.0f;
-    ret->m_viewport = (SDL_Rect){0, 0, 1024, 720};
+    ret->m_viewport = (SDL_Rect){0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
     return ret;
 }
 
@@ -50,12 +50,6 @@ void CameraDraw(Camera *camera, Drawable drawable)
     GraphicsDraw(camera->gfx, drawable);
 }
 
-void PlayerDraw(Camera *camera, Drawable drawable)
-{
-    drawable.rot = 0;
-    GraphicsDraw(camera->gfx, drawable);
-}
-
 SDL_Point CameraMiddle(Camera *camera)
 {
     SDL_Rect *vp = &camera->m_viewport;
@@ -73,6 +67,11 @@ void CameraAddRotation(Camera *camera, float ammount)
 void CameraSetFollow(Camera *camera, Vec2 *follow)
 {
     camera->m_follow = follow;
+}
+
+Vec2 CameraGetPos(Camera *camera)
+{
+    return camera->m_position;
 }
 
 // Vec2 CameraRemoveRotation(Camera *camera, Vec2 vector)

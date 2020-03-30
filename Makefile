@@ -7,8 +7,8 @@ endif
 ifeq ($(detected_OS), Windows)
 APP_C		:= app_client.exe
 APP_S		:= app_server.exe
-LIB_LOC 	:= -LC:/lib/
-INC_LOC 	:= -IC:/include/
+LIB_LOC 	:= -LC:\libarys\Chaos_SDL\lib
+INC_LOC 	:= -IC:\libarys\Chaos_SDL\include
 else
 APP_C		:= app_client.out
 APP_S		:= app_server.out
@@ -16,83 +16,54 @@ LIB_LOC 	:= -L/usr/lib/x86_64-linux-gnu
 INC_LOC 	:=
 endif
 
+# CC
 CC 			:= gcc
 ENTRY_C		:= Main_Client.c
 ENTRY_S 	:= Main_Server.c
 
+# Source files
 SRCDIR  	:= ./include
-SRCDIRS 	:= ./ ./core ./net ./math
-OBJDIR		:= ./bin
-OBJDIR_C	:= $(OBJDIR)/CLIENT
-OBJDIR_S	:= $(OBJDIR)/SERVER
-
-# Files and folders
 ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/core/*.c $(SRCDIR)/net/*.c $(SRCDIR)/math/*.c)
 SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
 SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 
-OBJS_C		:= $(patsubst $(SRCDIR)/%.c,$(OBJDIR_C)/%.o,$(SRCS_C))
-OBJS_S		:= $(patsubst $(SRCDIR)/%.c,$(OBJDIR_S)/%.o,$(SRCS_S))
-
 # Flags
-CFLAGS  	:= -std=c11 -Wall -pedantic -pthread -g -lm $(INC_LOC)
-LDFLAGS 	:= -std=c11
+CFLAGS  	:= -std=c11 -Wall -pthread -g -lm $(INC_LOC)
 
 # Libraries
 LIBS 		:= $(LIB_LOC) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_net -lSDL2_ttf
+
+BUILD_C		:= $(CC) $(ENTRY_C) $(SRCS_C) $(CFLAGS) $(INC_LOC) $(LIBS) $(FLAGS) -o $(APP_C)
+BUILD_S		:= $(CC) $(ENTRY_S) $(SRCS_S) $(CFLAGS) $(INC_LOC) $(LIBS) $(FLAGS) -o $(APP_S)
+
+RUN_C 		:= ./$(APP_C)
+RUN_S 		:= ./$(APP_S)
 
 # Targets
 help:
 	@echo Usage: make \<option\>
 	@echo Options:
-	@echo -b Builds app
-	@echo -r Runs app
-	@echo -br Builds and runs app
-os:
+	@echo -b\<c/s\> Builds \<client/server\>
+	@echo -r\<c/s\> Runs \<client/server\>
+	@echo -br\<c/s\> Builds and runs \<client/server\>
+myOS:
 	@echo $(detected_OS)
-bc: $(APP_C)
+
+bc: $(ENTRY_C)
+	$(BUILD_C)
+
 rc: $(ENTRY_C)
-	./$(APP_C)
-brc:	
+	$(RUN_C)
+
+brc: $(ENTRY_CLIENT)
 	make bc && make rc
 
-bs: $(APP_S)
+bs: $(ENTRY_S)
+	$(BUILD_S)
+
 rs: $(ENTRY_S)
-	./$(APP_S)
-brs:	
+	$(RUN_S)
+
+brs: $(ENTRY_SERVER)
 	make bs && make rs
-
-$(APP_C): buildrepo-c $(OBJS_C)
-	$(CC) $(ENTRY_C) $(OBJS_C) $(LIBS) $(CFLAGS) -o $@
-$(APP_S): buildrepo-s $(OBJS_S)
-	$(CC) $(ENTRY_S) $(OBJS_S) $(LIBS) $(CFLAGS) -o $@
-
-$(OBJDIR_C)/%.o: $(SRCDIR)/%.c
-	$(CC) $(LDFLAGS) -c $< -o $@
-$(OBJDIR_S)/%.o: $(SRCDIR)/%.c
-	$(CC) $(LDFLAGS) -c $< -o $@
 	
-clean:
-	rm $(OBJDIR) -Rf
-
-buildrepo-c:
-	@$(call make-repo-c)
-buildrepo-s:
-	@$(call make-repo-s)
-
-# Create obj directory structure
-define make-repo-c
-	mkdir -p $(OBJDIR_C)
-	for dir in $(SRCDIRS); \
-	do \
-		mkdir -p $(OBJDIR_C)/$$dir; \
-	done
-endef
-
-define make-repo-s
-	mkdir -p $(OBJDIR_S)
-	for dir in $(SRCDIRS); \
-	do \
-		mkdir -p $(OBJDIR_S)/$$dir; \
-	done
-endef

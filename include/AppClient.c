@@ -2,12 +2,14 @@
 
 #include "core/Entity.h"
 #include "Items.h"
+#include "Player.h"
 
 struct AppClient
 {
     Graphics *gfx;
     Audio *audio;
     Font *font;
+    Gui *gui;
     Camera *camera;
     Clock *clock;
     Input *input;
@@ -18,20 +20,24 @@ struct AppClient
     Vec2 cameraFollow;
     Sound test;
     Item item;
-    Entity entities[2];
+    Entity entities[3];
+
+    Player player;
 };
 
 AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    app->clock = clock;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
+    app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->clock = clock;
     app->input = input;
     app->client = client;
     app->netMgr = NetworkMgrCreate();
+    app->player = PlayerCreate();
     NetworkMgrAddClient(app->netMgr, app->client);
 
     int cnt = 0;
@@ -65,16 +71,18 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
     ClientSetNet(client, "85.226.233.210", 1337);
-    ClientStart(client);
-    ClientSend(client, Test, "THIS IS A TEST", 15);
+    // ClientStart(client);
+    // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
-    app->entities[0].move_x = 500;
-    app->entities[1] = EntityCreate((Vec2){-500, 0}, 100, 20, EntityWoman, SDL_TRUE, SDL_FALSE);
+    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, 0);
+    app->entities[0].velocity.x = 500;
+    app->entities[0].velocity.y = 500;
+    app->entities[1] = EntityCreate((Vec2){300, 300}, 100, 20, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 500}, 100, 20, EntityWoman, 2);
 
     app->item = ItemCreate(ItemWoodenSword);
 
-    CameraSetFollow(app->camera, &app->cameraFollow);
+    CameraSetFollow(app->camera, &app->player.aimFollow);
 
     return app;
 }
@@ -101,37 +109,29 @@ void AppClientUpdate(AppClient *app)
     CameraUpdate(app->camera);
     NetworkMgrPollAll(app->netMgr);
 
-    if (InputGet(app->input, KEY_Q))
-        CameraAddRotation(app->camera, -1.0f);
-    if (InputGet(app->input, KEY_E))
-        CameraAddRotation(app->camera, 1.0f);
-
-    if (InputGet(app->input, KEY_A))
-        app->cameraFollow.x -= 3.0f;
-    if (InputGet(app->input, KEY_W))
-        app->cameraFollow.y -= 3.0f;
-    if (InputGet(app->input, KEY_D))
-        app->cameraFollow.x += 3.0f;
-    if (InputGet(app->input, KEY_S))
-        app->cameraFollow.y += 3.0f;
     if (InputGet(app->input, KEY_M))
         SoundPlay(app->test, 0);
     if (InputGet(app->input, KEY_O))
         SoundStop(app->test);
+    if (InputGet(app->input, KEY_L))
+        app->entities[1].velocity.x = 500;
+    EntityUpdate(app->entities, 3, &app->entities[0], app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[1], app->clock);
+    EntityUpdate(app->entities, 3, &app->entities[2], app->clock);
 
-    EntityUpdate(app->entities, 2, &app->entities[0], 0, app->clock);
-    EntityUpdate(app->entities, 2, &app->entities[1], 1, app->clock);
+    PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 }
 
 void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
-        GraphicsDraw(app->gfx, app->db[i]);
+        CameraDraw(app->camera, app->db[i]);
     ItemDraw(app->camera, &app->item);
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
-    PlayerDraw(app->camera, app->db[2999]);
+    EntityDraw(app->camera, &app->entities[2]);
+    PlayerDraw(&app->player, app->camera);
 
     //GUI
-    FontDraw(app->font, TTF_Arial, "Hello World!", 20, 20, (SDL_Color){255, 255, 255});
+    GuiUpdate(app->gui);
 }

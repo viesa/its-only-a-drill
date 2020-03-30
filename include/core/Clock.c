@@ -30,6 +30,11 @@ const float ClockGetDeltaTime(Clock *clock)
     return (float)clock->m_delta / 1000.0f;
 }
 
+const float ClockGetFPS(Clock *clock)
+{
+    return 1 / ClockGetDeltaTime(clock);
+}
+
 const float ClockGetDeltaTimeMS(Clock *clock)
 {
     return (float)clock->m_delta;
