@@ -32,7 +32,7 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock)
     {
         delta.y += player->entity.moveSpeed * ClockGetDeltaTime(clock);
     }
-    player->entity.posVec = Vec2Add(&player->entity.posVec, &delta);
+    player->entity.position = Vec2Add(&player->entity.position, &delta);
 }
 
 void PlayerDraw(Player *player, Camera *camera)
