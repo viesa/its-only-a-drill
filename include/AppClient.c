@@ -6,6 +6,8 @@
 
 struct AppClient
 {
+    SDL_bool *running;
+
     Graphics *gfx;
     Audio *audio;
     Font *font;
@@ -26,9 +28,10 @@ struct AppClient
     Player player;
 };
 
-AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    app->running = running;
     app->clock = clock;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
@@ -105,7 +108,7 @@ void AppClientRun(AppClient *app)
     if (app->menu->currentState == MS_None)
         AppClientUpdate(app);
 
-    if (InputGet(app->input, KEY_ESC))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
         app->menu->currentState = MS_MainMenu;
 
     AppClientDraw(app);
@@ -117,17 +120,17 @@ void AppClientUpdate(AppClient *app)
     CameraUpdate(app->camera);
     NetworkMgrPollAll(app->netMgr);
 
-    if (InputGet(app->input, KEY_M))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_M))
         SoundPlay(app->test, 0);
-    if (InputGet(app->input, KEY_O))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_O))
         SoundStop(app->test);
-    if (InputGet(app->input, KEY_L))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_L))
         app->entities[1].Force.x += 50;
-    if (InputGet(app->input, KEY_J))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_J))
         app->entities[1].Force.x -= 50;
-    if (InputGet(app->input, KEY_I))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_I))
         app->entities[1].Force.y -= 50;
-    if (InputGet(app->input, KEY_K))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 50;
     EntityUpdate(app->entities, 3, app->clock);
 

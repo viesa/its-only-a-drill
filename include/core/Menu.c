@@ -81,17 +81,17 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
         {"Exit"}};
 
     //Get input
-    if (InputGet(input, KEY_W))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_W))
     {
         if (menu->activeIndex > 0)
             menu->activeIndex--;
     }
-    if (InputGet(input, KEY_S))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_S))
     {
         if (menu->activeIndex < 3)
             menu->activeIndex++;
     }
-    if (InputGet(input, KEY_E))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E))
     {
         switch (menu->activeIndex)
         {
@@ -99,8 +99,12 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
             menu->currentState = MS_None;
             break;
         case 3:
-            SDL_Quit();
+        {
+            SDL_Event quit;
+            quit.type = SDL_QUIT;
+            SDL_PushEvent(&quit);
             break;
+        }
         }
     }
 
