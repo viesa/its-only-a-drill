@@ -34,7 +34,13 @@ Graphics *GraphicsCreate()
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     //INIT ALL TEXTURES
-    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
+    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/menu.png");
+    if (!tilemap)
+        log_warn("Could not load menu.png");
+    gfx_ret->m_allTextures[SS_Menu] = tilemap;
+
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
     if (!tilemap)
         log_warn("Could not load tilemap.png");
     gfx_ret->m_allTextures[SS_Legacy] = tilemap;

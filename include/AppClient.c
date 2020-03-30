@@ -13,6 +13,7 @@ struct AppClient
     Camera *camera;
     Clock *clock;
     Input *input;
+    Menu *menu;
     Client *client;
     NetworkMgr *netMgr;
 
@@ -35,6 +36,7 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
+    app->menu = MenuCreate(app->gfx, app->font);
     app->client = client;
     app->netMgr = NetworkMgrCreate();
     app->player = PlayerCreate();
@@ -99,7 +101,13 @@ void AppClientDestroy(AppClient *app)
 void AppClientRun(AppClient *app)
 {
     GraphicsClearScreen(app->gfx);
-    AppClientUpdate(app);
+
+    if (app->menu->currentState == MS_None)
+        AppClientUpdate(app);
+
+    if (InputGet(app->input, KEY_ESC))
+        app->menu->currentState = MS_MainMenu;
+
     AppClientDraw(app);
     GraphicsPresentScreen(app->gfx);
 }
@@ -138,4 +146,7 @@ void AppClientDraw(AppClient *app)
 
     //GUI
     GuiUpdate(app->gui);
+
+    //Menu
+    MenuUpdate(app->menu, app->input);
 }

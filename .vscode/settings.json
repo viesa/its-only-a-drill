@@ -12,6 +12,7 @@
                 "list.h": "c",
                 "sdl_ttf.h": "c",
                 "client.h": "c",
-                "time.h": "c"
+                "time.h": "c",
+                "player.h": "c"
         }
 }
