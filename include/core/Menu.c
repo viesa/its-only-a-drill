@@ -87,17 +87,17 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
         {"Exit"}};
 
     //Get input
-    if (InputIsKeyPressed(input, SDL_SCANCODE_W))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
     {
         if (menu->activeIndex > 0)
             menu->activeIndex--;
     }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_S))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
     {
         if (menu->activeIndex < 3)
             menu->activeIndex++;
     }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
         {
@@ -155,17 +155,17 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         {"Back"}};
 
     //Get input
-    if (InputIsKeyPressed(input, SDL_SCANCODE_W))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
     {
         if (menu->activeIndex > 0)
             menu->activeIndex--;
     }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_S))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
     {
         if (menu->activeIndex < 3)
             menu->activeIndex++;
     }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
         {
