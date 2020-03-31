@@ -1,0 +1,143 @@
+============================================================
+======================== GUIDELINES ========================
+============================================================
+
+
+==================== HUR VI SKRIVER KOD ====================
+
+---- Funktioner:
+
+    <return-typ> <STRUCT+funktionalitet>(STRUCTPOINTER, övriga parameter)
+        ex.
+        void CameraUpdate(Camera* camera, float dt);
+
+    Om en funktion tar in väldigt många parametrar ska de skrivas:
+    int minFunktion(int var1,
+                    int var2,
+                    int var3,
+                    int var4);
+
+    Col: 60 = ny rad
+
+
+---- Include:
+
+    Använd <...> när du inkluderar externa filer
+    Använd "..." när du inkluderar lokala filer
+
+    Allt som finns inom vår repo (mappen "its-only-a-drill") 
+    räknas som en lokal fil
+
+    Ex.
+    #include <stdio.h>
+    #include "core/Camera.h"
+    
+
+---- Abstrakta datatyper:
+
+    1. Skapa .h och .c filen
+    2. Skriv ut "#ifndef"...
+    3. Skapa en struct som heter samma som filen
+    4. Skapa Create och Destroy funktionerna (Destroy = Optional)
+    5. Implementera Create och Destroy i .c
+    6. Skriva dina egna funktioner i .h
+
+    Ex. Jag vill skapa en Player-struktur
+    1. Skapa Player.h och Player.c
+    2. Skriv:
+        #ifndef PLAYER_H
+        #define PLAYER_H
+        <HÄR SKA DU SKRIVA DIN KOD>
+        #endif
+    3. Skapa en struct som heter Player:
+        typedef struct Player
+        {
+            float speed;
+        } Player;
+    4. Skapa Create och Destroy:
+        Player PlayerCreate();
+        void PlayerDestroy(Player* player);
+    5. Implementera Create och Destroy i Player.c
+        Player PlayerCreate()
+        {
+            Player player;
+            player.speed = 0.0f;
+            return player;
+        }
+
+        void PlayerDestroy(Player* player)
+        {
+        }
+
+        OBS! Om din strukt innehåller över 5 datatyper:
+
+        Player PlayerCreate()
+        {
+            Player player = (Player*)SDL_malloc(sizeof(Player));
+            player->speed = 0.0f;
+            return player;
+        }
+
+        void PlayerDestroy(Player* player)
+        {
+            SDL_free(player);
+        }
+    6. Skriva dina egna funktioner i Player.h
+        void PlayerUpdate(Player* player, float dt);
+
+
+============== HUR VI SKRIVER KOMMENTARER ==================
+
+Över de flesta funktioner i din .h fil bör du skriva en
+kommentar vad funktionen gör. Inte för mycket text!
+
+Om funktionen är kort eller om namnet är tydligt nog
+behövs ingen kommenterar. 
+
+Skriv enligt följande format:
+    ///<Kortfattat vad funktionen gör>
+    ///\param <beskriving av parameter som är av värde>
+
+Exempel från filen Sound.h
+    ///Play the sound file
+    ///\param loops: If == -1, loop forever
+    ///Otherwise loop of number times provied + 1
+    void SoundPlay(int loops = 0);
+
+OBS! 
+    Det är viktigt att kommentaren skrivs ovanför 
+    deklarationen i .h
+
+============= HUR VI SKRIVER ERROR-HANTERING ================
+
+När en funktion returnerar ett result-värde (ex. -1, 0 eller 1)
+hanterar vi det genom att skriva ut i terminalen. 
+
+Använd "core/Log.h" !
+
+Ex.
+#include "core/Log.h"
+
+int result = SDLNet_Init();
+if(result == -1)
+{
+    log_error("Could not initialize net: %s", SDLNet_GetError());
+    return NULL;
+}
+
+Det finns:
+    log_info
+    log_warn
+    log_error
+    log_fatal
+
+
+================== INSTÄLLNINGAR I VSCODE ===================
+
+---- Installera extensions:
+        - C/C++
+        - Live share
+        - Txt Syntax
+
+---- Inställningar:
+        "Settings" > "Editor: format on save" ska vara PÅ

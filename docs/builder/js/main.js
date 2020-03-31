@@ -60,7 +60,6 @@ function lrdel(element) {
 };
 
 function update() {
-    $("#layers-title").text("layers (" + imageList.length + ")");
 
     var container = $("#layers-container");
     container.empty();
@@ -82,6 +81,30 @@ function update() {
     clearCanvas();
     for (i = 0; i < imageList.length; i++) {
         ctx.drawImage(imageList[i].img, imageList[i].x, imageList[i].y, imageList[i].w, imageList[i].h);
+    }
+}
+
+function outputJSON() {
+    var jsonString = JSON.stringify(imageList);
+    download(jsonString, "level.json", "json");
+}
+
+// Code from https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
+function download(data, filename, type) {
+    var file = new Blob([data], { type: type });
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
     }
 }
 
