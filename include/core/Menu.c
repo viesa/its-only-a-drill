@@ -93,32 +93,11 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
         {"Exit"}};
 
     //Get input
-    if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
-    {
-        if (menu->activeIndex > 0)
-        {
-            menu->activeIndex--;
-        }
-        else
-        {
-            menu->activeIndex = 3;
-        }
-    }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
-    {
-        if (menu->activeIndex < 3)
-        {
-            menu->activeIndex++;
-        }
-        else
-        {
-            menu->activeIndex = 0;
-        }
-    }
-    // if (menu->activeIndex > 0 || menu->activeIndex < 3)
-    // {
-    //     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP)) - (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN));
-    // }
+    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
@@ -176,28 +155,11 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         {"Toggle vSync"},
         {"Back"}};
     //Get input
-    if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
-    {
-        if (menu->activeIndex > 0)
-        {
-            menu->activeIndex--;
-        }
-        else
-        {
-            menu->activeIndex = 3;
-        }
-    }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
-    {
-        if (menu->activeIndex < 3)
-        {
-            menu->activeIndex++;
-        }
-        else
-        {
-            menu->activeIndex = 0;
-        }
-    }
+    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
@@ -268,28 +230,11 @@ void MenuUpdateResolution(Menu *menu, Input *input)
         {"Apply"},
         {"Back"}};
     //Get input
-    if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
-    {
-        if (menu->activeIndex > 0)
-        {
-            menu->activeIndex--;
-        }
-        else
-        {
-            menu->activeIndex = 3;
-        }
-    }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
-    {
-        if (menu->activeIndex < 3)
-        {
-            menu->activeIndex++;
-        }
-        else
-        {
-            menu->activeIndex = 0;
-        }
-    }
+    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
     if (InputIsKeyPressed(input, SDL_SCANCODE_D) || InputIsKeyPressed(input, SDL_SCANCODE_RIGHT))
     {
         switch (menu->activeIndex)
