@@ -13,6 +13,8 @@
                 "sdl_ttf.h": "c",
                 "client.h": "c",
                 "time.h": "c",
-                "player.h": "c"
+                "player.h": "c",
+                "audio.hpp": "c",
+                "music.hpp": "c"
         }
 }
