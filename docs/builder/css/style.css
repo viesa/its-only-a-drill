@@ -11,7 +11,7 @@ body{
     left: 0;
     width: 100vh;
     height: 100vh;
-    cursor: pointer;
+    cursor: crosshair;
 }
 
 #sidebar{
@@ -56,4 +56,9 @@ body{
 
 .selected-tile{
     background: red;
+}
+
+
+.lrval{
+    width: 5em;
 }

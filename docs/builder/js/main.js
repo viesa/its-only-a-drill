@@ -39,7 +39,7 @@ function update() {
     var container = $("#layers-container");
     container.empty();
     for (i = 0; i < imageList.length; i++) {
-        container.append("<p class='layer-child'> Layer [" + i + "], Type: " + imageList[i].type + ", X: " + imageList[i].x + ", Y: " + imageList[i].y + ", Width: " + imageList[i].w + ", Height: " + imageList[i].h + "</p>");
+        container.append("<p class='layer-child'> Layer [" + i + "], Type: " + imageList[i].type + " X<input type='number' class='lrval lrvx' value='" + imageList[i].x + "'> Y<input type='number' class='lrval lrvy' value='" + imageList[i].y + "'> Width<input type='number' class='lrval lrvw' value='" + imageList[i].w + "'> Height<input type='number' class='lrval lrvh' value='" + imageList[i].h + "'></p>");
     }
 
     clearCanvas();
