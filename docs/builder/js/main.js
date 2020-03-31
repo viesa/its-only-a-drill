@@ -60,7 +60,6 @@ function lrdel(element) {
 };
 
 function update() {
-    $("#layers-title").text("layers (" + imageList.length + ")");
 
     var container = $("#layers-container");
     container.empty();
