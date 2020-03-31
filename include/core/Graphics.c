@@ -26,6 +26,7 @@ Graphics *GraphicsCreate()
     SDL_GetCurrentDisplayMode(0, &DM);
     gfx_ret->gfxWindowWidth = DM.w;
     gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+    gfx_ret->isFullscreen = 0;
 
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->gfxWindowWidth, gfx_ret->gfxWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)

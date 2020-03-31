@@ -27,5 +27,6 @@ typedef enum GuiWindow
 
 Gui *GuiCreate(Font *font, Clock *clock);
 void GuiUpdate(Gui *gui);
+void GuiDestroy(Gui *gui);
 
 #endif

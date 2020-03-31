@@ -103,8 +103,10 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
         case 0:
             menu->currentState = MS_None;
             break;
+        case 2:
+            menu->currentState = MS_Options;
+            break;
         case 3:
-            SDL_Quit();
             break;
         }
     }
@@ -138,4 +140,78 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
 
 void MenuUpdateOptions(Menu *menu, Input *input)
 {
+    //Determine menu options
+    int optionLength = 4;
+    char options[4][100] = {
+        {"Toggle fullscreen"},
+        {"Set resolution"},
+        {"Toggle vSync"},
+        {"Back"}};
+
+    //Get input
+    if (InputGet(input, KEY_W))
+    {
+        if (menu->activeIndex > 0)
+            menu->activeIndex--;
+    }
+    if (InputGet(input, KEY_S))
+    {
+        if (menu->activeIndex < 3)
+            menu->activeIndex++;
+    }
+    if (InputGet(input, KEY_E))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0: //toggle fullscreen
+            if (menu->gfx->isFullscreen)
+            { //Get out of fullscreen
+                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, NULL);
+                menu->gfx->isFullscreen = 0;
+            }
+            else
+            {
+                //go to fullscreen
+                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
+                menu->gfx->isFullscreen = 1;
+            }
+            break;
+        case 1: //set resolution
+            break;
+        case 3:
+            menu->currentState = MS_MainMenu;
+            break;
+        }
+    }
+
+    //Update 3d color
+    SDL_Color vitalsColor[10] = {
+        {menu->loopSwing, 159, 227},
+        {menu->loopSwing, 139, 207},
+        {menu->loopSwing, 119, 187},
+        {menu->loopSwing, 99, 167},
+        {menu->loopSwing, 79, 147},
+        {menu->loopSwing, 59, 127},
+        {menu->loopSwing, 39, 107},
+        {menu->loopSwing, 19, 87},
+        {255 - menu->loopSwing, 180, 184},
+        {255 - menu->loopSwing, 180, 184}};
+
+    //Draw menu options
+    for (size_t i = 0; i < optionLength; i++)
+    {
+        if (i == menu->activeIndex)
+        {
+            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+        }
+        else
+        {
+            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+        }
+    }
+}
+
+void MenuDestroy(Menu *menu)
+{
+    SDL_free(menu);
 }

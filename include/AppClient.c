@@ -103,6 +103,9 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 void AppClientDestroy(AppClient *app)
 {
     GraphicsDestroy(app->gfx);
+    MenuDestroy(app->menu);
+    GuiDestroy(app->gui);
+    FontDestroy(app->font);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
     NetworkMgrDestroy(app->netMgr);
@@ -166,7 +169,7 @@ void AppClientUpdate(AppClient *app)
     {
         SoundStop(&app->foot);
     }
-    
+
     if (InputGet(app->input, KEY_L))
         app->entities[1].Force.x += 50;
     if (InputGet(app->input, KEY_J))
