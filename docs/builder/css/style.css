@@ -39,7 +39,20 @@ h3,label{
     align-items: center;
     flex-direction: column;
     background: #999;
-    border: 1px solid black;
+}
+
+#dwnld-btn{
+    position: fixed;
+    bottom: .5em;
+    right: .5em;
+    z-index: 9999999;
+    font-size: 2rem;
+    border: 0;
+    outline: 0;
+    color: black;
+    background: white;
+    cursor: pointer;
+    border-radius: .2rem;
 }
 
 /* LAYERS */
@@ -47,7 +60,11 @@ h3,label{
 #layers-title{
     position: fixed;
     top: 0;
-    right: 0;
+    right: 1em;
+}
+
+#layers{
+    border-bottom: 3px solid #666;
 }
 
 #layers-container{
@@ -63,13 +80,14 @@ h3,label{
 }
 
 .layer-child{
-    background: #888;
+    background: #666;
     padding: 10px;
-    margin: 10px;
+    margin: 5px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
+    border-radius: .2rem;
 }
 
 .layer-child-box{
@@ -101,9 +119,16 @@ h3,label{
     align-items: center;
     flex-direction: column;
     flex-flow: column wrap;
-    background: #999;
+}
+
+.tile-selector{
+    background: #888;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: .2rem;
 }
 
 .selected-tile{
-    background: red;
+    background: #666;
 }
