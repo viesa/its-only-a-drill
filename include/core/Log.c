@@ -21,9 +21,7 @@
  */
 
 /*
-
 IMPORTED FROM https://github.com/rxi/log.c
-
 */
 
 #include <stdio.h>

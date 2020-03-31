@@ -16,12 +16,19 @@ typedef enum SoundFile
     SF_Count
 } SoundFile;
 
+typedef enum MusicFile
+{
+    MF_Test,
+    MF_Count
+} MusicFile;
+
 typedef struct Audio Audio;
 
 Audio *AudioCreate();
 void AudioDestroy(Audio *audio);
 
-Mix_Chunk *AudioGet(Audio *audio, SoundFile soundFile);
+Mix_Chunk *AudioGetSound(Audio *audio, SoundFile soundFile);
+Mix_Music *AudioGetMusic(Audio *audio, MusicFile musicFile);
 
 int AudioGenChannel(Audio *audio);
 void AudioFreeChannel(Audio *audio, int channel);

@@ -86,17 +86,17 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
         {"Exit"}};
 
     //Get input
-    if (InputGet(input, KEY_W))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_W))
     {
         if (menu->activeIndex > 0)
             menu->activeIndex--;
     }
-    if (InputGet(input, KEY_S))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_S))
     {
         if (menu->activeIndex < 3)
             menu->activeIndex++;
     }
-    if (InputGet(input, KEY_E))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E))
     {
         switch (menu->activeIndex)
         {
@@ -149,38 +149,42 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         {"Back"}};
 
     //Get input
-    if (InputGet(input, KEY_W))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_W))
     {
         if (menu->activeIndex > 0)
             menu->activeIndex--;
     }
-    if (InputGet(input, KEY_S))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_S))
     {
         if (menu->activeIndex < 3)
             menu->activeIndex++;
     }
-    if (InputGet(input, KEY_E))
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E))
     {
         switch (menu->activeIndex)
         {
         case 0: //toggle fullscreen
             if (menu->gfx->isFullscreen)
             { //Get out of fullscreen
-                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, NULL);
+                //SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, NULL);
                 menu->gfx->isFullscreen = 0;
             }
             else
             {
                 //go to fullscreen
-                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
+                //SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
                 menu->gfx->isFullscreen = 1;
             }
             break;
         case 1: //set resolution
             break;
         case 3:
-            menu->currentState = MS_MainMenu;
+        {
+            SDL_Event quit;
+            quit.type = SDL_QUIT;
+            SDL_PushEvent(&quit);
             break;
+        }
         }
     }
 

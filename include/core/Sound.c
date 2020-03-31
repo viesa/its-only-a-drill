@@ -6,7 +6,7 @@ Sound SoundCreate(Audio *audio, SoundFile soundFile)
 {
     Sound ret;
     ret.m_audio = audio;
-    ret.m_chunk = AudioGet(audio, soundFile);
+    ret.m_chunk = AudioGetSound(audio, soundFile);
     ret.m_channel = AudioGenChannel(audio);
     ret.m_isPlaying = SDL_FALSE;
     return ret;

@@ -6,6 +6,8 @@
 
 struct AppClient
 {
+    SDL_bool *running;
+
     Graphics *gfx;
     Audio *audio;
     Font *font;
@@ -20,7 +22,7 @@ struct AppClient
     Drawable db[3000];
     Vec2 cameraFollow;
 
-    Sound test;
+    Sound testSound;
     Sound door;
     Sound foot;
     Sound gun;
@@ -29,15 +31,18 @@ struct AppClient
     Sound knife;
     Sound bomp;
 
+    Music testMusic;
+
     Item item;
     Entity entities[3];
 
     Player player;
 };
 
-AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client *client)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    app->running = running;
     app->clock = clock;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
@@ -77,10 +82,12 @@ AppClient *AppClientCreate(Clock *clock, SDL_bool *running, Input *input, Client
 
     app->db[2999] = DrawableCreate(tileWomanDefaultGun, (SDL_Rect){496, 344, 57, 43}, SS_Characters);
 
-    app->test = SoundCreate(app->audio, SF_Test);
+    app->testSound = SoundCreate(app->audio, SF_Test);
     app->door = SoundCreate(app->audio, SF_Door);
     app->foot = SoundCreate(app->audio, SF_Footsteps);
     app->gun = SoundCreate(app->audio, SF_Gun);
+
+    app->testMusic = MusicCreate(app->audio, MF_Test);
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
@@ -120,7 +127,7 @@ void AppClientRun(AppClient *app)
     if (app->menu->currentState == MS_None)
         AppClientUpdate(app);
 
-    if (InputGet(app->input, KEY_ESC))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
         app->menu->currentState = MS_MainMenu;
 
     AppClientDraw(app);
@@ -132,51 +139,31 @@ void AppClientUpdate(AppClient *app)
     CameraUpdate(app->camera);
     NetworkMgrPollAll(app->netMgr);
 
-    if (InputGet(app->input, KEY_W))
-        SoundPlay(&app->foot, 0);
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_W) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_D) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_S) ||
+        InputIsKeyDown(app->input, SDL_SCANCODE_A))
+        SoundPlay(&app->foot, -1);
     else
-    {
         SoundStop(&app->foot);
-    }
 
-    if (InputGet(app->input, KEY_D))
-        SoundPlay(&app->foot, 0);
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_M))
+        SoundPlay(&app->testSound, 0);
     else
-    {
-        SoundStop(&app->foot);
-    }
-    if (InputGet(app->input, KEY_S))
-        SoundPlay(&app->foot, 0);
-    else
-    {
-        SoundStop(&app->foot);
-    }
-    if (InputGet(app->input, KEY_A))
-        SoundPlay(&app->foot, 0);
-    else
-    {
-        SoundStop(&app->foot);
-    }
-    if (InputGet(app->input, KEY_M))
-        SoundPlay(&app->test, 0);
-    else
-    {
-        SoundStop(&app->foot);
-    }
-    if (InputGet(app->input, KEY_O))
-        SoundStop(&app->test);
-    else
-    {
-        SoundStop(&app->foot);
-    }
+        SoundStop(&app->testSound);
 
-    if (InputGet(app->input, KEY_L))
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_N))
+        MusicPlay(&app->testMusic, 0);
+    else
+        MusicStop(&app->testMusic);
+
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
         app->entities[1].Force.x += 50;
-    if (InputGet(app->input, KEY_J))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_J))
         app->entities[1].Force.x -= 50;
-    if (InputGet(app->input, KEY_I))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_I))
         app->entities[1].Force.y -= 50;
-    if (InputGet(app->input, KEY_K))
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 50;
     EntityUpdate(app->entities, 3, app->clock);
 
