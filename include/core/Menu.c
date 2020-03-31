@@ -96,12 +96,24 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
     if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
     {
         if (menu->activeIndex > 0)
+        {
             menu->activeIndex--;
+        }
+        else
+        {
+            menu->activeIndex = 3;
+        }
     }
     if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
     {
         if (menu->activeIndex < 3)
+        {
             menu->activeIndex++;
+        }
+        else
+        {
+            menu->activeIndex = 0;
+        }
     }
     // if (menu->activeIndex > 0 || menu->activeIndex < 3)
     // {
@@ -167,12 +179,24 @@ void MenuUpdateOptions(Menu *menu, Input *input)
     if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
     {
         if (menu->activeIndex > 0)
+        {
             menu->activeIndex--;
+        }
+        else
+        {
+            menu->activeIndex = 3;
+        }
     }
     if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
     {
         if (menu->activeIndex < 3)
+        {
             menu->activeIndex++;
+        }
+        else
+        {
+            menu->activeIndex = 0;
+        }
     }
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
@@ -247,12 +271,24 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     if (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP))
     {
         if (menu->activeIndex > 0)
+        {
             menu->activeIndex--;
+        }
+        else
+        {
+            menu->activeIndex = 3;
+        }
     }
     if (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN))
     {
         if (menu->activeIndex < 3)
+        {
             menu->activeIndex++;
+        }
+        else
+        {
+            menu->activeIndex = 0;
+        }
     }
     if (InputIsKeyPressed(input, SDL_SCANCODE_D) || InputIsKeyPressed(input, SDL_SCANCODE_RIGHT))
     {
