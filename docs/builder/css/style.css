@@ -5,6 +5,10 @@ body{
     overflow: hidden;
 }
 
+h3,label{
+    user-select: none;
+}
+
 #canvas{
     position: fixed;
     top: 0;
@@ -38,12 +42,58 @@ body{
     border: 1px solid black;
 }
 
+/* LAYERS */
+
+#layers-title{
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+
 #layers-container{
     overflow-y: scroll;
     padding-left: 2%;
     padding-right: 2%;
     width: 96%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-flow: row wrap;
 }
+
+.layer-child{
+    background: #888;
+    padding: 10px;
+    margin: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+.layer-child-box{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: .2em;
+
+}
+
+.lrval{
+    width: 5em;
+    margin-left: 1em;
+}
+
+.lrdel{
+    width: 100%;
+}
+
+
+
+/* TILES */
 
 #tile-container{
     display: flex;
@@ -56,9 +106,4 @@ body{
 
 .selected-tile{
     background: red;
-}
-
-
-.lrval{
-    width: 5em;
 }
