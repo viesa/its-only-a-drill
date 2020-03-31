@@ -159,11 +159,11 @@ void AppClientUpdate(AppClient *app)
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
         app->entities[1].Force.x += 50;
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_J))
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_J))
         app->entities[1].Force.x -= 50;
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_I))
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_I))
         app->entities[1].Force.y -= 50;
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
+    if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 50;
     EntityUpdate(app->entities, 3, app->clock);
 
