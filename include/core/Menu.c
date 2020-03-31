@@ -108,7 +108,12 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
             menu->currentState = MS_Options;
             break;
         case 3:
-            break;
+        {
+            SDL_Event quit;
+            quit.type = SDL_QUIT;
+            SDL_PushEvent(&quit);
+        }
+        break;
         }
     }
 
@@ -181,9 +186,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
             break;
         case 3:
         {
-            SDL_Event quit;
-            quit.type = SDL_QUIT;
-            SDL_PushEvent(&quit);
+            menu->currentState = MS_MainMenu;
             break;
         }
         }
