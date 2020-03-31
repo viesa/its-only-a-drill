@@ -1,34 +1,57 @@
 #include "Input.h"
 
+#include "Log.h"
+
 struct Input
 {
-    SDL_bool m_events[CODE_nCodes];
+    SDL_bool m_keymap[SDL_NUM_SCANCODES];
+    SDL_bool m_prevKeymap[SDL_NUM_SCANCODES];
 };
 
 Input *InputCreate()
 {
-    Input *input_ret = (Input *)SDL_malloc(sizeof(Input));
-    InputReset(input_ret);
-    return input_ret;
+    Input *ret = (Input *)SDL_malloc(sizeof(Input));
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+    {
+        ret->m_keymap[i] = SDL_FALSE;
+        ret->m_prevKeymap[i] = SDL_FALSE;
+    }
+    return ret;
 }
 void InputDestroy(Input *input)
 {
     SDL_free(input);
 }
 
-void InputReset(Input *input)
+void InputUpdate(Input *input)
 {
-    for (int i = 0; i < CODE_nCodes; i++)
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
     {
-        input->m_events[i] = SDL_FALSE;
+        input->m_prevKeymap[i] = input->m_keymap[i];
     }
 }
 
-SDL_bool InputGet(Input *input, const Code key)
+void InputKeyDown(Input *input, const SDL_Scancode key)
 {
-    return input->m_events[key];
+    input->m_keymap[key] = SDL_TRUE;
 }
-void InputSet(Input *input, const Code key, SDL_bool newState)
+
+void InputKeyUp(Input *input, const SDL_Scancode key)
 {
-    input->m_events[key] = newState;
+    input->m_keymap[key] = SDL_FALSE;
+}
+
+SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key)
+{
+    return input->m_keymap[key];
+}
+
+SDL_bool InputIsKeyPressed(Input *input, const SDL_Scancode key)
+{
+    return InputIsKeyDown(input, key) && !InputWasKeyDown(input, key);
+}
+
+SDL_bool InputWasKeyDown(Input *input, const SDL_Scancode key)
+{
+    return input->m_prevKeymap[key];
 }

@@ -4,6 +4,7 @@
 #include "Font.h"
 #include "Clock.h"
 
+//Graphical User Interface - GUI
 typedef struct Gui
 {
     Font *font;
@@ -12,6 +13,7 @@ typedef struct Gui
     float loopCount;
     float loopSwing;
     float swingDir;
+    int fps;
     float defaultEdge;
     float defaultSize;
     float defaultOffset;
@@ -25,5 +27,6 @@ typedef enum GuiWindow
 
 Gui *GuiCreate(Font *font, Clock *clock);
 void GuiUpdate(Gui *gui);
+void GuiDestroy(Gui *gui);
 
 #endif

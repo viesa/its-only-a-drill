@@ -3,6 +3,7 @@
 
 typedef enum SpriteSheet
 {
+    SS_Menu,
     SS_Legacy,
     SS_Tiles,
     SS_Characters,

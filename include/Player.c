@@ -33,19 +33,19 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     player->aimFollow = Vec2Add(&aim, &player->entity.position);
 
     Vec2 delta = {0.0f, 0.0f};
-    if (InputGet(input, KEY_A))
+    if (InputIsKeyDown(input, SDL_SCANCODE_A))
     {
         delta.x -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
     }
-    if (InputGet(input, KEY_W))
+    if (InputIsKeyDown(input, SDL_SCANCODE_W))
     {
         delta.y -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
     }
-    if (InputGet(input, KEY_D))
+    if (InputIsKeyDown(input, SDL_SCANCODE_D))
     {
         delta.x += player->entity.moveSpeed * ClockGetDeltaTime(clock);
     }
-    if (InputGet(input, KEY_S))
+    if (InputIsKeyDown(input, SDL_SCANCODE_S))
     {
         delta.y += player->entity.moveSpeed * ClockGetDeltaTime(clock);
     }

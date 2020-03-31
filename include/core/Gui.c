@@ -20,6 +20,7 @@ Gui *GuiCreate(Font *font, Clock *clock)
     gui->loopCount = 0;
     gui->loopSwing = 87;
     gui->swingDir = 0;
+    gui->fps = 0;
 
     gui->defaultEdge = 30;
     gui->defaultSize = 50;
@@ -88,13 +89,22 @@ void GuiUpdate(Gui *gui)
 
     // Objective
     SDL_Color objColor[2] = {
-        {102, 16, 9},
-        {239, 193, 92}};
+        {102 + cos(gui->loopCount) * 5, 16, 9},
+        {239 + sin(gui->loopCount) * 5, 193, 92}};
     FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
     FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
+    if (!gui->loopCount % 5)
+    {
+        gui->fps = (int)ClockGetFPS(gui->clock);
+    }
     // FPS
     char fps[10];
-    sprintf(fps, "%d FPS", (int)ClockGetFPS(gui->clock));
+    sprintf(fps, "%d FPS", gui->fps);
     FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
+}
+
+void GuiDestroy(Gui *gui)
+{
+    SDL_free(gui);
 }

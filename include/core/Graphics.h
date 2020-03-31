@@ -9,6 +9,7 @@ typedef struct Graphics
 {
     int gfxWindowWidth;
     int gfxWindowHeight;
+    int isFullscreen;
 
     SDL_Window *m_mainWindow;
     SDL_Renderer *m_renderer;

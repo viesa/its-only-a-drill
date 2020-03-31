@@ -7,7 +7,7 @@ Entity EntityCreate(Vec2 position, int moveSpeed, int rotSpeed, EntityPresets pr
     e.id = uniqueIdentifier;
     e.position = position;
     e.Force.x = 0;
-    e.Force.x = 0;
+    e.Force.y = 0;
     switch (preset)
     {
     case EntityWoman:
@@ -15,8 +15,6 @@ Entity EntityCreate(Vec2 position, int moveSpeed, int rotSpeed, EntityPresets pr
         e.rotSpeed = rotSpeed;
         e.Friction = 0.05f;
         e.mass = 100.0f;
-        e.Force.x = 0;
-        e.Force.y = 0;
         e.isCollider = SDL_TRUE;
         e.isMovable = SDL_TRUE;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);

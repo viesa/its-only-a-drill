@@ -26,6 +26,7 @@ Graphics *GraphicsCreate()
     SDL_GetCurrentDisplayMode(0, &DM);
     gfx_ret->gfxWindowWidth = DM.w;
     gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+    gfx_ret->isFullscreen = 0;
 
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->gfxWindowWidth, gfx_ret->gfxWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
@@ -34,7 +35,13 @@ Graphics *GraphicsCreate()
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     //INIT ALL TEXTURES
-    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
+    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/menu.png");
+    if (!tilemap)
+        log_warn("Could not load menu.png");
+    gfx_ret->m_allTextures[SS_Menu] = tilemap;
+
+    //INIT ALL TEXTURES
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
     if (!tilemap)
         log_warn("Could not load tilemap.png");
     gfx_ret->m_allTextures[SS_Legacy] = tilemap;
