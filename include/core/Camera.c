@@ -28,6 +28,7 @@ void CameraDestroy(Camera *camera)
 
 void CameraUpdate(Camera *camera)
 {
+    camera->m_viewport = (SDL_Rect){0, 0, camera->gfx->gfxWindowWidth, camera->gfx->gfxWindowHeight};
     Vec2 *p = &camera->m_position;
     SDL_Rect *vp = &camera->m_viewport;
     Vec2 *f = camera->m_follow;
