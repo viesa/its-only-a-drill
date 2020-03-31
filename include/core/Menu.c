@@ -22,8 +22,8 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     menu->Height = 480;
     menu->Scale = 1;
 
-    SDL_Rect src = {0, 0, 400, 400};
-    SDL_Rect dst = {0, 0, 600, 600};
+    SDL_Rect src = {0, 0, 1919, 942};
+    SDL_Rect dst = {0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
 
     return menu;
