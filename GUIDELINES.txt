@@ -17,7 +17,7 @@
                     int var3,
                     int var4);
 
-    Col: 60 = ny rad
+    Col: 100 = ny rad
 
 
 ---- Include:

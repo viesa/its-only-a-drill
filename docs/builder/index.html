@@ -11,19 +11,37 @@
 </head>
 
 <body>
-    <button id="dwnld-btn" onclick="outputJSON()">
-        &nbsp;<i class="fas fa-download"></i>&nbsp;
-    </button>
+    <div id="tool-button-container">
+
+
+        <input type="file" id="files" name="file" style="display: none;" />
+        <button class="tool-buttons" onclick="document.getElementById('files').click();$('#upld-btn').show()">
+            &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
+        </button>
+
+        <button id="upld-btn" class="tool-buttons" style="display: none;" onclick="readBlob()">
+            &nbsp;<i class="fas fa-upload"></i>&nbsp;
+        </button>
+
+        <button id="dwnld-btn" class="tool-buttons" onclick="outputJSON()">
+            &nbsp;<i class="fas fa-download"></i>&nbsp;
+        </button>
+
+    </div>
     <canvas id="canvas"></canvas>
     <div id="sidebar">
         <div id="layers" class="sidebar-box">
             <div id="layers-container"></div>
         </div>
         <div id="tiles" class="sidebar-box">
-            <h3>Tiles</h3>
+            <h3>Tiles
+                <div id="byte_content"></div>
+            </h3>
             <div id="tile-container">
-                <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" class="tile-selector">
-                <img src="img/gun.png" id="img-gun" title="gun: 40x40px" type="gun" class="tile-selector">
+                <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" mass="80" collider="1"
+                    class="tile-selector">
+                <img src="img/gun.png" id="img-gun" title="gun: 40x40px" type="gun" mass="1" collider="1"
+                    class="tile-selector">
             </div>
         </div>
     </div>
@@ -44,5 +62,12 @@
     y,
     w,
     h,
-    collider
+    mass,
+    collider,
+    rot
+
+    To do:
+    custom rektanglar
+    rotera tiles
+    öppna i level builder
 -->

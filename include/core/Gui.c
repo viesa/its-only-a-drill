@@ -36,11 +36,12 @@ void GuiUpdate(Gui *gui)
     int wW = gui->font->gfx->gfxWindowWidth;
     int wH = gui->font->gfx->gfxWindowHeight;
 
-    if (rand() % 30 < 3)
-        gui->points += rand() % 500;
-
-    if (gui->points > 50000)
-        gui->points = 0;
+    //if (rand() % 30 < 3)
+    //    gui->points += rand() % 500;
+    //
+    //if (gui->points > 50000)
+    //    gui->points = 0;
+    gui->points = ScoreInfo(0); //Temp Score grej
 
     if (gui->loopCount < 2 * PI)
     {
