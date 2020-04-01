@@ -12,6 +12,7 @@
 #include "../core/Log.h"
 #include "../net/NetworkMgr.h"
 #include "../net/Client.h"
+#include "Score.h"
 
 typedef struct AppClient AppClient;
 

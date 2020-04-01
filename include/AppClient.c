@@ -101,9 +101,14 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
     app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
 
+    ScoreCreate(0);
+    ScoreIncrement(100,0);
+
     app->item = ItemCreate(ItemWoodenSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
+
+
 
     return app;
 }

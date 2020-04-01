@@ -3,6 +3,7 @@
 
 #include "Font.h"
 #include "Clock.h"
+#include "Score.h"
 
 //Graphical User Interface - GUI
 typedef struct Gui
