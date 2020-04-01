@@ -12,8 +12,6 @@
 
 <body>
     <div id="tool-button-container">
-
-
         <input type="file" id="files" name="file" style="display: none;" />
         <button class="tool-buttons" onclick="document.getElementById('files').click();$('#upld-btn').show()">
             &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
@@ -26,7 +24,6 @@
         <button id="dwnld-btn" class="tool-buttons" onclick="outputJSON()">
             &nbsp;<i class="fas fa-download"></i>&nbsp;
         </button>
-
     </div>
     <canvas id="canvas"></canvas>
     <div id="sidebar">
@@ -34,9 +31,7 @@
             <div id="layers-container"></div>
         </div>
         <div id="tiles" class="sidebar-box">
-            <h3>Tiles
-                <div id="byte_content"></div>
-            </h3>
+            <h3>Tiles</h3>
             <div id="tile-container">
                 <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" mass="80" collider="1"
                     class="tile-selector">
@@ -46,9 +41,13 @@
         </div>
     </div>
 
+    <p id="byte_content" style="display: none;"></p>
 
     <!-- Import JS files -->
     <script src="js/main.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/files.js"></script>
+    <script src="js/frontend.js"></script>
 
 </body>
 
@@ -68,6 +67,4 @@
 
     To do:
     custom rektanglar
-    rotera tiles
-    öppna i level builder
 -->
