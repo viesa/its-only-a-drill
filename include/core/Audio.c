@@ -70,7 +70,7 @@ Audio *AudioCreate()
     //------------------ Music files ------------------
     //-------------------------------------------------
 
-    Mix_Music *testMusic = Mix_LoadMUS("assets/music/test.mp3");
+    Mix_Music *testMusic = Mix_LoadMUS("./assets/music/test.mp3");
     if (!testMusic)
         log_warn("Could not load test.mp3");
     ret->m_music[MF_Test] = testMusic;

@@ -70,7 +70,7 @@ void EntityUpdate(Entity entities[], int nrEnts, Clock *clk)
 
     EntityOnCollision(entities, nrEnts, clk);
 
-    for (int i; i < nrEnts; i++)
+    for (int i = 0; i < nrEnts; i++)
     {
         //This part is the carculation of the force on the current entity.
         //It uses F=MA and changes it to A=F/M and then applys it on position           it wont be perfect but it dose what it should do

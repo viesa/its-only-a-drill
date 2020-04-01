@@ -24,7 +24,7 @@ $("#canvas").on("click", function () {
         var width = selectedLayer.width();
         var height = selectedLayer.height();
 
-        imageList.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), pos.x - width / 2, pos.y - height / 2, width, height));
+        imageList.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), pos.x - width / 2, pos.y - height / 2, width, height, selectedLayer.attr("mass"), selectedLayer.attr("collider")));
 
         update();
     }
@@ -70,18 +70,24 @@ function update() {
         var str3 = "<div class='layer-child-box'><label>Type: " + imageList[i].type + "</label></div>";
         var str4 = "<div class='layer-child-box'><label>X</label><input type='number' class='lrval' lrType='lrvx' value='" + imageList[i].x + "'></div>";
         var str5 = "<div class='layer-child-box'><label>Y</label><input type='number' class='lrval' lrType='lrvy' value='" + imageList[i].y + "'></div>";
-        var str6 = "<div class='layer-child-box'><label>W</label><input type='number' class='lrval' lrType='lrvw' value='" + imageList[i].w + "'></div>";
-        var str7 = "<div class='layer-child-box'><label>H</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].h + "'></div>";
-        var str8 = "<div class='layer-child-box'><button class='lrdel' onclick='lrdel($(this))'>Delete</button></div>";
-        var str9 = "</div>";
+        var str6 = "<div class='layer-child-box'><label>Width</label><input type='number' class='lrval' lrType='lrvw' value='" + imageList[i].w + "'></div>";
+        var str7 = "<div class='layer-child-box'><label>Height</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].h + "'></div>";
+        var str8 = "<div class='layer-child-box'><label>Mass</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].m + "'></div>";
+        var str9 = "<div class='layer-child-box'><label>Collider</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].c + "'></div>";
+        var str10 = "<div class='layer-child-box'><button class='lrdel' onclick='lrdel($(this))'>Delete</button></div>";
+        var str11 = "</div>";
 
-        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9);
+        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11);
     }
 
     clearCanvas();
     for (i = 0; i < imageList.length; i++) {
         ctx.drawImage(imageList[i].img, imageList[i].x, imageList[i].y, imageList[i].w, imageList[i].h);
     }
+}
+
+function loadJSON() {
+
 }
 
 function outputJSON() {
@@ -114,14 +120,16 @@ function clearCanvas() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function objectGenerator(imgType, image, xPos, yPos, width, height) {
+function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collider) {
     return obj = {
         type: imgType,
         img: image,
         x: xPos,
         y: yPos,
         w: width,
-        h: height
+        h: height,
+        m: mass,
+        c: collider
     }
 }
 
