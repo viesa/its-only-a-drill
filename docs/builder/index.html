@@ -11,9 +11,14 @@
 </head>
 
 <body>
-    <button id="dwnld-btn" onclick="outputJSON()">
-        &nbsp;<i class="fas fa-download"></i>&nbsp;
-    </button>
+    <div id="tool-button-container">
+        <button id="upld-btn" class="tool-buttons" onclick="loadJSON()">
+            &nbsp;<i class="fas fa-folder-open"></i>&nbsp;
+        </button>
+        <button id="dwnld-btn" class="tool-buttons" onclick="outputJSON()">
+            &nbsp;<i class="fas fa-download"></i>&nbsp;
+        </button>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="sidebar">
         <div id="layers" class="sidebar-box">
@@ -22,8 +27,10 @@
         <div id="tiles" class="sidebar-box">
             <h3>Tiles</h3>
             <div id="tile-container">
-                <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" class="tile-selector">
-                <img src="img/gun.png" id="img-gun" title="gun: 40x40px" type="gun" class="tile-selector">
+                <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" mass="80" collider="1"
+                    class="tile-selector">
+                <img src="img/gun.png" id="img-gun" title="gun: 40x40px" type="gun" mass="1" collider="1"
+                    class="tile-selector">
             </div>
         </div>
     </div>
@@ -44,5 +51,12 @@
     y,
     w,
     h,
+    mass,
     collider
+
+    To do:
+    mass
+    custom rektanglar
+    rotera tiles
+    öppna i level builder
 -->
