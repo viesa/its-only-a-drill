@@ -167,7 +167,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         case 0: //toggle fullscreen
             if (menu->gfx->isFullscreen)
             { //Get out of fullscreen
-                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, NULL);
+                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, 0);
                 menu->gfx->gfxWindowHeight -= 60;
                 menu->gfx->isFullscreen = 0;
             }
