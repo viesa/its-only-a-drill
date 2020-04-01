@@ -15,6 +15,7 @@
                 "time.h": "c",
                 "player.h": "c",
                 "audio.hpp": "c",
-                "music.hpp": "c"
+                "music.hpp": "c",
+                "string_view": "c"
         }
 }
