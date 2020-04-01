@@ -225,9 +225,9 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     //Determine menu options
     int optionLength = 4;
     char options[4][100] = {
-        {"Scale based"},
-        {"UnUsed"},
-        {"Apply"},
+        {"640x480"},
+        {"1280x960"},
+        {"1920x1440"},
         {"Back"}};
     //Get input
     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
@@ -235,43 +235,24 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_D) || InputIsKeyPressed(input, SDL_SCANCODE_RIGHT))
-    {
-        switch (menu->activeIndex)
-        {
-        case 0:
-            if (menu->Scale < 3)
-            {
-                menu->Scale++;
-                printf("Menu scale was incressed: %d\n", menu->Scale);
-            }
-            break;
-        }
-    }
-    if (InputIsKeyPressed(input, SDL_SCANCODE_A) || InputIsKeyPressed(input, SDL_SCANCODE_LEFT))
-    {
-        switch (menu->activeIndex)
-        {
-        case 0:
-            if (menu->Scale > 1)
-            {
-                menu->Scale--;
-                printf("Menu scale was incressed: %d\n", menu->Scale);
-            }
-            break;
-        }
-    }
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
         {
         case 0: // currently used by ad & Left Right
+            menu->Scale = 1;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
+            menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
+            menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
             break;
         case 1:
-        {
-        }
-        break;
+            menu->Scale = 2;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
+            menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
+            menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
+            break;
         case 2:
+            menu->Scale = 3;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
             menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
             menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
