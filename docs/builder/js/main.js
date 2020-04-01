@@ -3,6 +3,7 @@ var imageList = [];
 var c = document.getElementById("canvas");
 var ctx = c.getContext("2d");
 var selectedLayer;
+var fileLoading;
 
 $(window).on("load", function () {
 
@@ -24,7 +25,7 @@ $("#canvas").on("click", function () {
         var width = selectedLayer.width();
         var height = selectedLayer.height();
 
-        imageList.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), pos.x - width / 2, pos.y - height / 2, width, height, selectedLayer.attr("mass"), selectedLayer.attr("collider")));
+        imageList.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), pos.x - width / 2, pos.y - height / 2, width, height, selectedLayer.attr("mass"), selectedLayer.attr("collider"), 0));
 
         update();
     }
@@ -50,6 +51,18 @@ $(document).on("change", '.lrval', function () {
         case "lrvh":
             imageList[$(this).parent().parent().attr("chnr")].h = $(this).val();
             break;
+
+        case "lrvm":
+            imageList[$(this).parent().parent().attr("chnr")].m = $(this).val();
+            break;
+
+        case "lrvc":
+            imageList[$(this).parent().parent().attr("chnr")].c = $(this).val();
+            break;
+
+        case "lrvr":
+            imageList[$(this).parent().parent().attr("chnr")].r = $(this).val();
+            break;
     }
     update();
 });
@@ -72,27 +85,69 @@ function update() {
         var str5 = "<div class='layer-child-box'><label>Y</label><input type='number' class='lrval' lrType='lrvy' value='" + imageList[i].y + "'></div>";
         var str6 = "<div class='layer-child-box'><label>Width</label><input type='number' class='lrval' lrType='lrvw' value='" + imageList[i].w + "'></div>";
         var str7 = "<div class='layer-child-box'><label>Height</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].h + "'></div>";
-        var str8 = "<div class='layer-child-box'><label>Mass</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].m + "'></div>";
-        var str9 = "<div class='layer-child-box'><label>Collider</label><input type='number' class='lrval' lrType='lrvh' value='" + imageList[i].c + "'></div>";
-        var str10 = "<div class='layer-child-box'><button class='lrdel' onclick='lrdel($(this))'>Delete</button></div>";
-        var str11 = "</div>";
+        var str8 = "<div class='layer-child-box'><label>Mass</label><input type='number' class='lrval' lrType='lrvm' value='" + imageList[i].m + "'></div>";
+        var str9 = "<div class='layer-child-box'><label>Collider</label><input type='number' class='lrval' lrType='lrvc' value='" + imageList[i].c + "'></div>";
+        var str10 = "<div class='layer-child-box'><label>Rotation</label><input type='number' class='lrval' lrType='lrvr' value='" + imageList[i].r + "'></div>";
+        var str11 = "<div class='layer-child-box'><button class='lrdel' onclick='lrdel($(this))'>Delete</button></div>";
+        var str12 = "</div>";
 
-        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11);
+        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11 + str12);
     }
 
     clearCanvas();
     for (i = 0; i < imageList.length; i++) {
-        ctx.drawImage(imageList[i].img, imageList[i].x, imageList[i].y, imageList[i].w, imageList[i].h);
+        drawRotatedImage(imageList[i].img, imageList[i].x, imageList[i].y, imageList[i].w, imageList[i].h, imageList[i].r);
     }
 }
 
-function loadJSON() {
+// Code from https://www.html5rocks.com/en/tutorials/file/dndfiles/
+function readBlob() {
 
+    var files = document.getElementById('files').files;
+    if (!files.length) {
+        alert('Please select a file!');
+        return;
+    }
+
+    var file = files[0];
+    var reader = new FileReader();
+
+    // If we use onloadend, we need to check the readyState.
+    reader.onloadend = function (evt) {
+        if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+            document.getElementById('byte_content').textContent = evt.target.result;
+        }
+    };
+
+    var blob = file.slice(0, file.length);
+    reader.readAsBinaryString(blob);
 }
 
 function outputJSON() {
     var jsonString = JSON.stringify(imageList);
     download(jsonString, "level.json", "json");
+}
+
+// Code from https://gamedev.stackexchange.com/questions/67274/is-it-possible-to-rotate-an-image-on-an-html5-canvas-without-rotating-the-whole
+var TO_RADIANS = Math.PI / 180;
+function drawRotatedImage(image, x, y, w, h, angle) {
+    // save the current co-ordinate system 
+    // before we screw with it
+    ctx.save();
+
+    // move to the middle of where we want to draw our image
+    ctx.translate(x, y);
+
+    // rotate around that point, converting our 
+    // angle from degrees to radians 
+    ctx.rotate(angle * TO_RADIANS);
+
+    // draw it up and to the left by half the width
+    // and height of the image 
+    ctx.drawImage(image, -(w / 2), -(h / 2));
+
+    // and restore the co-ords to how they were when we began
+    ctx.restore();
 }
 
 // Code from https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
@@ -120,7 +175,7 @@ function clearCanvas() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collider) {
+function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collider, rotation) {
     return obj = {
         type: imgType,
         img: image,
@@ -129,7 +184,8 @@ function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collid
         w: width,
         h: height,
         m: mass,
-        c: collider
+        c: collider,
+        r: rotation
     }
 }
 

@@ -12,12 +12,21 @@
 
 <body>
     <div id="tool-button-container">
-        <button id="upld-btn" class="tool-buttons" onclick="loadJSON()">
-            &nbsp;<i class="fas fa-folder-open"></i>&nbsp;
+
+
+        <input type="file" id="files" name="file" style="display: none;" />
+        <button class="tool-buttons" onclick="document.getElementById('files').click();$('#upld-btn').show()">
+            &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
         </button>
+
+        <button id="upld-btn" class="tool-buttons" style="display: none;" onclick="readBlob()">
+            &nbsp;<i class="fas fa-upload"></i>&nbsp;
+        </button>
+
         <button id="dwnld-btn" class="tool-buttons" onclick="outputJSON()">
             &nbsp;<i class="fas fa-download"></i>&nbsp;
         </button>
+
     </div>
     <canvas id="canvas"></canvas>
     <div id="sidebar">
@@ -25,7 +34,9 @@
             <div id="layers-container"></div>
         </div>
         <div id="tiles" class="sidebar-box">
-            <h3>Tiles</h3>
+            <h3>Tiles
+                <div id="byte_content"></div>
+            </h3>
             <div id="tile-container">
                 <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" mass="80" collider="1"
                     class="tile-selector">
@@ -52,10 +63,10 @@
     w,
     h,
     mass,
-    collider
+    collider,
+    rot
 
     To do:
-    mass
     custom rektanglar
     rotera tiles
     öppna i level builder
