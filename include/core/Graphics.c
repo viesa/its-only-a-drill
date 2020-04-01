@@ -12,6 +12,8 @@ Graphics *GraphicsCreate()
         log_error("Could not initialize video: %s", SDL_GetError());
     }
 
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -27,6 +29,7 @@ Graphics *GraphicsCreate()
     gfx_ret->gfxWindowWidth = DM.w;
     gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
     gfx_ret->isFullscreen = 0;
+    gfx_ret->vsync = SDL_TRUE;
 
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->gfxWindowWidth, gfx_ret->gfxWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)

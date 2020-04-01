@@ -184,8 +184,20 @@ void MenuUpdateOptions(Menu *menu, Input *input)
             menu->currentState = MS_Resolution;
         }
         break;
-        case 2: //Vsync // not supported with SDL alone // do we use OpenGL?
-            break;
+        case 2: //Vsync // do we use OpenGL?
+        {
+            if (menu->gfx->vsync)
+            {
+                SDL_GL_SetSwapInterval(0);
+                menu->gfx->vsync = SDL_FALSE;
+            }
+            else
+            {
+                SDL_GL_SetSwapInterval(1);
+                menu->gfx->vsync = SDL_TRUE;
+            }
+        }
+        break;
         case 3:
         {
             menu->currentState = MS_MainMenu;
