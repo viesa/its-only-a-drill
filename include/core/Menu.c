@@ -20,7 +20,6 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     menu->activeIndex = 0;
     menu->Width = 640;
     menu->Height = 480;
-    menu->Scale = 1;
 
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
@@ -76,6 +75,9 @@ void MenuUpdate(Menu *menu, Input *input)
         break;
     case MS_Resolution:
         MenuUpdateResolution(menu, input);
+        break;
+    case MS_FPS:
+        MenuUpdateFPS(menu, input);
         break;
     default:
         break;
@@ -148,11 +150,12 @@ void MenuUpdateMainMenu(Menu *menu, Input *input)
 void MenuUpdateOptions(Menu *menu, Input *input)
 {
     //Determine menu options
-    int optionLength = 4;
-    char options[4][100] = {
+    int optionLength = 5;
+    char options[5][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
+        {"SET FPS"},
         {"Back"}};
     //Get input
     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
@@ -172,8 +175,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
                 menu->gfx->isFullscreen = 0;
             }
             else
-            {
-                //go to fullscreen
+            { //go to fullscreen
                 SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
                 menu->gfx->gfxWindowHeight += 60;
                 menu->gfx->isFullscreen = 1;
@@ -199,6 +201,11 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         }
         break;
         case 3:
+        {
+            menu->currentState = MS_FPS;
+            break;
+        }
+        case 4:
         {
             menu->currentState = MS_MainMenu;
             break;
@@ -235,11 +242,14 @@ void MenuUpdateOptions(Menu *menu, Input *input)
 void MenuUpdateResolution(Menu *menu, Input *input)
 {
     //Determine menu options
-    int optionLength = 4;
-    char options[4][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"640x480"},
-        {"1280x960"},
-        {"1920x1440"},
+        {"1280x720"},
+        {"1920x1080"},
+        {"1920x1200"},
+        {"2560x1440"},
+        {"2560x1600"},
         {"Back"}};
     //Get input
     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
@@ -251,25 +261,49 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     {
         switch (menu->activeIndex)
         {
-        case 0: // currently used by ad & Left Right
-            menu->Scale = 1;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
-            menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
-            menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
+        case 0:
+            menu->Width = 640;
+            menu->Height = 480;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
             break;
         case 1:
-            menu->Scale = 2;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
-            menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
-            menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
+            menu->Width = 1280;
+            menu->Height = 720;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
             break;
         case 2:
-            menu->Scale = 3;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width * menu->Scale, menu->Height * menu->Scale);
-            menu->gfx->gfxWindowWidth = menu->Width * menu->Scale;
-            menu->gfx->gfxWindowHeight = menu->Height * menu->Scale;
+            menu->Width = 1920;
+            menu->Height = 1080;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
             break;
         case 3:
+            menu->Width = 1920;
+            menu->Height = 1200;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
+            break;
+        case 4:
+            menu->Width = 2560;
+            menu->Height = 1440;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
+            break;
+        case 5:
+            menu->Width = 2560;
+            menu->Height = 1600;
+            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
+            menu->gfx->gfxWindowWidth = menu->Width;
+            menu->gfx->gfxWindowHeight = menu->Height;
+            break;
+        case 6:
         {
             menu->currentState = MS_Options;
             break;
@@ -303,7 +337,71 @@ void MenuUpdateResolution(Menu *menu, Input *input)
         }
     }
 }
+void MenuUpdateFPS(Menu *menu, Input *input)
+{
+    //Determine menu options
+    int optionLength = 6;
+    char options[6][100] = {
+        {"30 FPS"},
+        {"60 FPS"},
+        {"90 FPS"},
+        {"120 FPS"},
+        {"144 FPS"},
+        {"Back"}};
+    //Get input
+    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+        {
+            menu->currentState = MS_Options;
+            break;
+        }
+        }
+    }
+
+    //Update 3d color
+    SDL_Color vitalsColor[10] = {
+        {menu->loopSwing, 159, 227},
+        {menu->loopSwing, 139, 207},
+        {menu->loopSwing, 119, 187},
+        {menu->loopSwing, 99, 167},
+        {menu->loopSwing, 79, 147},
+        {menu->loopSwing, 59, 127},
+        {menu->loopSwing, 39, 107},
+        {menu->loopSwing, 19, 87},
+        {255 - menu->loopSwing, 180, 184},
+        {255 - menu->loopSwing, 180, 184}};
+
+    //Draw menu options
+    for (size_t i = 0; i < optionLength; i++)
+    {
+        if (i == menu->activeIndex)
+        {
+            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+        }
+        else
+        {
+            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+        }
+    }
+}
 void MenuDestroy(Menu *menu)
 {
     SDL_free(menu);

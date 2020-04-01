@@ -11,6 +11,7 @@ typedef enum MenuState
     MS_Options,
     MS_MainMenu,
     MS_Resolution,
+    MS_FPS,
     MS_None
 } MenuState;
 
@@ -26,7 +27,6 @@ typedef struct Menu
     int activeIndex;
     int Width;
     int Height;
-    int Scale;
 
 } Menu;
 
@@ -35,6 +35,7 @@ void MenuUpdate(Menu *menu, Input *input);
 void MenuUpdateMainMenu(Menu *menu, Input *input);
 void MenuUpdateOptions(Menu *menu, Input *input);
 void MenuUpdateResolution(Menu *menu, Input *input);
+void MenuUpdateFPS(Menu *menu, Input *input);
 void MenuDestroy(Menu *menu);
 
 #endif
