@@ -9,7 +9,9 @@ typedef enum ItemType{
 typedef struct Item{
     Drawable drawable;
     ItemType type;
+    int PosX;
+    int PosY;
 }Item;
 Item ItemCreate(ItemType type);
-void ItemDraw(Camera *camera, Item *item);
+void ItemDraw(Camera *camera, Item *item,int x,int y);
 #endif
