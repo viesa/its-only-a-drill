@@ -20,9 +20,18 @@ function drawRotatedImage(image, x, y, w, h, angle) {
     ctx.restore();
 }
 
+function drawHighlightRectangle(x, y, w, h, deg) {
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.rotate(deg * TO_RADIANS);
+    ctx.lineWidth = "10";
+    ctx.strokeStyle = "#1a73d9";
+    ctx.stroke();
+}
+
 var setCanvasSize = function () {
-    canvas.width = window.innerHeight;
-    canvas.height = window.innerHeight;
+    canvas.width = 2000; //window.innerHeight;
+    canvas.height = 2000; //window.innerHeight;
 }
 
 function clearCanvas() {

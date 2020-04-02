@@ -8,6 +8,10 @@ var db = {
     list: []
 }
 
+$(window).on("load", function () {
+    $("#tile-container").children().first().trigger("click");
+});
+
 $(".tile-selector").on("click", function () {
     if (selectedLayer) {
         selectedLayer.removeClass("selected-tile");

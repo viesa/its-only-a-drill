@@ -39,6 +39,24 @@ function readBlob() {
 
 /// DOWNLOAD
 
+/// Intercept ctrl + s
+$(document).keydown(function (e) {
+
+    var key = undefined;
+    var possible = [e.key, e.keyIdentifier, e.keyCode, e.which];
+
+    while (key === undefined && possible.length > 0) {
+        key = possible.pop();
+    }
+
+    if (key && (key == '115' || key == '83') && (e.ctrlKey || e.metaKey) && !(e.altKey)) {
+        e.preventDefault();
+        outputJSON();
+        return false;
+    }
+    return true;
+});
+
 //Interface for download();
 function outputJSON() {
     var tempOutObj = db;
