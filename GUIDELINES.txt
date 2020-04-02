@@ -141,3 +141,9 @@ Det finns:
 
 ---- Inställningar:
         "Settings" > "Editor: format on save" ska vara PÅ
+
+
+==================== HUR VI ANVÄNDER GIT ====================
+
+Läs följande artikel:
+        https://chris.beams.io/posts/git-commit/

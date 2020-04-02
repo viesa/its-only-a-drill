@@ -16,6 +16,8 @@ typedef struct Music
 Music MusicCreate(Audio *audio, MusicFile musicFile);
 void MusicDestroy(Music *music);
 
+/// \param loops: if loops == -1, player forever
+/// Otherwise, play loops + 1 times
 void MusicPlay(Music *music, int loops);
 void MusicStop(Music *music);
 

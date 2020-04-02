@@ -58,7 +58,6 @@ function lrdel(element) {
     update();
 }
 
-
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
