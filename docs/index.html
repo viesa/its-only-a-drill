@@ -1,42 +1,54 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Its-Only-A-Drill Docs</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css" \>
 </head>
+
 <body>
     <div class="wrapper">
         <div class="sidebar">
-        <h3>Its-Only-A-Drill Docs</h3>
+            <h3>Its-Only-A-Drill Docs</h3>
 
-        <a href="#welcome">welcome</a>
-        <a href="#item">item</a>
-        <a href="#gui">gui</a>
-        <a href="#Eventhandeling">Eventhandeling</a>
+            <a href="#welcome">welcome</a>
+            <a href="#item">item</a>
+            <a href="#gui">gui</a>
+            <a href="#Eventhandeling">Eventhandeling</a>
+            <br>
+            <a href="./builder/index.html">Level builder</a>
 
         </div>
         <div class="content-wrapper">
             <section id="welcome">
-                <a href="#welcome"><h1>#welcome</h1></a>
-                <p>This is the documentation for the game Its-Only-A-Drill. Navigate using the tab to the left, or scroll to discover new functions!</p>
+                <a href="#welcome">
+                    <h1>#welcome</h1>
+                </a>
+                <p>This is the documentation for the game Its-Only-A-Drill. Navigate using the tab to the left, or
+                    scroll to discover new functions!</p>
 
                 <img src="./img/game.png" width="400">
             </section>
 
             <section id="item">
-                <a href="#item"><h1>#item</h1></a>
+                <a href="#item">
+                    <h1>#item</h1>
+                </a>
                 <p>To create an item:</p>
-                <p>CreateItem([The item you want to create], [The game Graphics], [The Enum of the item you want to create]);</p>
+                <p>CreateItem([The item you want to create], [The game Graphics], [The Enum of the item you want to
+                    create]);</p>
                 <p>AddToRenderList([The Game], [The item Drawable]);</p>
                 <p></p>
                 <p>To make the item stick to player:</p>
                 <p>UpdateItemPreview([The Player], [The Item])</p>
-            </section>            
+            </section>
 
             <section id="gui">
-                <a href="#gui"><h1>#gui</h1></a>
+                <a href="#gui">
+                    <h1>#gui</h1>
+                </a>
                 <img class="img-no-native-shadow" src="./img/gui.png" width="400">
                 <h4>Show alerts (prompts)</h4>
                 <p class="code">
@@ -51,7 +63,8 @@
                 <p class="code">
                     void MsgBoxShow(Gui* g, char message[201]);
                 </p>
-                <p>Message boxes allow for showing more text than a prompt. The user can close the messageBox by clicking RETURN on their keyboard.
+                <p>Message boxes allow for showing more text than a prompt. The user can close the messageBox by
+                    clicking RETURN on their keyboard.
                     <br>
                     MessageBox also has a function to close, in case you desire to use it.
                 </p>
@@ -88,24 +101,30 @@
                     <li>text: text to print </li>
                 </ul>
                 <p>
-                    RenderText supports changing color and formatting inline. 
-                    <br><br>Use the <p class="code">$$FC</p> Format to change parameters. F being format as int, C being color as int.
+                    RenderText supports changing color and formatting inline.
+                    <br><br>Use the <p class="code">$$FC</p> Format to change parameters. F being format as int, C being
+                    color as int.
                 </p>
-                
-                
+
+
             </section>
-			
-			<section id="Eventhandeling">
-                <a href="#Eventhandeling"><h1>#Eventhandeling</h1></a>
+
+            <section id="Eventhandeling">
+                <a href="#Eventhandeling">
+                    <h1>#Eventhandeling</h1>
+                </a>
                 <p>reads the events on your keyboard</p>
-                <p>creating a new event key first find the scancode for your key example 26 it's W.<br>Then give it a name that no other key has example UP1<br> last you need to add = so the finished new line looks like this "UP1= 26" in options.txt  </p>
+                <p>creating a new event key first find the scancode for your key example 26 it's W.<br>Then give it a
+                    name that no other key has example UP1<br> last you need to add = so the finished new line looks
+                    like this "UP1= 26" in options.txt </p>
                 <p>eventhandler(["the event name"]) example eventhandler("UP1=")</p>
-				<p></p>
-				<p>the return value is 0 for false(the key was not pressed)<br>1 for true(the key was pressed)</p>
-            </section> 
-            
+                <p></p>
+                <p>the return value is 0 for false(the key was not pressed)<br>1 for true(the key was pressed)</p>
+            </section>
+
         </div>
     </div>
 
 </body>
+
 </html>
