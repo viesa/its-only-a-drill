@@ -4,14 +4,15 @@
 #include "core/Graphics.h"
 #include "core/Camera.h"
 typedef enum ItemType{
-    ItemWoodenSword
+    ItemWoodenSword,
+    ItemMetalSword
 }ItemType;
 typedef struct Item{
     Drawable drawable;
     ItemType type;
-    int PosX;
-    int PosY;
+    Vec2 postion;
+    int picked;
 }Item;
 Item ItemCreate(ItemType type);
-void ItemDraw(Camera *camera, Item *item,int x,int y);
+void ItemDraw(Camera *camera, Item *item,Vec2 position);
 #endif
