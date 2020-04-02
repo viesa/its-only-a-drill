@@ -33,7 +33,7 @@ struct AppClient
 
     Music testMusic;
 
-    Item item;
+    Item item[2];
     Entity entities[3];
 
     Player player;
@@ -104,7 +104,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     ScoreCreate(0);
     ScoreIncrement(100,0);
 
-    app->item = ItemCreate(ItemWoodenSword);
+    app->item[0] = ItemCreate(ItemWoodenSword);
+    app->item[1] = ItemCreate(ItemWoodenSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
@@ -179,7 +180,8 @@ void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
-    ItemDraw(app->camera, &app->item);
+    ItemDraw(app->camera, &app->item[0],200,300);
+    ItemDraw(app->camera, &app->item[1],100,200);
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
