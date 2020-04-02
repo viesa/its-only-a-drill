@@ -17,6 +17,8 @@ typedef struct Sound
 Sound SoundCreate(Audio *audio, SoundFile soundFile);
 void SoundDestroy(Sound *sound);
 
+/// \param loops: if loops == -1, player forever
+/// Otherwise, play loops + 1 times
 void SoundPlay(Sound *sound, int loops);
 void SoundStop(Sound *sound);
 

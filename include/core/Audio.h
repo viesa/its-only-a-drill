@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL_mixer.h>
 
+// Enum used in array of pre-loaded sounds
 typedef enum SoundFile
 {
     SF_Test,
@@ -16,6 +17,7 @@ typedef enum SoundFile
     SF_Count
 } SoundFile;
 
+// Enum used in array of pre-loaded music
 typedef enum MusicFile
 {
     MF_Test,
@@ -27,10 +29,14 @@ typedef struct Audio Audio;
 Audio *AudioCreate();
 void AudioDestroy(Audio *audio);
 
+/// Returns a pre-loaded soundfile (.wav)
 Mix_Chunk *AudioGetSound(Audio *audio, SoundFile soundFile);
+/// Returns a pre-loaded musicfile (.mp3)
 Mix_Music *AudioGetMusic(Audio *audio, MusicFile musicFile);
 
+/// Generates a channel for a sound to play on
 int AudioGenChannel(Audio *audio);
+/// Free a channel when it is no longer used
 void AudioFreeChannel(Audio *audio, int channel);
 
 #endif
