@@ -28,7 +28,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     return menu;
 }
 
-void MenuUpdate(Menu *menu, Input *input)
+void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls)
 {
     if (menu->loopCount < 2 * PI)
     {
@@ -77,7 +77,7 @@ void MenuUpdate(Menu *menu, Input *input)
         MenuUpdateResolution(menu, input);
         break;
     case MS_FPS:
-        MenuUpdateFPS(menu, input);
+        MenuUpdateFPS(menu, input, FPSContorls);
         break;
     default:
         break;
@@ -337,7 +337,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
         }
     }
 }
-void MenuUpdateFPS(Menu *menu, Input *input)
+void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
 {
     //Determine menu options
     int optionLength = 6;
@@ -346,7 +346,7 @@ void MenuUpdateFPS(Menu *menu, Input *input)
         {"60 FPS"},
         {"90 FPS"},
         {"120 FPS"},
-        {"144 FPS"},
+        {"unlimited"},
         {"Back"}};
     //Get input
     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
@@ -359,15 +359,31 @@ void MenuUpdateFPS(Menu *menu, Input *input)
         switch (menu->activeIndex)
         {
         case 0:
+        {
+            FPSContorls->DesiredFPS = 30;
             break;
+        }
         case 1:
+        {
+            FPSContorls->DesiredFPS = 60;
             break;
+        }
+        break;
         case 2:
+        {
+            FPSContorls->DesiredFPS = 90;
             break;
+        }
         case 3:
+        {
+            FPSContorls->DesiredFPS = 120;
             break;
+        }
         case 4:
+        {
+            FPSContorls->DesiredFPS = 999; // they won't know
             break;
+        }
         case 5:
         {
             menu->currentState = MS_Options;

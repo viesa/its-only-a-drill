@@ -15,6 +15,7 @@ struct AppClient
     Gui *gui;
     Camera *camera;
     Clock *clock;
+    FpsManger *FPSControls;
     Input *input;
     Menu *menu;
     Client *client;
@@ -36,16 +37,17 @@ struct AppClient
 
     Item item[2];
     Entity entities[3];
-
     Player player;
     Map *testMap;
+    Weapon weapon;
 };
 
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client, FpsManger *FPSControls)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->clock = clock;
+    app->FPSControls = FPSControls;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
@@ -97,7 +99,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     // ClientStart(client);
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){0, 0}, 100, 20, EntityWoman, 0);
+    app->entities[0] = EntityCreate((Vec2){50, 50}, 100, 20, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
     app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
@@ -107,7 +109,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     ScoreIncrement(100, 0);
 
     app->item[0] = ItemCreate(ItemWoodenSword);
-    app->item[1] = ItemCreate(ItemWoodenSword);
+    app->item[1] = ItemCreate(ItemMetalSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
@@ -173,21 +175,32 @@ void AppClientUpdate(AppClient *app)
         app->entities[1].Force.y -= 50;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 50;
-    EntityUpdate(app->entities, 3, app->clock);
+
+    /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
+    {   /* om player position är samma som vapens då försvinner den
+        if ( Vec2Equ(player->entities->position, app->item->postion) )
+        {
+            ItemPickup(app->item);
+        }
+        
+    }*/
+
+    EntityUpdate(app->entities, 4, app->clock);
 
     PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+    //UpdateWeapons(&app->);
 }
 
 void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
-    ItemDraw(app->camera, &app->item[0], 200, 300);
-    ItemDraw(app->camera, &app->item[1], 100, 200);
 
     for (int i = 0; i < app->testMap->n; i++)
         EntityDraw(app->camera, &app->testMap->contents[i]);
 
+    ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
+    ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
@@ -197,5 +210,5 @@ void AppClientDraw(AppClient *app)
     GuiUpdate(app->gui);
 
     //Menu
-    MenuUpdate(app->menu, app->input);
+    MenuUpdate(app->menu, app->input, app->FPSControls);
 }
