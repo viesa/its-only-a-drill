@@ -49,6 +49,15 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
                             entities[Recessive].Force.x += entities[Dominant].Force.x;
                             entities[Dominant].Force.y = entities[Dominant].Force.y * -1;
                             entities[Recessive].Force.y += entities[Dominant].Force.y;
+
+                            if (result.w < result.h)
+                            {
+                                entities[Dominant].position.x += result.w;
+                            }
+                            else
+                            {
+                                entities[Dominant].position.y += result.h;
+                            }
                         }
                     }
                 }
