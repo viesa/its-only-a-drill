@@ -6,7 +6,11 @@
 #include "math.h"
 typedef enum EntityPresets
 {
-    EntityWoman
+    EntityWoman,
+    //TEMPORARY
+    EntityGun,
+    EntityPlayerSpawn,
+    //--------
 } EntityPresets;
 typedef struct Entity
 {
@@ -20,7 +24,7 @@ typedef struct Entity
     float Friction, mass;
 } Entity;
 
-Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
+Entity EntityCreate(Vec2 position, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
 
 ///\param entities: if NULL, no collision detection occurs
 void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);

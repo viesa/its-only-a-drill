@@ -3,6 +3,7 @@
 #include "core/Entity.h"
 #include "Items.h"
 #include "Player.h"
+#include "Map.h"
 
 struct AppClient
 {
@@ -37,6 +38,7 @@ struct AppClient
     Entity entities[3];
 
     Player player;
+    Map *testMap;
 };
 
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client)
@@ -102,14 +104,14 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
 
     ScoreCreate(0);
-    ScoreIncrement(100,0);
+    ScoreIncrement(100, 0);
 
     app->item[0] = ItemCreate(ItemWoodenSword);
     app->item[1] = ItemCreate(ItemWoodenSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
-
+    app->testMap = MapCreate(JSONCreate("level.json"));
 
     return app;
 }
@@ -180,8 +182,12 @@ void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
-    ItemDraw(app->camera, &app->item[0],200,300);
-    ItemDraw(app->camera, &app->item[1],100,200);
+    ItemDraw(app->camera, &app->item[0], 200, 300);
+    ItemDraw(app->camera, &app->item[1], 100, 200);
+
+    for (int i = 0; i < app->testMap->n; i++)
+        EntityDraw(app->camera, &app->testMap->contents[i]);
+
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
