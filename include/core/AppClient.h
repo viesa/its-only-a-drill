@@ -13,10 +13,11 @@
 #include "../net/NetworkMgr.h"
 #include "../net/Client.h"
 #include "Score.h"
+#include "Weapons.h"
 
 typedef struct AppClient AppClient;
 
-AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, Client *client);
+AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, Client *client, FpsManger *FPSControls);
 void AppClientDestroy(AppClient *app);
 
 void AppClientRun(AppClient *app);

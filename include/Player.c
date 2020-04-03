@@ -32,24 +32,32 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
 
     player->aimFollow = Vec2Add(&aim, &player->entity.position);
 
-    Vec2 delta = {0.0f, 0.0f};
-    if (InputIsKeyDown(input, SDL_SCANCODE_A))
-    {
-        delta.x -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
-    }
-    if (InputIsKeyDown(input, SDL_SCANCODE_W))
-    {
-        delta.y -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
-    }
     if (InputIsKeyDown(input, SDL_SCANCODE_D))
-    {
-        delta.x += player->entity.moveSpeed * ClockGetDeltaTime(clock);
-    }
+        player->entity.Force.x += 50;
+    if (InputIsKeyDown(input, SDL_SCANCODE_A))
+        player->entity.Force.x -= 50;
+    if (InputIsKeyDown(input, SDL_SCANCODE_W))
+        player->entity.Force.y -= 50;
     if (InputIsKeyDown(input, SDL_SCANCODE_S))
-    {
-        delta.y += player->entity.moveSpeed * ClockGetDeltaTime(clock);
-    }
-    player->entity.position = Vec2Add(&player->entity.position, &delta);
+        player->entity.Force.y += 50;
+    // Vec2 delta = {0.0f, 0.0f};
+    // if (InputIsKeyDown(input, SDL_SCANCODE_A))
+    // {
+    //     delta.x -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
+    // }
+    // if (InputIsKeyDown(input, SDL_SCANCODE_W))
+    // {
+    //     delta.y -= player->entity.moveSpeed * ClockGetDeltaTime(clock);
+    // }
+    // if (InputIsKeyDown(input, SDL_SCANCODE_D))
+    // {
+    //     delta.x += player->entity.moveSpeed * ClockGetDeltaTime(clock);
+    // }
+    // if (InputIsKeyDown(input, SDL_SCANCODE_S))
+    // {
+    //     delta.y += player->entity.moveSpeed * ClockGetDeltaTime(clock);
+    // }
+    // player->entity.position = Vec2Add(&player->entity.position, &delta);
 }
 
 void PlayerDraw(Player *player, Camera *camera)

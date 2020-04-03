@@ -16,6 +16,7 @@
                 "player.h": "c",
                 "audio.hpp": "c",
                 "music.hpp": "c",
-                "string_view": "c"
+                "string_view": "c",
+                "initializer_list": "c"
         }
 }
