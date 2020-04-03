@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#include <SDL2/SDL_shape.h>
+#include <SDL2/SDL_rect.h>
 
 struct Camera
 {

@@ -2,7 +2,6 @@
 #define JSON_H
 
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <SDL2/SDL_bits.h>
 
 #include "JSONParser.h"

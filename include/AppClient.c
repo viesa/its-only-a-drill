@@ -1,6 +1,5 @@
 #include "core/AppClient.h"
 
-#include "core/Entity.h"
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"

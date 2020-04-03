@@ -1,6 +1,5 @@
 #ifndef ENTITY_H
 #define ENTITY_H
-#include "Graphics.h"
 #include "Camera.h"
 #include "Clock.h"
 #include "math.h"

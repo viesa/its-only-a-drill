@@ -1,5 +1,7 @@
 #include "JSON.h"
 
+#include <sys/stat.h>
+
 static void process_value(json_value *value, int depth);
 
 JSON *JSONCreate(char *filename)
