@@ -99,12 +99,13 @@ void GraphicsPresentScreen(Graphics *gfx)
 
 void GraphicsDraw(Graphics *gfx, Drawable drawable)
 {
+    SDL_Point rot_point = (SDL_Point){(int)drawable.rot_anchor.x, (int)drawable.rot_anchor.y};
     SDL_RenderCopyEx(gfx->m_renderer,
                      gfx->m_allTextures[drawable.spriteSheet],
                      &drawable.src,
                      &drawable.dst,
                      drawable.rot,
-                     &drawable.rot_anchor,
+                     &rot_point,
                      SDL_FLIP_NONE);
 }
 
