@@ -2,7 +2,8 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Level builder</title>
+    <title>It's Only a Drill - Level builder</title>
+    <link rel=icon href=favicon.png type="image/png">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&family=Ubuntu:wght@300;400&display=swap"
         rel="stylesheet">
@@ -13,19 +14,22 @@
 <body>
     <div id="tool-button-container">
         <input type="file" id="files" name="file" style="display: none;" />
-        <button class="tool-buttons" onclick="document.getElementById('files').click();$('#upld-btn').show()">
+        <button class="tool-buttons" title="Open folder"
+            onclick="document.getElementById('files').click();$('#upld-btn').show()">
             &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
         </button>
 
-        <button id="upld-btn" class="tool-buttons" style="display: none;" onclick="readBlob()">
+        <button id="upld-btn" class="tool-buttons" title="Upload file" style="display: none;" onclick="readBlob()">
             &nbsp;<i class="fas fa-upload"></i>&nbsp;
         </button>
 
-        <button id="dwnld-btn" class="tool-buttons" onclick="outputJSON()">
+        <button id="dwnld-btn" class="tool-buttons" title="Download current map" onclick="outputJSON()">
             &nbsp;<i class="fas fa-download"></i>&nbsp;
         </button>
     </div>
-    <canvas id="canvas"></canvas>
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
     <div id="sidebar">
         <div id="layers" class="sidebar-box">
             <div id="layers-container"></div>
@@ -48,7 +52,6 @@
     <script src="js/canvas.js"></script>
     <script src="js/files.js"></script>
     <script src="js/frontend.js"></script>
-
 </body>
 
 </html>

@@ -13,7 +13,7 @@ function frontendUpdate() {
         var str8 = "<div class='layer-child-box'><label>Mass</label><input type='number' class='lrval' lrType='lrvm' value='" + db.list[i].m + "'></div>";
         var str9 = "<div class='layer-child-box'><label>Collider</label><input type='number' class='lrval' lrType='lrvc' value='" + db.list[i].c + "'></div>";
         var str10 = "<div class='layer-child-box'><label>Rotation</label><input type='number' class='lrval' lrType='lrvr' value='" + db.list[i].r + "'></div>";
-        var str11 = "<div class='layer-child-box'><button class='lrdel' onclick='lrdel($(this))'>Delete</button></div>";
+        var str11 = "<div class='layer-child-box'><button class='lrbutton lrdel' onclick='lrdel($(this))'>Delete</button><button class='lrbutton lrhigh' onclick='highLight($(this))'>Highlight</button></div>";
         var str12 = "</div>";
 
         container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11 + str12);
@@ -23,31 +23,31 @@ function frontendUpdate() {
 $(document).on("change", '.lrval', function () {
     switch ($(this).attr("lrType")) {
         case "lrvx":
-            db.list[$(this).parent().parent().attr("chnr")].x = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].x = parseInt($(this).val());
             break;
 
         case "lrvy":
-            db.list[$(this).parent().parent().attr("chnr")].y = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].y = parseInt($(this).val());
             break;
 
         case "lrvw":
-            db.list[$(this).parent().parent().attr("chnr")].w = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].w = parseInt($(this).val());
             break;
 
         case "lrvh":
-            db.list[$(this).parent().parent().attr("chnr")].h = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].h = parseInt($(this).val());
             break;
 
         case "lrvm":
-            db.list[$(this).parent().parent().attr("chnr")].m = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].m = parseInt($(this).val());
             break;
 
         case "lrvc":
-            db.list[$(this).parent().parent().attr("chnr")].c = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].c = parseInt($(this).val());
             break;
 
         case "lrvr":
-            db.list[$(this).parent().parent().attr("chnr")].r = $(this).val();
+            db.list[$(this).parent().parent().attr("chnr")].r = parseInt($(this).val());
             break;
     }
     update();
@@ -73,7 +73,7 @@ $("#canvas").on("click", function () {
         var width = selectedLayer.width();
         var height = selectedLayer.height();
 
-        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), pos.x, pos.y, width, height, selectedLayer.attr("mass"), selectedLayer.attr("collider"), 0));
+        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x), parseInt(pos.y), parseInt(width), parseInt(height), parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0)));
 
         update();
     }
@@ -81,3 +81,10 @@ $("#canvas").on("click", function () {
         alert("You need to select a type first.");
     }
 });
+
+function highLight(object) {
+    update();
+    var hoverObj = db.list[object.parent().parent().attr("chnr")];
+    drawHighlightRectangle(hoverObj.x - hoverObj.w / 2, hoverObj.y - hoverObj.h / 2, hoverObj.w, hoverObj.h, hoverObj.r);
+
+};
