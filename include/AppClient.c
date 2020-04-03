@@ -181,10 +181,24 @@ void AppClientUpdate(AppClient *app)
         
     }*/
 
-    EntityUpdate(app->entities, 3, app->clock);
+    EntityUpdate(app->entities, 4, app->clock);
 
     PlayerUpdate(&app->player, app->input, app->clock, app->camera);
     //UpdateWeapons(&app->);
+    // SDL_PixelFormat *fmt;
+    // SDL_Color *color;
+    // fmt = app->gfx->format;
+    // Uint8 index;
+    // index = *(Uint8 *)surface->pixels;
+    // color = &fmt->palette->colors[index];
+    // for (int i = 0; i < ; i++)
+    // {
+    //     for (int j = 0; j < count; j++)
+    //     {
+    //         /* code */
+    //     }
+    //     printf("\n");
+    // }
 }
 
 void AppClientDraw(AppClient *app)

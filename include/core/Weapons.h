@@ -23,6 +23,8 @@ typedef struct Weapon
     int captivity;
 } Weapon;
 
+///<skapar ett weapon so it exist >
+///\param <beskriving av parameter som är av värde>
 Weapon WeaponCreate(int damage, float accuracy, int weaponType);
 void WeaponUpdate(Weapon *Weapon, Input *Input, Entity *User);
 void shoot();
