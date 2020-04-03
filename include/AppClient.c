@@ -3,6 +3,7 @@
 #include "core/Entity.h"
 #include "Items.h"
 #include "Player.h"
+#include "Map.h"
 
 struct AppClient
 {
@@ -37,6 +38,7 @@ struct AppClient
     Item item[2];
     Entity entities[3];
     Player player;
+    Map *testMap;
     Weapon weapon;
 };
 
@@ -110,6 +112,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->item[1] = ItemCreate(ItemMetalSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
+
+    app->testMap = MapCreate(JSONCreate("level.json"));
 
     return app;
 }
@@ -205,6 +209,10 @@ void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
+
+    for (int i = 0; i < app->testMap->n; i++)
+        EntityDraw(app->camera, &app->testMap->contents[i]);
+
     ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
     ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
     EntityDraw(app->camera, &app->entities[0]);

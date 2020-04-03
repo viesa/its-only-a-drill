@@ -17,6 +17,7 @@
                 "audio.hpp": "c",
                 "music.hpp": "c",
                 "string_view": "c",
+                "random": "c",
                 "initializer_list": "c"
         }
 }

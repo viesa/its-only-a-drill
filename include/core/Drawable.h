@@ -1,14 +1,15 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
-#include <SDL2/SDL_shape.h>
+#include <SDL2/SDL_rect.h>
 #include "SpriteSheet.h"
+#include "../math/Vec2.h"
 
 typedef struct Drawable
 {
     SDL_Rect src;
     SDL_Rect dst;
     float rot;
-    SDL_Point rot_anchor;
+    Vec2 rot_anchor;
     SpriteSheet spriteSheet;
 
 } Drawable;
