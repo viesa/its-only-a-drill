@@ -176,7 +176,7 @@ void AppClientUpdate(AppClient *app)
         app->entities[1].Force.y += 500;
 
     /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
-    {   /* om player position är samma som vapens då försvinner den
+    {   om player position är samma som vapens då försvinner den
         if ( Vec2Equ(player->entities->position, app->item->postion) )
         {
             ItemPickup(app->item);

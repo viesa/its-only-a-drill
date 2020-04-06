@@ -36,7 +36,7 @@ Map *MapCreate(JSON *mapdata)
         int src_h = entries[9].value->u.object.values[3].value->u.integer;
         SDL_Rect src = {src_x, src_y, src_w, src_h};
 
-        Entity _new_ = EntityCreate(position, 0, 0, type, 0);
+        Entity _new_ = EntityCreate(position, type, 0);
         _new_.drawable.dst.w = width;
         _new_.drawable.dst.h = height;
         _new_.drawable.rot = rotation;

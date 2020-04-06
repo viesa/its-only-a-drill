@@ -38,32 +38,32 @@ Graphics *GraphicsCreate()
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     //INIT ALL TEXTURES
-    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/menu.png");
+    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/menu.png");
     if (!tilemap)
         log_warn("Could not load menu.png");
     gfx_ret->m_allTextures[SS_Menu] = tilemap;
 
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tilemap.png");
     if (!tilemap)
         log_warn("Could not load tilemap.png");
     gfx_ret->m_allTextures[SS_Legacy] = tilemap;
 
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_tiles.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/spritesheet_tiles.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_tiles.png");
     gfx_ret->m_allTextures[SS_Tiles] = tilemap;
 
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_characters.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/spritesheet_characters.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = tilemap;
 
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tools.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tools.png");
     if (!tilemap)
         log_warn("Could not load tools.png");
     gfx_ret->m_allTextures[SS_Tools] = tilemap;
 
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/weapons.png");
+    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/weapons.png");
     if (!tilemap)
         log_warn("Could not load weapons.png");
     gfx_ret->m_allTextures[SS_Weapons] = tilemap;
