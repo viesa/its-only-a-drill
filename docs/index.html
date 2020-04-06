@@ -16,6 +16,7 @@
             <a href="#welcome">Welcome</a>
             <a href="#dataflow">Data flowchart</a>
             <a href="#level-builder">Level builder</a>
+            <a href="#wiki">Wiki</a>
             <a href="#example-section">Example section</a>
             <br>
             <a href="./builder/index.html">Level builder (Link)</a>
@@ -52,6 +53,211 @@
                     <li>example list item</li>
                     <li>example list item</li>
                 </ul>
+            </section>
+
+            <section id="wiki">
+                <a href="#wiki">
+                    <h1>Wiki</h1>
+                </a>
+                <h2>Funktioner</h2>
+                <p class="code">
+                    return-typ STRUCT+funktionalitet(STRUCTPOINTER, övriga parameter)
+                </p>
+                <b>Exempel:</b>
+                <p class="code">
+                    void CameraUpdate(Camera* camera, float dt);
+                </p>
+
+                <p>
+                    Om en funktion tar in väldigt många parametrar ska de skrivas:<br>
+                </p>
+                <p class="code">int minFunktion(int var1,<br>
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspint var2,<br>
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspint var3,<br>
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspint var4);<br>
+                </p>
+                <p>
+                    Col: 100 = ny rad
+                </p>
+
+                <br>
+                <h2>Include</h2>
+                <p>
+                    Använd <...> när du inkluderar externa filer <br>
+                        Använd "..." när du inkluderar lokala filer
+                </p>
+
+                <p>Allt som finns inom vår repo (mappen <i>"its-only-a-drill"</i>)
+                    räknas som en <b>lokal</b> fil</p>
+
+
+                <b>Exempel:</b>
+                <p class="code">
+                    #include &lt;stdio.h&gt; <b>Externt</b><br>
+                    #include "core/Camera.h" <b>Lokalt</b>
+                </p>
+
+                <br>
+                <h2>Abstrakta datatyper</h2>
+                <ol>
+                    <li>Skapa .h och .c filen</li>
+                    <li>Skriv ut <b>#ifndef</b>...</li>
+                    <li>Skapa en struct som heter samma som filen</li>
+                    <li>Skapa Create- och Destroyfunktionerna (Destroy är frivillig)</li>
+                    <li>Implementera Create och Destroy i .c-filen</li>
+                    <li>Skriva dina egna funktioner i .h-filen</li>
+                </ol>
+
+                <b>Exempel:</b>
+                <p>
+                    Jag vill skapa en Player-struktur
+                </p>
+
+                <ol>
+                    <li>Skapa Player.h och Player.c</li>
+                    <li>Skriv:
+                        <p class="code">
+                            #ifndef PLAYER_H<br>
+                            #define PLAYER_H<br><br>
+                            <b>&lt;Här ska du skriva din kod&gt;</b><br><br>
+                            #endif
+                        </p>
+                    </li>
+                    <li>Skapa en struct som heter Player:
+                        <p class="code">
+                            typedef struct Player<br>
+                            {<br>
+                            float speed;<br>
+                            } Player;<br>
+                        </p>
+                    </li>
+                    <li>Skapa Create och Destroy:
+                        <p class="code">
+                            Player PlayerCreate();<br>
+                            void PlayerDestroy(Player* player);
+                        </p>
+                    </li>
+                    <li>Implementera Create och Destroy i Player.c
+                        <p class="code">
+                            Player PlayerCreate()<br>
+                            {<br>
+                            Player player;<br>
+                            player.speed = 0.0f;<br>
+                            return player;<br>
+                            }<br>
+                            <br>
+                            void PlayerDestroy(Player* player)<br>
+                            {<br>
+                            }<br>
+                        </p>
+                        <b> OBS!</b> Om din strukt innehåller över <b>5</b> datatyper:
+                        <p class="code">
+                            Player PlayerCreate() <br>
+                            { <br>
+                            Player player = (Player*)SDL_malloc(sizeof(Player)); <br>
+                            player->speed = 0.0f; <br>
+                            return player; <br>
+                            } <br>
+                            <br>
+                            void PlayerDestroy(Player* player) <br>
+                            { <br>
+                            SDL_free(player); <br>
+                            } <br>
+                        </p>
+
+                    </li>
+                    <li>Skriva dina egna funktioner i Player.h och Player.c
+                        <p class="code">
+                            void PlayerUpdate(Player* player, float dt);<br>
+                        </p>
+                    </li>
+                </ol>
+
+                <br>
+                <h2>Kommentarer</h2>
+                <p>
+                    Över de flesta funktioner i din .h fil bör du skriva en
+                    kommentar vad funktionen gör. Inte för mycket text!
+                </p>
+
+                <p>
+                    Om funktionen är korteller om namnet är tydligt nog
+                    behövs ingen kommenterar.
+                </p>
+
+                <p>Skriv enligt följande format:</p>
+
+                <p class="code">
+                    ///&lt;Kortfattat vad funktionen gör&gt;<br>
+                    ///\param &lt;beskriving av parameter som är av värde&gt;<br>
+                </p>
+                <p>Exempel från filen Sound.h</p>
+                <p class="code">
+                    ///Play the sound file<br>
+                    ///\param loops: If == -1, loop forever<br>
+                    ///Otherwise loop of number times provied + 1<br>
+                    void SoundPlay(int loops = 0);<br>
+                </p>
+
+                <b>OBS!</b> Det är viktigt att kommentaren skrivs ovanför
+                deklarationen i .h
+
+                <br>
+                <h2>Error-hantering</h2>
+                <p>
+                    När en funktion returnerar ett result-värde (ex. -1, 0 eller 1)
+                    hanterar vi det genom att skriva ut i terminalen.
+                </p>
+
+
+                <p>Använd <b>"core/Log.h"</b></p>
+
+                <p>Exempel:</p>
+                <p class="code">
+                    #include "core/Log.h"<br>
+                    <br>
+                    ....<br>
+                    <br>
+                    int result = SDLNet_Init();<br>
+                    if(result == -1)<br>
+                    {<br>
+                    log_error("Could not initialize net: %s", SDLNet_GetError());<br>
+                    return NULL;<br>
+                    }<br>
+                </p>
+
+                <p>
+                    Tillängliga log-typer:
+                    <ul>
+                        <li> log_info</li>
+                        <li> log_warn</li>
+                        <li> log_error</li>
+                        <li> log_fatal</li>
+                    </ul>
+                </p>
+
+                <br>
+                <h2>Visual Studio Code inställningar</h2>
+                <p>
+                    Settings &gt; <b>Editor: format on save</b> ska vara <b>PÅ</b>
+                </p>
+
+                <h4>Extensions som ska vara installerade:</h4>
+                <ul>
+                    <li>C/C++</li>
+                    <li>Live Share</li>
+                </ul>
+
+                <br>
+                <h2>Git</h2>
+                <p>
+                    Hur vi använder Git hänvisas till <a href="https://chris.beams.io/posts/git-commit/">denna
+                        artikel</a><br>
+                    <br>
+                    Läs igenom noga!<br>
+                </p>
+
+
             </section>
 
             <section id="example-section">

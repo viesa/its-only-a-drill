@@ -43,31 +43,26 @@ Graphics *GraphicsCreate()
         log_warn("Could not load menu.png");
     gfx_ret->m_allTextures[SS_Menu] = tilemap;
 
-    //INIT ALL TEXTURES
     tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
     if (!tilemap)
         log_warn("Could not load tilemap.png");
     gfx_ret->m_allTextures[SS_Legacy] = tilemap;
 
-    //INIT ALL TEXTURES
     tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_tiles.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_tiles.png");
     gfx_ret->m_allTextures[SS_Tiles] = tilemap;
 
-    //INIT ALL TEXTURES
     tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_characters.png");
     if (!tilemap)
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = tilemap;
 
-    //INIT ALL TEXTURES
     tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tools.png");
     if (!tilemap)
         log_warn("Could not load tools.png");
     gfx_ret->m_allTextures[SS_Tools] = tilemap;
 
-    //INIT ALL TEXTURES
     tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/weapons.png");
     if (!tilemap)
         log_warn("Could not load weapons.png");

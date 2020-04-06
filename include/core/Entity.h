@@ -12,9 +12,8 @@ typedef enum EntityPresets
 } EntityPresets;
 typedef struct Entity
 {
-    int rot, rotSpeed, moveSpeed, id;
+    int rot, id;
     SDL_bool isCollider;
-    SDL_bool isMovable;
     Drawable drawable;
     Vec2 position;
     Vec2 Force;
@@ -22,12 +21,17 @@ typedef struct Entity
     float Friction, mass;
 } Entity;
 
-Entity EntityCreate(Vec2 position, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
+///Creates a entity
+///\param preset: what entity is being created
+///makes a entity and create it so it exists
+Entity EntityCreate(Vec2 position, EntityPresets preset, int id);
 
-///\param entities: if NULL, no collision detection occurs
+///Waring only one
+///\param entites: ALL entitys are needed
+///updates the state of alla entitys
 void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);
 void EntityDraw(Camera *camera, Entity *entity);
 
-/// Checks whether entities are colliding or not
+/// finds the collision and fixes the problem with rules
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk);
 #endif
