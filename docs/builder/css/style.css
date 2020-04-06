@@ -171,12 +171,16 @@ h3,label{
     flex-flow: column wrap;
 }
 
-.tile-selector{
+.tiles-child-box{
     background: #888;
     padding: 10px;
     margin: 5px;
     cursor: pointer;
     border-radius: .2rem;
+
+}
+
+.tile-selector{
 }
 
 .selected-tile{

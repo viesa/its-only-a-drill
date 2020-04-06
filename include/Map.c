@@ -21,8 +21,8 @@ Map *MapCreate(JSON *mapdata)
         EntityPresets type;
         if (!strcmp(type_str, "player"))
             type = EntityPlayerSpawn;
-        else if (!strcmp(type_str, "gun"))
-            type = EntityGun;
+        else
+            type = EntityMapObject;
         Vec2 position = Vec2Create((float)entries[2].value->u.integer, (float)entries[3].value->u.integer);
         int width = entries[4].value->u.integer;
         int height = entries[5].value->u.integer;
@@ -30,18 +30,27 @@ Map *MapCreate(JSON *mapdata)
         SDL_bool collider = (SDL_bool)entries[7].value->u.integer;
         int rotation = entries[8].value->u.integer;
 
-        Entity e = EntityCreate(position, 0, 0, type, 0);
-        e.drawable.dst.w = width;
-        e.drawable.dst.h = height;
-        e.drawable.rot = rotation;
-        e.drawable.rot_anchor = RectMid(e.drawable.dst);
-        e.mass = mass;
-        e.isCollider = collider;
+        int src_x = entries[9].value->u.object.values[0].value->u.integer;
+        int src_y = entries[9].value->u.object.values[1].value->u.integer;
+        int src_w = entries[9].value->u.object.values[2].value->u.integer;
+        int src_h = entries[9].value->u.object.values[3].value->u.integer;
+        SDL_Rect src = {src_x, src_y, src_w, src_h};
 
-        SDL_memcpy(&map->contents[i], &e, sizeof(Entity));
+        Entity _new_ = EntityCreate(position, 0, 0, type, 0);
+        _new_.drawable.dst.w = width;
+        _new_.drawable.dst.h = height;
+        _new_.drawable.rot = rotation;
+        _new_.drawable.rot_anchor = RectMid(_new_.drawable.dst);
+        _new_.mass = mass;
+        _new_.isCollider = collider;
+        _new_.drawable.src = src;
+
+        SDL_memcpy(&map->contents[i], &_new_, sizeof(Entity));
     }
     return map;
 }
 void MapDestroy(Map *map)
 {
+    SDL_free(map->contents);
+    SDL_free(map);
 }

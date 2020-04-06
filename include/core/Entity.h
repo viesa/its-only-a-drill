@@ -6,9 +6,8 @@
 typedef enum EntityPresets
 {
     EntityWoman,
-    //TEMPORARY
-    EntityGun,
     EntityPlayerSpawn,
+    EntityMapObject
     //--------
 } EntityPresets;
 typedef struct Entity

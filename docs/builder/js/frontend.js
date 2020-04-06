@@ -70,10 +70,12 @@ $("#canvas").on("click", function () {
     if (selectedLayer) {
 
         var pos = getMousePos(c, window.event);
-        var width = selectedLayer.width();
-        var height = selectedLayer.height();
+        var cvX = parseInt(selectedLayer.attr("sx"));
+        var cvY = parseInt(selectedLayer.attr("sy"));
+        var cvW = parseInt(selectedLayer.attr("sw"));
+        var cvH = parseInt(selectedLayer.attr("sh"));
 
-        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x), parseInt(pos.y), parseInt(width), parseInt(height), parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0)));
+        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x - cvW / 2), parseInt(pos.y - cvH / 2), cvW, cvH, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
 
         update();
     }

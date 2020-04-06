@@ -21,12 +21,6 @@ Entity EntityCreate(Vec2 position, int moveSpeed, int rotSpeed, EntityPresets pr
         e.isMovable = SDL_TRUE;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
         break;
-    case EntityGun:
-        e.drawable = DrawableCreate((SDL_Rect){1780, 892, 50, 50}, (SDL_Rect){0, 0, 0, 0}, SS_Tiles);
-        break;
-    case EntityPlayerSpawn:
-        e.drawable = DrawableCreate((SDL_Rect){1628, 1036, 50, 50}, (SDL_Rect){0, 0, 0, 0}, SS_Tiles);
-        break;
     default:
         break;
     }
