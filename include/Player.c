@@ -33,13 +33,13 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     player->aimFollow = Vec2Add(&aim, &player->entity.position);
 
     if (InputIsKeyDown(input, SDL_SCANCODE_D))
-        player->entity.Force.x += 50;
+        player->entity.Force.x += 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_A))
-        player->entity.Force.x -= 50;
+        player->entity.Force.x -= 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_W))
-        player->entity.Force.y -= 50;
+        player->entity.Force.y -= 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_S))
-        player->entity.Force.y += 50;
+        player->entity.Force.y += 750;
     // Vec2 delta = {0.0f, 0.0f};
     // if (InputIsKeyDown(input, SDL_SCANCODE_A))
     // {
