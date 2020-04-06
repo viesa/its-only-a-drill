@@ -6,7 +6,7 @@
 Player PlayerCreate()
 {
     Player ret;
-    ret.entity = EntityCreate((Vec2){0.0f, 0.0f}, 120, 0, EntityWoman, 10);
+    ret.entity = EntityCreate((Vec2){0.0f, 0.0f}, EntityWoman, 10);
     ret.aimFollow = Vec2Create(0.0f, 0.0f);
     return ret;
 }
