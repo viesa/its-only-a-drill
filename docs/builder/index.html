@@ -12,31 +12,36 @@
 </head>
 
 <body>
-    <div id="tool-button-container">
-        <input type="file" id="files" name="file" style="display: none;" />
-        <button class="tool-buttons" title="Open folder"
-            onclick="document.getElementById('files').click();$('#upld-btn').show()">
-            &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
-        </button>
-
-        <button id="upld-btn" class="tool-buttons" title="Upload file" style="display: none;" onclick="readBlob()">
-            &nbsp;<i class="fas fa-upload"></i>&nbsp;
-        </button>
-
-        <button id="dwnld-btn" class="tool-buttons" title="Download current map" onclick="outputJSON()">
-            &nbsp;<i class="fas fa-download"></i>&nbsp;
-        </button>
-    </div>
     <div id="canvas-container">
         <canvas id="canvas"></canvas>
     </div>
     <div id="sidebar">
         <div id="layers" class="sidebar-box">
+            <h3>Layers</h3>
             <div id="layers-container"></div>
         </div>
         <div id="tiles" class="sidebar-box">
             <h3>Tiles</h3>
-            <div id="tile-container">
+            <div id="tile-container"></div>
+        </div>
+
+        <div id="tools" class="sidebar-box">
+            <h3>Tools</h3>
+            <div id="tool-container">
+                <input type="file" id="files" name="file" style="display: none;" />
+                <button class="tool-buttons" title="Open folder"
+                    onclick="document.getElementById('files').click();$('#upld-btn').show()">
+                    &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
+                </button>
+
+                <button id="upld-btn" class="tool-buttons" title="Upload file" style="display: none;"
+                    onclick="readBlob()">
+                    &nbsp;<i class="fas fa-upload"></i>&nbsp;
+                </button>
+
+                <button id="dwnld-btn" class="tool-buttons" title="Download current map" onclick="outputJSON()">
+                    &nbsp;<i class="fas fa-download"></i>&nbsp;
+                </button>
             </div>
         </div>
     </div>

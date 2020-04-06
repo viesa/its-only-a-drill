@@ -1,6 +1,20 @@
 {
     "types": [
         {
+            "name": "brick_red",
+            "x": 0,
+            "y": 0,
+            "w": 32,
+            "h": 16
+        },
+        {
+            "name": "brick_green",
+            "x": 32,
+            "y": 0,
+            "w": 32,
+            "h": 16
+        },
+        {
             "name": "brick_brown",
             "x": 0,
             "y": 48,
@@ -19,6 +33,34 @@
             "x": 64,
             "y": 0,
             "w": 32,
+            "h": 16
+        },
+        {
+            "name": "brick_brown_broken",
+            "x": 64,
+            "y": 96,
+            "w": 64,
+            "h": 16
+        },
+        {
+            "name": "wood_darkbrown",
+            "x": 160,
+            "y": 0,
+            "w": 16,
+            "h": 16
+        },
+        {
+            "name": "wood_light",
+            "x": 176,
+            "y": 80,
+            "w": 16,
+            "h": 16
+        },
+        {
+            "name": "tile_white",
+            "x": 224,
+            "y": 0,
+            "w": 16,
             "h": 16
         }
     ]

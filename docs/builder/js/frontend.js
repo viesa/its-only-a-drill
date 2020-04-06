@@ -74,8 +74,9 @@ $("#canvas").on("click", function () {
         var cvY = parseInt(selectedLayer.attr("sy"));
         var cvW = parseInt(selectedLayer.attr("sw"));
         var cvH = parseInt(selectedLayer.attr("sh"));
+        //center of mouse parseInt(pos.x - cvW / 2), parseInt(pos.y - cvH / 2)
 
-        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x - cvW / 2), parseInt(pos.y - cvH / 2), cvW, cvH, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
+        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x), parseInt(pos.y), cvW * 2, cvH * 2, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
 
         update();
     }
