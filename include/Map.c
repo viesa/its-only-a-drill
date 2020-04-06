@@ -30,7 +30,7 @@ Map *MapCreate(JSON *mapdata)
         SDL_bool collider = (SDL_bool)entries[7].value->u.integer;
         int rotation = entries[8].value->u.integer;
 
-        Entity e = EntityCreate(position, 0, 0, type, 0);
+        Entity e = EntityCreate(position, type, 0);
         e.drawable.dst.w = width;
         e.drawable.dst.h = height;
         e.drawable.rot = rotation;

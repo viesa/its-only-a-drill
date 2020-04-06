@@ -37,7 +37,7 @@ struct AppClient
     Item item[2];
     Entity entities[3];
     Player player;
-    Map *testMap;
+    //Map *testMap;
     Weapon weapon;
 };
 
@@ -98,11 +98,11 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     // ClientStart(client);
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){50, 50}, 100, 20, EntityWoman, 0);
+    app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
-    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
-    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
+    app->entities[1] = EntityCreate((Vec2){300, 0}, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 0}, EntityWoman, 2);
 
     ScoreCreate(0);
     ScoreIncrement(100, 0);
@@ -112,7 +112,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
-    app->testMap = MapCreate(JSONCreate("level.json"));
+    //app->testMap = MapCreate(JSONCreate("level.json"));
 
     return app;
 }
@@ -167,13 +167,13 @@ void AppClientUpdate(AppClient *app)
         MusicStop(&app->testMusic);
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
-        app->entities[1].Force.x += 50;
+        app->entities[1].Force.x += 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_J))
-        app->entities[1].Force.x -= 50;
+        app->entities[1].Force.x -= 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_I))
-        app->entities[1].Force.y -= 50;
+        app->entities[1].Force.y -= 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
-        app->entities[1].Force.y += 50;
+        app->entities[1].Force.y += 500;
 
     /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
     {   /* om player position är samma som vapens då försvinner den
@@ -209,8 +209,8 @@ void AppClientDraw(AppClient *app)
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
 
-    for (int i = 0; i < app->testMap->n; i++)
-        EntityDraw(app->camera, &app->testMap->contents[i]);
+    // for (int i = 0; i < app->testMap->n; i++)
+    //     EntityDraw(app->camera, &app->testMap->contents[i]);
 
     ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
     ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
