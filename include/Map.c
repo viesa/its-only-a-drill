@@ -23,6 +23,7 @@ Map *MapCreate(JSON *mapdata)
             type = EntityPlayerSpawn;
         else
             type = EntityMapObject;
+
         Vec2 position = Vec2Create((float)entries[2].value->u.integer, (float)entries[3].value->u.integer);
         int width = entries[4].value->u.integer;
         int height = entries[5].value->u.integer;
@@ -34,16 +35,17 @@ Map *MapCreate(JSON *mapdata)
         int src_y = entries[9].value->u.object.values[1].value->u.integer;
         int src_w = entries[9].value->u.object.values[2].value->u.integer;
         int src_h = entries[9].value->u.object.values[3].value->u.integer;
+
+        SDL_Rect dst = {(int)position.x, (int)position.y, width, height};
         SDL_Rect src = {src_x, src_y, src_w, src_h};
 
         Entity _new_ = EntityCreate(position, type, 0);
-        _new_.drawable.dst.w = width;
-        _new_.drawable.dst.h = height;
+        _new_.drawable.dst = dst;
+        _new_.drawable.src = src;
         _new_.drawable.rot = rotation;
         _new_.drawable.rot_anchor = RectMid(_new_.drawable.dst);
         _new_.mass = mass;
         _new_.isCollider = collider;
-        _new_.drawable.src = src;
 
         SDL_memcpy(&map->contents[i], &_new_, sizeof(Entity));
     }

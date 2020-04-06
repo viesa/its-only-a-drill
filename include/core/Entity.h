@@ -6,9 +6,10 @@
 typedef enum EntityPresets
 {
     EntityWoman,
+    //Used only by Map.c
     EntityPlayerSpawn,
+    //Used only by Map.c
     EntityMapObject
-    //--------
 } EntityPresets;
 typedef struct Entity
 {
