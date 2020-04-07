@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#define DegBug
+
 Graphics *GraphicsCreate()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -28,6 +30,10 @@ Graphics *GraphicsCreate()
     SDL_GetCurrentDisplayMode(0, &DM);
     gfx_ret->gfxWindowWidth = DM.w;
     gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+#ifdef DegBug
+    gfx_ret->gfxWindowWidth = 640;
+    gfx_ret->gfxWindowHeight = 480;
+#endif
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
 
@@ -38,40 +44,41 @@ Graphics *GraphicsCreate()
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     //INIT ALL TEXTURES
-    SDL_Texture *tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/menu.png");
-    if (!tilemap)
+    SDL_Texture *texture;
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/menu.png");
+    if (!texture)
         log_warn("Could not load menu.png");
-    gfx_ret->m_allTextures[SS_Menu] = tilemap;
+    gfx_ret->m_allTextures[SS_Menu] = texture;
 
-    //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tilemap.png");
-    if (!tilemap)
-        log_warn("Could not load tilemap.png");
-    gfx_ret->m_allTextures[SS_Legacy] = tilemap;
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tilemap.png");
+    if (!texture)
+        log_warn("Could not load texture.png");
+    gfx_ret->m_allTextures[SS_Legacy] = texture;
 
-    //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_tiles.png");
-    if (!tilemap)
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/spritesheet_tiles.png");
+    if (!texture)
         log_warn("Could not load spritesheet_tiles.png");
-    gfx_ret->m_allTextures[SS_Tiles] = tilemap;
+    gfx_ret->m_allTextures[SS_Tiles] = texture;
 
-    //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/spritesheet_characters.png");
-    if (!tilemap)
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/spritesheet_characters.png");
+    if (!texture)
         log_warn("Could not load spritesheet_characters.png");
-    gfx_ret->m_allTextures[SS_Characters] = tilemap;
+    gfx_ret->m_allTextures[SS_Characters] = texture;
 
-    //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/tools.png");
-    if (!tilemap)
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tools.png");
+    if (!texture)
         log_warn("Could not load tools.png");
-    gfx_ret->m_allTextures[SS_Tools] = tilemap;
+    gfx_ret->m_allTextures[SS_Tools] = texture;
 
-    //INIT ALL TEXTURES
-    tilemap = IMG_LoadTexture(gfx_ret->m_renderer, "assets/spritesheets/weapons.png");
-    if (!tilemap)
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/weapons.png");
+    if (!texture)
         log_warn("Could not load weapons.png");
-    gfx_ret->m_allTextures[SS_Weapons] = tilemap;
+    gfx_ret->m_allTextures[SS_Weapons] = texture;
+
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/background-tiles.png");
+    if (!texture)
+        log_warn("Could not load background-tiles.png");
+    gfx_ret->m_allTextures[SS_BackgroundTiles] = texture;
 
     return gfx_ret;
 }
@@ -99,12 +106,13 @@ void GraphicsPresentScreen(Graphics *gfx)
 
 void GraphicsDraw(Graphics *gfx, Drawable drawable)
 {
+    SDL_Point rot_point = (SDL_Point){(int)drawable.rot_anchor.x, (int)drawable.rot_anchor.y};
     SDL_RenderCopyEx(gfx->m_renderer,
                      gfx->m_allTextures[drawable.spriteSheet],
                      &drawable.src,
                      &drawable.dst,
                      drawable.rot,
-                     &drawable.rot_anchor,
+                     &rot_point,
                      SDL_FLIP_NONE);
 }
 

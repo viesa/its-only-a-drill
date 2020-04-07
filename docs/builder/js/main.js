@@ -10,14 +10,23 @@ var db = {
 
 $(window).on("load", function () {
     $("#tile-container").children().first().trigger("click");
+    $.getJSON("./js/types.json", function (json) {
+
+        for (i = 0; i < json.types.length; i++) {
+            var str1 = '<div class="tiles-child-box"><span>' + json.types[i].name + '</span>';
+            var str2 = '<img src="../spritesheets/background-tiles.png" id="img-' + json.types[i].name + '" title="' + json.types[i].name + ': 16x16px" type="' + json.types[i].name + '" sx="' + json.types[i].x + '" sy="' + json.types[i].y + '" sw="' + json.types[i].w + '" sh="' + json.types[i].h + '" mass="1" collider="1" class="tile-selector" style="display:none">';
+            var str3 = '</div>';
+            $("#tile-container").append(str1 + str2 + str3);
+        };
+    });
 });
 
-$(".tile-selector").on("click", function () {
+$(document).on("click", '.tiles-child-box', function () {
     if (selectedLayer) {
-        selectedLayer.removeClass("selected-tile");
+        selectedLayer.parent().removeClass("selected-tile");
     }
-    selectedLayer = $(this);
     $(this).addClass("selected-tile");
+    selectedLayer = $(this).find(".tile-selector");
 });
 
 function update() {
@@ -27,7 +36,7 @@ function update() {
     canvasUpdate();
 }
 
-function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collider, rotation) {
+function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collider, rotation, sx, sy, sw, sh) {
     return obj = {
         type: imgType,
         img: image,
@@ -37,6 +46,12 @@ function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collid
         h: height,
         m: mass,
         c: collider,
-        r: rotation
+        r: rotation,
+        src: {
+            x: sx,
+            y: sy,
+            w: sw,
+            h: sh
+        }
     }
 }

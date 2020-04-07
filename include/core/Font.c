@@ -2,10 +2,6 @@
 
 #include "Log.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-
 Font *FontCreate(Graphics *gfx)
 {
     if (TTF_Init() < 0)

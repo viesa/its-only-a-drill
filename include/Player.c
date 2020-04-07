@@ -6,7 +6,7 @@
 Player PlayerCreate()
 {
     Player ret;
-    ret.entity = EntityCreate((Vec2){0.0f, 0.0f}, 120, 0, EntityWoman, 10);
+    ret.entity = EntityCreate((Vec2){0.0f, 0.0f}, EntityWoman, 10);
     ret.aimFollow = Vec2Create(0.0f, 0.0f);
     return ret;
 }
@@ -23,23 +23,23 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
 
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(&player->entity.position, &cameraPos);
+    Vec2 playerPos = Vec2Sub(player->entity.position, cameraPos);
 
-    Vec2 aim = Vec2Sub(&mousePos, &playerPos);
+    Vec2 aim = Vec2Sub(mousePos, playerPos);
 
-    aim = Vec2Unit(&aim);
-    aim = Vec2MulL(&aim, RADIUS);
+    aim = Vec2Unit(aim);
+    aim = Vec2MulL(aim, RADIUS);
 
-    player->aimFollow = Vec2Add(&aim, &player->entity.position);
+    player->aimFollow = Vec2Add(aim, player->entity.position);
 
     if (InputIsKeyDown(input, SDL_SCANCODE_D))
-        player->entity.Force.x += 50;
+        player->entity.Force.x += 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_A))
-        player->entity.Force.x -= 50;
+        player->entity.Force.x -= 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_W))
-        player->entity.Force.y -= 50;
+        player->entity.Force.y -= 750;
     if (InputIsKeyDown(input, SDL_SCANCODE_S))
-        player->entity.Force.y += 50;
+        player->entity.Force.y += 750;
     // Vec2 delta = {0.0f, 0.0f};
     // if (InputIsKeyDown(input, SDL_SCANCODE_A))
     // {

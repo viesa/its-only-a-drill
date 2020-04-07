@@ -9,6 +9,7 @@ typedef enum SpriteSheet
     SS_Characters,
     SS_Tools,
     SS_Weapons,
+    SS_BackgroundTiles,
     SS_Count
 } SpriteSheet;
 

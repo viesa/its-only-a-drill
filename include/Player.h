@@ -3,8 +3,6 @@
 
 #include "core/Entity.h"
 #include "core/Input.h"
-#include "core/Clock.h"
-#include "core/Camera.h"
 
 #define RADIUS 25
 

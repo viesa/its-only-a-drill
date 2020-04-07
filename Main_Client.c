@@ -1,8 +1,4 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_net.h>
-#include <SDL2/SDL_ttf.h>
 #include "include/core/Event.h"
-#include "include/net/Client.h"
 
 #include "include/core/AppClient.h"
 

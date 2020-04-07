@@ -1,5 +1,7 @@
 #include "JSON.h"
 
+#include <sys/stat.h>
+
 static void process_value(json_value *value, int depth);
 
 JSON *JSONCreate(char *filename)
@@ -33,7 +35,7 @@ JSON *JSONCreate(char *filename)
     }
     if (fread(file_contents, file_size, 1, fp) != 1)
     {
-        log_error("JSON Loading error: Uanble to read contents of %s", filename);
+        log_error("JSON Loading error: Unable to read contents of %s", filename);
         fclose(fp);
         free(file_contents);
         return NULL;
@@ -73,12 +75,23 @@ json_value *JSONGetValue(JSON *json, uint32_t indices[], uint32_t n)
     for (int i = 0; i < n; i++)
     {
         json_type type = ret->type;
-        uint32_t length = ret->u.object.length;
         uint32_t currIndex = indices[i];
-        if (ret->type != json_object ||
-            ret->u.object.length <= indices[i])
+        if (type == json_object)
+        {
+            uint32_t length = ret->u.object.length;
+            if (length <= currIndex)
+                return NULL;
+            ret = ret->u.object.values[currIndex].value;
+        }
+        else if (type == json_array)
+        {
+            uint32_t length = ret->u.array.length;
+            if (length <= currIndex)
+                return NULL;
+            ret = ret->u.array.values[currIndex];
+        }
+        else
             return NULL;
-        ret = ret->u.object.values[indices[i]].value;
     }
     return ret;
 }

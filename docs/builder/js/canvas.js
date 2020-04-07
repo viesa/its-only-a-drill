@@ -30,8 +30,8 @@ function drawHighlightRectangle(x, y, w, h, deg) {
 }
 
 var setCanvasSize = function () {
-    canvas.width = 2000; //window.innerHeight;
-    canvas.height = 2000; //window.innerHeight;
+    canvas.width = 2048; //window.innerHeight;
+    canvas.height = 2048; //window.innerHeight;
 }
 
 function clearCanvas() {
@@ -42,7 +42,8 @@ function clearCanvas() {
 
 function canvasUpdate() {
     clearCanvas();
+    //ctx.drawImage(document.getElementById("background-tiles-sheet"), 0, 48, 16, 16, 0, 0, 16, 16);
     for (i = 0; i < db.list.length; i++) {
-        drawRotatedImage(db.list[i].img, db.list[i].x, db.list[i].y, db.list[i].w, db.list[i].h, db.list[i].r);
+        ctx.drawImage(db.list[i].img, db.list[i].src.x, db.list[i].src.y, db.list[i].src.w, db.list[i].src.h, db.list[i].x, db.list[i].y, db.list[i].w, db.list[i].h);
     }
 }

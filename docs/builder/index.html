@@ -12,39 +12,52 @@
 </head>
 
 <body>
-    <div id="tool-button-container">
-        <input type="file" id="files" name="file" style="display: none;" />
-        <button class="tool-buttons" title="Open folder"
-            onclick="document.getElementById('files').click();$('#upld-btn').show()">
-            &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
-        </button>
-
-        <button id="upld-btn" class="tool-buttons" title="Upload file" style="display: none;" onclick="readBlob()">
-            &nbsp;<i class="fas fa-upload"></i>&nbsp;
-        </button>
-
-        <button id="dwnld-btn" class="tool-buttons" title="Download current map" onclick="outputJSON()">
-            &nbsp;<i class="fas fa-download"></i>&nbsp;
-        </button>
-    </div>
     <div id="canvas-container">
         <canvas id="canvas"></canvas>
     </div>
     <div id="sidebar">
         <div id="layers" class="sidebar-box">
+            <h3>Layers</h3>
             <div id="layers-container"></div>
         </div>
         <div id="tiles" class="sidebar-box">
             <h3>Tiles</h3>
-            <div id="tile-container">
-                <img src="img/player.png" id="img-player" title="player: 120x60px" type="player" mass="80" collider="1"
-                    class="tile-selector">
-                <img src="img/gun.png" id="img-gun" title="gun: 40x40px" type="gun" mass="1" collider="1"
-                    class="tile-selector">
+            <div id="tile-container"></div>
+        </div>
+
+        <div id="tools" class="sidebar-box">
+            <h3>Tools</h3>
+            <div id="tool-container">
+
+                <button id="sync" onclick="update()" title="Refresh canvas" class="tool-buttons">
+                    &nbsp;<i class="fas fa-sync-alt"></i>&nbsp;
+                </button>
+
+                <button id="snapToGrid" class="tool-buttons">
+                    <label for="snapCheckBox">Align</label>
+                    <input id="snapCheckBox" type="checkbox" checked>
+                </button>
+
+                <input type="file" id="files" name="file" style="display: none;" />
+                <button class="tool-buttons" title="Open folder"
+                    onclick="document.getElementById('files').click();$('#upld-btn').show()">
+                    &nbsp;<i class='fas fa-folder-open'></i>&nbsp;
+                </button>
+
+                <button id="upld-btn" class="tool-buttons" title="Upload file" style="display: none;"
+                    onclick="readBlob()">
+                    &nbsp;<i class="fas fa-upload"></i>&nbsp;
+                </button>
+
+                <button id="dwnld-btn" class="tool-buttons" title="Download current map" onclick="outputJSON()">
+                    &nbsp;<i class="fas fa-download"></i>&nbsp;
+                </button>
             </div>
         </div>
     </div>
-
+    <div id="spritesheet_container" style="display: none;">
+        <img id="background-tiles-sheet" src="../spritesheets/background-tiles.png">
+    </div>
     <p id="byte_content" style="display: none;"></p>
 
     <!-- Import JS files -->

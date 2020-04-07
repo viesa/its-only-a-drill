@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#include <SDL2/SDL_shape.h>
+#include <SDL2/SDL_rect.h>
 
 struct Camera
 {
@@ -43,21 +43,15 @@ void CameraDraw(Camera *camera, Drawable drawable)
 {
     drawable.dst.x -= camera->m_position.x;
     drawable.dst.y -= camera->m_position.y;
-    drawable.rot = camera->m_centerRotation;
-    SDL_Point middle = CameraMiddle(camera);
-    middle.x += camera->m_viewport.w / 2.0f - drawable.dst.x;
-    middle.y += camera->m_viewport.h / 2.0f - drawable.dst.y;
-    drawable.rot_anchor = middle;
-    GraphicsDraw(camera->gfx, drawable);
+    if (SDL_HasIntersection(&drawable.dst, &camera->m_viewport))
+        GraphicsDraw(camera->gfx, drawable);
 }
 
-SDL_Point CameraMiddle(Camera *camera)
+Vec2 CameraMiddle(Camera *camera)
 {
     SDL_Rect *vp = &camera->m_viewport;
-    return (SDL_Point){
-        (float)(vp->x + vp->w) / 2.0f + camera->m_position.x,
-        (float)(vp->y + vp->h) / 2.0f + camera->m_position.y,
-    };
+    return (Vec2Create)((float)(vp->x + vp->w) / 2.0f + camera->m_position.x,
+                        (float)(vp->y + vp->h) / 2.0f + camera->m_position.y);
 }
 
 void CameraAddRotation(Camera *camera, float ammount)

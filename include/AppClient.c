@@ -1,8 +1,8 @@
 #include "core/AppClient.h"
 
-#include "core/Entity.h"
 #include "Items.h"
 #include "Player.h"
+#include "Map.h"
 
 struct AppClient
 {
@@ -39,6 +39,7 @@ struct AppClient
 
     Entity entities[3];
     Player player;
+    //Map *testMap;
     Weapon weapon;
 };
 
@@ -99,11 +100,11 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     // ClientStart(client);
     // ClientSend(client, Test, "THIS IS A TEST", 15);
 
-    app->entities[0] = EntityCreate((Vec2){50, 50}, 100, 20, EntityWoman, 0);
+    app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
-    app->entities[1] = EntityCreate((Vec2){300, 0}, 100, 20, EntityWoman, 1);
-    app->entities[2] = EntityCreate((Vec2){500, 0}, 100, 20, EntityWoman, 2);
+    app->entities[1] = EntityCreate((Vec2){300, 0}, EntityWoman, 1);
+    app->entities[2] = EntityCreate((Vec2){500, 0}, EntityWoman, 2);
 
     ScoreCreate(0);
     ScoreIncrement(100, 0);
@@ -114,6 +115,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->ground = GroundListCreate();
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
+
+    //app->testMap = MapCreate(JSONCreate("level.json"));
 
     return app;
 }
@@ -168,13 +171,13 @@ void AppClientUpdate(AppClient *app)
         MusicStop(&app->testMusic);
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
-        app->entities[1].Force.x += 50;
+        app->entities[1].Force.x += 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_J))
-        app->entities[1].Force.x -= 50;
+        app->entities[1].Force.x -= 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_I))
-        app->entities[1].Force.y -= 50;
+        app->entities[1].Force.y -= 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
-        app->entities[1].Force.y += 50;
+        app->entities[1].Force.y += 500;
 
     if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
     { // if player is near to the item, then take it!     
@@ -205,6 +208,20 @@ void AppClientUpdate(AppClient *app)
 
     PlayerUpdate(&app->player, app->input, app->clock, app->camera);
     //UpdateWeapons(&app->);
+    // SDL_PixelFormat *fmt;
+    // SDL_Color *color;
+    // fmt = app->gfx->format;
+    // Uint8 index;
+    // index = *(Uint8 *)surface->pixels;
+    // color = &fmt->palette->colors[index];
+    // for (int i = 0; i < ; i++)
+    // {
+    //     for (int j = 0; j < count; j++)
+    //     {
+    //         /* code */
+    //     }
+    //     printf("\n");
+    // }
 }
 
 void AppClientDraw(AppClient *app)

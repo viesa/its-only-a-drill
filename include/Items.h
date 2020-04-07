@@ -1,7 +1,6 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include "core/Graphics.h"
 #include "core/Camera.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50

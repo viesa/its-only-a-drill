@@ -15,7 +15,7 @@ void CameraUpdate(Camera *camera);
 void CameraDraw(Camera *camera, Drawable drawable);
 
 /// Return a position to the middle point of the viewport
-SDL_Point CameraMiddle(Camera *camera);
+Vec2 CameraMiddle(Camera *camera);
 void CameraAddRotation(Camera *camera, float ammount);
 
 /// Specifies which position should always be in

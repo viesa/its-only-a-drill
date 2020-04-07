@@ -1,15 +1,11 @@
 #include "Gui.h"
-#include "Clock.h"
 #include <math.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
 
-#define PI 3.14159265359
+#include "Library.h"
 
 Gui *GuiCreate(Font *font, Clock *clock)
 {
