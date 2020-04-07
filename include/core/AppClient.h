@@ -8,14 +8,13 @@
 #include "Sound.h"
 #include "Music.h"
 #include "../core/Log.h"
-#include "../net/NetworkMgr.h"
-#include "../net/Client.h"
+#include "../net_UDP/UDPClient.h"
 #include "Score.h"
 #include "Weapons.h"
 
 typedef struct AppClient AppClient;
 
-AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, Client *client, FpsManger *FPSControls);
+AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls);
 void AppClientDestroy(AppClient *app);
 
 void AppClientRun(AppClient *app);
