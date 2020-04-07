@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+//#define DegBug
+
 Graphics *GraphicsCreate()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -28,6 +30,10 @@ Graphics *GraphicsCreate()
     SDL_GetCurrentDisplayMode(0, &DM);
     gfx_ret->gfxWindowWidth = DM.w;
     gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+#ifdef DegBug
+    gfx_ret->gfxWindowWidth = 640;
+    gfx_ret->gfxWindowHeight = 480;
+#endif
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
 
