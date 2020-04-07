@@ -41,19 +41,19 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
                 {
                     if (SDL_IntersectRect(&entities[Dominant].drawable.dst, &entities[Recessive].drawable.dst, &result))
                     {
-                        Vec2 DominantCenter;
+                        Vec2 DominantCenter; // carculating center
                         DominantCenter.x = (float)entities[Dominant].drawable.dst.x + (float)entities[Dominant].drawable.dst.w / 2.0f;
                         DominantCenter.y = (float)entities[Dominant].drawable.dst.y + (float)entities[Dominant].drawable.dst.h / 2.0f;
 
-                        Vec2 RecessiveCenter;
+                        Vec2 RecessiveCenter; // carculating center
                         RecessiveCenter.x = (float)entities[Recessive].drawable.dst.x + (float)entities[Recessive].drawable.dst.w / 2.0f;
                         RecessiveCenter.y = (float)entities[Recessive].drawable.dst.y + (float)entities[Recessive].drawable.dst.h / 2.0f;
 
-                        Vec2 ResultDistance;
+                        Vec2 ResultDistance; // Carculating distance
                         ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
                         ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
 
-                        entities[Recessive].position.x -= ResultDistance.x / 17.0f;
+                        entities[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat affect
                         entities[Recessive].position.y -= ResultDistance.y / 17.0f;
                     }
                 }

@@ -29,7 +29,7 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int id);
 
 ///Waring only one
 ///\param entites: ALL entitys are needed
-///updates the state of alla entitys
+///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
 void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);
 void EntityDraw(Camera *camera, Entity *entity);
 
