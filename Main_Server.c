@@ -14,6 +14,7 @@ int main()
         if (rLen)
         {
             int ports[1] = {m_server.pack->address.port};
+            printf("Message Recieved: %s", m_server.pack->data);
             UDPServerBroadcast(&m_server,
                                m_server.pack->data,
                                m_server.pack->len, ports, 1);
