@@ -3,6 +3,7 @@
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
+#include "core/Inventory.h"
 
 struct AppClient
 {
@@ -174,6 +175,7 @@ void AppClientUpdate(AppClient *app)
         app->entities[1].Force.y -= 500;
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 500;
+        
 
     /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
     {   om player position är samma som vapens då försvinner den
@@ -218,7 +220,7 @@ void AppClientDraw(AppClient *app)
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
     PlayerDraw(&app->player, app->camera);
-
+    
     //GUI
     GuiUpdate(app->gui);
 
