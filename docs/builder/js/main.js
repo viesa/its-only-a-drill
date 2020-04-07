@@ -4,11 +4,18 @@ var selectedLayer;
 var fileLoading;
 
 var db = {
+    mapInfo: {
+        uid: 0,
+        name: "Test map",
+        difficulty: 0,
+        maxPlayers: 0
+    },
     layers: 0,
     list: []
 }
 
 $(window).on("load", function () {
+
     $("#tile-container").children().first().trigger("click");
     $.getJSON("./js/types.json", function (json) {
 
@@ -22,6 +29,8 @@ $(window).on("load", function () {
 
     $('#canvas-container').scrollTop(1028 - $(window).height() / 2);
     $('#canvas-container').scrollLeft(1028 - $(window).height() / 2);
+
+    db.mapInfo.uid = Math.round(Math.random() * 1000000);
 });
 
 $(document).on("click", '.tiles-child-box', function () {
@@ -57,4 +66,20 @@ function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collid
             h: sh
         }
     }
+}
+
+function showMapInfo() {
+    $("#mapNameInput").val(db.mapInfo.name);
+    $("#maxPlayersInput").val(db.mapInfo.maxPlayers);
+    $("#difficultyInput").val(db.mapInfo.difficulty);
+    $("#uidInput").val(db.mapInfo.uid);
+    $('#mapInfoContainer').fadeIn();
+}
+
+function saveMapInfo() {
+    db.mapInfo.name = $("#mapNameInput").val();
+    db.mapInfo.maxPlayers = $("#maxPlayersInput").val();
+    db.mapInfo.difficulty = $("#difficultyInput").val();
+    db.mapInfo.uid = $("#uidInput").val();
+    $('#mapInfoContainer').fadeOut();
 }

@@ -6,8 +6,9 @@ function frontendUpdate() {
 
         var str2 = "<div class='layer-child-first'><div class='layer-child-info'><label>Z-Index: " + i + "</label>";
         var str3 = "<label>Type: " + db.list[i].type + "</label></div><div class='layer-child-options'>";
-        var str4 = "<button class='lrbutton lrexpand'>Options</button>";
-        var str5 = "<button class='lrbutton lrdel' onclick='lrdel($(this))'>Delete</button>";
+        var str4 = "";
+        //"<button class='lrbutton lrexpand'>Options</button>";
+        var str5 = "<button class='lrbutton lrdel' onclick='lrdel($(this))'><i class='fas fa-trash-alt'></i></button>";
         var str6 = "";
         //var str6 = "<button class='lrbutton lrhigh' onclick='highLight($(this).parent().parent().parent())'>Highlight</button>";
 
@@ -66,7 +67,7 @@ $(document).on("change", '.lrval', function () {
             db.list[$(this).parent().parent().parent().attr("chnr")].r = parseInt($(this).val());
             break;
     }
-    update();
+    canvasUpdate();
 });
 
 function lrdel(element) {
@@ -133,8 +134,8 @@ function highLight(object) {
     drawHighlightRectangle(hoverObj.x, hoverObj.y, hoverObj.w, hoverObj.h, hoverObj.r);
 };
 
-$(document).on("click", '.lrexpand', function () {
-    $(this).parent().parent().parent().find(".layer-child-expanded").slideToggle("fast");
+$(document).on("click", '.layer-child-first', function () {
+    $(this).parent().find(".layer-child-expanded").slideToggle("fast");
 });
 
 $(document).on('mouseenter', '.layer-child', function (event) {
