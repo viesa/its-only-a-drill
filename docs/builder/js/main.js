@@ -83,3 +83,8 @@ function saveMapInfo() {
     db.mapInfo.uid = $("#uidInput").val();
     $('#mapInfoContainer').fadeOut();
 }
+
+function getURLParams() {
+    var u = new URLSearchParams(db).toString();
+    window.location.href = window.location.href + "?" + u
+}
