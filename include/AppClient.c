@@ -34,7 +34,9 @@ struct AppClient
 
     Music testMusic;
 
-    Item item[2];
+    //Item item[2];
+    GroundListItems ground;
+
     Entity entities[3];
     Player player;
     //Map *testMap;
@@ -107,8 +109,10 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
-    app->item[0] = ItemCreate(ItemWoodenSword);
-    app->item[1] = ItemCreate(ItemMetalSword);
+    //app->item[0] = ItemCreate(ItemWoodenSword);
+    //app->item[1] = ItemCreate(ItemMetalSword);
+    app->player.entity.inventory = InventoryCreate();
+    app->ground = GroundListCreate();
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
@@ -175,14 +179,30 @@ void AppClientUpdate(AppClient *app)
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 500;
 
-    /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
-    {   om player position är samma som vapens då försvinner den
-        if ( Vec2Equ(player->entities->position, app->item->postion) )
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
+    { // if player is near to the item, then take it!     
+        if (app->player.entity.inventory.top < MAX_PLYER_ITEMS)
         {
-            ItemPickup(app->item);
-        }
-        
-    }*/
+            for (int tmp = 0; tmp < 2; tmp++)
+            {
+                if (SDL_HasIntersection(&app->player.entity.drawable.dst, &app->ground.contents[tmp].drawable.dst))
+                {
+                    ItemPickup(&app->player.entity.inventory, &app->ground.contents[tmp], &app->ground,tmp);
+                    log_info("you picked up an item. \n"); 
+                }
+            } 
+        } else {
+                    log_info("You can't pick this item. Your item list is full! \n"); 
+                }
+    }
+
+    if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
+    {
+        if (app->player.entity.inventory.top > 1)   // can't drop the knife
+        {
+            ItemDrop(&app->ground, &app->player.entity.inventory,app->player.entity.position);
+        } 
+    }
 
     EntityUpdate(app->entities, 4, app->clock);
 
@@ -208,12 +228,11 @@ void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
-
-    // for (int i = 0; i < app->testMap->n; i++)
-    //     EntityDraw(app->camera, &app->testMap->contents[i]);
-
-    ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
-    ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
+        for (int allItems = 0; allItems < app->ground.top; allItems++)
+        {
+            ItemDraw(app->camera, &app->ground.contents[allItems], app->ground.contents[allItems].postion);
+        }
+   // ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
