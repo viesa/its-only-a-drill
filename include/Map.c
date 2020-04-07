@@ -2,19 +2,19 @@
 
 #include "core/Library.h"
 
-Map *MapCreate(JSON *mapdata)
+Map MapCreate(JSON *mapdata)
 {
-    Map *map = (Map *)SDL_malloc(sizeof(Map));
-    map->contents = NULL;
+    Map map;
+    map.contents = NULL;
 
     //Converts mapdata into entities
-    uint32_t layers = JSONGetValue(mapdata, (uint32_t[]){0}, 1)->u.integer;
-    map->n = layers;
+    uint32_t layers = JSONGetValue(mapdata, (uint32_t[]){1}, 1)->u.integer;
+    map.n = layers;
 
-    map->contents = (Entity *)SDL_malloc(sizeof(Entity) * layers);
+    map.contents = (Entity *)SDL_malloc(sizeof(Entity) * layers);
     for (uint32_t i = 0; i < layers; i++)
     {
-        json_value *current = JSONGetValue(mapdata, (uint32_t[]){1, i}, 2);
+        json_value *current = JSONGetValue(mapdata, (uint32_t[]){2, i}, 2);
         json_object_entry *entries = current->u.object.values;
 
         char *type_str = entries[0].value->u.string.ptr;
@@ -47,7 +47,7 @@ Map *MapCreate(JSON *mapdata)
         _new_.mass = mass;
         _new_.isCollider = collider;
 
-        SDL_memcpy(&map->contents[i], &_new_, sizeof(Entity));
+        SDL_memcpy(&map.contents[i], &_new_, sizeof(Entity));
     }
     return map;
 }

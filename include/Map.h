@@ -10,7 +10,7 @@ typedef struct Map
     uint32_t n;
 } Map;
 
-Map *MapCreate(JSON *mapdata);
+Map MapCreate(JSON *mapdata);
 void MapDestroy(Map *map);
 
 #endif
