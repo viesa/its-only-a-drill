@@ -8,7 +8,8 @@ function frontendUpdate() {
         var str3 = "<label>Type: " + db.list[i].type + "</label></div><div class='layer-child-options'>";
         var str4 = "<button class='lrbutton lrexpand'>Options</button>";
         var str5 = "<button class='lrbutton lrdel' onclick='lrdel($(this))'>Delete</button>";
-        var str6 = "<button class='lrbutton lrhigh' onclick='highLight($(this))'>Highlight</button>";
+        var str6 = "";
+        //var str6 = "<button class='lrbutton lrhigh' onclick='highLight($(this).parent().parent().parent())'>Highlight</button>";
 
         if (i > 0) {
             var str7 = "<button class='lrbutton lrup lrarrow' onclick='lrup($(this))'><i class='fas fa-arrow-up'></i></button>";
@@ -127,11 +128,17 @@ $("#canvas").on("click", function () {
 });
 
 function highLight(object) {
-    update();
-    var hoverObj = db.list[object.parent().parent().parent().attr("chnr")];
+    canvasUpdate();
+    var hoverObj = db.list[object.attr("chnr")];
     drawHighlightRectangle(hoverObj.x, hoverObj.y, hoverObj.w, hoverObj.h, hoverObj.r);
 };
 
 $(document).on("click", '.lrexpand', function () {
     $(this).parent().parent().parent().find(".layer-child-expanded").slideToggle("fast");
+});
+
+$(document).on('mouseenter', '.layer-child', function (event) {
+    highLight($(this));
+}).on('mouseleave', '.layer-child', function () {
+    canvasUpdate();
 });
