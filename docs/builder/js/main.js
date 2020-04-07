@@ -15,7 +15,6 @@ var db = {
 }
 
 $(window).on("load", function () {
-
     $("#tile-container").children().first().trigger("click");
     $.getJSON("./js/types.json", function (json) {
 
@@ -82,9 +81,4 @@ function saveMapInfo() {
     db.mapInfo.difficulty = $("#difficultyInput").val();
     db.mapInfo.uid = $("#uidInput").val();
     $('#mapInfoContainer').fadeOut();
-}
-
-function getURLParams() {
-    var u = new URLSearchParams(db).toString();
-    window.location.href = window.location.href + "?" + u
 }

@@ -143,3 +143,8 @@ $(document).on('mouseenter', '.layer-child', function (event) {
 }).on('mouseleave', '.layer-child', function () {
     canvasUpdate();
 });
+
+function centerCanvas() {
+    $('#canvas-container').scrollTop(1028 - $(window).height() / 2);
+    $('#canvas-container').scrollLeft(1028 - $(window).height() / 2);
+}

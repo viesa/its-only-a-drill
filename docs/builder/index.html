@@ -9,6 +9,20 @@
         rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://kit.fontawesome.com/836f06798d.js" crossorigin="anonymous"></script>
+
+    <!-- JQUERY UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/dark-hive/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            $(document).tooltip({
+                show: false,
+                hide: false
+            });
+        });
+    </script>
+
 </head>
 
 <body>
@@ -32,12 +46,12 @@
                     &nbsp;<i class="fas fa-cogs"></i>&nbsp;
                 </button>
 
-                <button id="sync" onclick="update()" title="Refresh canvas" class="tool-buttons">
+                <button id="sync" onclick="update()" title="Refresh" class="tool-buttons">
                     &nbsp;<i class="fas fa-sync-alt"></i>&nbsp;
                 </button>
 
-                <button id="snapToGrid" class="tool-buttons">
-                    <label for="snapCheckBox">Align</label>
+                <button id="snapToGrid" title="Snap to grid" class="tool-buttons">
+                    <label for="snapCheckBox"><i class="fas fa-ruler-combined"></i></label>
                     <input id="snapCheckBox" type="checkbox" checked>
                 </button>
 
@@ -56,8 +70,8 @@
                     &nbsp;<i class="fas fa-download"></i>&nbsp;
                 </button>
 
-                <button id="urlParams-btn" class="tool-buttons" title="Get URL params" onclick="getURLParams()">
-                    &nbsp;<i class="fas fa-link"></i>&nbsp;
+                <button id="center-btn" class="tool-buttons" title="Center canvas" onclick="centerCanvas()">
+                    &nbsp;<i class="fas fa-crosshairs"></i></i>&nbsp;
                 </button>
             </div>
         </div>
