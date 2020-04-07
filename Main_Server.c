@@ -3,8 +3,6 @@
 #include "include/core/Event.h"
 #include "include/net_UDP/UDPServer.h"
 
-#include "include/core/AppServer.h"
-
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
