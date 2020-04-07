@@ -38,31 +38,31 @@ function frontendUpdate() {
 $(document).on("change", '.lrval', function () {
     switch ($(this).attr("lrType")) {
         case "lrvx":
-            db.list[$(this).parent().parent().attr("chnr")].x = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].x = parseInt($(this).val());
             break;
 
         case "lrvy":
-            db.list[$(this).parent().parent().attr("chnr")].y = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].y = parseInt($(this).val());
             break;
 
         case "lrvw":
-            db.list[$(this).parent().parent().attr("chnr")].w = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].w = parseInt($(this).val());
             break;
 
         case "lrvh":
-            db.list[$(this).parent().parent().attr("chnr")].h = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].h = parseInt($(this).val());
             break;
 
         case "lrvm":
-            db.list[$(this).parent().parent().attr("chnr")].m = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].m = parseInt($(this).val());
             break;
 
         case "lrvc":
-            db.list[$(this).parent().parent().attr("chnr")].c = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].c = parseInt($(this).val());
             break;
 
         case "lrvr":
-            db.list[$(this).parent().parent().attr("chnr")].r = parseInt($(this).val());
+            db.list[$(this).parent().parent().parent().attr("chnr")].r = parseInt($(this).val());
             break;
     }
     update();
