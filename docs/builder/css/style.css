@@ -46,6 +46,7 @@ h3{
     background: #999;
     display: block;
     border-left: 3px solid #444;
+    overflow: hidden;
 }
 
 .sidebar-box{
@@ -61,35 +62,52 @@ h3{
 }
 
 #layers-container{
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     height: calc(100% - 2.25rem);
     width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    flex-direction: row;
-    flex-flow: row wrap;
 }
 
 .layer-child{
     background: #666;
     padding: 10px;
-    margin: 5px;
+    margin-right: 1rem;
+    width: calc(100% - 1rem);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
-    border-radius: .2rem;
     -webkit-box-shadow: 0px 0px 0px 2px #666;
     -moz-box-shadow: 0px 0px 0px 2px #666;
     box-shadow: 0px 0px 0px 2px #666;
+    display: flex;
+    align-items: flex-start;
 }
 
 .layer-child:hover{
     outline:none;
-    -webkit-box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
-    -moz-box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
-    box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
+    background: #555;
+}
+
+
+.layer-child-first{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.layer-child-info, .layer-child-options{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.layer-child-info label{
+    margin-right: 1rem;
+}
+
+.layer-child-expanded{
+    padding-top: 1rem;
 }
 
 .layer-child-box{
@@ -130,13 +148,26 @@ h3{
     color: white;
     padding-left: .3rem;
     cursor: pointer;
+    max-width: 5rem;
+    font-size: 1rem;
+    margin-left: .25rem;
+    margin-right: .25rem;
 }
 
-.lrbutton:hover, .lrbutton:focus{
+.lrbutton:hover, .lrbutton:active{
     outline:none;
     -webkit-box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
     -moz-box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
     box-shadow: 0px 0px 0px 2px rgba(26,115,217,1);
+}
+
+.lrdisabled{
+    cursor: not-allowed;
+    opacity: 25%;
+}
+
+.lrarrow{
+    width: min-content;
 }
 
 

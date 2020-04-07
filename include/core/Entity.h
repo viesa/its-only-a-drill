@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Clock.h"
 #include "math.h"
+#include "../Items.h"
 typedef enum EntityPresets
 {
     EntityWoman,
@@ -20,6 +21,7 @@ typedef struct Entity
     Vec2 Force;
     Vec2 accseleration;
     float Friction, mass;
+    InventoryListItems inventory;
 } Entity;
 
 ///Creates a entity
@@ -29,7 +31,7 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int id);
 
 ///Waring only one
 ///\param entites: ALL entitys are needed
-///updates the state of alla entitys
+///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
 void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);
 void EntityDraw(Camera *camera, Entity *entity);
 
