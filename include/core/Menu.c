@@ -3,12 +3,12 @@
 #include "Log.h"
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font)
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
 {
     Menu *menu = (Menu *)SDL_malloc(sizeof(Menu));
     menu->gfx = gfx;
     menu->font = font;
-    menu->currentState = MS_MainMenu;
+    menu->state = state;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -17,13 +17,13 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     menu->Height = 480;
 
     SDL_Rect src = {0, 0, 1919, 942};
-    SDL_Rect dst = {0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
+    SDL_Rect dst = {0, 0, gfx->windowWidth, gfx->windowHeight};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
 
     return menu;
 }
 
-void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls)
+void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapList, Map *map)
 {
     if (menu->loopCount < 2 * PI)
     {
@@ -49,21 +49,15 @@ void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls)
         menu->loopSwing--;
     }
 
-    if (menu->currentState != MS_None)
-    {
-        //Get windows size
-        menu->mainMenuDbl.dst.w = menu->gfx->gfxWindowWidth;
-        menu->mainMenuDbl.dst.h = menu->gfx->gfxWindowHeight;
-
-        //Draw background
-        GraphicsDraw(menu->gfx, menu->mainMenuDbl);
-    }
+    //Get input
+    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
 
     //Decides what shall be drawn on top
-    switch (menu->currentState)
+    switch (menu->state->menuState)
     {
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, input);
+        MenuUpdateMainMenu(menu, input, map);
         break;
     case MS_Options:
         MenuUpdateOptions(menu, input);
@@ -74,72 +68,61 @@ void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls)
     case MS_FPS:
         MenuUpdateFPS(menu, input, FPSContorls);
         break;
+    case MS_CustomMap:
+        MenuUpdateCustomMap(menu, input, mapList, map);
+        break;
     default:
         break;
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu, Input *input)
+void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
 {
     //Determine menu options
-    int optionLength = 4;
-    char options[4][100] = {
+    int optionLength = 5;
+    char options[5][100] = {
         {"Continue game"},
         {"Start new game"},
+        {"Custom"},
         {"Options"},
         {"Exit"}};
-
-    //Get input
-    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
-                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
-    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
-    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         switch (menu->activeIndex)
         {
         case 0:
-            menu->currentState = MS_None;
+        {
+            if (map->contents)
+            {
+                menu->state->gameState = GS_Playing;
+                menu->state->menuState = MS_None;
+            }
             break;
+        }
         case 2:
-            menu->currentState = MS_Options;
+        {
+            menu->state->menuState = MS_CustomMap;
             break;
+        }
         case 3:
+        {
+            menu->state->menuState = MS_Options;
+            break;
+        }
+        case 4:
         {
             SDL_Event quit;
             quit.type = SDL_QUIT;
             SDL_PushEvent(&quit);
+            break;
         }
-        break;
+        default:
+            break;
         }
     }
 
-    //Update 3d color
-    SDL_Color vitalsColor[10] = {
-        {menu->loopSwing, 159, 227},
-        {menu->loopSwing, 139, 207},
-        {menu->loopSwing, 119, 187},
-        {menu->loopSwing, 99, 167},
-        {menu->loopSwing, 79, 147},
-        {menu->loopSwing, 59, 127},
-        {menu->loopSwing, 39, 107},
-        {menu->loopSwing, 19, 87},
-        {255 - menu->loopSwing, 180, 184},
-        {255 - menu->loopSwing, 180, 184}};
-
-    //Draw menu options
-    for (size_t i = 0; i < optionLength; i++)
-    {
-        if (i == menu->activeIndex)
-        {
-            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
-        }
-        else
-        {
-            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
-        }
-    }
+    MenuDraw(menu, options, optionLength);
 }
 
 void MenuUpdateOptions(Menu *menu, Input *input)
@@ -152,9 +135,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         {"Toggle vSync"},
         {"SET FPS"},
         {"Back"}};
-    //Get input
-    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
-                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
@@ -166,19 +147,19 @@ void MenuUpdateOptions(Menu *menu, Input *input)
             if (menu->gfx->isFullscreen)
             { //Get out of fullscreen
                 SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, 0);
-                menu->gfx->gfxWindowHeight -= 60;
+                menu->gfx->windowHeight -= 60;
                 menu->gfx->isFullscreen = 0;
             }
             else
             { //go to fullscreen
                 SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
-                menu->gfx->gfxWindowHeight += 60;
+                menu->gfx->windowHeight += 60;
                 menu->gfx->isFullscreen = 1;
             }
             break;
         case 1: //set resolution
         {
-            menu->currentState = MS_Resolution;
+            menu->state->menuState = MS_Resolution;
         }
         break;
         case 2: //Vsync // do we use OpenGL?
@@ -197,42 +178,18 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         break;
         case 3:
         {
-            menu->currentState = MS_FPS;
+            menu->state->menuState = MS_FPS;
             break;
         }
         case 4:
         {
-            menu->currentState = MS_MainMenu;
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_MainMenu;
             break;
         }
         }
     }
-
-    //Update 3d color
-    SDL_Color vitalsColor[10] = {
-        {menu->loopSwing, 159, 227},
-        {menu->loopSwing, 139, 207},
-        {menu->loopSwing, 119, 187},
-        {menu->loopSwing, 99, 167},
-        {menu->loopSwing, 79, 147},
-        {menu->loopSwing, 59, 127},
-        {menu->loopSwing, 39, 107},
-        {menu->loopSwing, 19, 87},
-        {255 - menu->loopSwing, 180, 184},
-        {255 - menu->loopSwing, 180, 184}};
-
-    //Draw menu options
-    for (size_t i = 0; i < optionLength; i++)
-    {
-        if (i == menu->activeIndex)
-        {
-            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
-        }
-        else
-        {
-            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
-        }
-    }
+    MenuDraw(menu, options, optionLength);
 }
 void MenuUpdateResolution(Menu *menu, Input *input)
 {
@@ -246,9 +203,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
         {"2560x1440"},
         {"2560x1600"},
         {"Back"}};
-    //Get input
-    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
-                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
@@ -260,77 +215,53 @@ void MenuUpdateResolution(Menu *menu, Input *input)
             menu->Width = 640;
             menu->Height = 480;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 1:
             menu->Width = 1280;
             menu->Height = 720;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 2:
             menu->Width = 1920;
             menu->Height = 1080;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 3:
             menu->Width = 1920;
             menu->Height = 1200;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 4:
             menu->Width = 2560;
             menu->Height = 1440;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 5:
             menu->Width = 2560;
             menu->Height = 1600;
             SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->gfxWindowWidth = menu->Width;
-            menu->gfx->gfxWindowHeight = menu->Height;
+            menu->gfx->windowWidth = menu->Width;
+            menu->gfx->windowHeight = menu->Height;
             break;
         case 6:
         {
-            menu->currentState = MS_Options;
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_Options;
             break;
         }
         }
     }
-
-    //Update 3d color
-    SDL_Color vitalsColor[10] = {
-        {menu->loopSwing, 159, 227},
-        {menu->loopSwing, 139, 207},
-        {menu->loopSwing, 119, 187},
-        {menu->loopSwing, 99, 167},
-        {menu->loopSwing, 79, 147},
-        {menu->loopSwing, 59, 127},
-        {menu->loopSwing, 39, 107},
-        {menu->loopSwing, 19, 87},
-        {255 - menu->loopSwing, 180, 184},
-        {255 - menu->loopSwing, 180, 184}};
-
-    //Draw menu options
-    for (size_t i = 0; i < optionLength; i++)
-    {
-        if (i == menu->activeIndex)
-        {
-            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
-        }
-        else
-        {
-            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
-        }
-    }
+    MenuDraw(menu, options, optionLength);
 }
 void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
 {
@@ -343,9 +274,7 @@ void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
         {"120 FPS"},
         {"unlimited"},
         {"Back"}};
-    //Get input
-    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
-                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
@@ -381,38 +310,110 @@ void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
         }
         case 5:
         {
-            menu->currentState = MS_Options;
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_Options;
             break;
         }
         }
     }
+    MenuDraw(menu, options, optionLength);
+}
 
-    //Update 3d color
-    SDL_Color vitalsColor[10] = {
-        {menu->loopSwing, 159, 227},
-        {menu->loopSwing, 139, 207},
-        {menu->loopSwing, 119, 187},
-        {menu->loopSwing, 99, 167},
-        {menu->loopSwing, 79, 147},
-        {menu->loopSwing, 59, 127},
-        {menu->loopSwing, 39, 107},
-        {menu->loopSwing, 19, 87},
-        {255 - menu->loopSwing, 180, 184},
-        {255 - menu->loopSwing, 180, 184}};
-
-    //Draw menu options
-    for (size_t i = 0; i < optionLength; i++)
+void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
+{
+    //Determine menu options
+    int optionLength = mapList->allMaps.len + 1;
+    char options[optionLength][100];
+    for (int i = 0; i < optionLength; i++)
+        for (int j = 0; j < 100; j++)
+            options[i][j] = 0;
+    int i = 0;
+    for (Node *node = mapList->allMaps.front; node; node = node->next, i++)
     {
-        if (i == menu->activeIndex)
+        MapListEntry *entry = (MapListEntry *)node->data;
+        char buffer[100] = {0};
+        strcat(options[i], "Name: ");
+        strcat(options[i], entry->name);
+        strcat(options[i], " Diff: ");
+        SDL_itoa(entry->difficulty, buffer, 10);
+        strcat(options[i], buffer);
+        strcat(options[i], " MaxPl: ");
+        SDL_itoa(entry->maxPlayers, buffer, 10);
+        strcat(options[i], buffer);
+    }
+    strcpy(options[optionLength - 1], "Back");
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        if (menu->activeIndex == optionLength - 1)
         {
-            FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_MainMenu;
         }
         else
         {
-            FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->gfxWindowWidth / 2, menu->gfx->gfxWindowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+            MapListEntry *entry = (MapListEntry *)ListGet(&mapList->allMaps, menu->activeIndex)->data;
+            JSON *mapdata = JSONCreate(entry->filename);
+            *map = MapCreate(mapdata);
+            JSONDestroy(mapdata);
+            menu->state->gameState = GS_Playing;
+            menu->state->menuState = MS_None;
         }
     }
+    MenuDraw(menu, options, optionLength);
 }
+
+void MenuDraw(Menu *menu, char options[][100], int optionLength)
+{
+    //Get windows size
+    menu->mainMenuDbl.dst.w = menu->gfx->windowWidth;
+    menu->mainMenuDbl.dst.h = menu->gfx->windowHeight;
+
+    //Draw background
+    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+
+    switch (menu->state->menuState)
+    {
+    case MS_Options:
+    case MS_MainMenu:
+    case MS_Resolution:
+    case MS_FPS:
+    case MS_CustomMap:
+    {
+        //Update 3d color
+        SDL_Color vitalsColor[10] = {
+            {menu->loopSwing, 159, 227},
+            {menu->loopSwing, 139, 207},
+            {menu->loopSwing, 119, 187},
+            {menu->loopSwing, 99, 167},
+            {menu->loopSwing, 79, 147},
+            {menu->loopSwing, 59, 127},
+            {menu->loopSwing, 39, 107},
+            {menu->loopSwing, 19, 87},
+            {255 - menu->loopSwing, 180, 184},
+            {255 - menu->loopSwing, 180, 184}};
+
+        //Draw menu options
+        for (size_t i = 0; i < optionLength; i++)
+        {
+            if (i == menu->activeIndex)
+            {
+                FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->windowWidth / 2, menu->gfx->windowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+            }
+            else
+            {
+                FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->windowWidth / 2, menu->gfx->windowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+            }
+        }
+    }
+    default:
+        break;
+    }
+}
+
 void MenuDestroy(Menu *menu)
 {
     SDL_free(menu);

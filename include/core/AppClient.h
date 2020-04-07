@@ -7,6 +7,7 @@
 #include "Menu.h"
 #include "Sound.h"
 #include "Music.h"
+#include "State.h"
 #include "../core/Log.h"
 #include "../net_UDP/UDPClient.h"
 #include "Score.h"

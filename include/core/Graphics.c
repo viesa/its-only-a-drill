@@ -28,16 +28,16 @@ Graphics *GraphicsCreate()
 
     SDL_DisplayMode DM;
     SDL_GetCurrentDisplayMode(0, &DM);
-    gfx_ret->gfxWindowWidth = DM.w;
-    gfx_ret->gfxWindowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+    gfx_ret->windowWidth = DM.w;
+    gfx_ret->windowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #ifdef DegBug
-    gfx_ret->gfxWindowWidth = 640;
-    gfx_ret->gfxWindowHeight = 480;
+    gfx_ret->windowWidth = 640;
+    gfx_ret->windowHeight = 480;
 #endif
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
 
-    gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->gfxWindowWidth, gfx_ret->gfxWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->windowWidth, gfx_ret->windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
         log_fatal("Could not create window: %s", SDL_GetError());
 
