@@ -14,9 +14,10 @@ function frontendUpdate() {
         var str9 = "<div class='layer-child-box'><label>Collider</label><input type='number' class='lrval' lrType='lrvc' value='" + db.list[i].c + "'></div>";
         var str10 = "<div class='layer-child-box'><label>Rotation</label><input type='number' class='lrval' lrType='lrvr' value='" + db.list[i].r + "'></div>";
         var str11 = "<div class='layer-child-box'><button class='lrbutton lrdel' onclick='lrdel($(this))'>Delete</button><button class='lrbutton lrhigh' onclick='highLight($(this))'>Highlight</button></div>";
-        var str12 = "</div>";
+        var str12 = "<div class='layer-child-box'><button class='lrbutton lrup' onclick='lrup($(this))'>Up</button><button class='lrbutton lrdown' onclick='lrdown($(this))'>Down</button></div>";
+        var str13 = "</div>";
 
-        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11 + str12);
+        container.append(str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9 + str10 + str11 + str12 + str13);
     }
 }
 
@@ -58,6 +59,22 @@ function lrdel(element) {
     update();
 }
 
+function lrup(element) {
+    var index = parseInt(element.parent().parent().attr("chnr"));
+    var a = db.list[index - 1];
+    db.list[index - 1] = db.list[index];
+    db.list[index] = a;
+    update();
+}
+
+function lrdown(element) {
+    var index = parseInt(element.parent().parent().attr("chnr"));
+    var a = db.list[index];
+    db.list[index] = db.list[index + 1];
+    db.list[index + 1] = a;
+    update();
+}
+
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -70,13 +87,22 @@ $("#canvas").on("click", function () {
     if (selectedLayer) {
 
         var pos = getMousePos(c, window.event);
+        var mouseX;
+        var mouseY;
+        if ($("#snapCheckBox").is(":checked")) {
+            mouseX = Math.ceil((parseInt(pos.x)) / 32) * 32 - 32;
+            mouseY = Math.ceil((parseInt(pos.y)) / 32) * 32 - 32;
+        } else {
+            mouseX = pos.x;
+            mouseY = pos.y;
+        }
         var cvX = parseInt(selectedLayer.attr("sx"));
         var cvY = parseInt(selectedLayer.attr("sy"));
         var cvW = parseInt(selectedLayer.attr("sw"));
         var cvH = parseInt(selectedLayer.attr("sh"));
         //center of mouse parseInt(pos.x - cvW / 2), parseInt(pos.y - cvH / 2)
 
-        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(pos.x), parseInt(pos.y), cvW * 2, cvH * 2, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
+        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(mouseX), parseInt(mouseY), cvW * 2, cvH * 2, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
 
         update();
     }
@@ -88,6 +114,5 @@ $("#canvas").on("click", function () {
 function highLight(object) {
     update();
     var hoverObj = db.list[object.parent().parent().attr("chnr")];
-    drawHighlightRectangle(hoverObj.x - hoverObj.w / 2, hoverObj.y - hoverObj.h / 2, hoverObj.w, hoverObj.h, hoverObj.r);
-
+    drawHighlightRectangle(hoverObj.x, hoverObj.y, hoverObj.w, hoverObj.h, hoverObj.r);
 };

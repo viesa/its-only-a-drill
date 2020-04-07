@@ -30,8 +30,8 @@ function drawHighlightRectangle(x, y, w, h, deg) {
 }
 
 var setCanvasSize = function () {
-    canvas.width = 2000; //window.innerHeight;
-    canvas.height = 2000; //window.innerHeight;
+    canvas.width = 2048; //window.innerHeight;
+    canvas.height = 2048; //window.innerHeight;
 }
 
 function clearCanvas() {
