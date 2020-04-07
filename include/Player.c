@@ -23,14 +23,14 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
 
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(&player->entity.position, &cameraPos);
+    Vec2 playerPos = Vec2Sub(player->entity.position, cameraPos);
 
-    Vec2 aim = Vec2Sub(&mousePos, &playerPos);
+    Vec2 aim = Vec2Sub(mousePos, playerPos);
 
-    aim = Vec2Unit(&aim);
-    aim = Vec2MulL(&aim, RADIUS);
+    aim = Vec2Unit(aim);
+    aim = Vec2MulL(aim, RADIUS);
 
-    player->aimFollow = Vec2Add(&aim, &player->entity.position);
+    player->aimFollow = Vec2Add(aim, player->entity.position);
 
     if (InputIsKeyDown(input, SDL_SCANCODE_D))
         player->entity.Force.x += 750;
