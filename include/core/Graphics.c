@@ -43,6 +43,11 @@ Graphics *GraphicsCreate()
 
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+    //Sets Window-icon
+    SDL_Surface *win_icon = SDL_LoadBMP("assets/window_icon.bmp");
+    SDL_SetWindowIcon(gfx_ret->m_mainWindow, win_icon);
+    SDL_FreeSurface(win_icon);
+
     //INIT ALL TEXTURES
     SDL_Texture *texture;
     texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/menu.png");
