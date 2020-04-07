@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Clock.h"
 #include "math.h"
+#include "../Items.h"
 typedef enum EntityPresets
 {
     EntityWoman
@@ -18,6 +19,7 @@ typedef struct Entity
     Vec2 Force;
     Vec2 accseleration;
     float Friction, mass;
+    InventoryListItems inventory;
 } Entity;
 
 Entity EntityCreate(Vec2 vec, int moveSpeed, int rotSpeed, EntityPresets preset, int id);
