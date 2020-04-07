@@ -17,8 +17,7 @@ struct AppClient
     FpsManger *FPSControls;
     Input *input;
     Menu *menu;
-    Client *client;
-    NetworkMgr *netMgr;
+    UDPClient *client;
 
     Drawable db[3000];
     Vec2 cameraFollow;
@@ -34,16 +33,14 @@ struct AppClient
 
     Music testMusic;
 
-    //Item item[2];
-    GroundListItems ground;
-
+    Item item[2];
     Entity entities[3];
     Player player;
     //Map *testMap;
     Weapon weapon;
 };
 
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client *client, FpsManger *FPSControls)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
@@ -57,9 +54,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     app->input = input;
     app->menu = MenuCreate(app->gfx, app->font);
     app->client = client;
-    app->netMgr = NetworkMgrCreate();
     app->player = PlayerCreate();
-    NetworkMgrAddClient(app->netMgr, app->client);
 
     int cnt = 0;
 
@@ -96,10 +91,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
 
     app->cameraFollow = (Vec2){0.0f, 0.0f};
 
-    ClientSetNet(client, "85.226.233.210", 1337);
-    // ClientStart(client);
-    // ClientSend(client, Test, "THIS IS A TEST", 15);
-
     app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
@@ -109,15 +100,25 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, Client
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
-    //app->item[0] = ItemCreate(ItemWoodenSword);
-    //app->item[1] = ItemCreate(ItemMetalSword);
-    app->player.entity.inventory = InventoryCreate();
-    app->ground = GroundListCreate();
+    app->item[0] = ItemCreate(ItemWoodenSword);
+    app->item[1] = ItemCreate(ItemMetalSword);
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
     //app->testMap = MapCreate(JSONCreate("level.json"));
 
+    /*
+    if (UDPClientSend(app->client, "hej\0", 4))
+    {
+        printf("Sending Message: hej\n");
+        SDL_Delay(100);
+        int r = UDPClientListen(app->client, 100);
+        if (r)
+        {
+            printf("Incomming Message: %s\n", app->client->pack->data);
+        }
+    }
+    */
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -128,7 +129,6 @@ void AppClientDestroy(AppClient *app)
     FontDestroy(app->font);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
-    NetworkMgrDestroy(app->netMgr);
 
     SDL_free(app);
 }
@@ -150,7 +150,6 @@ void AppClientRun(AppClient *app)
 void AppClientUpdate(AppClient *app)
 {
     CameraUpdate(app->camera);
-    NetworkMgrPollAll(app->netMgr);
 
     if (InputIsKeyDown(app->input, SDL_SCANCODE_W) ||
         InputIsKeyDown(app->input, SDL_SCANCODE_D) ||
@@ -179,30 +178,14 @@ void AppClientUpdate(AppClient *app)
     if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
         app->entities[1].Force.y += 500;
 
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
-    { // if player is near to the item, then take it!     
-        if (app->player.entity.inventory.top < MAX_PLYER_ITEMS)
+    /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
+    {   om player position är samma som vapens då försvinner den
+        if ( Vec2Equ(player->entities->position, app->item->postion) )
         {
-            for (int tmp = 0; tmp < 2; tmp++)
-            {
-                if (SDL_HasIntersection(&app->player.entity.drawable.dst, &app->ground.contents[tmp].drawable.dst))
-                {
-                    ItemPickup(&app->player.entity.inventory, &app->ground.contents[tmp], &app->ground,tmp);
-                    log_info("you picked up an item. \n"); 
-                }
-            } 
-        } else {
-                    log_info("You can't pick this item. Your item list is full! \n"); 
-                }
-    }
-
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
-    {
-        if (app->player.entity.inventory.top > 1)   // can't drop the knife
-        {
-            ItemDrop(&app->ground, &app->player.entity.inventory,app->player.entity.position);
-        } 
-    }
+            ItemPickup(app->item);
+        }
+        
+    }*/
 
     EntityUpdate(app->entities, 4, app->clock);
 
@@ -228,11 +211,12 @@ void AppClientDraw(AppClient *app)
 {
     for (int i = 0; i < 2880; i++)
         CameraDraw(app->camera, app->db[i]);
-        for (int allItems = 0; allItems < app->ground.top; allItems++)
-        {
-            ItemDraw(app->camera, &app->ground.contents[allItems], app->ground.contents[allItems].postion);
-        }
-   // ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
+
+    // for (int i = 0; i < app->testMap->n; i++)
+    //     EntityDraw(app->camera, &app->testMap->contents[i]);
+
+    ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
+    ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
     EntityDraw(app->camera, &app->entities[0]);
     EntityDraw(app->camera, &app->entities[1]);
     EntityDraw(app->camera, &app->entities[2]);
