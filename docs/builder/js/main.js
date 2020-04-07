@@ -19,6 +19,9 @@ $(window).on("load", function () {
             $("#tile-container").append(str1 + str2 + str3);
         };
     });
+
+    $('#canvas-container').scrollTop(1028 - $(window).height() / 2);
+    $('#canvas-container').scrollLeft(1028 - $(window).height() / 2);
 });
 
 $(document).on("click", '.tiles-child-box', function () {
