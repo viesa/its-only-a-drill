@@ -9,7 +9,7 @@ UDPClient UDPClientCreate(const char *ip, Uint16 port)
         exit(EXIT_FAILURE);
     }
     /* Open a socket on random port */
-    if (!(client.sock = SDLNet_UDP_Open(0)))
+    if (!(client.sock = SDLNet_UDP_Open(port)))
     {
         fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);

@@ -61,18 +61,16 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
-    /*
     if (UDPClientSend(app->client, "hej\0", 4))
     {
         printf("Sending Message: hej\n");
-        SDL_Delay(100);
+        SDL_Delay(1000);
         int r = UDPClientListen(app->client, 100);
         if (r)
         {
             printf("Incomming Message: %s\n", app->client->pack->data);
         }
     }
-    */
 
     app->state.gameState = GS_Menu;
     app->state.menuState = MS_MainMenu;

@@ -2,7 +2,6 @@
 #include <SDL2/SDL_net.h>
 #include "include/core/Event.h"
 #include "include/net_UDP/UDPServer.h"
-
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
@@ -10,7 +9,6 @@ int main()
 
     while (m_running)
     {
-        SDL_Delay(100);
         int rLen = UDPServerListen(&m_server, 100);
         if (rLen)
         {
@@ -20,7 +18,9 @@ int main()
                           m_server.pack->data,
                           m_server.pack->len,
                           m_server.pack->address.port);
+            m_running = SDL_FALSE;
         }
+        SDL_Delay(100);
     }
     UDPServerDestroy(&m_server);
     SDL_Quit();
