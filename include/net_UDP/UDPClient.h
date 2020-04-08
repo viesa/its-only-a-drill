@@ -9,6 +9,6 @@ typedef struct UDPClient
 } UDPClient;
 UDPClient UDPClientCreate(const char *ip, Uint16 port);
 int UDPClientSend(UDPClient *client, void *data, size_t size);
-int UDPClientRecieve(UDPClient *client, void *buffer, size_t max);
+int UDPClientListen(UDPClient *client, int maxLen);
 void UDPClientDestroy(UDPClient *client);
 #endif
