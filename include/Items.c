@@ -131,12 +131,12 @@ void inventoryPop(InventoryListItems *i)
     //     log_info("warning the the inventory list is fucked!\n");
     // }
 }
-uppdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera)
+void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera)
 {
     for (int i = 0; i < Ground->top; i++)
     {
         ItemDraw(camera, &Ground->contents[i], Ground->contents[i].postion);
     }
-    
+
     return;
 }

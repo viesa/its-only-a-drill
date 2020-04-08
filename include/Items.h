@@ -2,7 +2,7 @@
 #define ITEM_H
 
 #include "core/Camera.h"
-#include "core/weapons.h"
+#include "core/Weapons.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 
@@ -47,6 +47,6 @@ GroundListItems GroundListCreate(void);
 void ItemDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos);
 void groundListAdd(GroundListItems *g, InventoryListItems *i);
 void inventoryPop(InventoryListItems *i);
-void uppdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera);
+void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera);
 
 #endif

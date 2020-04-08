@@ -135,29 +135,31 @@ void AppClientUpdate(AppClient *app)
 #endif
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
-    { // if player is near to the item, then take it!     
-        if (app->player.entity.inventory.top < MAX_PLYER_ITEMS)
-        {
-            for (int tmp = 0; tmp < 2; tmp++)
+        { // if player is near to the item, then take it!
+            if (app->player.entity.inventory.top < MAX_PLYER_ITEMS)
             {
-                if (SDL_HasIntersection(&app->player.entity.drawable.dst, &app->groundListItems.contents[tmp].drawable.dst))
+                for (int tmp = 0; tmp < 2; tmp++)
                 {
-                    ItemPickup(&app->player.entity.inventory, &app->groundListItems.contents[tmp], &app->groundListItems,tmp);
-                    log_info("you picked up an item. \n"); 
+                    if (SDL_HasIntersection(&app->player.entity.drawable.dst, &app->groundListItems.contents[tmp].drawable.dst))
+                    {
+                        ItemPickup(&app->player.entity.inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
+                        log_info("you picked up an item. \n");
+                    }
                 }
-            } 
-        } else {
-                    log_info("You can't pick this item. Your item list is full! \n"); 
-                }
-    }
+            }
+            else
+            {
+                log_info("You can't pick this item. Your item list is full! \n");
+            }
+        }
 
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
-    {
-        if (app->player.entity.inventory.top > 1)   // can't drop the knife
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
         {
-            ItemDrop(&app->groundListItems, &app->player.entity.inventory,app->player.entity.position);
-        } 
-    }
+            if (app->player.entity.inventory.top > 1) // can't drop the knife
+            {
+                ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
+            }
+        }
 
         EntityUpdate(app->entities, 4, app->clock);
 
@@ -199,7 +201,7 @@ void AppClientDraw(AppClient *app)
             for (int i = 0; i < app->map.n; i++)
                 EntityDraw(app->camera, &app->map.contents[i]);
 
-        uppdateItemDraw(&app->player.entity.inventory, &app->groundListItems, app->camera);
+        UpdateItemDraw(&app->player.entity.inventory, &app->groundListItems, app->camera);
         EntityDraw(app->camera, &app->entities[0]);
         EntityDraw(app->camera, &app->entities[1]);
         EntityDraw(app->camera, &app->entities[2]);
