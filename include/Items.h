@@ -2,7 +2,7 @@
 #define ITEM_H
 
 #include "core/Camera.h"
-#include "core/Weapons.h"
+#include "core/Weapon.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 

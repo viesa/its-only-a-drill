@@ -11,7 +11,6 @@
 #include "../core/Log.h"
 #include "../net_UDP/UDPClient.h"
 #include "Score.h"
-#include "Weapons.h"
 
 typedef struct AppClient AppClient;
 
