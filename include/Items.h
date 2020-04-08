@@ -2,7 +2,6 @@
 #define ITEM_H
 
 #include "core/Camera.h"
-#include "core/Weapon.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 
@@ -16,12 +15,22 @@ typedef enum ItemType
     ItemEmpty
 } ItemType;
 
+typedef struct Weapon
+{
+    int Damage;
+    int falloff;
+    float accuracy;
+    int ammo;
+    int captivity;
+} WeaponStats;
+
 typedef struct Item
 {
     Drawable drawable;
     ItemType type;
     Vec2 postion;
     int picked;
+    WeaponStats Stats;
 } Item;
 
 ////Lista med items som ligger i invemtory
