@@ -37,11 +37,7 @@ Graphics *GraphicsCreate()
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
 
-<<<<<<< HEAD
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's Only a Drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->windowWidth, gfx_ret->windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-=======
-    gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->gfxWindowWidth, gfx_ret->gfxWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
->>>>>>> d170d874778996d0a1a8d4590838ca0f7e893849
     if (!gfx_ret->m_mainWindow)
         log_fatal("Could not create window: %s", SDL_GetError());
 
