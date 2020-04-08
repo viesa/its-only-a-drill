@@ -268,17 +268,6 @@ size_t ListSearch(List *list, const void *key, const size_t size)
     return list->len;
 }
 
-Node *ListGet(List *list, const size_t index)
-{
-    size_t i = 0;
-    for (Node *node = list->front; node; node = node->next, i++)
-    {
-        if (i == index)
-            return node;
-    }
-    return NULL;
-}
-
 void ListClear(List *list)
 {
     if (list->len > 0)

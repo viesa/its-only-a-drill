@@ -24,9 +24,7 @@ float Vec2Dot(Vec2 v1, Vec2 v2);
 float Vec2Len(Vec2 v);
 float Vec2LenSq(Vec2 v);
 Vec2 Vec2Unit(Vec2 v);
-Vec2 Vec2Inv(Vec2 v);
-
-// Returns the shortest angle between the two vectors in radians
-double Vec2Ang(Vec2 v1, Vec2 v2);
+Vec2 Vec2Sat(Vec2 v);
+Vec2 Vec2Had(Vec2 v1, Vec2 v2);
 
 #endif

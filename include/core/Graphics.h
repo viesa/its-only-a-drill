@@ -7,8 +7,8 @@
 
 typedef struct Graphics
 {
-    int windowWidth;
-    int windowHeight;
+    int gfxWindowWidth;
+    int gfxWindowHeight;
     int isFullscreen;
     SDL_bool vsync;
 

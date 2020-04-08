@@ -70,6 +70,7 @@ h3{
 
 .layer-child{
     background: #666;
+    padding: 10px;
     margin-right: 1rem;
     width: calc(100% - 1rem);
     display: flex;
@@ -81,11 +82,11 @@ h3{
     box-shadow: 0px 0px 0px 2px #666;
     display: flex;
     align-items: flex-start;
-    cursor: pointer;
 }
 
 .layer-child:hover{
     outline:none;
+    background: #555;
 }
 
 
@@ -93,29 +94,20 @@ h3{
     width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: .5rem 1rem;
-    background: #555;
-}
-
-.layer-child-first:hover{
-    background: #5a5a5a;
 }
 
 .layer-child-info, .layer-child-options{
     display: flex;
     align-items: center;
     justify-content: space-around;
-    cursor: pointer;
-    user-select: none;
 }
 
 .layer-child-info label{
     margin-right: 1rem;
-    cursor: pointer;
 }
 
 .layer-child-expanded{
-    padding: 1rem 1rem;
+    padding-top: 1rem;
 }
 
 .layer-child-box{
@@ -154,7 +146,7 @@ h3{
     border: 0;
     border-radius: .2rem;
     color: white;
-    padding: .5rem 1rem;
+    padding-left: .3rem;
     cursor: pointer;
     max-width: 5rem;
     font-size: 1rem;
@@ -239,19 +231,4 @@ h3{
 #snapCheckBox{
     height: 1.5rem;
     width: 1.5rem;
-}
-
-/* Map info window */
-#mapInfoContainer{
-    z-index: 999999999999999;
-    position: fixed;
-    background: #444;
-    padding: 2rem 3rem;
-    border-radius: .2rem;
-}
-
-/* TOOLTIPS */
-.ui-tooltip{
-    opacity: 1 !important;
-    background: #555 !important;
 }

@@ -10,7 +10,6 @@ typedef struct Player
 {
     Entity entity;
     Vec2 aimFollow;
-    Vec2 forward;
 } Player;
 
 Player PlayerCreate();
