@@ -86,6 +86,9 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         {"Custom"},
         {"Options"},
         {"Exit"}};
+    // makes it loop
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
