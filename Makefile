@@ -23,7 +23,7 @@ ENTRY_S 	:= Main_Server.c
 
 # Source files
 SRCDIR  	:= ./include
-ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/core/*.c $(SRCDIR)/net/*.c $(SRCDIR)/math/*.c)
+ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/core/*.c $(SRCDIR)/net_UDP/*.c $(SRCDIR)/math/*.c)
 SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
 SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 

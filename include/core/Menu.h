@@ -4,22 +4,16 @@
 #include "Font.h"
 #include "Input.h"
 #include "Clock.h"
-
-typedef enum MenuState
-{
-    MS_Options,
-    MS_MainMenu,
-    MS_Resolution,
-    MS_FPS,
-    MS_None
-} MenuState;
+#include "State.h"
+#include "../MapList.h"
+#include "../Map.h"
 
 typedef struct Menu
 {
     Graphics *gfx;
     Font *font;
     Drawable mainMenuDbl;
-    MenuState currentState;
+    State *state;
     float loopCount;
     int loopSwing;
     int swingDir;
@@ -29,12 +23,16 @@ typedef struct Menu
 
 } Menu;
 
-Menu *MenuCreate(Graphics *gfx, Font *font);
-void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls);
-void MenuUpdateMainMenu(Menu *menu, Input *input);
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
+void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapList, Map *map);
+void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
 void MenuUpdateOptions(Menu *menu, Input *input);
 void MenuUpdateResolution(Menu *menu, Input *input);
 void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls);
+void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map);
+
+void MenuDraw(Menu *menu, char options[][100], int optionLength);
+
 void MenuDestroy(Menu *menu);
 
 #endif

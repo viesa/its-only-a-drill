@@ -54,6 +54,8 @@ Node *ListEraseNode(List *list, const Node *node);
 /// \param size: size of key/data
 size_t ListSearch(List *list, const void *key, const size_t size);
 
+Node *ListGet(List *list, const size_t index);
+
 /// Clear the contents of the list
 void ListClear(List *list);
 
