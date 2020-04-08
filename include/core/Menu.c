@@ -93,7 +93,7 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         {
         case 0:
         {
-            if (map->contents)
+            // if (map->contents)
             {
                 menu->state->gameState = GS_Playing;
                 menu->state->menuState = MS_None;
@@ -408,6 +408,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
                 FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->windowWidth / 2, menu->gfx->windowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
             }
         }
+        break;
     }
     default:
         break;
