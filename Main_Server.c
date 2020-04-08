@@ -6,17 +6,18 @@
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
-    UDPServer m_server = UDPServerCreate(4000);
+    UDPServer m_server = UDPServerCreate(1337);
 
     while (m_running)
     {
         int rLen = UDPServerListen(&m_server, 100);
         if (rLen)
         {
-            UDPServerSend(&m_server,
-                          m_server.pack->data,
-                          m_server.pack->len,
-                          m_server.pack->address.port);
+            int ports[1] = {m_server.pack->address.port};
+            printf("Message Recieved: %s", m_server.pack->data);
+            UDPServerBroadcast(&m_server,
+                               m_server.pack->data,
+                               m_server.pack->len, ports, 1);
         }
     }
     UDPServerDestroy(&m_server);

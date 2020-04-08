@@ -3,10 +3,12 @@
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
+#include "MapList.h"
 
 struct AppClient
 {
     SDL_bool *running;
+    State state;
 
     Graphics *gfx;
     Audio *audio;
@@ -19,31 +21,20 @@ struct AppClient
     Menu *menu;
     UDPClient *client;
 
-    Drawable db[3000];
-    Vec2 cameraFollow;
-
-    Sound testSound;
-    Sound door;
-    Sound foot;
-    Sound gun;
-    Sound notification;
-    Sound sms;
-    Sound knife;
-    Sound bomp;
-
-    Music testMusic;
-
     Item item[2];
     Entity entities[3];
     Player player;
-    //Map *testMap;
     Weapon weapon;
+
+    Map map;
+    MapList mapList;
 };
 
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
+    app->state = StateCreate();
     app->clock = clock;
     app->FPSControls = FPSControls;
     app->gfx = GraphicsCreate();
@@ -52,44 +43,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
-    app->menu = MenuCreate(app->gfx, app->font);
+    app->menu = MenuCreate(app->gfx, app->font, &app->state);
     app->client = client;
     app->player = PlayerCreate();
-
-    int cnt = 0;
-
-    //Cut tiles from spritesheets
-    //SS_Legacy
-    //SDL_Rect tileSand = {16, 112, 16, 16};
-    //SDL_Rect tileCowHead = {352, 1088, 16, 16};
-
-    //SS_Characters
-    SDL_Rect tileWomanDefaultGun = {0, 44, 57, 43};
-
-    //SS_Tiles
-    SDL_Rect tileWood = {1036, 74, 64, 64};
-
-    short floorTileSize = 64;
-
-    for (int row = 0; row < 45; row++)
-    {
-        for (int col = 0; col < 64; col++)
-        {
-            app->db[cnt] = DrawableCreate(tileWood, (SDL_Rect){(col - 32) * floorTileSize, (row - 22.5) * floorTileSize, floorTileSize, floorTileSize}, SS_Tiles);
-            cnt++;
-        }
-    }
-
-    app->db[2999] = DrawableCreate(tileWomanDefaultGun, (SDL_Rect){496, 344, 57, 43}, SS_Characters);
-
-    app->testSound = SoundCreate(app->audio, SF_Test);
-    app->door = SoundCreate(app->audio, SF_Door);
-    app->foot = SoundCreate(app->audio, SF_Footsteps);
-    app->gun = SoundCreate(app->audio, SF_Gun);
-
-    app->testMusic = MusicCreate(app->audio, MF_Test);
-
-    app->cameraFollow = (Vec2){0.0f, 0.0f};
 
     app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
@@ -105,8 +61,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
-    //app->testMap = MapCreate(JSONCreate("level.json"));
-
     /*
     if (UDPClientSend(app->client, "hej\0", 4))
     {
@@ -119,16 +73,25 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         }
     }
     */
+
+    app->state.gameState = GS_Menu;
+    app->state.menuState = MS_MainMenu;
+
+    app->map.contents = NULL;
+    app->map.n = 0;
+    app->mapList = MapListCreate("maps");
+
     return app;
 }
 void AppClientDestroy(AppClient *app)
 {
     GraphicsDestroy(app->gfx);
+    AudioDestroy(app->audio);
+    CameraDestroy(app->camera);
+
     MenuDestroy(app->menu);
     GuiDestroy(app->gui);
     FontDestroy(app->font);
-    AudioDestroy(app->audio);
-    CameraDestroy(app->camera);
 
     SDL_free(app);
 }
@@ -136,95 +99,99 @@ void AppClientDestroy(AppClient *app)
 void AppClientRun(AppClient *app)
 {
     GraphicsClearScreen(app->gfx);
-
-    if (app->menu->currentState == MS_None)
-        AppClientUpdate(app);
-
-    if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
-        app->menu->currentState = MS_MainMenu;
-
+    AppClientUpdate(app);
     AppClientDraw(app);
     GraphicsPresentScreen(app->gfx);
 }
 
 void AppClientUpdate(AppClient *app)
 {
-    CameraUpdate(app->camera);
 
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_W) ||
-        InputIsKeyDown(app->input, SDL_SCANCODE_D) ||
-        InputIsKeyDown(app->input, SDL_SCANCODE_S) ||
-        InputIsKeyDown(app->input, SDL_SCANCODE_A))
-        SoundPlay(&app->foot, -1);
-    else
-        SoundStop(&app->foot);
+    switch (app->state.gameState)
+    {
+    case GS_Menu:
+    {
+        MapListUpdate(&app->mapList);
+        break;
+    }
+    case GS_Playing:
+    {
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
+        {
+            app->state.gameState = GS_Menu;
+            app->state.menuState = MS_MainMenu;
+            break;
+        }
+        CameraUpdate(app->camera);
 
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_M))
-        SoundPlay(&app->testSound, 0);
-    else
-        SoundStop(&app->testSound);
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
+            app->entities[1].Force.x += 500;
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_J))
+            app->entities[1].Force.x -= 500;
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_I))
+            app->entities[1].Force.y -= 500;
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
+            app->entities[1].Force.y += 500;
 
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_N))
-        MusicPlay(&app->testMusic, 0);
-    else
-        MusicStop(&app->testMusic);
-
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_L))
-        app->entities[1].Force.x += 500;
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_J))
-        app->entities[1].Force.x -= 500;
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_I))
-        app->entities[1].Force.y -= 500;
-    if (InputIsKeyDown(app->input, SDL_SCANCODE_K))
-        app->entities[1].Force.y += 500;
-
-    /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
-    {   om player position är samma som vapens då försvinner den
+        /*if (InputIsKeyDown(app->input, SDL_SCANCODE_Q))
+        {   om player position är samma som vapens då försvinner den
         if ( Vec2Equ(player->entities->position, app->item->postion) )
         {
             ItemPickup(app->item);
         }
         
-    }*/
+        }*/
 
-    EntityUpdate(app->entities, 4, app->clock);
+        EntityUpdate(app->entities, 4, app->clock);
 
-    PlayerUpdate(&app->player, app->input, app->clock, app->camera);
-    //UpdateWeapons(&app->);
-    // SDL_PixelFormat *fmt;
-    // SDL_Color *color;
-    // fmt = app->gfx->format;
-    // Uint8 index;
-    // index = *(Uint8 *)surface->pixels;
-    // color = &fmt->palette->colors[index];
-    // for (int i = 0; i < ; i++)
-    // {
-    //     for (int j = 0; j < count; j++)
-    //     {
-    //         /* code */
-    //     }
-    //     printf("\n");
-    // }
+        PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+        //UpdateWeapons(&app->);
+        // SDL_PixelFormat *fmt;
+        // SDL_Color *color;
+        // fmt = app->gfx->format;
+        // Uint8 index;
+        // index = *(Uint8 *)surface->pixels;
+        // color = &fmt->palette->colors[index];
+        // for (int i = 0; i < ; i++)
+        // {
+        //     for (int j = 0; j < count; j++)
+        //     {
+        //         /* code */
+        //     }
+        //     printf("\n");
+        // }
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void AppClientDraw(AppClient *app)
 {
-    for (int i = 0; i < 2880; i++)
-        CameraDraw(app->camera, app->db[i]);
+    switch (app->state.gameState)
+    {
+    case GS_Menu:
+    {
+        MenuUpdate(app->menu, app->input, app->FPSControls, &app->mapList, &app->map);
+        break;
+    }
+    case GS_Playing:
+    {
+        if (app->map.contents)
+            for (int i = 0; i < app->map.n; i++)
+                EntityDraw(app->camera, &app->map.contents[i]);
 
-    // for (int i = 0; i < app->testMap->n; i++)
-    //     EntityDraw(app->camera, &app->testMap->contents[i]);
-
-    ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
-    ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
-    EntityDraw(app->camera, &app->entities[0]);
-    EntityDraw(app->camera, &app->entities[1]);
-    EntityDraw(app->camera, &app->entities[2]);
-    PlayerDraw(&app->player, app->camera);
-
-    //GUI
-    GuiUpdate(app->gui);
-
-    //Menu
-    MenuUpdate(app->menu, app->input, app->FPSControls);
+        ItemDraw(app->camera, &app->item[0], ((Vec2){200, 300}));
+        ItemDraw(app->camera, &app->item[1], ((Vec2){100, 200}));
+        EntityDraw(app->camera, &app->entities[0]);
+        EntityDraw(app->camera, &app->entities[1]);
+        EntityDraw(app->camera, &app->entities[2]);
+        PlayerDraw(&app->player, app->camera);
+        GuiUpdate(app->gui);
+        break;
+    }
+    default:
+        break;
+    }
 }
