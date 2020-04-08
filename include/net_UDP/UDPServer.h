@@ -5,6 +5,7 @@ typedef struct UDPServer
 {
     UDPsocket sock;
     UDPpacket *pack;
+    IPaddress ip;
 } UDPServer;
 UDPServer UDPServerCreate(Uint16 port);
 void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size, int ports[], int nrPorts);

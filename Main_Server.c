@@ -12,7 +12,6 @@ int main()
         int rLen = UDPServerListen(&m_server, 100);
         if (rLen)
         {
-            int ports[1] = {m_server.pack->address.port};
             printf("Message Recieved: %s\n", m_server.pack->data);
             UDPServerSend(&m_server,
                           m_server.pack->data,
