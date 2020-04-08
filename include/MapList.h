@@ -6,6 +6,8 @@
 #include "core/List.h"
 #include "core/JSON.h"
 
+#include "Map.h"
+
 typedef struct MapListEntry
 {
     uint32_t uid;
