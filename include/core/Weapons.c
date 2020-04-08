@@ -1,39 +1,36 @@
-#include "Weapons.h"
+// #include "Weapons.h"
 
-Weapon *CreateWeapon(int damage, float accuracy, int weaponType)
-{
-    Weapon *weapon = (Weapon *)SDL_malloc(sizeof(Weapon));
-    weapon->Damage = damage;
-    weapon->accuracy = accuracy;
-    switch (weaponType)
-    {
-    case Sniper:
-        weapon->falloff = 500;
-        break;
-    case Pistol:
-        weapon->falloff = 100;
-        break;
-    case MachineGun:
-        weapon->falloff = 250;
-        break;
+// WeaponStats WeaponCreate(Item *weaponItem)
+// {
+//     // ItemWoodenSword,
+//     // ItemMetalSword,
+//     // Pistol,
+//     // Sniper,
+//     // MechineGun,
+//     // ItemEmpty
+//     WeaponStats stats;
+//     switch (weaponItem->type)
+//     {
+//     case Pistol:
+//         stats.Damage;
+//         stats.falloff;
+//         stats.accuracy = 0.7;
+//         stats.ammo = 12;
+//         stats.captivity = 12;
+//         break;
 
-    default:
-        weapon->falloff = 0;
-        break;
-    }
-    return weapon;
-}
-void UpdateWeapons(Weapon *weapons, Input *input, Entity *User, Camera *camera)
-{
-    if (InputIsKeyPressed(input, SDL_SCANCODE_G))
-    {
-        User->Force.x += 20;
-    }
-}
-void shoot()
-{
-}
-void DestroyWeapons(Weapon *weapon)
-{
-    SDL_free(weapon);
-}
+//     default:
+//         break;
+//     }
+//     return stats;
+// }
+// void UpdateWeapons(Weapon *weapons, Input *input, Entity *User, Camera *camera)
+// {
+//     if (InputIsKeyPressed(input, SDL_SCANCODE_G))
+//     {
+//         User->Force.x += 20;
+//     }
+// }
+// void shoot()
+// {
+// }
