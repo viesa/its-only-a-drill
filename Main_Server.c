@@ -10,14 +10,16 @@ int main()
 
     while (m_running)
     {
+        SDL_Delay(100);
         int rLen = UDPServerListen(&m_server, 100);
         if (rLen)
         {
             int ports[1] = {m_server.pack->address.port};
-            printf("Message Recieved: %s", m_server.pack->data);
-            UDPServerBroadcast(&m_server,
-                               m_server.pack->data,
-                               m_server.pack->len, ports, 1);
+            printf("Message Recieved: %s\n", m_server.pack->data);
+            UDPServerSend(&m_server,
+                          m_server.pack->data,
+                          m_server.pack->len,
+                          m_server.pack->address.port);
         }
     }
     UDPServerDestroy(&m_server);
