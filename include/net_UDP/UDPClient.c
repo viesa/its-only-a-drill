@@ -1,4 +1,5 @@
 #include "UDPClient.h"
+#include <stdio.h>
 UDPClient UDPClientCreate(const char *ip, Uint16 port)
 {
     UDPClient client;

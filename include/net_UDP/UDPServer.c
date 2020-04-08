@@ -1,4 +1,5 @@
 #include "UDPServer.h"
+#include <stdio.h>
 #define DEGBUG
 UDPServer UDPServerCreate(Uint16 port)
 {
