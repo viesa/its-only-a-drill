@@ -17,7 +17,7 @@ Camera *CameraCreate(Graphics *gfx, Vec2 *follow)
     ret->gfx = gfx;
     ret->m_follow = follow;
     ret->m_centerRotation = 0.0f;
-    ret->m_viewport = (SDL_Rect){0, 0, gfx->windowWidth, gfx->windowHeight};
+    ret->m_viewport = (SDL_Rect){0, 0, gfx->gfxWindowWidth, gfx->gfxWindowHeight};
     return ret;
 }
 
@@ -28,7 +28,7 @@ void CameraDestroy(Camera *camera)
 
 void CameraUpdate(Camera *camera)
 {
-    camera->m_viewport = (SDL_Rect){0, 0, camera->gfx->windowWidth, camera->gfx->windowHeight};
+    camera->m_viewport = (SDL_Rect){0, 0, camera->gfx->gfxWindowWidth, camera->gfx->gfxWindowHeight};
     Vec2 *p = &camera->m_position;
     SDL_Rect *vp = &camera->m_viewport;
     Vec2 *f = camera->m_follow;

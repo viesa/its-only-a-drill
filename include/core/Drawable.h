@@ -9,7 +9,6 @@ typedef struct Drawable
     SDL_Rect src;
     SDL_Rect dst;
     float rot;
-    // Defines rotation anchor in world space NOT camera space
     Vec2 rot_anchor;
     SpriteSheet spriteSheet;
 

@@ -6,11 +6,9 @@ function frontendUpdate() {
 
         var str2 = "<div class='layer-child-first'><div class='layer-child-info'><label>Z-Index: " + i + "</label>";
         var str3 = "<label>Type: " + db.list[i].type + "</label></div><div class='layer-child-options'>";
-        var str4 = "";
-        //"<button class='lrbutton lrexpand'>Options</button>";
-        var str5 = "<button class='lrbutton lrdel' onclick='lrdel($(this))'><i class='fas fa-trash-alt'></i></button>";
-        var str6 = "";
-        //var str6 = "<button class='lrbutton lrhigh' onclick='highLight($(this).parent().parent().parent())'>Highlight</button>";
+        var str4 = "<button class='lrbutton lrexpand'>Options</button>";
+        var str5 = "<button class='lrbutton lrdel' onclick='lrdel($(this))'>Delete</button>";
+        var str6 = "<button class='lrbutton lrhigh' onclick='highLight($(this))'>Highlight</button>";
 
         if (i > 0) {
             var str7 = "<button class='lrbutton lrup lrarrow' onclick='lrup($(this))'><i class='fas fa-arrow-up'></i></button>";
@@ -40,34 +38,34 @@ function frontendUpdate() {
 $(document).on("change", '.lrval', function () {
     switch ($(this).attr("lrType")) {
         case "lrvx":
-            db.list[$(this).parent().parent().parent().attr("chnr")].x = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].x = parseInt($(this).val());
             break;
 
         case "lrvy":
-            db.list[$(this).parent().parent().parent().attr("chnr")].y = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].y = parseInt($(this).val());
             break;
 
         case "lrvw":
-            db.list[$(this).parent().parent().parent().attr("chnr")].w = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].w = parseInt($(this).val());
             break;
 
         case "lrvh":
-            db.list[$(this).parent().parent().parent().attr("chnr")].h = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].h = parseInt($(this).val());
             break;
 
         case "lrvm":
-            db.list[$(this).parent().parent().parent().attr("chnr")].m = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].m = parseInt($(this).val());
             break;
 
         case "lrvc":
-            db.list[$(this).parent().parent().parent().attr("chnr")].c = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].c = parseInt($(this).val());
             break;
 
         case "lrvr":
-            db.list[$(this).parent().parent().parent().attr("chnr")].r = parseInt($(this).val());
+            db.list[$(this).parent().parent().attr("chnr")].r = parseInt($(this).val());
             break;
     }
-    canvasUpdate();
+    update();
 });
 
 function lrdel(element) {
@@ -129,22 +127,11 @@ $("#canvas").on("click", function () {
 });
 
 function highLight(object) {
-    canvasUpdate();
-    var hoverObj = db.list[object.attr("chnr")];
+    update();
+    var hoverObj = db.list[object.parent().parent().parent().attr("chnr")];
     drawHighlightRectangle(hoverObj.x, hoverObj.y, hoverObj.w, hoverObj.h, hoverObj.r);
 };
 
-$(document).on("click", '.layer-child-first', function () {
-    $(this).parent().find(".layer-child-expanded").slideToggle("fast");
+$(document).on("click", '.lrexpand', function () {
+    $(this).parent().parent().parent().find(".layer-child-expanded").slideToggle("fast");
 });
-
-$(document).on('mouseenter', '.layer-child', function (event) {
-    highLight($(this));
-}).on('mouseleave', '.layer-child', function () {
-    canvasUpdate();
-});
-
-function centerCanvas() {
-    $('#canvas-container').scrollTop(1028 - $(window).height() / 2);
-    $('#canvas-container').scrollLeft(1028 - $(window).height() / 2);
-}

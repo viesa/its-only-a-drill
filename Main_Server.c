@@ -1,27 +1,35 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
 #include "include/core/Event.h"
-#include "include/net_UDP/UDPServer.h"
+#include "include/net/Server.h"
+
+#include "include/core/AppServer.h"
+
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
-    UDPServer m_server = UDPServerCreate(1337);
+
+    Clock *m_clock = ClockCreate();
+    Input *m_input = InputCreate();
+    Event *m_event = EventCreate(m_input);
+    Server *m_server = ServerCreate(4000);
+    AppServer *m_app = AppServerCreate(m_clock, &m_running, m_input, m_server);
 
     while (m_running)
     {
-        int rLen = UDPServerListen(&m_server, 100);
-        if (rLen)
-        {
-            printf("Message Recieved: %s\n", m_server.pack->data);
-            UDPServerSend(&m_server,
-                          m_server.pack->data,
-                          m_server.pack->len,
-                          m_server.pack->address.port);
+        EventPollAll(m_event);
+        if (InputGet(m_input, KEY_ESC) || InputGet(m_input, EVENT_QUIT))
             m_running = SDL_FALSE;
-        }
-        SDL_Delay(100);
+
+        ClockTick(m_clock);
+        AppServerRun(m_app);
     }
-    UDPServerDestroy(&m_server);
+
+    ClockDestroy(m_clock);
+    InputDestroy(m_input);
+    EventDestroy(m_event);
+    ServerDestroy(m_server);
+    AppServerDestroy(m_app);
     SDL_Quit();
 
     return EXIT_SUCCESS;
