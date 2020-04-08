@@ -8,8 +8,8 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
     Entity e;
     e.id = uniqueIdentifier;
     e.position = position;
-    e.Force.x = 0;
-    e.Force.y = 0;
+    e.Force = Vec2Create(0.0f, 0.0f);
+
     switch (preset)
     {
     case EntityWoman:

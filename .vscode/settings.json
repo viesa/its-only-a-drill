@@ -19,6 +19,10 @@
                 "string_view": "c",
                 "random": "c",
                 "initializer_list": "c",
+<<<<<<< HEAD
                 "algorithm": "c"
+=======
+                "library.h": "c"
+>>>>>>> 17bce88e8880d66d439f424a81d6387b7252135b
         }
 }
