@@ -61,3 +61,13 @@ Vec2 Vec2Unit(Vec2 v)
 {
     return Vec2DivL(v, Vec2Len(v));
 }
+
+Vec2 Vec2Inv(Vec2 v)
+{
+    return Vec2Create(-v.x, -v.y);
+}
+
+double Vec2Ang(Vec2 v1, Vec2 v2)
+{
+    return acos((Vec2Dot(v1, v2) / (Vec2Len(v1) * Vec2Len(v2))));
+}

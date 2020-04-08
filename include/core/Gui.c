@@ -29,8 +29,8 @@ Gui *GuiCreate(Font *font, Clock *clock)
 void GuiUpdate(Gui *gui)
 {
     // Update window size
-    int wW = gui->font->gfx->gfxWindowWidth;
-    int wH = gui->font->gfx->gfxWindowHeight;
+    int wW = gui->font->gfx->windowWidth;
+    int wH = gui->font->gfx->windowHeight;
 
     //if (rand() % 30 < 3)
     //    gui->points += rand() % 500;

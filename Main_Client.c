@@ -9,8 +9,8 @@ int main()
     Clock *m_clock = ClockCreate();
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
-    Client *m_client = ClientCreate("127.0.0.1", 4000);
-    AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, m_client, m_FPS);
+    UDPClient m_client = UDPClientCreate("85.226.160.180", 1337);
+    AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_FPS);
 
     while (m_running)
     {
@@ -25,7 +25,7 @@ int main()
     ClockDestroy(m_clock);
     InputDestroy(m_input);
     EventDestroy(m_event);
-    ClientDestroy(m_client);
+    UDPClientDestroy(&m_client);
     AppClientDestroy(m_app);
     SDL_Quit();
 
