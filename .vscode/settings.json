@@ -18,6 +18,7 @@
                 "music.hpp": "c",
                 "string_view": "c",
                 "random": "c",
-                "initializer_list": "c"
+                "initializer_list": "c",
+                "library.h": "c"
         }
 }
