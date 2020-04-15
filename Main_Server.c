@@ -17,7 +17,6 @@ int main()
                           m_server.pack->data,
                           m_server.pack->len,
                           m_server.pack->address.port);
-            m_running = SDL_FALSE;
         }
         SDL_Delay(100);
     }

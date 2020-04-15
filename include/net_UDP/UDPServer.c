@@ -16,7 +16,6 @@ UDPServer UDPServerCreate(Uint16 port)
         fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-    SDLNet_ResolveHost(&server.ip, "85.226.160.180", port);
     return server;
 }
 void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size, int ports[], int nrPorts)
@@ -72,5 +71,4 @@ int UDPServerListen(UDPServer *server, int maxLen)
 void UDPServerDestroy(UDPServer *server)
 {
     SDLNet_UDP_Unbind(server->sock, 0);
-    SDLNet_FreePacket(server->pack);
 }
