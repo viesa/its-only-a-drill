@@ -4,6 +4,7 @@
 UDPServer UDPServerCreate(Uint16 port)
 {
     UDPServer server;
+    server.nrPlayers = 0;
     /* Initialize SDL_net */
     if (SDLNet_Init() < 0)
     {
@@ -18,7 +19,7 @@ UDPServer UDPServerCreate(Uint16 port)
     }
     return server;
 }
-void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size, int ports[], int nrPorts)
+void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size)
 {
     /* Make space for the packet */
     if (!(server->pack = SDLNet_AllocPacket(size)))
@@ -28,12 +29,14 @@ void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size, int ports[], in
     }
     memcpy(server->pack->data, msg, size);
     server->pack->len = size;
-    for (int i = 0; i < nrPorts; i++)
+    for (int i = 0; i < server->nrPlayers; i++)
     {
-        server->pack->address.port = ports[i];
-        SDLNet_UDP_Send(server->sock, -1, server->pack);
+        server->pack->address = server->players[i].ip;
+        if (SDLNet_UDP_Send(server->sock, -1, server->pack))
+        {
+            printf("OUT(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
+        }
     }
-    SDLNet_FreePacket(server->pack);
 }
 void UDPServerSend(UDPServer *server, Uint8 *msg, int size, int port)
 {
@@ -48,23 +51,34 @@ void UDPServerSend(UDPServer *server, Uint8 *msg, int size, int port)
     server->pack->address.port = port;
     if (SDLNet_UDP_Send(server->sock, -1, server->pack))
     {
-#ifdef DEGBUG
-        printf("Sending Message: %s\n", server->pack->data);
-#endif
+        printf("OUT(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
     }
     SDLNet_FreePacket(server->pack);
 }
 int UDPServerListen(UDPServer *server, int maxLen)
 {
     server->pack = SDLNet_AllocPacket(maxLen);
+    int exists = 0;
     int r = SDLNet_UDP_Recv(server->sock, server->pack);
     if (!r)
     {
         SDLNet_FreePacket(server->pack);
         return 0;
     }
+    for (int i = 0; i < server->nrPlayers; i++)
+    {
+        if (server->players[i].ip.host == server->pack->address.host)
+        {
+            exists = 1;
+        }
+    }
+    if (!exists)
+    {
+        server->players[server->nrPlayers].ip = server->pack->address;
+        server->nrPlayers++;
+    }
 #ifdef DEGBUG
-    printf("Incomming Message: %s\n", server->pack->data);
+    printf("IN(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
 #endif
     return r;
 }

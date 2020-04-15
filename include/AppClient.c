@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "MapList.h"
-
+// #define DEGBUG
 struct AppClient
 {
     SDL_bool *running;
@@ -63,6 +63,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
 
+#ifdef DEGBUG
     if (UDPClientSend(app->client, "hej\0", 4))
     {
         printf("Sending Message: hej\n");
@@ -73,7 +74,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
             printf("Incomming Message: %s\n", app->client->pack->data);
         }
     }
-
+#endif
     app->state.gameState = GS_Menu;
     app->state.menuState = MS_MainMenu;
 
