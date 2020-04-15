@@ -9,7 +9,7 @@ int main()
     Clock *m_clock = ClockCreate();
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
-    UDPClient m_client = UDPClientCreate("85.226.160.180", 8080); //85.226.160.180
+    UDPClient m_client = UDPClientCreate("85.226.160.180", 1337); //85.226.160.180
     AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_FPS);
 
     while (m_running)
