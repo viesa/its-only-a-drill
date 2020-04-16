@@ -4,6 +4,9 @@
 #ifdef linux
 #include <dirent.h>
 #endif
+#ifdef __APPLE__
+#include <dirent.h>
+#endif
 #ifdef _WIN32
 #include "core/dirent.h"
 #endif
