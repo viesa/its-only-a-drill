@@ -35,7 +35,6 @@ JSON *JSONCreate(char *filename)
     }
     if (fread(file_contents, file_size, 1, fp) != 1)
     {
-        printf(file_contents);
         log_error("JSON Loading error: Unable to read contents of %s", filename);
         fclose(fp);
         SDL_free(file_contents);
