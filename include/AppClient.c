@@ -80,7 +80,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     app->map.contents = NULL;
     app->map.n = 0;
-    // app->mapList = MapListCreate("maps");
+    app->mapList = MapListCreate("maps");
 
     return app;
 }
@@ -112,7 +112,7 @@ void AppClientUpdate(AppClient *app)
     {
     case GS_Menu:
     {
-        // MapListUpdate(&app->mapList);
+        MapListUpdate(&app->mapList);
         break;
     }
     case GS_Playing:

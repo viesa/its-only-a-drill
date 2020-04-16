@@ -1,7 +1,15 @@
 #ifndef MAPLIST_H
 #define MAPLIST_H
 
+#ifdef linux
 #include <dirent.h>
+#endif
+#ifdef __APPLE__
+#include <dirent.h>
+#endif
+#ifdef _WIN32
+#include "core/dirent.h"
+#endif
 #include <string.h>
 #include "core/List.h"
 #include "core/JSON.h"

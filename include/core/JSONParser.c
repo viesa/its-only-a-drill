@@ -29,6 +29,8 @@
 
 #include "JSONParser.h"
 
+#pragma GCC diagnostic ignored  "-Wpointer-to-int-cast"
+
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS

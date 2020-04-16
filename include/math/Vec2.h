@@ -1,7 +1,7 @@
 #ifndef VEC2_H
 #define VEC2_H
 
-#include "SDL2/SDL_bits.h"
+#include <SDL2/SDL_bits.h>
 
 typedef struct Vec2
 {
