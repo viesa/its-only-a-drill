@@ -5,7 +5,7 @@
 
 Item ItemCreate(ItemType type, Vec2 Position)
 {
-    Item i;
+    Item i = {0};
     switch (type)
     {
     case ItemWoodenSword:
