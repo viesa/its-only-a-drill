@@ -11,6 +11,7 @@
 #include "../core/Log.h"
 #include "../net_UDP/UDPClient.h"
 #include "Score.h"
+#include "Inventory.h"
 
 typedef struct AppClient AppClient;
 
