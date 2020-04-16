@@ -1,5 +1,7 @@
 #include "Map.h"
 
+#include <string.h>
+
 #include "core/Library.h"
 #include "core/Log.h"
 
