@@ -82,11 +82,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 #ifdef DEGBUG
     if (UDPClientSend(app->client, "hej\0", 4))
     {
-        printf("Sending Message: hej\n");
+        log_info("Sending Message: hej\n");
         SDL_Delay(1000);
         if (app->client->hasPacket)
         {
-            printf("Incoming Message: %s\n", app->client->pack->data);
+            log_info("Incoming Message: %s\n", app->client->pack->data);
+            app->client->hasPacket = SDL_FALSE;
         }
     }
 #endif
@@ -122,6 +123,13 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
+#ifdef DEGBUG
+    if (app->client->hasPacket)
+    {
+        log_info("%s", app->client->pack->data);
+        app->client->hasPacket = SDL_FALSE;
+    }
+#endif
 
     switch (app->state.gameState)
     {
@@ -184,24 +192,31 @@ void AppClientUpdate(AppClient *app)
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
             }
         }
-        
-        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB)) 
+
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2)) 
+            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
-                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position,2);
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position, 2);
             }
-        } 
-      
+        }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
+        if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
             if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
             {
                 shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
+                char buffert[50];
+                sprintf(buffert, "X:%f Y:%f\0", app->entities[0].position.x, app->entities[0].position.y);
+                UDPClientSend(app->client, buffert, 50);
             }
+        }
+        if (app->client->hasPacket)
+        {
+            app->client->hasPacket = 0;
+            log_info("%s\n", app->client->pack->data);
         }
 
         EntityUpdate(app->entities, 4, app->clock);
