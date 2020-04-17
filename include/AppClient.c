@@ -72,7 +72,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         int r = UDPClientListen(app->client, 100);
         if (r)
         {
-            printf("Incomming Message: %s\n", app->client->pack->data);
+            printf("Incoming Message: %s\n", app->client->pack->data);
         }
     }
 #endif
@@ -81,7 +81,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     app->map.contents = NULL;
     app->map.n = 0;
-    // app->mapList = MapListCreate("maps");
+    app->mapList = MapListCreate("maps");
 
     return app;
 }
@@ -113,7 +113,7 @@ void AppClientUpdate(AppClient *app)
     {
     case GS_Menu:
     {
-        // MapListUpdate(&app->mapList);
+        MapListUpdate(&app->mapList);
         break;
     }
     case GS_Playing:
@@ -218,6 +218,11 @@ void AppClientDraw(AppClient *app)
         EntityDraw(app->camera, &app->entities[2]);
         PlayerDraw(&app->player, app->camera);
         GuiUpdate(app->gui);
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
+        {
+            InventoryDisplay(app->gfx, app->camera, &app->player.entity.inventory, app->player.entity.position);
+        }
+
         break;
     }
     default:

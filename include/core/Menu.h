@@ -23,6 +23,7 @@ typedef struct Menu
 
 } Menu;
 
+// Creates menu
 Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
 void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapList, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);

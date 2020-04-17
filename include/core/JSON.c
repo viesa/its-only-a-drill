@@ -17,7 +17,7 @@ JSON *JSONCreate(char *filename)
         return NULL;
     }
     file_size = filestatus.st_size;
-    file_contents = (char *)malloc(filestatus.st_size);
+    file_contents = (char *)SDL_malloc(filestatus.st_size);
 
     if (file_contents == NULL)
     {
@@ -30,19 +30,19 @@ JSON *JSONCreate(char *filename)
     {
         log_error("JSON Loading error: Unable to open %s", filename);
         fclose(fp);
-        free(file_contents);
+        SDL_free(file_contents);
         return NULL;
     }
     if (fread(file_contents, file_size, 1, fp) != 1)
     {
         log_error("JSON Loading error: Unable to read contents of %s", filename);
         fclose(fp);
-        free(file_contents);
+        SDL_free(file_contents);
         return NULL;
     }
     fclose(fp);
 
-    JSON *json = (JSON *)malloc(sizeof(JSON));
+    JSON *json = (JSON *)SDL_malloc(sizeof(JSON));
 
     json->file_contents = (json_char *)file_contents;
     json->value = json_parse(json->file_contents, file_size);
@@ -50,7 +50,7 @@ JSON *JSONCreate(char *filename)
     if (json->value == NULL)
     {
         log_error("JSON Loading error: Unable to parse data");
-        free(file_contents);
+        SDL_free(file_contents);
         return NULL;
     }
 

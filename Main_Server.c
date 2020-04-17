@@ -5,7 +5,7 @@
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
-    UDPServer m_server = UDPServerCreate(25565);
+    UDPServer m_server = UDPServerCreate(1337);
 
     while (m_running)
     {

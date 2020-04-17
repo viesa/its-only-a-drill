@@ -5,7 +5,7 @@
 
 Item ItemCreate(ItemType type, Vec2 Position)
 {
-    Item i;
+    Item i = {0};
     switch (type)
     {
     case ItemWoodenSword:
@@ -62,6 +62,17 @@ void ItemDraw(Camera *camera, Item *item, Vec2 pos)
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
         CameraDraw(camera, item->drawable);
+    }
+}
+
+void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos) 
+{
+   if (item->picked)
+    {
+        item->postion = pos;
+        item->drawable.dst.x = item->postion.x;
+        item->drawable.dst.y = item->postion.y;
+        GraphicsDraw(gfx, item->drawable);
     }
 }
 

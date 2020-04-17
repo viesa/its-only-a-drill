@@ -39,6 +39,25 @@ void EventPollAll(Event *event)
         case SDL_KEYUP:
         {
             InputKeyUp(event->m_input, event->m_events.key.keysym.scancode);
+            break;
+        }
+        case SDL_MOUSEBUTTONDOWN:
+        {
+            InputMouseDown(event->m_input, event->m_events.button.button);
+            break;
+        }
+        case SDL_MOUSEBUTTONUP:
+        {
+            InputMouseUp(event->m_input, event->m_events.button.button);
+            break;
+        }
+        case SDL_MOUSEMOTION:
+        {
+            Vec2 _new;
+            _new.x = (float)event->m_events.motion.x;
+            _new.y = (float)event->m_events.motion.y;
+            InputMouseMove(event->m_input, _new);
+            break;
         }
         default:
             break;

@@ -3,21 +3,15 @@
 MapList MapListCreate(char *directory)
 {
     MapList mapList;
-    mapList.allMaps = ListCreate();
     mapList.directory = (char *)SDL_malloc(sizeof(char) * strlen(directory));
+    mapList.nMaps = 0;
     strcpy(mapList.directory, directory);
     MapListUpdate(&mapList);
     return mapList;
 }
 void MapListDestroy(MapList *mapList)
 {
-    for (Node *node = mapList->allMaps.front; node; node = node->next)
-    {
-        MapListEntry *entry = (MapListEntry *)node->data;
-        SDL_free(entry->name);
-        SDL_free(entry->filename);
-    }
-    ListDestroy(&mapList->allMaps);
+    MapListClear(mapList);
     SDL_free(mapList->directory);
 }
 
@@ -31,7 +25,7 @@ void MapListUpdate(MapList *mapList)
         MapListClear(mapList);
 
         for (int i = 0; (dir = readdir(d)) != NULL; i++)
-            if (strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
+            if (mapList->nMaps < MAX_MAPS && strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
             {
                 //Load in mapinfo from mapfile
                 size_t bytes = (strlen(mapList->directory) + 1 + strlen(dir->d_name));
@@ -88,15 +82,14 @@ void MapListUpdate(MapList *mapList)
                 //---------------
 
                 // Push-back this map
-                MapListEntry _new_entry;
-                _new_entry.uid = mapInfoEntries[0].value->u.integer;
-                _new_entry.name = (char *)SDL_malloc(sizeof(char) * mapInfoEntries[1].value->u.string.length);
-                strcpy(_new_entry.name, mapInfoEntries[1].value->u.string.ptr);
-                _new_entry.filename = (char *)SDL_malloc(sizeof(char) * strlen(fullpath));
-                strcpy(_new_entry.filename, fullpath);
-                _new_entry.difficulty = mapInfoEntries[2].value->u.integer;
-                _new_entry.maxPlayers = mapInfoEntries[3].value->u.integer;
-                ListPushBack(&mapList->allMaps, (void *)&_new_entry, sizeof(_new_entry));
+                MapListEntry *_new_entry = &mapList->allMaps[mapList->nMaps++];
+                _new_entry->uid = mapInfoEntries[0].value->u.integer;
+                _new_entry->name = (char *)SDL_malloc(sizeof(char) * mapInfoEntries[1].value->u.string.length);
+                strcpy(_new_entry->name, mapInfoEntries[1].value->u.string.ptr);
+                _new_entry->filename = (char *)SDL_malloc(sizeof(char) * strlen(fullpath));
+                strcpy(_new_entry->filename, fullpath);
+                _new_entry->difficulty = mapInfoEntries[2].value->u.integer;
+                _new_entry->maxPlayers = mapInfoEntries[3].value->u.integer;
                 // -------------------
 
                 // Clean up
@@ -110,10 +103,11 @@ void MapListUpdate(MapList *mapList)
 
 void MapListClear(MapList *mapList)
 {
-    for (Node *node = mapList->allMaps.front; node; node = node->next)
+    for (int i = 0; i < mapList->nMaps; i++)
     {
-        MapListEntry *entry = (MapListEntry *)node->data;
+        MapListEntry *entry = &mapList->allMaps[i];
         SDL_free(entry->name);
+        SDL_free(entry->filename);
     }
-    ListClear(&mapList->allMaps);
+    mapList->nMaps = 0;
 }
