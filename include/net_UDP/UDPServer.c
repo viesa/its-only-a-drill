@@ -35,8 +35,8 @@ void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size)
         pack->address = server->players[i].ip;
         if (SDLNet_UDP_Send(server->sock, -1, pack))
         {
-            printf("OUT(message): %s\n", pack->data);
-            //printf("OUT(message, host:port): %s, %x:%x\n", pack->data, pack->address.host, pack->address.port);
+            //printf("OUT(message): %s\n", pack->data);
+            printf("OUT(message, host:port): %s, %x:%x\n", pack->data, pack->address.host, pack->address.port);
         }
     }
 }
@@ -68,11 +68,14 @@ int UDPServerListen(UDPServer *server, int maxLen)
         SDLNet_FreePacket(server->pack);
         return 0;
     }
+#ifdef DEGBUG
+    system("clear");
+#endif
     for (int i = 0; i < server->nrPlayers; i++)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
-            if (strcmp((char *)server->pack->data, "quit") == 0)
+            if (strcmp(server->pack->data, "quit") == 0)
             {
                 server->nrPlayers--;
                 for (int j = i; j < server->nrPlayers; j++)
@@ -80,14 +83,6 @@ int UDPServerListen(UDPServer *server, int maxLen)
                     server->players[j] = server->players[j + 1];
                 }
             }
-#ifdef DEGBUG
-            printf("Player list:\n");
-            for (int j = 0; j < server->nrPlayers; j++)
-            {
-                printf("(host:port) %x:%x\n", server->pack->address.host, server->pack->address.port);
-            }
-            printf("End of player list\n");
-#endif
             exists = 1;
         }
     }
@@ -97,6 +92,11 @@ int UDPServerListen(UDPServer *server, int maxLen)
         server->nrPlayers++;
     }
 #ifdef DEGBUG
+    printf("\nPlayer list\n");
+    for (int i = 0; i < server->nrPlayers; i++)
+        printf("(host:port): %x:%x\n", server->players[i].ip.host, server->players[i].ip.port);
+    printf("length of list %d\n", server->nrPlayers);
+    printf("End of player list\n\n");
     printf("IN(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
 #endif
     return r;
