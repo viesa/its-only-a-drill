@@ -21,6 +21,10 @@ void shoot(Player *player, Camera *camera, Entity e[], Item item)
     point.x = player->entity.drawable.dst.x + (player->entity.drawable.dst.w / 2);
     point.y = player->entity.drawable.dst.y + (player->entity.drawable.dst.h / 2);
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
+
+    // push back
+    player->entity.Force.x -= itemFalloff.x;
+    player->entity.Force.y -= itemFalloff.y;
 #ifdef DegBug
     printf("line pos:\n");
     printf("X1: %d\n", point.x);
@@ -41,6 +45,8 @@ void shoot(Player *player, Camera *camera, Entity e[], Item item)
         if (SDL_IntersectRectAndLine(&e[i].drawable.dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
         { // reduce accuracy
             e[i].health -= item.Stats.Damage;
+            e[i].Force.x += itemFalloff.x;
+            e[i].Force.y += itemFalloff.y;
             log_info("entity %d: health = %d\n", i, e[i].health);
         }
     }
