@@ -62,7 +62,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 
     app->client = client;
 #ifdef DEGBUG
-    app->listenThread = SDL_CreateThread(ListenToServer, "Server Listen Thread", (void *)app->client);
+    app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
 #endif
     app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
