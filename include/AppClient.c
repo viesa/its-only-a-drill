@@ -85,11 +85,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 #ifdef DEGBUG
     if (UDPClientSend(app->client, "hej\0", 4))
     {
-        printf("Sending Message: hej\n");
+        log_info("Sending Message: hej\n");
         SDL_Delay(1000);
         if (app->client->hasPacket)
         {
-            printf("Incoming Message: %s\n", app->client->pack->data);
+            log_info("Incoming Message: %s\n", app->client->pack->data);
+            app->client->hasPacket = SDL_FALSE;
         }
     }
 #endif
@@ -125,7 +126,13 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
-
+#ifdef DEGBUG
+    if (app->client->hasPacket)
+    {
+        log_info("%s", app->client->pack->data);
+        app->client->hasPacket = SDL_FALSE;
+    }
+#endif
     switch (app->state.gameState)
     {
     case GS_Menu:
@@ -187,16 +194,15 @@ void AppClientUpdate(AppClient *app)
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
             }
         }
-        
-        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB)) 
+
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2)) 
+            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
-                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position,2);
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position, 2);
             }
-        } 
-      
+        }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
         { // always the item on hand is in the last place in the inventory list
