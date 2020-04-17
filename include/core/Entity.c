@@ -38,7 +38,6 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
         {
             if (entities[Recessive].isCollider)
             {
-                printf("dose it work\n");
                 if (Dominant != Recessive)
                 {
                     if (SDL_IntersectRect(&entities[Dominant].drawable.dst, &entities[Recessive].drawable.dst, &result))
