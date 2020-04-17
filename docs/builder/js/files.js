@@ -65,7 +65,8 @@ function outputJSON() {
     }
 
     var jsonString = JSON.stringify(tempOutObj);
-    download(jsonString, "level.json", "json");
+    var fileOutputName = db.mapInfo.uid.toString() + ".json";
+    download(jsonString, fileOutputName, "json");
 }
 
 
