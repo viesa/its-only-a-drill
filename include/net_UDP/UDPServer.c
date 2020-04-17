@@ -88,8 +88,11 @@ int UDPServerListen(UDPServer *server, int maxLen)
     }
     if (!exists)
     {
-        server->players[server->nrPlayers].ip = server->pack->address;
-        server->nrPlayers++;
+        if (strcmp(server->pack->data, "quit") != 0)
+        {
+            server->players[server->nrPlayers].ip = server->pack->address;
+            server->nrPlayers++;
+        }
     }
 #ifdef DEGBUG
     printf("\nPlayer list\n");
