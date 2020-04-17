@@ -19,7 +19,10 @@ struct AppClient
     FpsManger *FPSControls;
     Input *input;
     Menu *menu;
+
+    //UDP stuff (client, server messages etc.)
     UDPClient *client;
+    SDL_Thread *listenThread;
 
     //Item item[2];
     GroundListItems groundListItems;
@@ -29,7 +32,20 @@ struct AppClient
     Map map;
     MapList mapList;
 };
-
+void ListenToServer(void *args)
+{
+    UDPClient *client = (UDPClient *)args;
+    SDL_mutex *m;
+    while (client->isActive)
+    {
+        SDL_Delay(10);
+        SDL_LockMutex(m);
+        if (client->hasPacket)
+            continue;
+        UDPClientListen(client, UDPCLIENTMSGMAXLEN);
+        SDL_UnlockMutex(m);
+    }
+}
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
 {
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
@@ -44,9 +60,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
     app->menu = MenuCreate(app->gfx, app->font, &app->state);
-    app->client = client;
     app->player = PlayerCreate();
 
+    app->client = client;
+#ifdef DEGBUG
+    app->listenThread = SDL_CreateThread(ListenToServer, "Server Listen Thread", (void *)app->client);
+#endif
     app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
@@ -62,14 +81,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->player.entity.inventory = InventoryCreate();
 
     CameraSetFollow(app->camera, &app->player.aimFollow);
-
 #ifdef DEGBUG
     if (UDPClientSend(app->client, "hej\0", 4))
     {
         printf("Sending Message: hej\n");
-        SDL_Delay(1000);
-        int r = UDPClientListen(app->client, 100);
-        if (r)
+        SDL_Delay(100);
+        if (app->client->hasPacket)
         {
             printf("Incoming Message: %s\n", app->client->pack->data);
         }
