@@ -16,6 +16,7 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
         e.Friction = 0.05f;
         e.mass = 50.0f;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
+        e.isCollider = SDL_TRUE;
         break;
     case EntityPlayerSpawn:
         e.drawable.spriteSheet = SS_BackgroundTiles;
@@ -37,6 +38,7 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
         {
             if (entities[Recessive].isCollider)
             {
+                printf("dose it work\n");
                 if (Dominant != Recessive)
                 {
                     if (SDL_IntersectRect(&entities[Dominant].drawable.dst, &entities[Recessive].drawable.dst, &result))
