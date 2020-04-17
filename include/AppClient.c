@@ -71,7 +71,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         int r = UDPClientListen(app->client, 100);
         if (r)
         {
-            printf("Incomming Message: %s\n", app->client->pack->data);
+            printf("Incoming Message: %s\n", app->client->pack->data);
         }
     }
 #endif
