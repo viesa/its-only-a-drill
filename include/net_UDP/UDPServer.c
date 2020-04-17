@@ -40,7 +40,7 @@ void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size)
         }
     }
 }
-void UDPServerSend(UDPServer *server, Uint8 *msg, int size, int port)
+void UDPServerSend(UDPServer *server, char *msg, int size, int port)
 {
     /* Make space for the packet */
     UDPpacket *pack;
@@ -75,7 +75,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
-            if (strcmp(server->pack->data, "quit") == 0)
+            if (strcmp(server->pack->data, "0quit") == 0)
             {
                 server->nrPlayers--;
                 for (int j = i; j < server->nrPlayers; j++)

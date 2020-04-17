@@ -83,9 +83,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->player.entity.inventory = InventoryCreate();
 
 #ifdef DEGBUG
-    if (UDPClientSend(app->client, "hej\0", 4))
+    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 7))
     {
-        log_info("Sending Message: hej\n");
+        log_info("Sending Message: alive\n");
         SDL_Delay(1000);
         if (app->client->hasPacket)
         {
@@ -211,9 +211,6 @@ void AppClientUpdate(AppClient *app)
             if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
             {
                 shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
-                char buffert[50];
-                sprintf(buffert, "X:%f Y:%f\0", app->entities[0].position.x, app->entities[0].position.y);
-                UDPClientSend(app->client, buffert, 50);
             }
         }
         if (app->client->hasPacket)
