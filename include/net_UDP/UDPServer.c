@@ -72,7 +72,18 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
-            exists = 1;
+            if (!strcmp(server->pack->data, "quit"))
+            {
+                for (int j = i; i < server->nrPlayers; j++)
+                {
+                    server->players[j + 1] = server->players[j];
+                }
+                server->nrPlayers--;
+            }
+            else
+            {
+                exists = 1;
+            }
         }
     }
     if (!exists)
