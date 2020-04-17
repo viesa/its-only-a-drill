@@ -1,7 +1,7 @@
 #ifndef UDPCLIENT_H
 #define UDPCLIENT_H
 #include <SDL2/SDL_net.h>
-#define UDPCLIENTMSGMAXLEN 100
+#define MAX_MSGLEN 100
 typedef struct UDPClient
 {
     UDPpacket *pack;

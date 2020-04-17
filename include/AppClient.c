@@ -5,7 +5,7 @@
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
-// #define DEGBUG
+//#define DEGBUG
 struct AppClient
 {
     SDL_bool *running;
@@ -43,7 +43,7 @@ void ListenToServer(void *args)
         SDL_LockMutex(m);
         if (client->hasPacket)
             continue;
-        UDPClientListen(client, UDPCLIENTMSGMAXLEN);
+        UDPClientListen(client, MAX_MSGLEN);
         SDL_UnlockMutex(m);
     }
 }
@@ -181,7 +181,7 @@ void AppClientUpdate(AppClient *app)
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
-        {   // always the item on hand is in the last place in the inventory list
+        { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
             if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
             {
