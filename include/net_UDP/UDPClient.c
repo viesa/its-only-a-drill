@@ -3,6 +3,8 @@
 UDPClient UDPClientCreate(const char *ip, Uint16 port)
 {
     UDPClient client;
+    client.hasPacket = SDL_FALSE;
+    client.isActive = SDL_TRUE;
     /* Initialize SDL_net */
     if (SDLNet_Init() < 0)
     {
@@ -26,13 +28,13 @@ UDPClient UDPClientCreate(const char *ip, Uint16 port)
 }
 int UDPClientSend(UDPClient *client, void *data, size_t size)
 {
-    client->pack = SDLNet_AllocPacket(size);
-    memcpy(client->pack->data, data, size);
-    client->pack->address.host = client->serverip.host;
-    client->pack->address.port = client->serverip.port;
-    client->pack->len = size;
-    int s = SDLNet_UDP_Send(client->sock, -1, client->pack);
-    SDLNet_FreePacket(client->pack);
+    UDPpacket *pack = SDLNet_AllocPacket(size);
+    memcpy(pack->data, data, size);
+    pack->address.host = client->serverip.host;
+    pack->address.port = client->serverip.port;
+    pack->len = size;
+    int s = SDLNet_UDP_Send(client->sock, -1, pack);
+    SDLNet_FreePacket(pack);
     return s;
 }
 int UDPClientListen(UDPClient *client, int maxLen)
@@ -43,13 +45,16 @@ int UDPClientListen(UDPClient *client, int maxLen)
     int r = SDLNet_UDP_Recv(client->sock, client->pack);
     if (!r)
     {
-        SDLNet_FreePacket(client->pack);
+        client->hasPacket = SDL_FALSE;
         return 0;
     }
+    client->hasPacket = SDL_TRUE;
     return r;
 }
 void UDPClientDestroy(UDPClient *client)
 {
+    UDPClientSend(client, "quit\0", 6);
     client->pack = NULL;
+    SDLNet_FreePacket(client->pack);
     SDLNet_UDP_Close(client->sock);
 }

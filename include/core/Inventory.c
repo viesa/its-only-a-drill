@@ -18,17 +18,6 @@ void InventoryDisplay(Graphics *gfx,Camera *camera, InventoryListItems *i, Vec2 
         }
        
     }
-    //CameraDraw(camera, i->contents[j].drawable);
-    //for(int j = 0; j < MAX_PLYER_ITEMS ; j++ ) 
-    {
-       // if(j < 5) 
-        {
-            
-        }
-        /*else 
-        {
-             ItemDraw(camera , i->contents[j].type,  );
-        }*/
-        
-    }
 }
+
+

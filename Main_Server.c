@@ -9,12 +9,13 @@ int main()
 
     while (m_running)
     {
-        int rLen = UDPServerListen(&m_server, 100);
+        int rLen = UDPServerListen(&m_server, MAX_MSGLEN);
         if (rLen)
         {
-            UDPServerBroadcast(&m_server, m_server.pack->data, m_server.pack->len);
+            char buffer[MAX_MSGLEN];
+            sprintf(buffer, "%s (host:port) %x:%x", m_server.pack->data, m_server.pack->address.host, m_server.pack->address.port);
+            UDPServerBroadcast(&m_server, buffer, strlen(buffer) + 1);
         }
-        SDL_Delay(100);
     }
     UDPServerDestroy(&m_server);
     SDL_Quit();

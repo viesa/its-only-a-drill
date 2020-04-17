@@ -18,6 +18,8 @@ typedef struct Menu
     int loopSwing;
     int swingDir;
     int activeIndex;
+    int lastIndex;
+    SDL_bool indexChanged;
     int Width;
     int Height;
 

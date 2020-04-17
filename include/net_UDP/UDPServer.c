@@ -22,38 +22,41 @@ UDPServer UDPServerCreate(Uint16 port)
 void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size)
 {
     /* Make space for the packet */
-    if (!(server->pack = SDLNet_AllocPacket(size)))
+    UDPpacket *pack;
+    if (!(pack = SDLNet_AllocPacket(size)))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-    memcpy(server->pack->data, msg, size);
-    server->pack->len = size;
+    memcpy(pack->data, msg, size);
+    pack->len = size;
     for (int i = 0; i < server->nrPlayers; i++)
     {
-        server->pack->address = server->players[i].ip;
-        if (SDLNet_UDP_Send(server->sock, -1, server->pack))
+        pack->address = server->players[i].ip;
+        if (SDLNet_UDP_Send(server->sock, -1, pack))
         {
-            printf("OUT(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
+            printf("OUT(message): %s\n", pack->data);
+            //printf("OUT(message, host:port): %s, %x:%x\n", pack->data, pack->address.host, pack->address.port);
         }
     }
 }
 void UDPServerSend(UDPServer *server, Uint8 *msg, int size, int port)
 {
     /* Make space for the packet */
-    if (!(server->pack = SDLNet_AllocPacket(size)))
+    UDPpacket *pack;
+    if (!(pack = SDLNet_AllocPacket(size)))
     {
         fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
         exit(EXIT_FAILURE);
     }
-    memcpy(server->pack->data, msg, size);
-    server->pack->len = size;
-    server->pack->address.port = port;
-    if (SDLNet_UDP_Send(server->sock, -1, server->pack))
+    memcpy(pack->data, msg, size);
+    pack->len = size;
+    pack->address.port = port;
+    if (SDLNet_UDP_Send(server->sock, -1, pack))
     {
-        printf("OUT(message, host:port): %s, %x:%x\n", server->pack->data, server->pack->address.host, server->pack->address.port);
+        printf("OUT(message, host:port): %s, %x:%x\n", pack->data, pack->address.host, pack->address.port);
     }
-    SDLNet_FreePacket(server->pack);
+    SDLNet_FreePacket(pack);
 }
 int UDPServerListen(UDPServer *server, int maxLen)
 {
@@ -67,8 +70,24 @@ int UDPServerListen(UDPServer *server, int maxLen)
     }
     for (int i = 0; i < server->nrPlayers; i++)
     {
-        if (server->players[i].ip.host == server->pack->address.host)
+        if (server->players[i].ip.port == server->pack->address.port)
         {
+            if (strcmp((char *)server->pack->data, "quit") == 0)
+            {
+                server->nrPlayers--;
+                for (int j = i; j < server->nrPlayers; j++)
+                {
+                    server->players[j] = server->players[j + 1];
+                }
+            }
+#ifdef DEGBUG
+            printf("Player list:\n");
+            for (int j = 0; j < server->nrPlayers; j++)
+            {
+                printf("(host:port) %x:%x\n", server->pack->address.host, server->pack->address.port);
+            }
+            printf("End of player list\n");
+#endif
             exists = 1;
         }
     }

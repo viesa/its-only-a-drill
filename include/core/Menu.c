@@ -13,6 +13,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
     menu->loopSwing = 87;
     menu->swingDir = 0;
     menu->activeIndex = 0;
+    menu->lastIndex = 0;
     menu->Width = 640;
     menu->Height = 480;
 
@@ -53,6 +54,16 @@ void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapLi
     menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
                          (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
 
+    if (menu->lastIndex != menu->activeIndex)
+    {
+        menu->indexChanged = SDL_TRUE;
+    }
+    else
+    {
+        menu->indexChanged = SDL_FALSE;
+    }
+    menu->lastIndex = menu->activeIndex;
+
     //Decides what shall be drawn on top
     switch (menu->state->menuState)
     {
@@ -81,9 +92,9 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
     //Determine menu options
     int optionLength = 5;
     char options[5][100] = {
-        {"Continue game"},
-        {"Start new game"},
-        {"Custom"},
+        {"Join party"},
+        {"Host party"},
+        {"Local game"},
         {"Options"},
         {"Exit"}};
     // makes it loop
@@ -92,20 +103,21 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
+        menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
         {
         case 0:
         {
-            // if (map->contents)
-            {
-                menu->state->gameState = GS_Playing;
-                menu->state->menuState = MS_None;
-            }
-            break;
+            //Join party
+        }
+        case 1:
+        {
+            //Host party
         }
         case 2:
         {
             menu->state->menuState = MS_CustomMap;
+            menu->activeIndex = 0;
             break;
         }
         case 3:
@@ -144,6 +156,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
+        menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
         {
         case 0: //toggle fullscreen
@@ -212,6 +225,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
+        menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
         {
         case 0:
@@ -283,6 +297,7 @@ void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
 
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
+        menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
         {
         case 0:
@@ -335,14 +350,8 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
     {
         MapListEntry *entry = &mapList->allMaps[j];
         char buffer[100] = {0};
-        strcat(options[i], "Name: ");
-        strcat(options[i], entry->name);
-        strcat(options[i], " Diff: ");
-        SDL_itoa(entry->difficulty, buffer, 10);
-        strcat(options[i], buffer);
-        strcat(options[i], " MaxPl: ");
-        SDL_itoa(entry->maxPlayers, buffer, 10);
-        strcat(options[i], buffer);
+        sprintf(buffer, "%s [Diff: %d, MaxPl: %d]", entry->name, entry->difficulty, entry->maxPlayers);
+        strcpy(options[i], buffer);
     }
     strcpy(options[optionLength - 1], "Back");
 
@@ -353,19 +362,29 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
     {
         if (menu->activeIndex == optionLength - 1)
         {
+
+            menu->indexChanged = SDL_TRUE;
             menu->activeIndex = 0;
             menu->state->menuState = MS_MainMenu;
         }
         else
         {
-            MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
-            JSON *mapdata = JSONCreate(entry->filename);
-            *map = MapCreate(mapdata);
-            JSONDestroy(mapdata);
-            menu->state->gameState = GS_Playing;
             menu->state->menuState = MS_None;
+            menu->state->gameState = GS_Playing;
         }
     }
+    else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
+    {
+        if (map->contents != NULL)
+        {
+            MapDestroy(map);
+        }
+        MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
+        JSON *mapdata = JSONCreate(entry->filename);
+        *map = MapCreate(mapdata);
+        JSONDestroy(mapdata);
+    }
+
     MenuDraw(menu, options, optionLength);
 }
 
@@ -376,7 +395,10 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     menu->mainMenuDbl.dst.h = menu->gfx->windowHeight;
 
     //Draw background
-    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+    if (menu->state->menuState == MS_MainMenu)
+    {
+        GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+    }
 
     switch (menu->state->menuState)
     {
