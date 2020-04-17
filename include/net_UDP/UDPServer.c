@@ -88,7 +88,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
     }
     if (!exists)
     {
-        if (strcmp(server->pack->data, "quit") != 0 || server->nrPlayers != MAX_PLAYERS)
+        if (strcmp(server->pack->data, "quit") != 0 && server->nrPlayers != MAX_PLAYERS)
         {
             server->players[server->nrPlayers].ip = server->pack->address;
             server->nrPlayers++;
