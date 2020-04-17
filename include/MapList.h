@@ -1,7 +1,7 @@
 #ifndef MAPLIST_H
 #define MAPLIST_H
 
-#ifdef linux
+#ifdef __linux__
 #include <dirent.h>
 #endif
 #ifdef __APPLE__
@@ -16,6 +16,8 @@
 
 #include "Map.h"
 
+#define MAX_MAPS 5
+
 typedef struct MapListEntry
 {
     uint32_t uid;
@@ -28,7 +30,8 @@ typedef struct MapListEntry
 typedef struct MapList
 {
     char *directory;
-    List allMaps;
+    MapListEntry allMaps[MAX_MAPS];
+    uint16_t nMaps;
 } MapList;
 
 ///\param directory: Specifies which directory to load the map files from

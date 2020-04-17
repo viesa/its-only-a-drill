@@ -2,6 +2,12 @@
 #define Weapon_H
 #include <stdio.h>
 #include "../Items.h"
+#include "../Player.h"
+#include <SDL2/SDL_mouse.h>
+#include <stdio.h>
 
-WeaponStats WeaponCreate(Item *weaponItem);
+#include "Library.h"
+
+void shoot(Player *player, Camera *camera, Entity e[], Item item);
+
 #endif
