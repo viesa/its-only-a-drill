@@ -161,6 +161,15 @@ void AppClientUpdate(AppClient *app)
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
             }
         }
+        
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB)) 
+        {
+            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2)) 
+            {
+                log_info("You Pressed 2 while tab");
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position,2);
+            }
+        } 
       
 
         EntityUpdate(app->entities, 4, app->clock);
