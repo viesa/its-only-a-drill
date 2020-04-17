@@ -11,6 +11,8 @@ struct Input
 
     SDL_bool m_mousemap[NUM_MOUSE_EVENTS];
     SDL_bool m_prevMousemap[NUM_MOUSE_EVENTS];
+
+    Vec2 m_mousePosition;
 };
 
 Input *InputCreate()
@@ -65,6 +67,11 @@ void InputMouseUp(Input *input, const MouseCode code)
     input->m_mousemap[code] = SDL_FALSE;
 }
 
+void InputMouseMove(Input *input, Vec2 pos)
+{
+    input->m_mousePosition = pos;
+}
+
 SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key)
 {
     return input->m_keymap[key];
@@ -93,4 +100,9 @@ SDL_bool InputIsMousePressed(Input *input, const MouseCode code)
 SDL_bool InputIsMouseReleased(Input *input, const MouseCode code)
 {
     return !input->m_mousemap[code] && input->m_prevMousemap[code];
+}
+
+Vec2 InputLastMousePos(Input *input)
+{
+    return input->m_mousePosition;
 }
