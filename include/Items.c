@@ -17,7 +17,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 500;
+        i.Stats.falloff = 5000;
         break;
     case ItemMetalSword:
         i.drawable = DrawableCreate((SDL_Rect){16, 16, 16, 16}, (SDL_Rect){50, 50, 30, 30}, SS_Weapons);
@@ -65,9 +65,9 @@ void ItemDraw(Camera *camera, Item *item, Vec2 pos)
     }
 }
 
-void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos) 
+void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos)
 {
-   if (item->picked)
+    if (item->picked)
     {
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
