@@ -59,4 +59,6 @@ void groundListAdd(GroundListItems *g, InventoryListItems *i);
 void inventoryPop(InventoryListItems *i);
 void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera);
 
+void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item); 
+
 #endif
