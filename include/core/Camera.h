@@ -3,6 +3,7 @@
 
 #include "../math/Vec2.h"
 #include "Graphics.h"
+#include "Log.h"
 
 typedef struct Camera Camera;
 

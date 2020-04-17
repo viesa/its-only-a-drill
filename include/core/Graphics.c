@@ -34,6 +34,8 @@ Graphics *GraphicsCreate()
     gfx_ret->windowWidth = 640;
     gfx_ret->windowHeight = 480;
 #endif
+    gfx_ret->mapWidth = 2000;
+    gfx_ret->mapHeight = 2000;
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
 
