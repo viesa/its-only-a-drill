@@ -22,7 +22,6 @@ struct AppClient
     Menu *menu;
     UDPClient *client;
 
-    //Item item[2];
     GroundListItems groundListItems;
     Entity entities[3];
     Player player; // entity 4 = player
@@ -57,8 +56,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
-    //app->item[0] = ItemCreate(ItemWoodenSword);
-    //app->item[1] = ItemCreate(ItemMetalSword);
     app->groundListItems = GroundListCreate();
     app->player.entity.inventory = InventoryCreate();
 

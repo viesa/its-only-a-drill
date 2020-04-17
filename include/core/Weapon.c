@@ -9,8 +9,8 @@ void shoot(Player *player, Camera *camera, Entity e[], Item item)
 
     SDL_GetMouseState(&pos_x, &pos_y);
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
-    Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(RectMid(player->entity.drawable.dst), cameraPos);
+    // Vec2 cameraPos = CameraGetPos(camera);
+    Vec2 playerPos = Vec2Create((float)player->entity.drawable.dst.x, (float)player->entity.drawable.dst.y);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
     Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
