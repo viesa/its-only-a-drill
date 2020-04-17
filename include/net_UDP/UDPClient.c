@@ -53,7 +53,6 @@ int UDPClientListen(UDPClient *client, int maxLen)
 }
 void UDPClientDestroy(UDPClient *client)
 {
-    UDPClientSend(client, "quit\0", 6);
     client->pack = NULL;
     SDLNet_FreePacket(client->pack);
     SDLNet_UDP_Close(client->sock);
