@@ -72,7 +72,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
-            if (strcmp((unsigned char *)server->pack->data, "quit") == 0)
+            if (strcmp((char *)server->pack->data, "quit") == 0)
             {
                 server->nrPlayers--;
                 for (int j = i; j < server->nrPlayers; j++)
