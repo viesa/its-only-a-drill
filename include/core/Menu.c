@@ -325,15 +325,15 @@ void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
 void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
 {
     //Determine menu options
-    int optionLength = mapList->allMaps.len + 1;
+    int optionLength = mapList->nMaps + 1;
     char options[optionLength][100];
     for (int i = 0; i < optionLength; i++)
         for (int j = 0; j < 100; j++)
             options[i][j] = 0;
-    int i = 0;
-    for (Node *node = mapList->allMaps.front; node; node = node->next, i++)
+
+    for (int i = 0, j = 0; j < mapList->nMaps; i++, j++)
     {
-        MapListEntry *entry = (MapListEntry *)node->data;
+        MapListEntry *entry = &mapList->allMaps[j];
         char buffer[100] = {0};
         strcat(options[i], "Name: ");
         strcat(options[i], entry->name);
@@ -358,7 +358,7 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
         }
         else
         {
-            MapListEntry *entry = (MapListEntry *)ListGet(&mapList->allMaps, menu->activeIndex)->data;
+            MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
             JSON *mapdata = JSONCreate(entry->filename);
             *map = MapCreate(mapdata);
             JSONDestroy(mapdata);
