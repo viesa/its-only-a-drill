@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "MapList.h"
-// #define DEGBUG
+//#define DEGBUG
 struct AppClient
 {
     SDL_bool *running;
@@ -71,7 +71,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         int r = UDPClientListen(app->client, 100);
         if (r)
         {
-            printf("Incomming Message: %s\n", app->client->pack->data);
+            printf("Incoming Message: %s\n", app->client->pack->data);
         }
     }
 #endif
@@ -161,7 +161,6 @@ void AppClientUpdate(AppClient *app)
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
             }
         }
-      
 
         EntityUpdate(app->entities, 4, app->clock);
 
@@ -209,12 +208,11 @@ void AppClientDraw(AppClient *app)
         EntityDraw(app->camera, &app->entities[2]);
         PlayerDraw(&app->player, app->camera);
         GuiUpdate(app->gui);
-        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB)) 
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            InventoryDisplay(app->gfx,app->camera,&app->player.entity.inventory, app->player.entity.position);
+            InventoryDisplay(app->gfx, app->camera, &app->player.entity.inventory, app->player.entity.position);
         }
-        
-        
+
         break;
     }
     default:
