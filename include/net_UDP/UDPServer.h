@@ -1,7 +1,7 @@
 #ifndef UDPSERVER_h
 #define UDPSERVER_h
 #include <SDL2/SDL_net.h>
-#define MAX_PLAYERS 5
+#define MAX_PLAYERS 10
 #define MAX_MSGLEN 100
 typedef struct
 {
