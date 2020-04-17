@@ -13,18 +13,38 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.type = ItemWoodenSword;
         i.postion = Position;
         i.picked = 0;
+        i.Stats.accuracy = 1.0f;
+        i.Stats.ammo = 12;
+        i.Stats.captivity = 12;
+        i.Stats.Damage = 50;
+        i.Stats.falloff = 500;
         break;
     case ItemMetalSword:
         i.drawable = DrawableCreate((SDL_Rect){16, 16, 16, 16}, (SDL_Rect){50, 50, 30, 30}, SS_Weapons);
         i.type = ItemMetalSword;
         i.postion = Position;
         i.picked = 0;
+        i.Stats.accuracy = 1.0f;
+        i.Stats.ammo = 12;
+        i.Stats.captivity = 12;
+        i.Stats.Damage = 50;
+        i.Stats.falloff = 500;
         break;
     case ItemEmpty:
         i.picked = 1;
         i.type = ItemEmpty;
+        i.Stats.accuracy = 0.0f;
+        i.Stats.ammo = 0;
+        i.Stats.captivity = 0;
+        i.Stats.Damage = 0;
+        i.Stats.falloff = 0;
         break;
     default:
+        i.Stats.accuracy = 0.0f;
+        i.Stats.ammo = 0;
+        i.Stats.captivity = 0;
+        i.Stats.Damage = 0;
+        i.Stats.falloff = 0;
         break;
     }
     return i;

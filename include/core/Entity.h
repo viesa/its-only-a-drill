@@ -22,6 +22,7 @@ typedef struct Entity
     Vec2 accseleration;
     float Friction, mass;
     InventoryListItems inventory;
+    int health;
 } Entity;
 
 ///Creates a entity

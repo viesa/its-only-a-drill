@@ -1,63 +1,35 @@
 #include "Weapon.h"
+#include "Entity.h"
 
-WeaponStats WeaponCreate(Item *weaponItem)
+void shoot(Player *player, Camera *camera, Entity e[], Item item)
 {
-    WeaponStats stats;
-    switch (weaponItem->type)
-    {
-    case Pistol:
-        stats.Damage = 90;
-        stats.falloff = 50;
-        stats.accuracy = 0.7f;
-        stats.ammo = 12;
-        stats.captivity = 12;
-        break;
-    case Sniper:
-        stats.Damage = 90;
-        stats.falloff = 600;
-        stats.accuracy = 0.7f;
-        stats.ammo = 12;
-        stats.captivity = 12;
-        break;
-    case MechineGun:
-        stats.Damage = 20;
-        stats.falloff = 200;
-        stats.accuracy = 0.7f;
-        stats.ammo = 12;
-        stats.captivity = 12;
-        break;
-    case ItemWoodenSword:
-        stats.Damage = 100;
-        stats.falloff = 50;
-        stats.accuracy = 1.0f;
-        stats.ammo = 12;
-        stats.captivity = 12;
-        break;
-    case ItemMetalSword:
-        stats.Damage = 100;
-        stats.falloff = 50;
-        stats.accuracy = 1.0f;
-        stats.ammo = 12;
-        stats.captivity = 12;
-        break;
+    printf("function ran\n");
+    int pos_x = 0;
+    int pos_y = 0;
 
-    default:
-        stats.Damage = 0;
-        stats.falloff = 0;
-        stats.accuracy = 0.0f;
-        stats.ammo = 0;
-        stats.captivity = 0;
-        break;
+    SDL_GetMouseState(&pos_x, &pos_y);
+    Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
+    Vec2 cameraPos = CameraGetPos(camera);
+    Vec2 playerPos = Vec2Sub(RectMid(player->entity.drawable.dst), cameraPos);
+
+    Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
+    Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
+    Vec2 itemFalloff = Vec2MulL(player->forward, item.Stats.falloff);
+
+    SDL_Point point;
+    point.x = itemFalloff.x;
+    point.y = itemFalloff.y;
+
+    //SDL_bool pointInArea;
+
+    for (int i = 0; i < 3; i++)
+    {
+
+        if (SDL_PointInRect(&point, &e[i].drawable.dst))
+        //if(SDL_IntersectRectAndLine(&e[i].drawable.dst, (int)playerPos.x, (int)playerPos.y, (int)point.x, (int)point.y))
+        { // reduce accuracy
+            printf("hit\n");
+            e[i].health -= item.Stats.Damage;
+        }
     }
-    return stats;
 }
-// void UpdateWeapons(Weapon *weapons, Input *input, Entity *User, Camera *camera)
-// {
-//     if (InputIsKeyPressed(input, SDL_SCANCODE_G))
-//     {
-//         User->Force.x += 20;
-//     }
-// }
-// void shoot()
-// {
-// }
