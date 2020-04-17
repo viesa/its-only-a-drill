@@ -133,6 +133,7 @@ void AppClientUpdate(AppClient *app)
         app->client->hasPacket = SDL_FALSE;
     }
 #endif
+
     switch (app->state.gameState)
     {
     case GS_Menu:
@@ -204,13 +205,21 @@ void AppClientUpdate(AppClient *app)
             }
         }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
+        if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
             if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
             {
                 shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
+                char buffert[50];
+                sprintf(buffert, "X:%f Y:%f\0", app->entities[0].position.x, app->entities[0].position.y);
+                UDPClientSend(app->client, buffert, 50);
             }
+        }
+        if (app->client->hasPacket)
+        {
+            app->client->hasPacket = 0;
+            log_info("%s\n", app->client->pack->data);
         }
 
         EntityUpdate(app->entities, 4, app->clock);
