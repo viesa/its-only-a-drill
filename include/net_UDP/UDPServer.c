@@ -72,6 +72,22 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
+            if (strcmp(server->pack->data, "quit") == 0)
+            {
+                server->nrPlayers--;
+                for (int j = i; j < server->nrPlayers; j++)
+                {
+                    server->players[j] = server->players[j + 1];
+                }
+            }
+#ifdef DEGBUG
+            printf("Player list:\n");
+            for (int j = 0; j < server->nrPlayers; j++)
+            {
+                printf("(host:port) %x:%x\n", server->pack->address.host, server->pack->address.port);
+            }
+            printf("End of player list\n");
+#endif
             exists = 1;
         }
     }

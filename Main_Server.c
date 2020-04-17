@@ -16,7 +16,6 @@ int main()
             sprintf(buffer, "%s (host:port) %x:%x", m_server.pack->data, m_server.pack->address.host, m_server.pack->address.port);
             UDPServerBroadcast(&m_server, buffer, strlen(buffer) + 1);
         }
-        SDL_Delay(100);
     }
     UDPServerDestroy(&m_server);
     SDL_Quit();

@@ -36,15 +36,12 @@ struct AppClient
 void ListenToServer(void *args)
 {
     UDPClient *client = (UDPClient *)args;
-    SDL_mutex *m;
     while (client->isActive)
     {
         SDL_Delay(10);
-        SDL_LockMutex(m);
         if (client->hasPacket)
             continue;
         UDPClientListen(client, MAX_MSGLEN);
-        SDL_UnlockMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
@@ -86,7 +83,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     if (UDPClientSend(app->client, "hej\0", 4))
     {
         printf("Sending Message: hej\n");
-        SDL_Delay(100);
+        SDL_Delay(1000);
         if (app->client->hasPacket)
         {
             printf("Incoming Message: %s\n", app->client->pack->data);
