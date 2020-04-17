@@ -16,6 +16,7 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
         e.Friction = 0.05f;
         e.mass = 50.0f;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
+        e.health = 100;
         break;
     case EntityPlayerSpawn:
         e.drawable.spriteSheet = SS_BackgroundTiles;

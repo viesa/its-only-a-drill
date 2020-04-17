@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "MapList.h"
+#include "core/Weapon.h"
 // #define DEGBUG
 struct AppClient
 {
@@ -24,7 +25,7 @@ struct AppClient
     //Item item[2];
     GroundListItems groundListItems;
     Entity entities[3];
-    Player player;
+    Player player; // entity 4 = player
 
     Map map;
     MapList mapList;
@@ -159,6 +160,15 @@ void AppClientUpdate(AppClient *app)
             if (app->player.entity.inventory.top > 1) // can't drop the knife
             {
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
+            }
+        }
+
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
+        {   // always the item on hand is in the last place in the inventory list
+            // if there is ammo in ur weapon shoot
+            if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
+            {
+                shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
             }
         }
 
