@@ -17,7 +17,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 500;
+        i.Stats.falloff = 5000;
         break;
     case ItemMetalSword:
         i.drawable = DrawableCreate((SDL_Rect){16, 16, 16, 16}, (SDL_Rect){50, 50, 30, 30}, SS_Weapons);
@@ -65,9 +65,9 @@ void ItemDraw(Camera *camera, Item *item, Vec2 pos)
     }
 }
 
-void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos) 
+void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos)
 {
-   if (item->picked)
+    if (item->picked)
     {
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
@@ -109,7 +109,9 @@ GroundListItems GroundListCreate(void)
     GroundListItems ground;
     ground.contents[0] = ItemCreate(ItemWoodenSword, (Vec2){200, 200});
     ground.contents[1] = ItemCreate(ItemMetalSword, (Vec2){200, 400});
-    ground.top = 2;
+    ground.contents[2] = ItemCreate(ItemWoodenSword, (Vec2){300, 200});
+    ground.contents[3] = ItemCreate(ItemMetalSword, (Vec2){300, 400});
+    ground.top = 4;
     return ground;
 }
 
@@ -135,6 +137,38 @@ void groundListAdd(GroundListItems *g, InventoryListItems *i)
     g->contents[g->top].type = i->contents[i->top - 1].type;
     g->top++;
 }
+
+void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item) 
+{
+    
+    if(item <= i->top) 
+    {
+        item--;
+        i->contents[item].picked = 0;
+        i->contents[item].postion.x = playerPos.x;
+        i->contents[item].postion.y = playerPos.y;
+    
+        g->contents[g->top].drawable = i->contents[item].drawable;
+        g->contents[g->top].picked = i->contents[item].picked;
+        g->contents[g->top].postion = i->contents[item].postion;
+        g->contents[g->top].type = i->contents[item].type;
+        g->top++;
+
+        int incitem = item;
+        incitem++;
+        for(int k = item; k < i->top; k++) 
+        {
+            i->contents[k].drawable = i->contents[incitem].drawable;
+            i->contents[k].picked = i->contents[incitem].picked;
+            i->contents[k].postion = i->contents[incitem].postion;
+            i->contents[k].type = i->contents[incitem].type;
+            incitem++;
+        }
+        i->top--;
+    }
+    
+}
+
 
 void inventoryPop(InventoryListItems *i)
 {

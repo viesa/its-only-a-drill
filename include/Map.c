@@ -160,5 +160,6 @@ Map MapCreate(JSON *mapdata)
 void MapDestroy(Map *map)
 {
     SDL_free(map->contents);
-    SDL_free(map);
+    map->contents = NULL;
+    map->n = 0;
 }

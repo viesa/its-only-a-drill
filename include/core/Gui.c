@@ -85,11 +85,11 @@ void GuiUpdate(Gui *gui)
     FontDraw3DCustom(gui->font, TTF_Antilles, pts, wW - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Objective
-    SDL_Color objColor[2] = {
-        {102 + cos(gui->loopCount) * 5, 16, 9},
-        {239 + sin(gui->loopCount) * 5, 193, 92}};
-    FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
-    FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
+    //SDL_Color objColor[2] = {
+    //{102 + cos(gui->loopCount) * 5, 16, 9},
+    //{239 + sin(gui->loopCount) * 5, 193, 92}};
+    //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
+    //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
     if (!gui->loopCount % 5)
     {

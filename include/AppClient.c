@@ -21,6 +21,8 @@ struct AppClient
     Input *input;
     Menu *menu;
 
+    Vec2 middleOfMap;
+
     //UDP stuff (client, server messages etc.)
     UDPClient *client;
     SDL_Thread *listenThread;
@@ -60,6 +62,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->menu = MenuCreate(app->gfx, app->font, &app->state);
     app->player = PlayerCreate();
 
+    app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
+
     app->client = client;
 #ifdef DEGBUG
     app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
@@ -78,7 +82,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->groundListItems = GroundListCreate();
     app->player.entity.inventory = InventoryCreate();
 
-    CameraSetFollow(app->camera, &app->player.aimFollow);
 #ifdef DEGBUG
     if (UDPClientSend(app->client, "hej\0", 4))
     {
@@ -128,6 +131,14 @@ void AppClientUpdate(AppClient *app)
     case GS_Menu:
     {
         MapListUpdate(&app->mapList);
+        switch (app->state.menuState)
+        {
+        case MS_CustomMap:
+            CameraUpdate(app->camera);
+            break;
+        default:
+            break;
+        }
         break;
     }
     case GS_Playing:
@@ -176,6 +187,16 @@ void AppClientUpdate(AppClient *app)
                 ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
             }
         }
+        
+        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB)) 
+        {
+            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2)) 
+            {
+                log_info("You Pressed 2 while tab");
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position,2);
+            }
+        } 
+      
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_T))
         { // always the item on hand is in the last place in the inventory list
@@ -217,11 +238,27 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
+        switch (app->state.menuState)
+        {
+        case MS_CustomMap:
+            CameraSetFollow(app->camera, &app->middleOfMap);
+            if (app->map.contents)
+            {
+                for (int i = 0; i < app->map.n; i++)
+                {
+                    EntityDraw(app->camera, &app->map.contents[i]);
+                }
+            }
+            break;
+        default:
+            break;
+        }
         MenuUpdate(app->menu, app->input, app->FPSControls, &app->mapList, &app->map);
         break;
     }
     case GS_Playing:
     {
+        CameraSetFollow(app->camera, &app->player.aimFollow);
         if (app->map.contents)
             for (int i = 0; i < app->map.n; i++)
                 EntityDraw(app->camera, &app->map.contents[i]);
