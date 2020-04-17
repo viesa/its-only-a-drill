@@ -1,7 +1,7 @@
 #ifndef MAPLIST_H
 #define MAPLIST_H
 
-#ifdef linux
+#ifdef __linux__
 #include <dirent.h>
 #endif
 #ifdef __APPLE__
