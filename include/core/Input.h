@@ -4,6 +4,8 @@
 #include <SDL2/SDL_keyboard.h>
 #include <SDL2/SDL_mouse.h>
 
+#include "../math/Vec2.h"
+
 typedef enum MouseCode
 {
     BUTTON_LEFT = 1,
@@ -30,6 +32,8 @@ void InputKeyUp(Input *input, const SDL_Scancode key);
 void InputMouseDown(Input *input, const MouseCode code);
 /// Updates mousemap for this frame
 void InputMouseUp(Input *input, const MouseCode code);
+/// Updates mouse position
+void InputMouseMove(Input *input, Vec2 pos);
 
 /// Returns true if key is down this frame
 SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key);
@@ -48,5 +52,7 @@ SDL_bool InputIsMousePressed(Input *input, const MouseCode code);
 /// Returns true if mouse is up this frame,
 /// and down in the previous frame
 SDL_bool InputIsMouseReleased(Input *input, const MouseCode code);
+/// Returns the last captured mouse position
+Vec2 InputLastMousePos(Input *input);
 
 #endif
