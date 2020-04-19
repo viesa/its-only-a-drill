@@ -129,8 +129,11 @@ void AppClientUpdate(AppClient *app)
 #ifdef DEGBUG
     if (app->client->hasPacket)
     {
-        log_info("%s", app->client->pack->data);
-        app->client->hasPacket = SDL_FALSE;
+        if (UDPPackageDecode(app->client->pack->data) == UDPTypeText)
+        {
+            log_info("%s\n", app->client->pack->data);
+            app->client->hasPacket = SDL_FALSE;
+        }
     }
 #endif
 
@@ -213,16 +216,10 @@ void AppClientUpdate(AppClient *app)
                 shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
             }
         }
-        if (app->client->hasPacket)
-        {
-            app->client->hasPacket = 0;
-            log_info("%s\n", app->client->pack->data);
-        }
 
         EntityUpdate(app->entities, 4, app->clock);
 
         PlayerUpdate(&app->player, app->input, app->clock, app->camera);
-
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
