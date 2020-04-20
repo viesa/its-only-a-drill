@@ -3,6 +3,7 @@
 
 #include "core/Entity.h"
 #include "core/Input.h"
+#include "math/Vec2.h"
 
 #define RADIUS 25
 

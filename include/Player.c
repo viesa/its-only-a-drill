@@ -44,9 +44,9 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     else
         player->entity.drawable.rot = 360 - toDegrees(Vec2Ang((Vec2){1.0f, 0.0f}, player->forward));
 
-    player->entity.Force.y += 750 * ((InputIsKeyDown(input, SDL_SCANCODE_S) || InputIsKeyDown(input, SDL_SCANCODE_DOWN)) -
+    player->entity.Force.y += 500 * ((InputIsKeyDown(input, SDL_SCANCODE_S) || InputIsKeyDown(input, SDL_SCANCODE_DOWN)) -
                                      (InputIsKeyDown(input, SDL_SCANCODE_W) || InputIsKeyDown(input, SDL_SCANCODE_UP)));
-    player->entity.Force.x += 750 * ((InputIsKeyDown(input, SDL_SCANCODE_D) || InputIsKeyDown(input, SDL_SCANCODE_RIGHT)) -
+    player->entity.Force.x += 500 * ((InputIsKeyDown(input, SDL_SCANCODE_D) || InputIsKeyDown(input, SDL_SCANCODE_RIGHT)) -
                                      (InputIsKeyDown(input, SDL_SCANCODE_A) || InputIsKeyDown(input, SDL_SCANCODE_LEFT)));
 }
 
