@@ -19,7 +19,33 @@ UDPServer UDPServerCreate(Uint16 port)
     }
     return server;
 }
-void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, char *data, int size)
+void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress exclusive, char *data, int size)
+{
+    UDPpacket *pack = SDLNet_AllocPacket(size + 2);
+    char *payload = UDPPackageCreate(types, data, size);
+    SDL_memcpy(pack->data, payload, size + 2);
+    pack->len = size + 2;
+    for (int i = 0; i < server->nrPlayers; i++)
+    {
+        if (server->players[i].ip.port == exclusive.port && server->players[i].ip.host == exclusive.host)
+        {
+            continue;
+        }
+        pack->address = server->players[i].ip;
+        if (SDLNet_UDP_Send(server->sock, -1, pack))
+        {
+            //printf("OUT(message): %s\n", pack->data);
+            printf("RAW OUT(message, host:port): ");
+            for (int i = 0; i < server->pack->len; i++)
+            {
+                printf("%c", (char)server->pack->data[i]);
+            }
+            printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+        }
+    }
+    UDPPackageDestroy(payload);
+}
+void UDPServerEcho(UDPServer *server, UDPPackageTypes types, char *data, int size)
 {
 #ifndef Backup
     UDPpacket *pack = SDLNet_AllocPacket(size + 2);
