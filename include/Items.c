@@ -138,16 +138,16 @@ void groundListAdd(GroundListItems *g, InventoryListItems *i)
     g->top++;
 }
 
-void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item) 
+void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item)
 {
-    
-    if(item <= i->top) 
+
+    if (item <= i->top)
     {
         item--;
         i->contents[item].picked = 0;
         i->contents[item].postion.x = playerPos.x;
         i->contents[item].postion.y = playerPos.y;
-    
+
         g->contents[g->top].drawable = i->contents[item].drawable;
         g->contents[g->top].picked = i->contents[item].picked;
         g->contents[g->top].postion = i->contents[item].postion;
@@ -156,7 +156,7 @@ void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, 
 
         int incitem = item;
         incitem++;
-        for(int k = item; k < i->top; k++) 
+        for (int k = item; k < i->top; k++)
         {
             i->contents[k].drawable = i->contents[incitem].drawable;
             i->contents[k].picked = i->contents[incitem].picked;
@@ -166,9 +166,7 @@ void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, 
         }
         i->top--;
     }
-    
 }
-
 
 void inventoryPop(InventoryListItems *i)
 {

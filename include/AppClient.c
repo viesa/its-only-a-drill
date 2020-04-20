@@ -30,7 +30,7 @@ struct AppClient
     //Item item[2];
     GroundListItems groundListItems;
     Entity entities[3];
-    Player player; // entity 4 = player
+    Player player; // player == entity 0
 
     Map map;
     MapList mapList;
@@ -80,7 +80,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     //app->item[0] = ItemCreate(ItemWoodenSword);
     //app->item[1] = ItemCreate(ItemMetalSword);
     app->groundListItems = GroundListCreate();
-    app->player.entity.inventory = InventoryCreate();
+    app->entities[0].inventory = InventoryCreate();
 
 #ifdef DEGBUG
     if (UDPClientSend(app->client, UDPTypeText, "alive\0", 7))
@@ -177,13 +177,13 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
         { // if player is near to the item, then take it!
-            if (app->player.entity.inventory.top < MAX_PLYER_ITEMS)
+            if (app->entities[0].inventory.top < MAX_PLYER_ITEMS)
             {
                 for (int tmp = 0; tmp < 2; tmp++)
                 {
-                    if (SDL_HasIntersection(&app->player.entity.drawable.dst, &app->groundListItems.contents[tmp].drawable.dst))
+                    if (SDL_HasIntersection(&app->entities[0].drawable.dst, &app->groundListItems.contents[tmp].drawable.dst))
                     {
-                        ItemPickup(&app->player.entity.inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
+                        ItemPickup(&app->entities[0].inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
                         log_info("you picked up an item. \n");
                     }
                 }
@@ -196,9 +196,9 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
         {
-            if (app->player.entity.inventory.top > 1) // can't drop the knife
+            if (app->entities[0].inventory.top > 1) // can't drop the knife
             {
-                ItemDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position);
+                ItemDrop(&app->groundListItems, &app->entities[0].inventory, app->entities[0].position);
             }
         }
 
@@ -207,22 +207,22 @@ void AppClientUpdate(AppClient *app)
             if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
-                ItemDynamicDrop(&app->groundListItems, &app->player.entity.inventory, app->player.entity.position, 2);
+                ItemDynamicDrop(&app->groundListItems, &app->entities[0].inventory, app->entities[0].position, 2);
             }
         }
 
         if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
-            if (app->player.entity.inventory.contents[app->player.entity.inventory.top - 1].Stats.ammo > 0)
+            if (app->entities[0].inventory.contents[app->entities[0].inventory.top - 1].Stats.ammo > 0)
             {
-                shoot(&app->player, app->camera, app->entities, app->player.entity.inventory.contents[app->player.entity.inventory.top - 1]);
+                playerShoot(&app->entities[0], app->camera, app->entities, app->entities[0].inventory.contents[app->entities[0].inventory.top - 1]);
             }
         }
 
-        PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+        PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
         // EntityUpdate most be after input, playerupdate
-        EntityUpdate(app->entities, 4, app->clock);
+        EntityUpdate(app->entities, 3, app->clock);
 #ifdef DEGBUG
         UDPClientSend(app->client, UDPTypeEntity, &app->player.entity, sizeof(Entity));
 #endif
@@ -278,15 +278,14 @@ void AppClientDraw(AppClient *app)
             for (int i = 0; i < app->map.n; i++)
                 EntityDraw(app->camera, &app->map.contents[i]);
 
-        UpdateItemDraw(&app->player.entity.inventory, &app->groundListItems, app->camera);
+        UpdateItemDraw(&app->entities[0].inventory, &app->groundListItems, app->camera);
         EntityDraw(app->camera, &app->entities[0]);
         EntityDraw(app->camera, &app->entities[1]);
         EntityDraw(app->camera, &app->entities[2]);
-        PlayerDraw(&app->player, app->camera);
         GuiUpdate(app->gui);
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            InventoryDisplay(app->gfx, app->camera, &app->player.entity.inventory, app->player.entity.position);
+            InventoryDisplay(app->gfx, app->camera, &app->entities[0].inventory, app->entities[0].position);
         }
         break;
     }
