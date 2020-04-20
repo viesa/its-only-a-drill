@@ -11,7 +11,7 @@ int main()
     while (m_running)
     {
         int rLen = UDPServerListen(&m_server, MAX_MSGLEN);
-        if (rLen && UDPPackageDecode(m_server.pack->data) == UDPTypeText)
+        if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeText)
         {
             UDPPackageRemoveType(m_server.pack);
             char buffer[MAX_MSGLEN];
@@ -19,7 +19,7 @@ int main()
             UDPServerBroadcast(&m_server, UDPTypeText, buffer, strlen(buffer) + 1);
         }
 #ifdef DEGBUG
-        if (rLen && UDPPackageDecode(m_server.pack->data) == UDPTypeEntity)
+        if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeEntity)
         {
             UDPPackageRemoveTypeNULL(m_server.pack);
             UDPServerBroadcast(&m_server, UDPTypeEntity, (char *)m_server.pack->data, sizeof(Entity));

@@ -129,7 +129,7 @@ void AppClientUpdate(AppClient *app)
 #ifdef DEGBUG
     if (app->client->hasPacket)
     {
-        if (UDPPackageDecode(app->client->pack->data) == UDPTypeText)
+        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeText)
         {
             log_info("%s\n", app->client->pack->data);
             app->client->hasPacket = SDL_FALSE;
