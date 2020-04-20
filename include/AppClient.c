@@ -220,6 +220,9 @@ void AppClientUpdate(AppClient *app)
         EntityUpdate(app->entities, 4, app->clock);
 
         PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+#ifdef DEGBUG
+        UDPClientSend(app->client, UDPTypeEntity, &app->player.entity, sizeof(Entity));
+#endif
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
