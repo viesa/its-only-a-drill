@@ -74,9 +74,9 @@ Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
     Vec2 FrictionVector = Vec2Unit(entity.Velosity);
     FrictionVector = Vec2MulL(FrictionVector, -1.0F);
     FrictionVector = Vec2MulL(FrictionVector, entity.mass);
-    FrictionVector = Vec2MulL(FrictionVector, entity.Friction * 100);
-    entity.Force.x += FrictionVector.x * ClockGetDeltaTime(clk);
-    entity.Force.y += FrictionVector.y * ClockGetDeltaTime(clk);
+    FrictionVector = Vec2MulL(FrictionVector, entity.Friction);
+    entity.Force.x += FrictionVector.x;
+    entity.Force.y += FrictionVector.y;
 
     // update new position
     entity.position.x += entity.Velosity.x * ClockGetDeltaTime(clk);
