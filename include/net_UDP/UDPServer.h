@@ -4,7 +4,7 @@
 #include <SDL2/SDL_net.h>
 #define MAX_PLAYERS 10
 #define MAX_MSGLEN 100
-typedef struct
+typedef struct UDPPlayer
 {
     IPaddress ip;
 } UDPPlayer;
@@ -17,9 +17,12 @@ typedef struct UDPServer
 } UDPServer;
 // Creates a UDP server on a fixed port
 UDPServer UDPServerCreate(Uint16 port);
-// Sends a message to everyone on that has sent a message to the server capped
+// Sends a message to everyone on that has sent a message to the server during the session
 void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, char *msg, int size);
-void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *msg, int length, Uint16 host, Uint16 port);
+// Sends a message to a specified ip address
+void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *msg, int length, IPaddress ip);
+// Listens on the port given when creating the server and adding "players" to the list if they send any messages to the server and removes them if they send "quit"
 int UDPServerListen(UDPServer *server, int len);
+// Destroys the server (udp_close(), unbind, sdlnet close)
 void UDPServerDestroy(UDPServer *server);
 #endif
