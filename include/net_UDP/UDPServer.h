@@ -1,5 +1,6 @@
 #ifndef UDPSERVER_h
 #define UDPSERVER_h
+#include "UDPPackager.h"
 #include <SDL2/SDL_net.h>
 #define MAX_PLAYERS 10
 #define MAX_MSGLEN 100
@@ -17,8 +18,8 @@ typedef struct UDPServer
 // Creates a UDP server on a fixed port
 UDPServer UDPServerCreate(Uint16 port);
 // Sends a message to everyone on that has sent a message to the server capped
-void UDPServerBroadcast(UDPServer *server, Uint8 *msg, int size);
-void UDPServerSend(UDPServer *server, char *msg, int length, int port);
+void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, char *msg, int size);
+void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *msg, int length, Uint16 host, Uint16 port);
 int UDPServerListen(UDPServer *server, int len);
 void UDPServerDestroy(UDPServer *server);
 #endif

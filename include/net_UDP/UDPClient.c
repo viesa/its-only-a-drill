@@ -28,12 +28,12 @@ UDPClient UDPClientCreate(const char *ip, Uint16 port)
 }
 int UDPClientSend(UDPClient *client, UDPPackageTypes types, void *data, size_t size)
 {
-    UDPpacket *pack = SDLNet_AllocPacket(size + 1);
+    UDPpacket *pack = SDLNet_AllocPacket(size + 2);
     char *payload = UDPPackageCreate(types, data, size);
-    SDL_memcpy(pack->data, payload, size + 1);
+    SDL_memcpy(pack->data, payload, size + 2);
     pack->address.host = client->serverip.host;
     pack->address.port = client->serverip.port;
-    pack->len = size;
+    pack->len = size + 2;
     int s = SDLNet_UDP_Send(client->sock, -1, pack);
     UDPPackageDestroy(payload);
     SDLNet_FreePacket(pack);
@@ -55,7 +55,7 @@ int UDPClientListen(UDPClient *client, int maxLen)
 }
 void UDPClientDestroy(UDPClient *client)
 {
-    UDPClientSend(client, UDPTypeText, "quit\0", 6);
+    UDPClientSend(client, UDPTypeText, "quit\0", 5);
     client->pack = NULL;
     SDLNet_FreePacket(client->pack);
     SDLNet_UDP_Close(client->sock);
