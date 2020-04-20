@@ -5,7 +5,7 @@
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
-#define DEGBUG
+//#define DEGBUG
 struct AppClient
 {
     SDL_bool *running;
@@ -221,15 +221,15 @@ void AppClientUpdate(AppClient *app)
         }
 
         PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
-        Entity *tempEntity;
-        int value = UDPPackageDecode((char *)app->client->pack->data);
-        if (value == UDPTypeEntity)
-        {
-            //&app->entities[1]
-            UDPPackageRemoveTypeNULL(app->client->pack);
-            memcpy(&app->entities[1], (Entity *)app->client->pack->data, sizeof(Entity));
-            app->client->hasPacket = SDL_FALSE;
-        }
+        // Entity *tempEntity;
+        // int value = UDPPackageDecode((char *)app->client->pack->data);
+        // if (value == UDPTypeEntity)
+        // {
+        //     //&app->entities[1]
+        //     UDPPackageRemoveTypeNULL(app->client->pack);
+        //     memcpy(&app->entities[1], (Entity *)app->client->pack->data, sizeof(Entity));
+        //     app->client->hasPacket = SDL_FALSE;
+        // }
         // EntityUpdate most be after input, playerupdate
         EntityUpdate(app->entities, 3, app->clock);
 #ifdef DEGBUG
