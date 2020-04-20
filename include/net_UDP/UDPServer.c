@@ -35,7 +35,7 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, char *data, in
             printf("RAW OUT(message, host:port): ");
             for (int i = 0; i < server->pack->len; i++)
             {
-                printf("%c", server->pack->data[i]);
+                printf("%c", (char)server->pack->data[i]);
             }
             printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
         }
@@ -124,9 +124,9 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         if (server->players[i].ip.port == server->pack->address.port)
         {
-            if (UDPPackageDecode(server->pack->data) == UDPTypeText)
+            if (UDPPackageDecode((char *)server->pack->data) == UDPTypeText)
             {
-                if (strcmp(server->pack->data, "0quit") == 0)
+                if (strcmp((char *)server->pack->data, "0quit") == 0)
                 {
                     server->nrPlayers--;
                     for (int j = i; j < server->nrPlayers; j++)
@@ -140,7 +140,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
     }
     if (!exists)
     {
-        if (server->nrPlayers == MAX_PLAYERS || strcmp(server->pack->data, "0quit") == 0)
+        if (server->nrPlayers == MAX_PLAYERS || strcmp((char *)server->pack->data, "0quit") == 0)
             ;
         else
         {

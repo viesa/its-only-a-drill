@@ -94,6 +94,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         }
     }
 #endif
+#ifndef DEGBUG
+    UDPClientSend(app->client, UDPTypeText, "alive\0", 7);
+#endif
     app->state.gameState = GS_Menu;
     app->state.menuState = MS_MainMenu;
 
@@ -129,7 +132,7 @@ void AppClientUpdate(AppClient *app)
 #ifdef DEGBUG
     if (app->client->hasPacket)
     {
-        if (UDPPackageDecode(app->client->pack->data) == UDPTypeText)
+        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeText)
         {
             log_info("%s\n", app->client->pack->data);
             app->client->hasPacket = SDL_FALSE;
