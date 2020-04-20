@@ -63,15 +63,14 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, char *data, in
     }
 #endif
 }
-void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *data, int size, Uint16 host, Uint16 port)
+void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *data, int size, IPaddress ip)
 {
 #ifndef Backup
     UDPpacket *pack = SDLNet_AllocPacket(size + 2);
     char *payload = UDPPackageCreate(types, data, size);
     SDL_memcpy(pack->data, payload, size + 2);
     pack->len = size + 2;
-    pack->address.host = host;
-    pack->address.port = port;
+    pack->address = ip;
     if (SDLNet_UDP_Send(server->sock, -1, pack))
     {
         //printf("OUT(message): %s\n", pack->data);
@@ -166,4 +165,6 @@ int UDPServerListen(UDPServer *server, int maxLen)
 void UDPServerDestroy(UDPServer *server)
 {
     SDLNet_UDP_Unbind(server->sock, 0);
+    SDLNet_UDP_Close(server->sock);
+    SDLNet_Quit();
 }
