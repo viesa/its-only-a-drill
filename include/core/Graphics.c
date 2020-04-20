@@ -44,6 +44,7 @@ Graphics *GraphicsCreate()
         log_fatal("Could not create window: %s", SDL_GetError());
 
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRenderDrawBlendMode(gfx_ret->m_renderer, SDL_BLENDMODE_BLEND);
 
     //Sets Window-icon
     SDL_Surface *win_icon = SDL_LoadBMP("assets/window_icon.bmp");
@@ -87,6 +88,11 @@ Graphics *GraphicsCreate()
         log_warn("Could not load background-tiles.png");
     gfx_ret->m_allTextures[SS_BackgroundTiles] = texture;
 
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "assets/img/red_circle.png");
+    if (!texture)
+        log_warn("Could not load red_circle.png");
+    gfx_ret->m_allTextures[SS_RedCircle] = texture;
+
     return gfx_ret;
 }
 
@@ -121,6 +127,17 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      drawable.rot,
                      &rot_point,
                      SDL_FLIP_NONE);
+}
+
+void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(gfx->m_renderer, color.r, color.g, color.g, color.a);
+    SDL_RenderFillRect(gfx->m_renderer, &rect);
+}
+
+void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
+{
+    GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
 }
 
 SDL_Renderer *GraphicsGetRenderer(Graphics *gfx)

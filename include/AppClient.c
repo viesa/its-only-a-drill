@@ -285,7 +285,6 @@ void AppClientDraw(AppClient *app)
         {
             InventoryDisplay(app->gfx, app->camera, &app->player.entity.inventory, app->player.entity.position);
         }
-
         break;
     }
     default:

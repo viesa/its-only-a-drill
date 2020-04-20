@@ -31,6 +31,10 @@ void GraphicsPresentScreen(Graphics *gfx);
 
 /// Draw texture into the back-buffer
 void GraphicsDraw(Graphics *gfx, Drawable drawable);
+
+void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color);
+void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius);
+
 SDL_Renderer *GraphicsGetRenderer(Graphics *gfx);
 
 #endif
