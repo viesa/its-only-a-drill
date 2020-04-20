@@ -21,7 +21,7 @@ int main()
         if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeEntity)
         {
             UDPPackageRemoveTypeNULL(m_server.pack);
-            UDPServerEcho(&m_server, UDPTypeEntity, (char *)m_server.pack->data, sizeof(Entity));
+            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, (char *)m_server.pack->data, sizeof(Entity));
             log_info("Recieved entity by %x:%x\nBroadcasting...\n", m_server.pack->address.host, m_server.pack->address.port);
         }
 
