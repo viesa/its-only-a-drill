@@ -298,4 +298,6 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
+
+    GraphicsDrawGradient(app->gfx, (SDL_Rect){0, 0, app->gfx->windowWidth, app->gfx->windowHeight}, (SDL_Color){20, 180, 184, 50}, (SDL_Color){200, 159, 227, 50});
 }
