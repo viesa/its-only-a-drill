@@ -2,12 +2,9 @@
 #include <SDL2/SDL_net.h>
 #include "include/core/Event.h"
 #include "include/net_UDP/UDPServer.h"
-#include <stdlib.h>
-#include <time.h>
-//#define DEGBUG
+#define DEGBUG
 int main()
 {
-    srand(time(NULL));
     SDL_bool m_running = SDL_TRUE;
     UDPServer m_server = UDPServerCreate(1337);
     while (m_running)
@@ -20,11 +17,11 @@ int main()
             {
                 for (int i = 0; i < m_server.nrPlayers; i++)
                 {
-                    if (m_server.players[i].id == 0)
+                    if (m_server.ids[i] == 0)
                     {
-                        int id = m_server.nrPlayers;
-                        m_server.players[i].id = id;
-                        UDPServerSend(&m_server, UDPTypeint, &id, sizeof(int), m_server.pack->address);
+                        m_server.ids[i] = i + 1;
+                        m_server.players[i].id = i + 1;
+                        UDPServerSend(&m_server, UDPTypeint, &m_server.players[i].id, sizeof(int), m_server.pack->address);
                     }
                 }
             }

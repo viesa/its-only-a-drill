@@ -1,11 +1,11 @@
 #include "UDPServer.h"
-#include <stdio.h>
 #define DEGBUG
 UDPServer UDPServerCreate(Uint16 port)
 {
     UDPServer server;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
+        server.ids[i] = 0;
         server.players[i].id = 0;
     }
     server.nrPlayers = 0;
@@ -122,6 +122,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
                     {
                         server->players[j] = server->players[j + 1];
                     }
+                    server->ids[i] = 0;
                     SDL_memset(&server->players[server->nrPlayers], 0, sizeof(UDPPlayer));
                 }
             }
