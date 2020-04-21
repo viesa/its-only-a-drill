@@ -147,12 +147,10 @@ void GraphicsChangeCursor(Graphics *gfx, Cursor cursor)
     case CU_Normal:
         cursorSurface = SDL_LoadBMP("assets/cursors/cursor.bmp");
         gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
-        log_info("Changed to normal");
         break;
     case CU_Crossair:
         cursorSurface = SDL_LoadBMP("assets/cursors/crosshair.bmp");
         gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
-        log_info("Changed to crossair");
         break;
     default:
         break;
