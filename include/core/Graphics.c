@@ -31,7 +31,7 @@ Graphics *GraphicsCreate()
     gfx_ret->windowWidth = DM.w;
     gfx_ret->windowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #ifdef DegBug
-    gfx_ret->windowWidth = 640;
+    gfx_ret->windowWidth = 720;
     gfx_ret->windowHeight = 480;
 #endif
     gfx_ret->mapWidth = 2000;
@@ -182,6 +182,34 @@ void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color)
 void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
 {
     GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
+}
+
+void GraphicsDrawGradient(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+{
+    //Current color channels
+    float CurR = (float)start.r;
+    float CurG = (float)start.g;
+    float CurB = (float)start.b;
+    float CurA = (float)start.a;
+
+    //Calculate delta increments for each color channel
+    float dR = (float)(end.r - start.r) / (float)(rect.w);
+    float dG = (float)(end.g - start.g) / (float)(rect.w);
+    float dB = (float)(end.b - start.b) / (float)(rect.w);
+    float dA = (float)(end.a - start.a) / (float)(rect.w);
+
+    for (float x = rect.x; x < rect.x + rect.w; x++)
+    {
+        SDL_Rect drawRect = {x, rect.y, 1, rect.h};
+        SDL_SetRenderDrawColor(gfx->m_renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
+        SDL_RenderFillRect(gfx->m_renderer, &drawRect);
+
+        //Add an increment to the color channels
+        CurR += dR;
+        CurG += dG;
+        CurB += dB;
+        CurA += dA;
+    }
 }
 
 SDL_Renderer *GraphicsGetRenderer(Graphics *gfx)

@@ -24,6 +24,7 @@
                 "menu.h": "c",
                 "maplist.h": "c",
                 "dirent.h": "c",
-                "json.h": "c"
+                "json.h": "c",
+                "cstdlib": "c"
         }
 }
