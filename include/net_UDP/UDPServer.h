@@ -2,6 +2,8 @@
 #define UDPSERVER_h
 #include "UDPPackager.h"
 #include <SDL2/SDL_net.h>
+#include <stdlib.h>
+#include <time.h>
 #define MAX_PLAYERS 10
 #define MAX_MSGLEN 100
 typedef struct UDPPlayer
@@ -12,6 +14,7 @@ typedef struct UDPPlayer
 typedef struct UDPServer
 {
     UDPPlayer players[MAX_PLAYERS];
+    int ids[MAX_PLAYERS]; //0 means taken
     int nrPlayers;
     UDPsocket sock;
     UDPpacket *pack;
