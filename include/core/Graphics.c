@@ -76,6 +76,11 @@ Graphics *GraphicsCreate()
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = texture;
 
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/characters-and-props.png");
+    if (!texture)
+        log_warn("Could not load characters-and-props.png");
+    gfx_ret->m_allTextures[SS_Characters_Props] = texture;
+
     texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tools.png");
     if (!texture)
         log_warn("Could not load tools.png");
