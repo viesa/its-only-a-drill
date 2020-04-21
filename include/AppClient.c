@@ -40,10 +40,13 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
-        SDL_Delay(10);
+        //SDL_Delay(10);
         if (client->hasPacket)
             continue;
+        SDL_mutex *m = SDL_CreateMutex();
+        SDL_LockMutex(m);
         UDPClientListen(client, MAX_MSGLEN);
+        SDL_UnlockMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
@@ -221,16 +224,19 @@ void AppClientUpdate(AppClient *app)
         }
 
         PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
-        // Entity *tempEntity;
-        // int value = UDPPackageDecode((char *)app->client->pack->data);
-        // if (value == UDPTypeEntity)
+        // if (app->client->hasPacket)
         // {
-        //     //&app->entities[1]
-        //     UDPPackageRemoveTypeNULL(app->client->pack);
-        //     memcpy(&app->entities[1], (Entity *)app->client->pack->data, sizeof(Entity));
-        //     app->client->hasPacket = SDL_FALSE;
+        //     Entity *tempEntity;
+        //     int value = UDPPackageDecode((char *)app->client->pack->data);
+        //     if (value == UDPTypeEntity)
+        //     {
+        //         //&app->entities[1]
+        //         UDPPackageRemoveTypeNULL(app->client->pack);
+        //         memcpy(&app->entities[1], (Entity *)app->client->pack->data, sizeof(Entity));
+        //         app->client->hasPacket = SDL_FALSE;
+        //     }
         // }
-        // EntityUpdate most be after input, playerupdate
+        //EntityUpdate most be after input, playerupdate
         EntityUpdate(app->entities, 3, app->clock);
 #ifdef DEGBUG
         UDPClientSend(app->client, UDPTypeEntity, &app->entities[0], sizeof(Entity));

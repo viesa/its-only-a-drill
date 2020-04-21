@@ -78,6 +78,11 @@ Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
     entity.Force.x += FrictionVector.x;
     entity.Force.y += FrictionVector.y;
 
+    // Garante stop Cause float
+    entity.Velosity = Vec2DivL(entity.Force, entity.mass);
+    entity.Velosity.x = (fabs(entity.Velosity.x) < 5.1f) ? 0 : entity.Velosity.x;
+    entity.Velosity.y = (fabs(entity.Velosity.y) < 5.1f) ? 0 : entity.Velosity.y;
+
     // update new position
     entity.position.x += entity.Velosity.x * ClockGetDeltaTime(clk);
     entity.position.y += entity.Velosity.y * ClockGetDeltaTime(clk);
