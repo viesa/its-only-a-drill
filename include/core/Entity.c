@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 //#define DegBug
+#define FrictionMode 
 
 Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
 {
@@ -12,7 +13,7 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
     switch (preset)
     {
     case EntityWoman:
-        e.Friction = 4.7f;
+        e.Friction = 7.7f;
         e.mass = 50.0f;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
         e.health = 100;
@@ -46,6 +47,9 @@ void EntityUpdateMovment(Entity entities[], int nrEnts, Clock *clk)
         // carculate Net_force so friction & collision & the other forces is handle before
         entities[i] = EntityNetForces(entities[i], nrEnts, clk);
 
+        // update new position
+        entities[i].position.x += entities[i].Velosity.x * ClockGetDeltaTime(clk);
+        entities[i].position.y += entities[i].Velosity.y * ClockGetDeltaTime(clk);
 #ifdef DegBug
         if (entities[i].id == 0)
         {
@@ -83,9 +87,6 @@ Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
     entity.Velosity.x = (fabs(entity.Velosity.x) < 5.1f) ? 0 : entity.Velosity.x;
     entity.Velosity.y = (fabs(entity.Velosity.y) < 5.1f) ? 0 : entity.Velosity.y;
 
-    // update new position
-    entity.position.x += entity.Velosity.x * ClockGetDeltaTime(clk);
-    entity.position.y += entity.Velosity.y * ClockGetDeltaTime(clk);
     return entity;
 }
 
