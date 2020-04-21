@@ -5,14 +5,14 @@ char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
     switch (type)
     {
     case UDPTypeText:
-        SDL_memcpy(buffer + 1, data, size);
         buffer[0] = '0';
         buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
         break;
     case UDPTypeint:
-        SDL_memcpy(buffer + 1, data, size);
         buffer[0] = '1';
         buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
         break;
     case UDPTypeEntity:
         buffer[0] = '2';

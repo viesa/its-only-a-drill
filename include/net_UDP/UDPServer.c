@@ -39,9 +39,9 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
         if (SDLNet_UDP_Send(server->sock, -1, pack))
         {
             printf("RAW OUT(message, host:port): ");
-            for (int i = 0; i < server->pack->len; i++)
+            for (int i = 0; i < size + 2; i++)
             {
-                printf("%c", (char)server->pack->data[i]);
+                printf("%c", pack->data[i]);
             }
             printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
         }
@@ -63,9 +63,9 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
             if (SDLNet_UDP_Send(server->sock, -1, pack))
             {
                 printf("RAW OUT(message, host:port): ");
-                for (int i = 0; i < server->pack->len; i++)
+                for (int i = 0; i < size + 2; i++)
                 {
-                    printf("%c", (char)server->pack->data[i]);
+                    printf("%c", pack->data[i]);
                 }
                 printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
             }
@@ -80,14 +80,15 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
     char *payload = UDPPackageCreate(types, data, size);
     SDL_memcpy(pack->data, payload, size + 2);
     pack->len = size + 2;
+
     pack->address = ip;
     if (SDLNet_UDP_Send(server->sock, -1, pack))
     {
 #ifdef DEGBUG
         printf("RAW OUT(message, host:port): ");
-        for (int i = 0; i < server->pack->len; i++)
+        for (int i = 0; i < size + 2; i++)
         {
-            printf("%c", (char)server->pack->data[i]);
+            printf("%c", pack->data[i]);
         }
         printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
 #endif
