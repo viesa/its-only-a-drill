@@ -14,6 +14,15 @@ typedef enum EntityPresets
     //Used only by Map.c
     EntityMapObject
 } EntityPresets;
+typedef enum entityState
+{
+    GoForward,
+    GoBack,
+    Fight,
+    // used only for player so that the player can take control
+    EntityPlayer
+} EntityState;
+
 typedef struct Entity
 {
     int rot, id; // currently unused
@@ -27,6 +36,7 @@ typedef struct Entity
     float mass;
     InventoryListItems inventory;
     int health;
+    EntityState entityState;
 } Entity;
 
 ///Creates a entity
