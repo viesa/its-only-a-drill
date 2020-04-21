@@ -28,9 +28,6 @@ Gui *GuiCreate(Font *font, Clock *clock)
 
 void GuiUpdate(Gui *gui)
 {
-    // Update window size
-    int wW = gui->font->gfx->windowWidth;
-    int wH = gui->font->gfx->windowHeight;
 
     //if (rand() % 30 < 3)
     //    gui->points += rand() % 500;
@@ -82,7 +79,7 @@ void GuiUpdate(Gui *gui)
         {255 - gui->loopSwing, 180, 184},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3DCustom(gui->font, TTF_Antilles, pts, wW - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(gui->font, TTF_Antilles, pts, gui->font->gfx->windowWidth - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Objective
     //SDL_Color objColor[2] = {

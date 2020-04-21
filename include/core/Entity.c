@@ -1,7 +1,7 @@
 #include "Entity.h"
 #include <stdio.h>
 
-#define Replaceable_Transfers_force -1
+//#define DegBug
 
 Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
 {
@@ -9,11 +9,10 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
     e.id = uniqueIdentifier;
     e.position = position;
     e.Force = Vec2Create(0.0f, 0.0f);
-
     switch (preset)
     {
     case EntityWoman:
-        e.Friction = 0.05f;
+        e.Friction = 4.7f;
         e.mass = 50.0f;
         e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
         e.health = 100;
@@ -24,12 +23,72 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
         break;
     case EntityMapObject:
         e.drawable.spriteSheet = SS_BackgroundTiles;
+        e.mass = FLT_MAX;
+        e.isCollider = SDL_TRUE;
         break;
     default:
         break;
     }
     return e;
 }
+// the update logic
+void EntityUpdate(Entity entities[], int nrEnts, Clock *clk)
+{
+    EntityUpdateMovment(entities, nrEnts, clk);
+    EntityOnCollision(entities, nrEnts, clk);
+}
+
+void EntityUpdateMovment(Entity entities[], int nrEnts, Clock *clk)
+{
+
+    for (int i = 0; i < nrEnts; i++)
+    {
+        // carculate Net_force so friction & collision & the other forces is handle before
+        entities[i] = EntityNetForces(entities[i], nrEnts, clk);
+
+#ifdef DegBug
+        if (entities[i].id == 0)
+        {
+            log_debug("CurrentEntity:");
+            log_debug("position x: %f", entities[i].position.x);
+            log_debug("position y: %f", entities[i].position.y);
+            log_debug("Force x: %f", entities[i].Force.x);
+            log_debug("Force y: %f", entities[i].Force.y);
+            log_debug("Accseleration x: %f", entities[i].Accseleration.x);
+            log_debug("Accseleration y: %f", entities[i].Accseleration.y);
+            log_debug("Velosity x: %f", entities[i].Velosity.x);
+            log_debug("Velosity y: %f", entities[i].Velosity.y);
+            log_debug("Friction: %f", entities[i].Friction);
+            log_debug("mass: %f", entities[i].mass);
+        }
+#endif
+    }
+}
+
+Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
+{
+    // first get momentum
+    entity.Velosity = Vec2DivL(entity.Force, entity.mass);
+
+    // Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+    Vec2 FrictionVector = Vec2Unit(entity.Velosity);
+    FrictionVector = Vec2MulL(FrictionVector, -1.0F);
+    FrictionVector = Vec2MulL(FrictionVector, entity.mass);
+    FrictionVector = Vec2MulL(FrictionVector, entity.Friction);
+    entity.Force.x += FrictionVector.x;
+    entity.Force.y += FrictionVector.y;
+
+    // Garante stop Cause float
+    entity.Velosity = Vec2DivL(entity.Force, entity.mass);
+    entity.Velosity.x = (fabs(entity.Velosity.x) < 5.1f) ? 0 : entity.Velosity.x;
+    entity.Velosity.y = (fabs(entity.Velosity.y) < 5.1f) ? 0 : entity.Velosity.y;
+
+    // update new position
+    entity.position.x += entity.Velosity.x * ClockGetDeltaTime(clk);
+    entity.position.y += entity.Velosity.y * ClockGetDeltaTime(clk);
+    return entity;
+}
+
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
 {
     SDL_Rect result;
@@ -64,71 +123,9 @@ SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
     }
     return SDL_FALSE;
 }
-void EntityUpdate(Entity entities[], int nrEnts, Clock *clk)
-{
-
-    EntityOnCollision(entities, nrEnts, clk);
-
-    for (int i = 0; i < nrEnts; i++)
-    {
-        //This part is the carculation of the force on the current entity.
-        //It uses F=MA and changes it to A=F/M and then applys it on position
-        entities[i].Force.x -= entities[i].Force.x * entities[i].Friction;
-        entities[i].Force.y -= entities[i].Force.y * entities[i].Friction;
-        entities[i].accseleration.x = entities[i].Force.x / entities[i].mass;
-        entities[i].accseleration.y = entities[i].Force.y / entities[i].mass;
-        entities[i].position.x += entities[i].accseleration.x * ClockGetDeltaTime(clk);
-        entities[i].position.y += entities[i].accseleration.y * ClockGetDeltaTime(clk);
-
-// for debug plz do not erase me ;_;
-#ifdef DegBug
-        if (entities[i].id == 0)
-        {
-            printf("CurrentEntity:\n");
-            printf("position x: %f\n", entities[i].position.x);
-            printf("position y: %f\n", entities[i].position.y);
-            printf("Force x: %f\n", entities[i].Force.x);
-            printf("Force y: %f\n", entities[i].Force.y);
-            printf("accseleration x: %f\n", entities[i].accseleration.x);
-            printf("accseleration y: %f\n", entities[i].accseleration.y);
-            printf("Friction: %f\n", entities[i].Friction);
-            printf("mass: %f\n", entities[i].mass);
-        }
-#endif
-    }
-}
 void EntityDraw(Camera *camera, Entity *entity)
 {
     entity->drawable.dst.x = entity->position.x;
     entity->drawable.dst.y = entity->position.y;
     CameraDraw(camera, entity->drawable);
 }
-// physical forumals in progress
-// basic elastic collision the problem is it needs generlasation
-// direction is not working correcly
-
-// entities[Dominant].accseleration.x -= (((entities[Dominant].mass - entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.x) +
-//                                       (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.x);
-// entities[Dominant].accseleration.y -= (((entities[Dominant].mass - entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.y) +
-//                                       (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.y);
-
-// entities[Recessive].accseleration.x -= (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.x) +
-//                                        (((entities[Recessive].mass - entities[Dominant].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.x);
-// entities[Recessive].accseleration.y -= (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.y) +
-//                                        (((entities[Recessive].mass - entities[Dominant].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.y);
-
-// printf("Dominant x:%f\n", (((entities[Dominant].mass - entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.x) +
-//                               (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.x));
-// printf("Dominant y:%f\n", (((entities[Dominant].mass - entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.y) +
-//                               (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.y));
-// printf("Recessive x:%f\n", (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.x) +
-//                                (((entities[Recessive].mass - entities[Dominant].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.x));
-// printf("Recessive y:%f\n", (((2 * entities[Recessive].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Dominant].accseleration.y) +
-//                                (((entities[Recessive].mass - entities[Dominant].mass) / (entities[Dominant].mass + entities[Recessive].mass)) * entities[Recessive].accseleration.y));
-
-// basic if collision give the force but inverted
-// Replaceable transfers force is -1 default, witch means that we don't lose or gain force if you want to be slower after hit make it -0.X minus is importend
-// entities[Dominant].Force.x = entities[Dominant].Force.x * Replaceable_Transfers_force;
-// entities[Recessive].Force.x += entities[Dominant].Force.x;
-// entities[Dominant].Force.y = entities[Dominant].Force.y * Replaceable_Transfers_force;
-// entities[Recessive].Force.y += entities[Dominant].Force.y;

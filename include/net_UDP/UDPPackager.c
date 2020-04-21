@@ -5,18 +5,19 @@ char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
     switch (type)
     {
     case UDPTypeText:
-        buffer++;
-        SDL_memcpy(buffer, data, size);
-        buffer--;
         buffer[0] = '0';
-        buffer[size + 1] = '\0';
+        buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
+        break;
+    case UDPTypeint:
+        buffer[0] = '1';
+        buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
         break;
     case UDPTypeEntity:
-        buffer++;
-        SDL_memcpy(buffer, data, size);
-        buffer--;
-        buffer[0] = '1';
-        buffer[size + 1] = '\0';
+        buffer[0] = '2';
+        buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
         break;
     default:
         break;
@@ -35,6 +36,8 @@ UDPPackageTypes UDPPackageDecode(char *data)
     case '0':
         return UDPTypeText;
     case '1':
+        return UDPTypeint;
+    case '2':
         return UDPTypeEntity;
     default:
         return 400;
@@ -56,7 +59,7 @@ void UDPPackageRemoveType(UDPpacket *pack)
     }
     SDLNet_ResizePacket(pack, -1);
 }
-void UDPPackageDestroy(char *data)
+void UDPPackageDestroy(void *data)
 {
     SDL_free(data);
 }

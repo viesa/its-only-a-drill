@@ -21,15 +21,15 @@
 typedef struct MapListEntry
 {
     uint32_t uid;
-    char *name;
-    char *filename;
+    char name[50];
+    char filename[50];
     uint8_t difficulty;
     uint8_t maxPlayers;
 } MapListEntry;
 
 typedef struct MapList
 {
-    char *directory;
+    char directory[20];
     MapListEntry allMaps[MAX_MAPS];
     uint16_t nMaps;
 } MapList;
@@ -39,7 +39,5 @@ MapList MapListCreate(char *directory);
 void MapListDestroy(MapList *mapList);
 
 void MapListUpdate(MapList *mapList);
-
-void MapListClear(MapList *mapList);
 
 #endif
