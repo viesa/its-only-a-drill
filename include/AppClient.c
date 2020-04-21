@@ -1,11 +1,11 @@
 #include "core/AppClient.h"
-
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
-//#define DEGBUG
+#define DEGBUG
+#define MaxEntities 5
 struct AppClient
 {
     SDL_bool *running;
@@ -28,7 +28,8 @@ struct AppClient
     SDL_Thread *listenThread;
 
     GroundListItems groundListItems;
-    Entity entities[3];
+    Entity entities[MaxEntities];
+    int nrEntities;
     Player player; // player == entity 0
 
     Map map;
@@ -41,11 +42,7 @@ void ListenToServer(void *args)
     {
         if (client->hasPacket)
             continue;
-        SDL_mutex *m = SDL_CreateMutex();
-        SDL_LockMutex(m);
         UDPClientListen(client, MAX_MSGLEN);
-        SDL_UnlockMutex(m);
-        SDL_DestroyMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
@@ -63,7 +60,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->input = input;
     app->menu = MenuCreate(app->gfx, app->font, &app->state);
     app->player = PlayerCreate();
-
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
     app->client = client;
@@ -75,7 +71,13 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->entities[0].Force.y = 800;
     app->entities[1] = EntityCreate((Vec2){300, 0}, EntityWoman, 1);
     app->entities[2] = EntityCreate((Vec2){500, 0}, EntityWoman, 2);
-
+#ifdef DEGBUG
+    for (int i = 1; i < MaxEntities; i++)
+    {
+        app->entities[i].id = 0;
+    }
+    app->nrEntities = 1;
+#endif
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
@@ -86,12 +88,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
     {
         log_info("Sending Message: alive\n");
-        while (!app->client->hasPacket)
-            ;
+        SDL_Delay(1000);
         if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
+            app->entities[0].id = *(int *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE;
         }
     }
@@ -138,6 +140,27 @@ void AppClientUpdate(AppClient *app)
         {
             log_info("%s\n", app->client->pack->data);
             app->client->hasPacket = SDL_FALSE;
+        }
+        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeEntity)
+        {
+            UDPPackageRemoveTypeNULL(app->client->pack);
+            UDPpacket pack = *app->client->pack;
+            Entity ent = *(Entity *)pack.data;
+            app->client->hasPacket = SDL_FALSE;
+            SDL_bool exist = SDL_FALSE;
+            for (int i = 0; i < MaxEntities; i++)
+            {
+                if (app->entities[i].id == ent.id) //entity exists
+                {
+                    exist = SDL_TRUE;
+                    app->entities[i] = ent;
+                }
+            }
+            if (!exist) //entity doesnt exist, allocate
+            {
+                app->entities[app->nrEntities] = ent;
+                app->nrEntities++;
+            }
         }
     }
 #endif
@@ -225,7 +248,7 @@ void AppClientUpdate(AppClient *app)
         PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate
-        EntityUpdate(app->entities, 3, app->clock);
+        EntityUpdate(app->entities, MaxEntities, app->clock);
 #ifdef DEGBUG
         UDPClientSend(app->client, UDPTypeEntity, &app->entities[0], sizeof(Entity));
 #endif

@@ -31,7 +31,7 @@ int main()
             UDPPackageRemoveTypeNULL(m_server.pack);
             char buffer[m_server.pack->len - 2];
             SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
-            UDPServerEcho(&m_server, UDPTypeEntity, buffer, sizeof(Entity));
+            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, sizeof(Entity));
             log_info("Recieved entity by %x:%x\nBroadcasting...\n", m_server.pack->address.host, m_server.pack->address.port);
         }
 

@@ -12,7 +12,7 @@ void moveEntity(Entity entities[])
         {
             Vec2 nextPoint = Vec2Create(entities[i].position.x + 1000, entities[i].position.y);
             entities[i].Force.x += 500;
-            if (entities[i].position.x = nextPoint.x)
+            if (entities[i].position.x == nextPoint.x)
             {
                 entities[i].entityState = GoBack;
             }
@@ -23,7 +23,7 @@ void moveEntity(Entity entities[])
         {
             Vec2 backPoint = Vec2Create(entities[i].position.x - 1000, entities[i].position.y);
             entities[i].Force.x -= 500;
-            if (entities[i].position.x = backPoint.x)
+            if (entities[i].position.x == backPoint.x)
             {
                 entities[i].entityState = GoForward;
             }

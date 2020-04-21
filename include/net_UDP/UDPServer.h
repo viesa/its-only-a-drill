@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #define MAX_PLAYERS 10
-#define MAX_MSGLEN 100
+#define MAX_MSGLEN 1024
 typedef struct UDPPlayer
 {
     IPaddress ip;
