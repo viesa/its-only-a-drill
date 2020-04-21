@@ -4,6 +4,10 @@
 UDPServer UDPServerCreate(Uint16 port)
 {
     UDPServer server;
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        server.players[i].id = 0;
+    }
     server.nrPlayers = 0;
     /* Initialize SDL_net */
     if (SDLNet_Init() < 0)
@@ -19,7 +23,7 @@ UDPServer UDPServerCreate(Uint16 port)
     }
     return server;
 }
-void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress exclusive, char *data, int size)
+void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress exclusive, void *data, int size)
 {
     UDPpacket *pack = SDLNet_AllocPacket(size + 2);
     char *payload = UDPPackageCreate(types, data, size);
@@ -34,7 +38,6 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
         pack->address = server->players[i].ip;
         if (SDLNet_UDP_Send(server->sock, -1, pack))
         {
-            //printf("OUT(message): %s\n", pack->data);
             printf("RAW OUT(message, host:port): ");
             for (int i = 0; i < server->pack->len; i++)
             {
@@ -44,54 +47,35 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
         }
     }
     UDPPackageDestroy(payload);
+    SDLNet_FreePacket(pack);
 }
-void UDPServerEcho(UDPServer *server, UDPPackageTypes types, char *data, int size)
+void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int size)
 {
-#ifndef Backup
-    UDPpacket *pack = SDLNet_AllocPacket(size + 2);
-    char *payload = UDPPackageCreate(types, data, size);
-    SDL_memcpy(pack->data, payload, size + 2);
-    pack->len = size + 2;
-    for (int i = 0; i < server->nrPlayers; i++)
-    {
-        pack->address = server->players[i].ip;
-        if (SDLNet_UDP_Send(server->sock, -1, pack))
-        {
-            //printf("OUT(message): %s\n", pack->data);
-            printf("RAW OUT(message, host:port): ");
-            for (int i = 0; i < server->pack->len; i++)
-            {
-                printf("%c", (char)server->pack->data[i]);
-            }
-            printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
-        }
-    }
-    UDPPackageDestroy(payload);
-#endif
-#ifdef Backup
-    /* Make space for the packet */
     UDPpacket *pack;
-    if (!(pack = SDLNet_AllocPacket(size)))
+    if ((pack = SDLNet_AllocPacket(size + 2)))
     {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-    memcpy(pack->data, msg, size);
-    pack->len = size;
-    for (int i = 0; i < server->nrPlayers; i++)
-    {
-        pack->address = server->players[i].ip;
-        if (SDLNet_UDP_Send(server->sock, -1, pack))
+        char *payload = UDPPackageCreate(types, data, size);
+        SDL_memcpy(pack->data, payload, size + 2);
+        pack->len = size + 2;
+        for (int i = 0; i < server->nrPlayers; i++)
         {
-            //printf("OUT(message): %s\n", pack->data);
-            printf("OUT(message, host:port): %s, %x:%x\n", pack->data, pack->address.host, pack->address.port);
+            pack->address = server->players[i].ip;
+            if (SDLNet_UDP_Send(server->sock, -1, pack))
+            {
+                printf("RAW OUT(message, host:port): ");
+                for (int i = 0; i < server->pack->len; i++)
+                {
+                    printf("%c", (char)server->pack->data[i]);
+                }
+                printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+            }
         }
+        UDPPackageDestroy(payload);
+        SDLNet_FreePacket(pack);
     }
-#endif
 }
-void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *data, int size, IPaddress ip)
+void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int size, IPaddress ip)
 {
-#ifndef Backup
     UDPpacket *pack = SDLNet_AllocPacket(size + 2);
     char *payload = UDPPackageCreate(types, data, size);
     SDL_memcpy(pack->data, payload, size + 2);
@@ -99,38 +83,17 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, char *data, int siz
     pack->address = ip;
     if (SDLNet_UDP_Send(server->sock, -1, pack))
     {
-        //printf("OUT(message): %s\n", pack->data);
+#ifdef DEGBUG
         printf("RAW OUT(message, host:port): ");
         for (int i = 0; i < server->pack->len; i++)
         {
-            printf("%c", server->pack->data[i]);
+            printf("%c", (char)server->pack->data[i]);
         }
         printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+#endif
     }
     UDPPackageDestroy(payload);
-#endif
-#ifdef Backup
-    /* Make space for the packet */
-    UDPpacket *pack;
-    if (!(pack = SDLNet_AllocPacket(size)))
-    {
-        fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
-    }
-    memcpy(pack->data, data, size);
-    pack->len = size;
-    pack->address.port = port;
-    if (SDLNet_UDP_Send(server->sock, -1, pack))
-    {
-        printf("RAW IN(message, host:port): ");
-        for (int i = 0; i < server->pack->len; i++)
-        {
-            printf("%c", server->pack->data[i]);
-        }
-        printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
-    }
     SDLNet_FreePacket(pack);
-#endif
 }
 int UDPServerListen(UDPServer *server, int maxLen)
 {
@@ -158,6 +121,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
                     {
                         server->players[j] = server->players[j + 1];
                     }
+                    SDL_memset(&server->players[server->nrPlayers], 0, sizeof(UDPPlayer));
                 }
             }
             exists = 1;

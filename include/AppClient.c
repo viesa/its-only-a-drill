@@ -40,10 +40,13 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
-        SDL_Delay(10);
         if (client->hasPacket)
             continue;
+        SDL_mutex *m = SDL_CreateMutex();
+        SDL_LockMutex(m);
         UDPClientListen(client, MAX_MSGLEN);
+        SDL_UnlockMutex(m);
+        SDL_DestroyMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
@@ -83,13 +86,15 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->entities[0].inventory = InventoryCreate();
 
 #ifdef DEGBUG
-    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 7))
+    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
     {
         log_info("Sending Message: alive\n");
-        SDL_Delay(1000);
-        if (app->client->hasPacket)
+        while (!app->client->hasPacket)
+            ;
+        if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
         {
-            log_info("Incoming Message: %s\n", app->client->pack->data);
+            UDPPackageRemoveTypeNULL(app->client->pack);
+            log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
             app->client->hasPacket = SDL_FALSE;
         }
     }
@@ -221,15 +226,7 @@ void AppClientUpdate(AppClient *app)
         }
 
         PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
-        // Entity *tempEntity;
-        // int value = UDPPackageDecode((char *)app->client->pack->data);
-        // if (value == UDPTypeEntity)
-        // {
-        //     //&app->entities[1]
-        //     UDPPackageRemoveTypeNULL(app->client->pack);
-        //     memcpy(&app->entities[1], (Entity *)app->client->pack->data, sizeof(Entity));
-        //     app->client->hasPacket = SDL_FALSE;
-        // }
+
         // EntityUpdate most be after input, playerupdate
         EntityUpdate(app->entities, 3, app->clock);
 #ifdef DEGBUG

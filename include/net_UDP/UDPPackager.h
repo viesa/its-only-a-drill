@@ -6,6 +6,7 @@
 typedef enum UDPPackageTypes
 {
     UDPTypeText,
+    UDPTypeint,
     UDPTypeEntity
 } UDPPackageTypes;
 // Allocates a package like this "{type}{data}\0"
@@ -17,5 +18,5 @@ void UDPPackageRemoveType(UDPpacket *pack);
 // Removes the type and NULL terminator in "{type}{data}\0" (usefull when dealing with data structures)
 void UDPPackageRemoveTypeNULL(UDPpacket *pack);
 // SDL_free the data
-void UDPPackageDestroy(char *data);
+void UDPPackageDestroy(void *data);
 #endif
