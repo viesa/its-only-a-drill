@@ -38,6 +38,9 @@ Graphics *GraphicsCreate()
     gfx_ret->mapHeight = 2000;
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
+    gfx_ret->currentCursor = NULL;
+    gfx_ret->currentCursorType = CU_None;
+    GraphicsChangeCursor(gfx_ret, CU_Normal);
 
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->windowWidth, gfx_ret->windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
@@ -127,6 +130,47 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      drawable.rot,
                      &rot_point,
                      SDL_FLIP_NONE);
+}
+
+void GraphicsChangeCursor(Graphics *gfx, Cursor cursor)
+{
+    if (gfx->currentCursorType == cursor)
+        return;
+    else
+        gfx->currentCursorType = cursor;
+
+    if (gfx->currentCursor)
+        SDL_FreeCursor(gfx->currentCursor);
+    SDL_Surface *cursorSurface = NULL;
+    switch (cursor)
+    {
+    case CU_Normal:
+        cursorSurface = SDL_LoadBMP("assets/cursors/cursor.bmp");
+        gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+        log_info("Changed to normal");
+        break;
+    case CU_Crossair:
+        cursorSurface = SDL_LoadBMP("assets/cursors/crosshair.bmp");
+        gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+        log_info("Changed to crossair");
+        break;
+    default:
+        break;
+    }
+    if (gfx->currentCursor)
+        SDL_SetCursor(gfx->currentCursor);
+    if (cursorSurface)
+        SDL_FreeSurface(cursorSurface);
+}
+
+void GraphicsDrawCrosshair(Graphics *gfx, Vec2 mousePosition)
+{
+    // SDL_ShowCursor(0);
+    // SDL_Surface *cursorSurface = SDL_LoadBMP("assets/cursor/crosshair.bmp");
+    // SDL_Cursor *cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+    // SDL_SetCursor(cursor);
+    // SDL_ShowCursor(1);
+    // GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 512, 512}, (SDL_Rect){(int)mousePosition.x, (int)mousePosition.y, 30, 30}, SS_Cursor));
 }
 
 void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color)
