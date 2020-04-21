@@ -27,7 +27,6 @@ struct AppClient
     UDPClient *client;
     SDL_Thread *listenThread;
 
-    //Item item[2];
     GroundListItems groundListItems;
     Entity entities[3];
     Player player; // player == entity 0
@@ -80,8 +79,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
-    //app->item[0] = ItemCreate(ItemWoodenSword);
-    //app->item[1] = ItemCreate(ItemMetalSword);
     app->groundListItems = GroundListCreate();
     app->entities[0].inventory = InventoryCreate();
 

@@ -84,6 +84,12 @@ void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp)
     i->contents[i->top].picked = y->picked;
     i->contents[i->top].postion = y->postion;
     i->contents[i->top].type = y->type;
+    i->contents[i->top].Stats.accuracy = y->Stats.accuracy;
+    i->contents[i->top].Stats.ammo = y->Stats.ammo;
+    i->contents[i->top].Stats.captivity = y->Stats.captivity;
+    i->contents[i->top].Stats.Damage = y->Stats.Damage;
+    i->contents[i->top].Stats.falloff = y->Stats.falloff;
+
     i->top++;
     for (int x = tmp; x < g->top; x++)
     {
@@ -92,6 +98,11 @@ void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp)
         g->contents[x].picked = g->contents[y].picked;
         g->contents[x].postion = g->contents[y].postion;
         g->contents[x].type = g->contents[y].type;
+        g->contents[x].Stats.accuracy = g->contents[y].Stats.accuracy;
+        g->contents[x].Stats.ammo = g->contents[y].Stats.ammo;
+        g->contents[x].Stats.captivity = g->contents[y].Stats.captivity;
+        g->contents[x].Stats.Damage = g->contents[y].Stats.Damage;
+        g->contents[x].Stats.falloff = g->contents[y].Stats.falloff;
     }
     g->top--;
 }
@@ -172,27 +183,6 @@ void inventoryPop(InventoryListItems *i)
 {
     // the item that will be drop must be in the last available place in the investory list array!
     i->top--;
-    // int tmp = 0;
-    // for (int x = 0; x <= i->top; x++)
-    // {
-    //     if (i->contents[x].type == y->type)
-    //     {
-    //         tmp = x;
-    //     }
-    // }
-    // for (int x = tmp; x < i->top; x++)
-    // {
-    //     int y = x + 1;
-    //     i->contents[x].drawable = i->contents[y].drawable;
-    //     i->contents[x].picked = i->contents[y].picked;
-    //     i->contents[x].postion = i->contents[y].postion;
-    //     i->contents[x].type = i->contents[y].type;
-    // }
-    // printf("what is \ntemp: %d\ni->top: %d\n", tmp, i->top);
-    // if (tmp < 0)
-    // {
-    //     log_info("warning the the inventory list is fucked!\n");
-    // }
 }
 void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera)
 {
