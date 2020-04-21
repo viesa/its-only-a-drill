@@ -1,4 +1,4 @@
-#include "behavior.h"
+#include "Behavior.h"
 #include "Entity.h"
 #include <stdio.h>
 

@@ -5,6 +5,7 @@
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
+#include "core/Behavior.h"
 //#define DEGBUG
 #define MaxEntities 5
 struct AppClient
