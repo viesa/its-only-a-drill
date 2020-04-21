@@ -35,6 +35,8 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable);
 void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color);
 void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius);
 
+void GraphicsDrawGradient(Graphics *gfx, SDL_Rect area, SDL_Color start, SDL_Color end);
+
 SDL_Renderer *GraphicsGetRenderer(Graphics *gfx);
 
 #endif

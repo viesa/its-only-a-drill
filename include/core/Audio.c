@@ -70,10 +70,11 @@ Audio *AudioCreate()
     //------------------ Music files ------------------
     //-------------------------------------------------
 
-    Mix_Music *testMusic = Mix_LoadMUS("./assets/music/test.mp3");
+    //This always fails in mac environment, if someone has a fix, please fix.
+    /*Mix_Music *testMusic = Mix_LoadMUS("./assets/music/test.mp3");
     if (!testMusic)
         log_warn("Could not load test.mp3");
-    ret->m_music[MF_Test] = testMusic;
+    ret->m_music[MF_Test] = testMusic;*/
 
     for (int i = 0; i < N_CHANNELS; i++)
         ret->m_availableChannels[i] = SDL_TRUE;
