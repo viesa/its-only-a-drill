@@ -275,6 +275,7 @@ void AppClientDraw(AppClient *app)
             break;
         }
         MenuUpdate(app->menu, app->input, app->FPSControls, &app->mapList, &app->map);
+        GraphicsChangeCursor(app->gfx, CU_Normal);
         break;
     }
     case GS_Playing:
@@ -293,6 +294,7 @@ void AppClientDraw(AppClient *app)
         {
             InventoryDisplay(app->gfx, app->camera, &app->entities[0].inventory, app->entities[0].position);
         }
+        GraphicsChangeCursor(app->gfx, CU_Crossair);
         break;
     }
     default:
