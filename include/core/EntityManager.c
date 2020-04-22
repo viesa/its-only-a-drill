@@ -19,7 +19,7 @@ void EntityManagerDestroy(EntityManager *entityManager)
 void EntityManagerUpdate(EntityManager *entityManager, Clock *clk)
 {
     EntityManagerUpdateMovement(entityManager, clk);
-    // EntityManagerOnCollision(entityManager);
+    EntityManagerOnCollision(entityManager);
 }
 
 void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
@@ -53,7 +53,7 @@ void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
     }
 }
 
-SDL_bool EntityManagerOnCollision(EntityManager *entityManager)
+void EntityManagerOnCollision(EntityManager *entityManager)
 {
     SDL_Rect result;
     for (int Dominant = 0; Dominant < entityManager->highestIndex; Dominant++)
@@ -70,7 +70,7 @@ SDL_bool EntityManagerOnCollision(EntityManager *entityManager)
                         // Dominant hitbox
                         SDL_Rect *dHitbox = &entityManager->entities[Dominant].drawables[entityManager->entities[Dominant].hitboxIndex].dst;
                         // Recessive hitbox
-                        SDL_Rect *rHitbox = &entityManager->entities[Recessive].drawables[entityManager->entities[Dominant].hitboxIndex].dst;
+                        SDL_Rect *rHitbox = &entityManager->entities[Recessive].drawables[entityManager->entities[Recessive].hitboxIndex].dst;
                         if (SDL_IntersectRect(dHitbox, rHitbox, &result))
                         {
                             Vec2 DominantCenter; // calculating center
@@ -92,7 +92,6 @@ SDL_bool EntityManagerOnCollision(EntityManager *entityManager)
                 }
             }
     }
-    return SDL_FALSE;
 }
 
 Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position)

@@ -24,7 +24,7 @@ void EntityManagerUpdate(EntityManager *entityManager, Clock *clk);
 
 void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk);
 /// finds the collision and fixes the problem with rules
-SDL_bool EntityManagerOnCollision(EntityManager *entityManager);
+void EntityManagerOnCollision(EntityManager *entityManager);
 
 Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position);
 void EntityManagerRemove(EntityManager *entityManager, Entity *entity);
