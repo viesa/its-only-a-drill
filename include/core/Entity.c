@@ -1,7 +1,6 @@
 #include "Entity.h"
 #include <stdio.h>
 
-//#define DegBug
 #define FrictionMode
 
 Entity EntityCreate(Vec2 position, EntityType type, int id)

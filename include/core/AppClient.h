@@ -1,6 +1,8 @@
 #ifndef C_GAME_H
 #define C_GAME_H
+#include "Macros.h"
 #include "Clock.h"
+#include "FPSManager.h"
 #include "Gui.h"
 #include "Camera.h"
 #include "Input.h"
@@ -8,14 +10,14 @@
 #include "Sound.h"
 #include "Music.h"
 #include "State.h"
-#include "../core/Log.h"
+#include "EntityManager.h"
+#include "Cursor.h"
+#include "Log.h"
 #include "../net_UDP/UDPClient.h"
-#include "Score.h"
-#include "Inventory.h"
 
 typedef struct AppClient AppClient;
 
-AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls);
+AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager);
 void AppClientDestroy(AppClient *app);
 
 void AppClientRun(AppClient *app);

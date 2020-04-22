@@ -26,6 +26,7 @@
                 "dirent.h": "c",
                 "json.h": "c",
                 "cstdlib": "c",
-                "entitymanager.h": "c"
+                "entitymanager.h": "c",
+                "event.h": "c"
         }
 }

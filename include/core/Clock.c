@@ -39,22 +39,3 @@ const float ClockGetDeltaTimeMS(Clock *clock)
 {
     return (float)clock->m_delta;
 }
-FpsManger *FpsMangerCreate()
-{
-    FpsManger *fpsManger = (FpsManger *)SDL_malloc(sizeof(FpsManger));
-    fpsManger->StartWait = 0;
-    fpsManger->EndWait = 0;
-    fpsManger->DesiredFPS = 60;
-    return fpsManger;
-}
-void ClockFpsStart(FpsManger *FPSControls)
-{
-    FPSControls->StartWait = SDL_GetPerformanceCounter();
-}
-void ClockContorlFPS(FpsManger *FPSControls)
-{
-    float differnce;
-    FPSControls->EndWait = SDL_GetPerformanceCounter();
-    differnce = (FPSControls->EndWait - FPSControls->StartWait) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-    SDL_Delay(((((float)(1000 / FPSControls->DesiredFPS)) - differnce) < 0) ? 0 : (((float)(1000 / FPSControls->DesiredFPS)) - differnce));
-}

@@ -1,13 +1,14 @@
 #include "core/AppClient.h"
 #include "Items.h"
 #include "Player.h"
-#include "./core/Behavior.h"
 #include "Map.h"
 #include "MapList.h"
+#include "core/Behavior.h"
 #include "core/Weapon.h"
 #include "core/Behavior.h"
-#include "./core/EntityManager.h"
-//#define DEGBUG
+#include "core/Score.h"
+#include "core/Inventory.h"
+
 #define MaxEntities 5
 struct AppClient
 {
@@ -20,7 +21,7 @@ struct AppClient
     Gui *gui;
     Camera *camera;
     Clock *clock;
-    FpsManger *FPSControls;
+    FPSManager *fpsManager;
     Input *input;
     Menu *menu;
 
@@ -49,13 +50,15 @@ void ListenToServer(void *args)
         UDPClientListen(client, MAX_MSGLEN);
     }
 }
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
 {
+    CursorInitialize();
+
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->state = StateCreate();
     app->clock = clock;
-    app->FPSControls = FPSControls;
+    app->fpsManager = fpsManager;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
@@ -68,7 +71,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
     app->client = client;
-#ifdef DEGBUG
+#ifdef APP_DEBUG
     app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
 #endif
     for (int i = 1; i < 10; i++)
@@ -78,7 +81,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     }
     app->player.entity->entityState = EntityPlayer;
 
-#ifdef DEGBUG
+#ifdef APP_DEBUG
     for (int i = 1; i < app->entityManager->nrEntities; i++)
     {
         app->entityManager->entities[i].id = 0;
@@ -91,7 +94,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->groundListItems = GroundListCreate();
     app->player.entity->inventory = InventoryCreate();
 
-#ifdef DEGBUG
+#ifdef APP_DEBUG
     if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
     {
         log_info("Sending Message: alive\n");
@@ -105,7 +108,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         }
     }
 #endif
-#ifndef DEGBUG
+#ifndef APP_DEBUG
     UDPClientSend(app->client, UDPTypeText, "alive\0", 6);
 #endif
     app->state.gameState = GS_Menu;
@@ -132,15 +135,15 @@ void AppClientDestroy(AppClient *app)
 
 void AppClientRun(AppClient *app)
 {
-    GraphicsClearScreen(app->gfx);
+    WindowClear(app->gfx->window);
     AppClientUpdate(app);
     AppClientDraw(app);
-    GraphicsPresentScreen(app->gfx);
+    WindowPresent(app->gfx->window);
 }
 
 void AppClientUpdate(AppClient *app)
 {
-#ifdef DEGBUG
+#ifdef APP_DEBUG
     if (app->client->hasPacket)
     {
         if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeText)
@@ -175,6 +178,7 @@ void AppClientUpdate(AppClient *app)
     {
     case GS_Menu:
     {
+        CursorChange(CT_Normal);
         MapListUpdate(&app->mapList);
         switch (app->state.menuState)
         {
@@ -188,6 +192,7 @@ void AppClientUpdate(AppClient *app)
     }
     case GS_Playing:
     {
+        CursorChange(CT_Crossair);
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
         {
             app->state.gameState = GS_Menu;
@@ -263,7 +268,7 @@ void AppClientUpdate(AppClient *app)
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->entityManager, app->clock);
-#ifdef DEGBUG
+#ifdef APP_DEBUG
         UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
 #endif
         // SDL_PixelFormat *fmt;
@@ -302,8 +307,7 @@ void AppClientDraw(AppClient *app)
         default:
             break;
         }
-        MenuUpdate(app->menu, app->input, app->FPSControls, &app->mapList, &app->map);
-        GraphicsChangeCursor(app->gfx, CU_Normal);
+        MenuUpdate(app->menu, app->input, app->fpsManager, &app->mapList, &app->map);
         break;
     }
     case GS_Playing:
@@ -329,12 +333,11 @@ void AppClientDraw(AppClient *app)
 
         InventoryDisplayEquiped(app->gfx, &app->player.entity->inventory, app->player.entity->position);
 
-        GraphicsChangeCursor(app->gfx, CU_Crossair);
         break;
     }
     default:
         break;
     }
 
-    GraphicsDrawGradient(app->gfx, (SDL_Rect){0, 0, app->gfx->windowWidth, app->gfx->windowHeight}, (SDL_Color){20, 180, 184, 50}, (SDL_Color){200, 159, 227, 50});
+    GraphicsDrawGradient(app->gfx, (SDL_Rect){0, 0, app->gfx->window->width, app->gfx->window->height}, (SDL_Color){20, 180, 184, 50}, (SDL_Color){200, 159, 227, 50});
 }

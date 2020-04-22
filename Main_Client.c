@@ -1,11 +1,10 @@
+#include "include/core/AppClient.h"
 #include "include/core/Event.h"
 
-#include "include/core/AppClient.h"
-//#define DEGBUG
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
-    FpsManger *m_FPS = FpsMangerCreate();
+    FPSManager *m_fpsManager = FPSManagerCreate();
     Clock *m_clock = ClockCreate();
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
@@ -15,16 +14,16 @@ int main()
 #ifdef DEGBUG
     UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
 #endif
-    AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_FPS);
+    AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_fpsManager);
 
     while (m_running)
     {
-        ClockFpsStart(m_FPS);
+        FPSManagerStart(m_fpsManager);
         ClockTick(m_clock);
         InputUpdate(m_input);
         EventPollAll(m_event);
         AppClientRun(m_app);
-        ClockContorlFPS(m_FPS);
+        FPSManagerAdjust(m_fpsManager);
     }
 
     ClockDestroy(m_clock);

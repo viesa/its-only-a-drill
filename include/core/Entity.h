@@ -1,11 +1,14 @@
 #ifndef ENTITY_H
 #define ENTITY_H
+
+#include <float.h>
+
+#include "Macros.h"
 #include "Camera.h"
 #include "Clock.h"
-#include "math.h"
+#include "Library.h"
 #include "../Items.h"
 #include "../math/Vec2.h"
-#include <float.h>
 
 #define MAX_DRAWABLES 3
 

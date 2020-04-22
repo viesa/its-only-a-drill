@@ -2,55 +2,48 @@
 
 #include <stdio.h>
 
-void InventoryDisplay(Graphics *gfx, InventoryListItems *i) 
+void InventoryDisplay(Graphics *gfx, InventoryListItems *i)
 {
-    Drawable backround = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0,((gfx->windowHeight * 0.5) - 75 ), 300,150}, SS_Tiles);
-    GraphicsDraw(gfx,backround);
-    for (int j = 0; j < i->top; j++) 
+    Drawable backround = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, ((gfx->window->height * 0.5) - 75), 300, 150}, SS_Tiles);
+    GraphicsDraw(gfx, backround);
+    for (int j = 0; j < i->top; j++)
     {
-        if(j < 5) 
+        if (j < 5)
         {
-            ItemPocketDraw(gfx , &i->contents[j], ((Vec2){ 25 + (j * 50), (gfx->windowHeight * 0.5) - 50}));
+            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){25 + (j * 50), (gfx->window->height * 0.5) - 50}));
         }
-        else 
+        else
         {
-            ItemPocketDraw(gfx , &i->contents[j], ((Vec2){ 25 + ((j - 5) * 50), (gfx->windowHeight * 0.5)}));
+            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){25 + ((j - 5) * 50), (gfx->window->height * 0.5)}));
         }
-       
     }
 }
 
-void InventorySelectItem(InventoryListItems *i, int item ) 
+void InventorySelectItem(InventoryListItems *i, int item)
 {
-    if(i->top >= item) 
+    if (i->top >= item)
     {
         item--;
-        for(int j = 0; j < i->top; j++) 
+        for (int j = 0; j < i->top; j++)
         {
             i->contents[j].equiped = 0;
         }
         i->contents[item].equiped = 1;
-        
     }
 }
 
-void InventoryDisplayEquiped(Graphics *gfx,InventoryListItems *i, Vec2 PlayerPos) 
+void InventoryDisplayEquiped(Graphics *gfx, InventoryListItems *i, Vec2 PlayerPos)
 {
-    for(int j = 0; j < i->top; j++) 
+    for (int j = 0; j < i->top; j++)
     {
-        if((i->contents[j].equiped) == 1)
+        if ((i->contents[j].equiped) == 1)
         {
             //Item held = ItemCreate(i->contents[j].type,PlayerPos);
             //held.postion = PlayerPos;
             //held.postion.x = 300;
             //held.postion.y = 500;
             //GraphicsDraw(gfx,held.drawable);
-            ItemPocketDraw(gfx, &i->contents[j],((Vec2){ 200,300}));
+            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){200, 300}));
         }
     }
 }
-
-
-
-
-
