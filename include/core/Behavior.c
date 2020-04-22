@@ -5,7 +5,7 @@
 #define addmove 1500.0f
 #define moxsize 50
 
-void BehaviorMoveEntity(Entity entities[])
+void BehaviorMoveEntity(Entity entities[], int amountOfEntitys)
 {
     float axis_x1 = 200;
     float axis_y1 = 200;
@@ -16,7 +16,7 @@ void BehaviorMoveEntity(Entity entities[])
     SDL_Rect box1, box2;
     box1 = (SDL_Rect){(int)axis_x1 - moxsize, (int)axis_y1 - moxsize, moxsize, moxsize};
     box2 = (SDL_Rect){(int)axis_x2 - moxsize, (int)axis_y2 - moxsize, moxsize, moxsize};
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < amountOfEntitys; i++)
     {
         switch (entities[i].entityState)
         {

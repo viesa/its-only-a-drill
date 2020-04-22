@@ -20,7 +20,7 @@ void EntityManagerRemove(EntityManager *m, int index)
         m->entities[i] = m->entities[i + 1];
     }
     m->nrEntities--;
-    m->entities = SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
+    m->entities = (Entity *)SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
 }
 void EntityManagerDestroy(EntityManager *m)
 {
