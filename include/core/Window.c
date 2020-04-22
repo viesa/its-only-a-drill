@@ -14,11 +14,12 @@ Window *WindowCreate(const char *title)
     window->height = 480;
     SDL_DisplayMode displaymode;
     SDL_GetCurrentDisplayMode(0, &displaymode);
-    window->width = displaymode.w - 50;
-    window->height = displaymode.h - 100; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
-#ifdef WindowDebug
+#ifdef WINDOW_DEBUG
     window->width = 720;
     window->height = 480;
+#else
+    window->width = displaymode.w - 50;
+    window->height = displaymode.h - 100; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #endif
 
     window->sdl_window = SDL_CreateWindow(window->title,
@@ -31,7 +32,8 @@ Window *WindowCreate(const char *title)
         log_fatal("Could not create window: %s", SDL_GetError());
 
     window->renderer = SDL_CreateRenderer(window->sdl_window,
-                                          -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+                                          -1,
+                                          SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!window->renderer)
         log_fatal("Could not create renderer: %s", SDL_GetError());
     SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_BLEND);
@@ -43,11 +45,7 @@ Window *WindowCreate(const char *title)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetSwapInterval(1);
 
-    //Sets Window-icon
-    SDL_Surface *win_icon = SDL_LoadBMP("assets/window_icon.bmp");
-    SDL_SetWindowIcon(window->sdl_window, win_icon);
-    if (win_icon)
-        SDL_FreeSurface(win_icon);
+    WindowSetIcon(window, "assets/window_icon.bmp");
 
     return window;
 }
@@ -69,7 +67,6 @@ void WindowPresent(Window *window)
 {
     SDL_RenderPresent(window->renderer);
 }
-
 void WindowSetAntiAliasing(Window *window, const int level)
 {
     if (level < 0 || level > 8)
@@ -122,4 +119,14 @@ void WindowSetSize(Window *window, int width, int height)
     window->width = width;
     window->height = height;
     SDL_SetWindowSize(window->sdl_window, window->width, window->height);
+}
+
+void WindowSetIcon(Window *window, const char *filepath)
+{
+    SDL_Surface *win_icon = SDL_LoadBMP(filepath);
+    if (!win_icon)
+        log_error("Could not load win_icon: [%s]", filepath);
+    SDL_SetWindowIcon(window->sdl_window, win_icon);
+    if (win_icon)
+        SDL_FreeSurface(win_icon);
 }

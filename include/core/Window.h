@@ -29,4 +29,5 @@ void WindowSetVSync(Window *window, SDL_bool onoff);
 void WindowSetFullscreen(Window *window, SDL_bool onoff);
 void WindowSetTitle(Window *window, const char *title);
 void WindowSetSize(Window *window, int width, int height);
+void WindowSetIcon(Window *window, const char *filepath);
 #endif
