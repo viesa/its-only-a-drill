@@ -48,6 +48,7 @@ int UDPClientListen(UDPClient *client, int maxLen)
     if (!r)
     {
         client->hasPacket = SDL_FALSE;
+        SDLNet_FreePacket(client->pack);
         return 0;
     }
     client->hasPacket = SDL_TRUE;

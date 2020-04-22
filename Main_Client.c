@@ -10,7 +10,7 @@ int main()
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
     UDPClient m_client = UDPClientCreate("drill.pierrelf.com", 1337); //drill.pierrelf.com port 1337
-    //UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
+    // UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
     AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_FPS);
 
     while (m_running)

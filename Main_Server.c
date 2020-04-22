@@ -25,6 +25,7 @@ int main()
                     }
                 }
             }
+            SDLNet_FreePacket(m_server.pack);
         }
         if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeEntity)
         {
@@ -32,6 +33,7 @@ int main()
             char buffer[m_server.pack->len - 2];
             SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
             UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, sizeof(Entity));
+            SDLNet_FreePacket(m_server.pack);
         }
     }
     UDPServerDestroy(&m_server);
