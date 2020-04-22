@@ -77,11 +77,11 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->entityManager.entities[0].entityState = EntityPlayer;
 
 #ifdef DEGBUG
-    for (int i = 1; i < MaxEntities; i++)
+    for (int i = 1; i < app->entityManager.nrEntities; i++)
     {
-        app->entities[i].id = 0;
+        app->entityManager.entities[i].id = 0;
     }
-    app->nrEntities = 1;
+    app->entityManager.nrEntities = 1;
 #endif
     ScoreCreate(0);
     ScoreIncrement(100, 0);
@@ -98,7 +98,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
-            app->entities[0].id = *(int *)app->client->pack->data;
+            app->entityManager.entities[0].id = *(int *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE;
         }
     }
@@ -152,18 +152,18 @@ void AppClientUpdate(AppClient *app)
             Entity ent = *(Entity *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE;
             SDL_bool exist = SDL_FALSE;
-            for (int i = 0; i < MaxEntities; i++)
+            for (int i = 0; i < app->entityManager.nrEntities; i++)
             {
-                if (app->entities[i].id == ent.id) //entity exists
+                if (app->entityManager.entities[i].id == ent.id) //entity exists
                 {
                     exist = SDL_TRUE;
-                    app->entities[i] = ent;
+                    app->entityManager.entities[i] = ent;
                 }
             }
             if (!exist) //entity doesnt exist, allocate
             {
-                app->entities[app->nrEntities] = ent;
-                app->nrEntities++;
+                app->entityManager.entities[app->entityManager.nrEntities] = ent;
+                app->entityManager.nrEntities++;
             }
         }
     }
