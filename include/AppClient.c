@@ -117,7 +117,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 void AppClientDestroy(AppClient *app)
 {
     app->client->isActive = SDL_FALSE;
-    UDPClientDestroy(app->client);
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
