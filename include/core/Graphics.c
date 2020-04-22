@@ -31,19 +31,23 @@ Graphics *GraphicsCreate()
     gfx_ret->windowWidth = DM.w;
     gfx_ret->windowHeight = DM.h - 50; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #ifdef DegBug
-    gfx_ret->windowWidth = 640;
+    gfx_ret->windowWidth = 720;
     gfx_ret->windowHeight = 480;
 #endif
     gfx_ret->mapWidth = 2000;
     gfx_ret->mapHeight = 2000;
     gfx_ret->isFullscreen = 0;
     gfx_ret->vsync = SDL_TRUE;
+    gfx_ret->currentCursor = NULL;
+    gfx_ret->currentCursorType = CU_None;
+    GraphicsChangeCursor(gfx_ret, CU_Normal);
 
     gfx_ret->m_mainWindow = SDL_CreateWindow("It's only a drill", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, gfx_ret->windowWidth, gfx_ret->windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!gfx_ret->m_mainWindow)
         log_fatal("Could not create window: %s", SDL_GetError());
 
     gfx_ret->m_renderer = SDL_CreateRenderer(gfx_ret->m_mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRenderDrawBlendMode(gfx_ret->m_renderer, SDL_BLENDMODE_BLEND);
 
     //Sets Window-icon
     SDL_Surface *win_icon = SDL_LoadBMP("assets/window_icon.bmp");
@@ -72,6 +76,11 @@ Graphics *GraphicsCreate()
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = texture;
 
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/characters-and-props.png");
+    if (!texture)
+        log_warn("Could not load characters-and-props.png");
+    gfx_ret->m_allTextures[SS_Characters_Props] = texture;
+
     texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tools.png");
     if (!texture)
         log_warn("Could not load tools.png");
@@ -86,6 +95,11 @@ Graphics *GraphicsCreate()
     if (!texture)
         log_warn("Could not load background-tiles.png");
     gfx_ret->m_allTextures[SS_BackgroundTiles] = texture;
+
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "assets/img/red_circle.png");
+    if (!texture)
+        log_warn("Could not load red_circle.png");
+    gfx_ret->m_allTextures[SS_RedCircle] = texture;
 
     return gfx_ret;
 }
@@ -121,6 +135,84 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      drawable.rot,
                      &rot_point,
                      SDL_FLIP_NONE);
+}
+
+void GraphicsChangeCursor(Graphics *gfx, Cursor cursor)
+{
+    if (gfx->currentCursorType == cursor)
+        return;
+    else
+        gfx->currentCursorType = cursor;
+
+    if (gfx->currentCursor)
+        SDL_FreeCursor(gfx->currentCursor);
+    SDL_Surface *cursorSurface = NULL;
+    switch (cursor)
+    {
+    case CU_Normal:
+        cursorSurface = SDL_LoadBMP("assets/cursors/cursor.bmp");
+        gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+        break;
+    case CU_Crossair:
+        cursorSurface = SDL_LoadBMP("assets/cursors/crosshair.bmp");
+        gfx->currentCursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+        break;
+    default:
+        break;
+    }
+    if (gfx->currentCursor)
+        SDL_SetCursor(gfx->currentCursor);
+    if (cursorSurface)
+        SDL_FreeSurface(cursorSurface);
+}
+
+void GraphicsDrawCrosshair(Graphics *gfx, Vec2 mousePosition)
+{
+    // SDL_ShowCursor(0);
+    // SDL_Surface *cursorSurface = SDL_LoadBMP("assets/cursor/crosshair.bmp");
+    // SDL_Cursor *cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+    // SDL_SetCursor(cursor);
+    // SDL_ShowCursor(1);
+    // GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 512, 512}, (SDL_Rect){(int)mousePosition.x, (int)mousePosition.y, 30, 30}, SS_Cursor));
+}
+
+void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(gfx->m_renderer, color.r, color.g, color.g, color.a);
+    SDL_RenderFillRect(gfx->m_renderer, &rect);
+}
+
+void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
+{
+    GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
+}
+
+void GraphicsDrawGradient(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+{
+    //Current color channels
+    float CurR = (float)start.r;
+    float CurG = (float)start.g;
+    float CurB = (float)start.b;
+    float CurA = (float)start.a;
+
+    //Calculate delta increments for each color channel
+    float dR = (float)(end.r - start.r) / (float)(rect.w);
+    float dG = (float)(end.g - start.g) / (float)(rect.w);
+    float dB = (float)(end.b - start.b) / (float)(rect.w);
+    float dA = (float)(end.a - start.a) / (float)(rect.w);
+
+    for (float x = rect.x; x < rect.x + rect.w; x++)
+    {
+        SDL_Rect drawRect = {x, rect.y, 1, rect.h};
+        SDL_SetRenderDrawColor(gfx->m_renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
+        SDL_RenderFillRect(gfx->m_renderer, &drawRect);
+
+        //Add an increment to the color channels
+        CurR += dR;
+        CurG += dG;
+        CurB += dB;
+        CurA += dA;
+    }
 }
 
 SDL_Renderer *GraphicsGetRenderer(Graphics *gfx)

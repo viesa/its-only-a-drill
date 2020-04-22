@@ -4,6 +4,8 @@
 #include "Clock.h"
 #include "math.h"
 #include "../Items.h"
+#include "../math/Vec2.h"
+#include <float.h>
 typedef enum EntityPresets
 {
     EntityWoman,
@@ -12,17 +14,29 @@ typedef enum EntityPresets
     //Used only by Map.c
     EntityMapObject
 } EntityPresets;
+typedef enum entityState
+{
+    GoForward,
+    GoBack,
+    Fight,
+    // used only for player so that the player can take control
+    EntityPlayer
+} EntityState;
+
 typedef struct Entity
 {
-    int rot, id;
+    int rot, id; // currently unused
     SDL_bool isCollider;
     Drawable drawable;
     Vec2 position;
     Vec2 Force;
-    Vec2 accseleration;
-    float Friction, mass;
+    Vec2 Accseleration; // currently unused
+    Vec2 Velosity;
+    float Friction; // don't make it Lager then 10
+    float mass;
     InventoryListItems inventory;
     int health;
+    EntityState entityState;
 } Entity;
 
 ///Creates a entity
@@ -36,6 +50,9 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int id);
 void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);
 void EntityDraw(Camera *camera, Entity *entity);
 
+void EntityUpdateMovment(Entity entities[], int nrEnts, Clock *clk);
 /// finds the collision and fixes the problem with rules
 SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk);
+// carculates the net Froces after friction and collision
+Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk);
 #endif

@@ -1,7 +1,7 @@
 #include "Weapon.h"
 #include "Entity.h"
 
-void shoot(Player *player, Camera *camera, Entity e[], Item item)
+void playerShoot(Entity *player, Camera *camera, Entity e[], Item item)
 {
     int pos_x = 0;
     int pos_y = 0;
@@ -9,22 +9,22 @@ void shoot(Player *player, Camera *camera, Entity e[], Item item)
     SDL_GetMouseState(&pos_x, &pos_y);
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(RectMid(player->entity.drawable.dst), cameraPos);
+    Vec2 playerPos = Vec2Sub(RectMid(player->drawable.dst), cameraPos);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
     Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
     Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item.Stats.falloff);
-    pos_x = (int)(player->entity.drawable.dst.x + (player->entity.drawable.dst.w / 2)) + (int)itemFalloff.x;
-    pos_y = (int)(player->entity.drawable.dst.x + (player->entity.drawable.dst.w / 2)) + (int)itemFalloff.y;
+    pos_x = (int)(player->drawable.dst.x + (player->drawable.dst.w / 2)) + (int)itemFalloff.x;
+    pos_y = (int)(player->drawable.dst.x + (player->drawable.dst.w / 2)) + (int)itemFalloff.y;
 
     SDL_Point point;
-    point.x = player->entity.drawable.dst.x + (player->entity.drawable.dst.w / 2);
-    point.y = player->entity.drawable.dst.y + (player->entity.drawable.dst.h / 2);
+    point.x = player->drawable.dst.x + (player->drawable.dst.w / 2);
+    point.y = player->drawable.dst.y + (player->drawable.dst.h / 2);
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
 
     // push back
-    player->entity.Force.x -= itemFalloff.x;
-    player->entity.Force.y -= itemFalloff.y;
+    player->Force.x -= itemFalloff.x;
+    player->Force.y -= itemFalloff.y;
 #ifdef DegBug
     printf("line pos:\n");
     printf("X1: %d\n", point.x);
@@ -36,7 +36,7 @@ void shoot(Player *player, Camera *camera, Entity e[], Item item)
     printf("Y: %f\n", playerToMouse.y);
 #endif
     srand(time(0));
-    for (int i = 0; i < 3; i++)
+    for (int i = 1; i < 3; i++)
     {
         tmpPosX = pos_x;
         tmpPosY = pos_y;
