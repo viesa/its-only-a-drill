@@ -13,6 +13,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.type = ItemWoodenSword;
         i.postion = Position;
         i.picked = 0;
+        i.equiped = 0;
         i.Stats.accuracy = 1.0f;
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
@@ -24,6 +25,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.type = ItemMetalSword;
         i.postion = Position;
         i.picked = 0;
+        i.equiped = 0;
         i.Stats.accuracy = 1.0f;
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
@@ -45,6 +47,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.captivity = 0;
         i.Stats.Damage = 0;
         i.Stats.falloff = 0;
+        i.equiped = 0;
         break;
     }
     return i;
@@ -99,6 +102,7 @@ void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp)
 void ItemDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos) //Drop item
 {
     i->contents[i->top - 1].picked = 0;
+    i->contents[i->top - 1].equiped = 0;
     i->contents[i->top - 1].postion.x = playerPos.x;
     i->contents[i->top - 1].postion.y = playerPos.y;
     groundListAdd(g, i);
@@ -145,6 +149,7 @@ void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, 
     {
         item--;
         i->contents[item].picked = 0;
+        i->contents[item].equiped = 0;
         i->contents[item].postion.x = playerPos.x;
         i->contents[item].postion.y = playerPos.y;
     
@@ -152,6 +157,7 @@ void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, 
         g->contents[g->top].picked = i->contents[item].picked;
         g->contents[g->top].postion = i->contents[item].postion;
         g->contents[g->top].type = i->contents[item].type;
+        g->contents[g->top].equiped = i->contents[item].equiped;
         g->top++;
 
         int incitem = item;
@@ -162,6 +168,7 @@ void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, 
             i->contents[k].picked = i->contents[incitem].picked;
             i->contents[k].postion = i->contents[incitem].postion;
             i->contents[k].type = i->contents[incitem].type;
+            i->contents[k].equiped = i->contents[incitem].equiped;
             incitem++;
         }
         i->top--;
