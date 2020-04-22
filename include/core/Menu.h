@@ -1,6 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "EntityManager.h"
 #include "Font.h"
 #include "Input.h"
 #include "Clock.h"
@@ -11,6 +12,8 @@
 typedef struct Menu
 {
     Graphics *gfx;
+    EntityManager *entityManager;
+
     Font *font;
     Drawable mainMenuDbl;
     State *state;
@@ -26,7 +29,7 @@ typedef struct Menu
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
+Menu *MenuCreate(Graphics *gfx, EntityManager *entityManager, Font *font, State *state);
 void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapList, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
 void MenuUpdateOptions(Menu *menu, Input *input);

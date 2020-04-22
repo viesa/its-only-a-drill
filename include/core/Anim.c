@@ -20,7 +20,6 @@ Anim AnimCreate(AnimType animType, AnimRepeatOption anro, SpriteSheet spriteShee
         int x = 872;
         int y = 952;
         anim.nFrames = 9;
-
         anim.frames[0] = DrawableCreate((SDL_Rect){x, y, width, height}, (SDL_Rect){0, 0, width, height}, spriteSheet);
         anim.frames[1] = DrawableCreate((SDL_Rect){x, y - height, width, height}, (SDL_Rect){0, 0, width, height}, spriteSheet);
         anim.frames[2] = DrawableCreate((SDL_Rect){x, y - height * 2, width, height}, (SDL_Rect){0, 0, width, height}, spriteSheet);

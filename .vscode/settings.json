@@ -25,6 +25,7 @@
                 "maplist.h": "c",
                 "dirent.h": "c",
                 "json.h": "c",
-                "cstdlib": "c"
+                "cstdlib": "c",
+                "entitymanager.h": "c"
         }
 }

@@ -1,36 +1,153 @@
 #include "EntityManager.h"
-EntityManager EntityManagerCreate()
+
+EntityManager *EntityManagerCreate()
 {
-    EntityManager m;
-    m.nrEntities = 0;
-    return m;
-}
-void EntityManagerAdd(EntityManager *m, Entity ent)
-{
-    if (m->nrEntities == 0)
+    EntityManager *entityManager = (EntityManager *)SDL_malloc(sizeof(EntityManager));
+    entityManager->highestIndex = 0;
+    for (int i = 0; i < MAX_ENTITIES; i++)
     {
-        m->entities = (Entity *)SDL_malloc(sizeof(Entity));
-        m->nrEntities++;
+        entityManager->bitmap[i] = SDL_FALSE;
     }
-    else
-    {
-        m->nrEntities++;
-        m->entities = (Entity *)SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
-    }
-    m->entities[m->nrEntities - 1] = ent;
+    return entityManager;
 }
-void EntityManagerRemove(EntityManager *m, int index)
+
+void EntityManagerDestroy(EntityManager *entityManager)
 {
-    if (m->nrEntities < index)
+    SDL_free(entityManager);
+}
+
+void EntityManagerUpdate(EntityManager *entityManager, Clock *clk)
+{
+    EntityManagerUpdateMovement(entityManager, clk);
+    // EntityManagerOnCollision(entityManager);
+}
+
+void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
+{
+    for (int i = 0; i < entityManager->highestIndex; i++)
+    {
+        if (entityManager->bitmap[i])
+        { // carculate Net_force so friction & collision & the other forces is handle before
+            EntityCalculateNetForces(&entityManager->entities[i]);
+
+            // update new position
+            entityManager->entities[i].position.x += entityManager->entities[i].Velocity.x * ClockGetDeltaTime(clk);
+            entityManager->entities[i].position.y += entityManager->entities[i].Velocity.y * ClockGetDeltaTime(clk);
+#ifdef DegBug
+            if (entities[i].id == 0)
+            {
+                log_debug("CurrentEntity:");
+                log_debug("position x: %f", entities[i].position.x);
+                log_debug("position y: %f", entities[i].position.y);
+                log_debug("Force x: %f", entities[i].Force.x);
+                log_debug("Force y: %f", entities[i].Force.y);
+                log_debug("Acceleration x: %f", entities[i].Acceleration.x);
+                log_debug("Acceleration y: %f", entities[i].Acceleration.y);
+                log_debug("Velocity x: %f", entities[i].Velocity.x);
+                log_debug("Velocity y: %f", entities[i].Velocity.y);
+                log_debug("Friction: %f", entities[i].Friction);
+                log_debug("mass: %f", entities[i].mass);
+            }
+#endif
+        }
+    }
+}
+
+SDL_bool EntityManagerOnCollision(EntityManager *entityManager)
+{
+    SDL_Rect result;
+    for (int Dominant = 0; Dominant < entityManager->highestIndex; Dominant++)
+    {
+        if (entityManager->bitmap[Dominant] &&
+            entityManager->entities[Dominant].isCollider)
+            for (int Recessive = 0; Recessive < entityManager->highestIndex; Recessive++)
+            {
+                if (entityManager->bitmap[Recessive] &&
+                    entityManager->entities[Recessive].isCollider)
+                {
+                    if (Dominant != Recessive)
+                    {
+                        // Dominant hitbox
+                        SDL_Rect *dHitbox = &entityManager->entities[Dominant].drawables[entityManager->entities[Dominant].hitboxIndex].dst;
+                        // Recessive hitbox
+                        SDL_Rect *rHitbox = &entityManager->entities[Recessive].drawables[entityManager->entities[Dominant].hitboxIndex].dst;
+                        if (SDL_IntersectRect(dHitbox, rHitbox, &result))
+                        {
+                            Vec2 DominantCenter; // calculating center
+                            DominantCenter.x = (float)dHitbox->x + (float)dHitbox->w / 2.0f;
+                            DominantCenter.y = (float)dHitbox->y + (float)dHitbox->h / 2.0f;
+
+                            Vec2 RecessiveCenter; // calculating center
+                            RecessiveCenter.x = (float)rHitbox->x + (float)rHitbox->w / 2.0f;
+                            RecessiveCenter.y = (float)rHitbox->y + (float)rHitbox->h / 2.0f;
+
+                            Vec2 ResultDistance; // Calculating distance
+                            ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
+                            ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
+
+                            entityManager->entities[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat affect
+                            entityManager->entities[Recessive].position.y -= ResultDistance.y / 17.0f;
+                        }
+                    }
+                }
+            }
+    }
+    return SDL_FALSE;
+}
+
+Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position)
+{
+    Entity entity = EntityCreate(position, entityType, -1);
+    int index = EntityManagerGetFreeIndex(entityManager);
+    if (index == -1)
+    {
+        log_fatal("EntityManager is FULL!");
+        return NULL;
+    }
+    {
+        entityManager->entities[index] = entity;
+        entityManager->bitmap[index] = SDL_TRUE;
+        EntityManagerCalculateHighestIndex(entityManager);
+        return &entityManager->entities[index];
+    }
+}
+
+void EntityManagerRemove(EntityManager *entityManager, Entity *entity)
+{
+    int index = -1;
+    for (int i = 0; i < entityManager->highestIndex; i++)
+    {
+        if (entityManager->bitmap[i] && entity == &entityManager->entities[i])
+        {
+            index = i;
+        }
+    }
+    if (index == -1)
         return;
-    for (int i = index; i < m->nrEntities; i++)
-    {
-        m->entities[i] = m->entities[i + 1];
-    }
-    m->nrEntities--;
-    m->entities = (Entity *)SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
+
+    entityManager->bitmap[index] = SDL_FALSE;
+    EntityManagerCalculateHighestIndex(entityManager);
 }
-void EntityManagerDestroy(EntityManager *m)
+
+int EntityManagerGetFreeIndex(EntityManager *entityManager)
 {
-    SDL_free(m->entities);
+    for (int i = 0; i < MAX_ENTITIES; i++)
+    {
+        if (!entityManager->bitmap[i])
+            return i;
+    }
+    return -1;
+}
+
+void EntityManagerCalculateHighestIndex(EntityManager *entityManager)
+{
+    for (int i = MAX_ENTITIES; i >= 0; i--)
+    {
+        if (entityManager->bitmap[i])
+        {
+            entityManager->highestIndex = i;
+            return;
+        }
+    }
+    entityManager->highestIndex = 0;
 }

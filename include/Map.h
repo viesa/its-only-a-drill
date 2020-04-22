@@ -1,7 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "core/Entity.h"
+#include "core/EntityManager.h"
 #include "core/JSON.h"
 
 #define MAIN_LENGTH 3
@@ -17,11 +17,14 @@
 
 typedef struct Map
 {
-    Entity *contents;
+    Entity **contents;
     uint32_t n;
+    EntityManager *entityManager;
 } Map;
 
-Map MapCreate(JSON *mapdata);
+Map MapCreate(JSON *mapdata, EntityManager *entityManager);
 void MapDestroy(Map *map);
+
+void MapDraw(Map *map, Camera *camera);
 
 #endif

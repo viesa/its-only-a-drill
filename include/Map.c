@@ -5,15 +5,17 @@
 #include "core/Library.h"
 #include "core/Log.h"
 
-Map MapCreate(JSON *mapdata)
+Map MapCreate(JSON *mapdata, EntityManager *entityManager)
 {
-    Map error_map = {NULL, 0};
+    Map error_map = {NULL, 0, NULL};
     Map map;
+    map.n = 0;
     if (mapdata == NULL ||
         mapdata->value->type != json_object ||
         mapdata->value->u.object.length != MAIN_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Main)");
+        MapDestroy(&map);
         return error_map;
     }
 
@@ -23,6 +25,7 @@ Map MapCreate(JSON *mapdata)
         mapInfo->u.object.length != MAPINFO_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
+        MapDestroy(&map);
         return error_map;
     }
     SDL_bool badLoad = SDL_FALSE;
@@ -58,11 +61,12 @@ Map MapCreate(JSON *mapdata)
         layers->u.integer != JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX}, 1)->u.array.length)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Layers)");
+        MapDestroy(&map);
         return error_map;
     }
     map.n = layers->u.integer;
 
-    map.contents = (Entity *)SDL_malloc(sizeof(Entity) * map.n);
+    map.contents = (Entity **)SDL_malloc(sizeof(Entity *) * map.n);
     for (uint32_t i = 0; i < map.n; i++)
     {
         json_value *current = JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX, i}, 2);
@@ -71,7 +75,7 @@ Map MapCreate(JSON *mapdata)
             current->u.object.length != LIST_LENGTH)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (List)");
-            SDL_free(map.contents);
+            MapDestroy(&map);
             return error_map;
         }
 
@@ -109,7 +113,7 @@ Map MapCreate(JSON *mapdata)
         if (badLoad)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (LIST CONTENTS)");
-            SDL_free(map.contents);
+            MapDestroy(&map);
             return error_map;
         }
         //----------------------------------------------------
@@ -118,16 +122,16 @@ Map MapCreate(JSON *mapdata)
             entries[SRC_INDEX].value->u.object.length != SRC_LENGTH)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (SRC)");
-            SDL_free(map.contents);
+            MapDestroy(&map);
             return error_map;
         }
 
         char *type_str = entries[0].value->u.string.ptr;
-        EntityPresets type;
+        EntityType type;
         if (!strcmp(type_str, "player"))
-            type = EntityPlayerSpawn;
+            type = ET_PlayerSpawn;
         else
-            type = EntityMapObject;
+            type = ET_MapObject;
 
         Vec2 position = Vec2Create((float)entries[2].value->u.integer, (float)entries[3].value->u.integer);
         int width = entries[4].value->u.integer;
@@ -144,22 +148,39 @@ Map MapCreate(JSON *mapdata)
         SDL_Rect dst = {(int)position.x, (int)position.y, width, height};
         SDL_Rect src = {src_x, src_y, src_w, src_h};
 
-        Entity _new_ = EntityCreate(position, type, 0);
-        _new_.drawable.dst = dst;
-        _new_.drawable.src = src;
-        _new_.drawable.rot = rotation;
-        _new_.drawable.rot_anchor = RectMid(_new_.drawable.dst);
-        _new_.mass = mass;
-        _new_.isCollider = collider;
+        Entity *entity = EntityManagerAdd(entityManager, type, position);
+        entity->drawables[0].dst = dst;
+        entity->drawables[0].src = src;
+        entity->drawables[0].rot = rotation;
+        entity->drawables[0].rot_anchor = RectMid(entity->drawables[0].dst);
+        entity->mass = mass;
+        entity->isCollider = collider;
+        entity->hitboxIndex = 0;
+        entity->nDrawables = 1;
 
-        SDL_memcpy(&map.contents[i], &_new_, sizeof(Entity));
+        map.contents[i] = entity;
     }
 
+    map.entityManager = entityManager;
     return map;
 }
 void MapDestroy(Map *map)
 {
-    SDL_free(map->contents);
+    for (int i = 0; i < map->n; i++)
+    {
+        EntityManagerRemove(map->entityManager, map->contents[i]);
+    }
+    if (map->contents)
+        SDL_free(map->contents);
     map->contents = NULL;
     map->n = 0;
+}
+
+void MapDraw(Map *map, Camera *camera)
+{
+    if (map->contents)
+        for (int i = 0; i < map->n; i++)
+        {
+            EntityDraw(map->contents[i], camera);
+        }
 }

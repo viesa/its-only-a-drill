@@ -1,6 +1,6 @@
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
-#include "Entity.h"
+#include "EntityManager.h"
 #include "../math/Vec2.h"
 #include "Library.h"
 
@@ -10,7 +10,7 @@ typedef struct moveingPattern
 } moveingPattern;
 
 //mode 0 move between two points 2modes!
-void BehaviorMoveEntity(Entity entities[], int amountOfEntitys);
+void BehaviorMoveEntity(EntityManager *entityManager);
 Entity BehaviorMoveToPoint(Entity entity, float x, float y);
 
 #endif
