@@ -1,5 +1,6 @@
 #include "UDPServer.h"
 #define DEGBUG
+//#define RAWINOUT
 UDPServer UDPServerCreate(Uint16 port)
 {
     UDPServer server;
@@ -38,12 +39,36 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
         pack->address = server->players[i].ip;
         if (SDLNet_UDP_Send(server->sock, -1, pack))
         {
+#ifdef RAWINOUT
             printf("RAW OUT(message, host:port): ");
             for (int i = 0; i < size + 2; i++)
             {
                 printf("%c", pack->data[i]);
             }
-            printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+            printf(", %x:%x\n", pack->address.host, pack->address.port);
+#endif
+#ifndef RAWINOUT
+            char buffer[MAX_MSGLEN];
+            SDL_memcpy(buffer, pack->data, pack->len);
+            UDPpacket p = *pack;
+            p.data = buffer;
+            switch (UDPPackageDecode(pack->data))
+            {
+            case UDPTypeText:
+                UDPPackageRemoveType(&p);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+                break;
+            case UDPTypeint:
+                UDPPackageRemoveTypeNULL(&p);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+                break;
+            case UDPTypeEntity:
+                UDPPackageRemoveTypeNULL(&p);
+                Entity *e = (Entity *)p.data;
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+                break;
+            }
+#endif
         }
     }
     UDPPackageDestroy(payload);
@@ -62,12 +87,36 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
             pack->address = server->players[i].ip;
             if (SDLNet_UDP_Send(server->sock, -1, pack))
             {
+#ifdef RAWINOUT
                 printf("RAW OUT(message, host:port): ");
                 for (int i = 0; i < size + 2; i++)
                 {
                     printf("%c", pack->data[i]);
                 }
                 printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+#endif
+#ifndef RAWINOUT
+                char buffer[MAX_MSGLEN];
+                SDL_memcpy(buffer, server->pack->data, server->pack->len);
+                UDPpacket p = *server->pack;
+                p.data = buffer;
+                switch (UDPPackageDecode(server->pack->data))
+                {
+                case UDPTypeText:
+                    UDPPackageRemoveType(&p);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+                    break;
+                case UDPTypeint:
+                    UDPPackageRemoveTypeNULL(&p);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+                    break;
+                case UDPTypeEntity:
+                    UDPPackageRemoveTypeNULL(&p);
+                    Entity *e = (Entity *)p.data;
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+                    break;
+                }
+#endif
             }
         }
         UDPPackageDestroy(payload);
@@ -84,13 +133,35 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
     pack->address = ip;
     if (SDLNet_UDP_Send(server->sock, -1, pack))
     {
-#ifdef DEGBUG
+#ifdef RAWINOUT
         printf("RAW OUT(message, host:port): ");
         for (int i = 0; i < size + 2; i++)
         {
             printf("%c", pack->data[i]);
         }
         printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+#endif
+#ifndef RAWINOUT
+        char buffer[MAX_MSGLEN];
+        SDL_memcpy(buffer, pack->data, server->pack->len);
+        UDPpacket p = *pack;
+        p.data = buffer;
+        switch (UDPPackageDecode(pack->data))
+        {
+        case UDPTypeText:
+            UDPPackageRemoveType(&p);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+            break;
+        case UDPTypeint:
+            UDPPackageRemoveTypeNULL(&p);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+            break;
+        case UDPTypeEntity:
+            UDPPackageRemoveTypeNULL(&p);
+            Entity *e = (Entity *)p.data;
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+            break;
+        }
 #endif
     }
     UDPPackageDestroy(payload);
@@ -145,12 +216,36 @@ int UDPServerListen(UDPServer *server, int maxLen)
         printf("(host:port): %x:%x\n", server->players[i].ip.host, server->players[i].ip.port);
     printf("length of list %d\n", server->nrPlayers);
     printf("End of player list\n\n");
+#ifdef RAWINOUT
     printf("RAW IN(message, host:port): ");
     for (int i = 0; i < server->pack->len; i++)
     {
         printf("%c", server->pack->data[i]);
     }
     printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+#endif
+#ifndef RAWINOUT
+    char buffer[MAX_MSGLEN];
+    SDL_memcpy(buffer, server->pack->data, server->pack->len);
+    UDPpacket p = *server->pack;
+    p.data = buffer;
+    switch (UDPPackageDecode(server->pack->data))
+    {
+    case UDPTypeText:
+        UDPPackageRemoveType(&p);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+        break;
+    case UDPTypeint:
+        UDPPackageRemoveTypeNULL(&p);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+        break;
+    case UDPTypeEntity:
+        UDPPackageRemoveTypeNULL(&p);
+        Entity *e = (Entity *)p.data;
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+        break;
+    }
+#endif
 #endif
     return r;
 }

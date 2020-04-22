@@ -32,19 +32,7 @@ int main()
             char buffer[m_server.pack->len - 2];
             SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
             UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, sizeof(Entity));
-            log_info("Recieved entity by %x:%x\nBroadcasting...\n", m_server.pack->address.host, m_server.pack->address.port);
         }
-
-#ifdef DEGBUG
-        if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeEntity)
-        {
-            UDPPackageRemoveTypeNULL(m_server.pack);
-            UDPServerEcho(&m_server, UDPTypeEntity, (char *)m_server.pack->data, sizeof(Entity));
-            Entity *ent = (Entity *)m_server.pack->data;
-            printf("\n");
-            printf("(%x:%x) coordinates:\nx:%f, y:%f\n", m_server.pack->address.host, m_server.pack->address.port, ent->position.x, ent->position.y);
-        }
-#endif
     }
     UDPServerDestroy(&m_server);
     SDL_Quit();

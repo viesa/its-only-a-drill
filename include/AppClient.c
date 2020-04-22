@@ -40,6 +40,7 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
+        SDL_Delay(5);
         if (client->hasPacket)
             continue;
         UDPClientListen(client, MAX_MSGLEN);
@@ -144,8 +145,7 @@ void AppClientUpdate(AppClient *app)
         if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeEntity)
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
-            UDPpacket pack = *app->client->pack;
-            Entity ent = *(Entity *)pack.data;
+            Entity ent = *(Entity *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE;
             SDL_bool exist = SDL_FALSE;
             for (int i = 0; i < MaxEntities; i++)
