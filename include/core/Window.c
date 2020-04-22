@@ -125,7 +125,7 @@ void WindowSetIcon(Window *window, const char *filepath)
 {
     SDL_Surface *win_icon = SDL_LoadBMP(filepath);
     if (!win_icon)
-        log_error("Could not load win_icon: [%s]", filepath);
+        log_error("Could not load window icon: [%s]", filepath);
     SDL_SetWindowIcon(window->sdl_window, win_icon);
     if (win_icon)
         SDL_FreeSurface(win_icon);
