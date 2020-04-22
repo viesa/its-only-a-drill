@@ -8,6 +8,7 @@
 Player PlayerCreate(Camera *camera)
 {
     Player ret;
+    ret.walkAnim = AnimCreate(AN_PlayerWalk, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
     ret.aimFollow = Vec2Create(0.0f, 0.0f);
     ret.forward = Vec2Create(1.0f, 0.0f);
     return ret;
@@ -15,6 +16,27 @@ Player PlayerCreate(Camera *camera)
 
 void PlayerUpdate(Player *player, Entity *entity, Input *input, Clock *clock, Camera *camera)
 {
+    AnimUpdate(&player->walkAnim, ClockGetDeltaTime(clock));
+    if (!InputIsKeyDown(input, SDL_SCANCODE_A) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_W) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_D) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_S) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_LEFT) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_UP) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_RIGHT) &&
+        !InputIsKeyDown(input, SDL_SCANCODE_DOWN))
+    {
+        AnimStop(&player->walkAnim);
+    }
+    else
+    {
+        AnimResume(&player->walkAnim);
+    }
+    Drawable *a = player->walkAnim.active;
+    entity->drawable.dst.w = a->dst.w * 1.5f;
+    entity->drawable.dst.h = a->dst.h * 1.5f;
+    entity->drawable.src = a->src;
+    entity->drawable.spriteSheet = a->spriteSheet;
 
     int pos_x = 0;
     int pos_y = 0;

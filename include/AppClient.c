@@ -72,8 +72,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 #endif
     app->entityManager = EntityManagerCreate();
     EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){50, 50}, EntityWoman, 0));
-    EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){300, 0}, EntityWoman, 1));
-    EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){500, 0}, EntityWoman, 2));
+    for (int i = 1; i < 10; i++)
+        EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){100 * i, 0}, EntityWoman, i));
     app->entityManager.entities[0].entityState = EntityPlayer;
 
 #ifdef DEGBUG
@@ -318,9 +318,10 @@ void AppClientDraw(AppClient *app)
                 EntityDraw(app->camera, &app->map.contents[i]);
 
         UpdateItemDraw(&app->entityManager.entities[0].inventory, &app->groundListItems, app->camera);
-        EntityDraw(app->camera, &app->entityManager.entities[0]);
-        EntityDraw(app->camera, &app->entityManager.entities[1]);
-        EntityDraw(app->camera, &app->entityManager.entities[2]);
+
+        for (int i = 0; i < app->entityManager.nrEntities; i++)
+            EntityDraw(app->camera, &app->entityManager.entities[i]);
+
         GuiUpdate(app->gui);
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
