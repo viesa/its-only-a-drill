@@ -51,8 +51,8 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
             char buffer[MAX_MSGLEN];
             SDL_memcpy(buffer, pack->data, pack->len);
             UDPpacket p = *pack;
-            p.data = buffer;
-            switch (UDPPackageDecode(pack->data))
+            p.data = (Uint8 *)buffer;
+            switch (UDPPackageDecode((char *)pack->data))
             {
             case UDPTypeText:
                 UDPPackageRemoveType(&p);
@@ -99,8 +99,8 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                 char buffer[MAX_MSGLEN];
                 SDL_memcpy(buffer, server->pack->data, server->pack->len);
                 UDPpacket p = *server->pack;
-                p.data = buffer;
-                switch (UDPPackageDecode(server->pack->data))
+                p.data = (Uint8 *)buffer;
+                switch (UDPPackageDecode((char *)server->pack->data))
                 {
                 case UDPTypeText:
                     UDPPackageRemoveType(&p);
@@ -145,8 +145,8 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
         char buffer[MAX_MSGLEN];
         SDL_memcpy(buffer, pack->data, server->pack->len);
         UDPpacket p = *pack;
-        p.data = buffer;
-        switch (UDPPackageDecode(pack->data))
+        p.data = (Uint8 *)buffer;
+        switch (UDPPackageDecode((char *)pack->data))
         {
         case UDPTypeText:
             UDPPackageRemoveType(&p);
@@ -228,8 +228,8 @@ int UDPServerListen(UDPServer *server, int maxLen)
     char buffer[MAX_MSGLEN];
     SDL_memcpy(buffer, server->pack->data, server->pack->len);
     UDPpacket p = *server->pack;
-    p.data = buffer;
-    switch (UDPPackageDecode(server->pack->data))
+    p.data = (Uint8 *)buffer;
+    switch (UDPPackageDecode((char *)server->pack->data))
     {
     case UDPTypeText:
         UDPPackageRemoveType(&p);
