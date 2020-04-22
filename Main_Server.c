@@ -2,7 +2,6 @@
 #include <SDL2/SDL_net.h>
 #include "include/core/Event.h"
 #include "include/net_UDP/UDPServer.h"
-#define DEGBUG
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
