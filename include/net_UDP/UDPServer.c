@@ -45,7 +45,7 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
             {
                 printf("%c", pack->data[i]);
             }
-            printf(", %x:%x\n", pack->address.host, pack->address.port);
+            printf(", %d:%d\n", pack->address.host, pack->address.port);
 #endif
 #ifndef RAWINOUT
             char buffer[MAX_MSGLEN];
@@ -56,16 +56,16 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
             {
             case UDPTypeText:
                 UDPPackageRemoveType(&p);
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
                 break;
             case UDPTypeint:
                 UDPPackageRemoveTypeNULL(&p);
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
                 break;
             case UDPTypeEntity:
                 UDPPackageRemoveTypeNULL(&p);
                 Entity *e = (Entity *)p.data;
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
                 break;
             }
 #endif
@@ -93,7 +93,7 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                 {
                     printf("%c", pack->data[i]);
                 }
-                printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+                printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
 #endif
 #ifndef RAWINOUT
                 char buffer[MAX_MSGLEN];
@@ -104,16 +104,16 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                 {
                 case UDPTypeText:
                     UDPPackageRemoveType(&p);
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
                     break;
                 case UDPTypeint:
                     UDPPackageRemoveTypeNULL(&p);
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
                     break;
                 case UDPTypeEntity:
                     UDPPackageRemoveTypeNULL(&p);
                     Entity *e = (Entity *)p.data;
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
                     break;
                 }
 #endif
@@ -139,7 +139,7 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
         {
             printf("%c", pack->data[i]);
         }
-        printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+        printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
 #endif
 #ifndef RAWINOUT
         char buffer[MAX_MSGLEN];
@@ -150,16 +150,16 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
         {
         case UDPTypeText:
             UDPPackageRemoveType(&p);
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
             break;
         case UDPTypeint:
             UDPPackageRemoveTypeNULL(&p);
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
             break;
         case UDPTypeEntity:
             UDPPackageRemoveTypeNULL(&p);
             Entity *e = (Entity *)p.data;
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
             break;
         }
 #endif
@@ -213,7 +213,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
 #ifdef DEGBUG
     printf("\nPlayer list\n");
     for (int i = 0; i < server->nrPlayers; i++)
-        printf("(host:port): %x:%x\n", server->players[i].ip.host, server->players[i].ip.port);
+        printf("(host:port): %d:%d\n", server->players[i].ip.host, server->players[i].ip.port);
     printf("length of list %d\n", server->nrPlayers);
     printf("End of player list\n\n");
 #ifdef RAWINOUT
@@ -222,7 +222,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
         printf("%c", server->pack->data[i]);
     }
-    printf(", %x:%x\n", server->pack->address.host, server->pack->address.port);
+    printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
 #endif
 #ifndef RAWINOUT
     char buffer[MAX_MSGLEN];
@@ -233,16 +233,16 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
     case UDPTypeText:
         UDPPackageRemoveType(&p);
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) %s, %x:%x\n", (char *)p.data, p.address.host, p.address.port);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
         break;
     case UDPTypeint:
         UDPPackageRemoveTypeNULL(&p);
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(INT) %d, %x:%x\n", *(int *)p.data, p.address.host, p.address.port);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
         break;
     case UDPTypeEntity:
         UDPPackageRemoveTypeNULL(&p);
         Entity *e = (Entity *)p.data;
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %x:%x\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
         break;
     }
 #endif

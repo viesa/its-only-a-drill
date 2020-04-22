@@ -1,7 +1,7 @@
 #include "include/core/Event.h"
 
 #include "include/core/AppClient.h"
-
+//#define DEGBUG
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
@@ -9,8 +9,12 @@ int main()
     Clock *m_clock = ClockCreate();
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
-    UDPClient m_client = UDPClientCreate("drill.pierrelf.com", 1337); //drill.pierrelf.com port 1337
-    //UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
+#ifndef DEGBUG
+    UDPClient m_client = UDPClientCreate("85.226.160.126", 1337); //drill.pierrelf.com port 1337
+#endif
+#ifdef DEGBUG
+    UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
+#endif
     AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_FPS);
 
     while (m_running)
