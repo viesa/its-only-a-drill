@@ -3,12 +3,14 @@
 
 #include "core/Entity.h"
 #include "core/Input.h"
+#include "core/Anim.h"
 #include "math/Vec2.h"
 
 #define RADIUS 25
 
 typedef struct Player
 {
+    Anim walkAnim;
     Vec2 aimFollow;
     Vec2 forward;
 } Player;

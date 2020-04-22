@@ -11,23 +11,36 @@ typedef enum AnimType
     AN_Count
 } AnimType;
 
+typedef enum AnimRepeatOption
+{
+    ANRO_NoRepeat,
+    ANRO_RepeatFromStart,
+    ANRO_RepeatFromEnd,
+    ANRO_Count
+} AnimRepeatOption;
+
 typedef struct Anim
 {
     Drawable *active;
     Drawable frames[MAX_FRAMES];
+    AnimRepeatOption anro;
     int currentFrame;
     int nFrames;
+    int startFrame;
     float delta;
     float currDelta;
     SDL_bool isPaused;
+    SDL_bool isForward;
 } Anim;
 
-Anim AnimCreate(AnimType animType, float delta);
+Anim AnimCreate(AnimType animType, AnimRepeatOption anro, SpriteSheet spriteSheet, int startFrame, float delta);
 
 void AnimUpdate(Anim *anim, float dt);
 void AnimDraw(Anim *anim, Camera *camera);
 
 void AnimPause(Anim *anim);
 void AnimResume(Anim *anim);
+
+void AnimStop(Anim *anim);
 
 #endif

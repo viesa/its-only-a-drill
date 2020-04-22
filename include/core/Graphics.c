@@ -76,10 +76,10 @@ Graphics *GraphicsCreate()
         log_warn("Could not load spritesheet_characters.png");
     gfx_ret->m_allTextures[SS_Characters] = texture;
 
-    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/characters-and-props.png");
+    texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/character_prisoner.png");
     if (!texture)
-        log_warn("Could not load characters-and-props.png");
-    gfx_ret->m_allTextures[SS_Characters_Props] = texture;
+        log_warn("Could not load character_prisoner.png");
+    gfx_ret->m_allTextures[SS_Character_Prisoner] = texture;
 
     texture = IMG_LoadTexture(gfx_ret->m_renderer, "docs/spritesheets/old/tools.png");
     if (!texture)
