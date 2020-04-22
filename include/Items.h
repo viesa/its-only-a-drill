@@ -31,6 +31,7 @@ typedef struct Item
     Vec2 postion;
     int picked;
     WeaponStats Stats;
+    int equiped;
 } Item;
 
 ////Lista med items som ligger i invemtory
