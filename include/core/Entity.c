@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 //#define DegBug
-#define FrictionMode 
+#define FrictionMode
 
 Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
 {
@@ -85,8 +85,8 @@ Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
 
     // Garante stop Cause float
     entity.Velosity = Vec2DivL(entity.Force, entity.mass);
-    entity.Velosity.x = (fabs(entity.Velosity.x) < 5.1f) ? 0 : entity.Velosity.x;
-    entity.Velosity.y = (fabs(entity.Velosity.y) < 5.1f) ? 0 : entity.Velosity.y;
+    entity.Velosity.x = (fabs(entity.Velosity.x) < 6.1f) ? 0 : entity.Velosity.x;
+    entity.Velosity.y = (fabs(entity.Velosity.y) < 6.1f) ? 0 : entity.Velosity.y;
 
     return entity;
 }

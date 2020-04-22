@@ -1,18 +1,29 @@
-#include "behavior.h"
+#include "Behavior.h"
 #include "Entity.h"
 #include <stdio.h>
 
-void moveEntity(Entity entities[])
+#define addmove 1500.0f
+#define moxsize 50
+
+void BehaviorMoveEntity(Entity entities[])
 {
-    for (int i = 0; i < 3; i++)
+    float axis_x1 = 200;
+    float axis_y1 = 200;
+
+    float axis_x2 = -200;
+    float axis_y2 = -200;
+
+    SDL_Rect box1, box2;
+    box1 = (SDL_Rect){(int)axis_x1 - moxsize, (int)axis_y1 - moxsize, moxsize, moxsize};
+    box2 = (SDL_Rect){(int)axis_x2 - moxsize, (int)axis_y2 - moxsize, moxsize, moxsize};
+    for (int i = 0; i < 2; i++)
     {
         switch (entities[i].entityState)
         {
         case GoForward:
         {
-            Vec2 nextPoint = Vec2Create(entities[i].position.x + 1000, entities[i].position.y);
-            entities[i].Force.x += 500;
-            if (entities[i].position.x == nextPoint.x)
+            entities[i] = BehaviorMoveToPoint(entities[i], axis_x1, axis_y1);
+            if (SDL_HasIntersection(&entities[i].drawable.dst, &box1))
             {
                 entities[i].entityState = GoBack;
             }
@@ -21,9 +32,8 @@ void moveEntity(Entity entities[])
 
         case GoBack:
         {
-            Vec2 backPoint = Vec2Create(entities[i].position.x - 1000, entities[i].position.y);
-            entities[i].Force.x -= 500;
-            if (entities[i].position.x == backPoint.x)
+            entities[i] = BehaviorMoveToPoint(entities[i], axis_x2, axis_y2);
+            if (SDL_HasIntersection(&entities[i].drawable.dst, &box2))
             {
                 entities[i].entityState = GoForward;
             }
@@ -35,20 +45,17 @@ void moveEntity(Entity entities[])
         default:
             break;
         }
-        // Vec2 nextPoint = Vec2Create(entities[i].position.x + 1000, entities[i].position.y + 1000);
-        // Vec2 enemyVec = Vec2Sub(nextPoint, entities[i].position);
-        // Vec2 unitenemyVec = Vec2Unit(enemyVec);
-        // Vec2 enemyMovement = Vec2MulL(unitenemyVec, (float)500 );
-        // entities[i].Force.x += enemyMovement.x;
-        // entities[i].Force.y += enemyMovement.y;
     }
 }
 
-// void moveEntityFrom(Entity entities[])
-// {
-//     for (size_t i = 0; i < count; i++)
-//     {
-//         /* code */
-//     }
-
-// }
+Entity BehaviorMoveToPoint(Entity entity, float x, float y)
+{
+    float MovementSpeed = 900.0f;
+    Vec2 nextPoint = Vec2Create(x, y);
+    Vec2 enemyVec = Vec2Sub(nextPoint, RectMid(entity.drawable.dst));
+    Vec2 unitenemyVec = Vec2Unit(enemyVec);
+    Vec2 enemyMovement = Vec2MulL(unitenemyVec, MovementSpeed);
+    entity.Force.x += enemyMovement.x;
+    entity.Force.y += enemyMovement.y;
+    return entity;
+}

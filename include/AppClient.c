@@ -1,9 +1,11 @@
 #include "core/AppClient.h"
 #include "Items.h"
 #include "Player.h"
+#include "./core/Behavior.h"
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
+#include "core/Behavior.h"
 //#define DEGBUG
 #define MaxEntities 5
 struct AppClient
@@ -70,6 +72,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->entities[0] = EntityCreate((Vec2){50, 50}, EntityWoman, 0);
     app->entities[0].Force.x = 500;
     app->entities[0].Force.y = 800;
+    app->entities[0].entityState = EntityPlayer;
     app->entities[1] = EntityCreate((Vec2){300, 0}, EntityWoman, 1);
     app->entities[2] = EntityCreate((Vec2){500, 0}, EntityWoman, 2);
 #ifdef DEGBUG
@@ -244,7 +247,7 @@ void AppClientUpdate(AppClient *app)
                 playerShoot(&app->entities[0], app->camera, app->entities, app->entities[0].inventory.contents[app->entities[0].inventory.top - 1]);
             }
         }
-
+        BehaviorMoveEntity(app->entities);
         PlayerUpdate(&app->player, &app->entities[0], app->input, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate
