@@ -1,12 +1,12 @@
 #include "core/AppClient.h"
 #include "Items.h"
 #include "Player.h"
-#include "./core/behavior.h"
+#include "./core/Behavior.h"
 #include "Map.h"
 #include "MapList.h"
 #include "core/Weapon.h"
-#include "core/behavior.h"
-#define DEGBUG
+#include "core/Behavior.h"
+//#define DEGBUG
 #define MaxEntities 5
 struct AppClient
 {
