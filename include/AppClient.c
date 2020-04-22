@@ -118,7 +118,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 void AppClientDestroy(AppClient *app)
 {
     app->client->isActive = SDL_FALSE;
-    UDPClientDestroy(app->client);
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
@@ -231,6 +230,24 @@ void AppClientUpdate(AppClient *app)
             }
         }
 
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_3))
+        {
+            log_info("You Pressed 3");
+            InventorySelectItem(&app->entityManager.entities[0].inventory, 3);
+        }
+
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_4))
+        {
+            log_info("You Pressed 4");
+            InventorySelectItem(&app->entityManager.entities[0].inventory, 4);
+        }
+
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_5))
+        {
+            log_info("You Pressed 5");
+            InventorySelectItem(&app->entityManager.entities[0].inventory, 5);
+        }
+
         if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
@@ -305,10 +322,14 @@ void AppClientDraw(AppClient *app)
         EntityDraw(app->camera, &app->entityManager.entities[1]);
         EntityDraw(app->camera, &app->entityManager.entities[2]);
         GuiUpdate(app->gui);
+
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            InventoryDisplay(app->gfx, app->camera, &app->entityManager.entities[0].inventory, app->entityManager.entities[0].position);
+            InventoryDisplay(app->gfx, &app->entityManager.entities[0].inventory);
         }
+
+        InventoryDisplayEquiped(app->gfx, &app->entityManager.entities[0].inventory, app->entityManager.entities[0].position);
+
         GraphicsChangeCursor(app->gfx, CU_Crossair);
         break;
     }
