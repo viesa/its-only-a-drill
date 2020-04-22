@@ -8,8 +8,8 @@
 Window *WindowCreate(const char *title)
 {
     Window *window = (Window *)SDL_malloc(sizeof(Window));
-    window->title = (char *)SDL_malloc(sizeof(char) * strlen(title));
-    strcpy(window->title, title);
+    window->title = NULL;
+    WindowSetTitle(window, title);
     window->width = 720;
     window->height = 480;
     SDL_DisplayMode displaymode;
@@ -108,7 +108,8 @@ void WindowSetFullscreen(Window *window, SDL_bool onoff)
 
 void WindowSetTitle(Window *window, const char *title)
 {
-    SDL_free(window->title);
+    if (window->title)
+        SDL_free(window->title);
     window->title = (char *)SDL_malloc(sizeof(char) * strlen(title));
     strcpy(window->title, title);
     SDL_SetWindowTitle(window->sdl_window, window->title);
