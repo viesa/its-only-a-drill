@@ -7,8 +7,16 @@ EntityManager EntityManagerCreate()
 }
 void EntityManagerAdd(EntityManager *m, Entity ent)
 {
-    m->nrEntities++;
-    m->entities = (Entity *)SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
+    if (m->nrEntities == 0)
+    {
+        m->entities = (Entity *)SDL_malloc(sizeof(Entity));
+        m->nrEntities++;
+    }
+    else
+    {
+        m->nrEntities++;
+        m->entities = (Entity *)SDL_realloc(m->entities, sizeof(Entity) * m->nrEntities);
+    }
     m->entities[m->nrEntities - 1] = ent;
 }
 void EntityManagerRemove(EntityManager *m, int index)
