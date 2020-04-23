@@ -10,7 +10,7 @@ Clock *ClockCreate()
 {
     Clock *clock_ret = MALLOC(Clock);
     clock_ret->m_delta = 0;
-    clock_ret->m_lastTickTime = 0;
+    clock_ret->m_lastTickTime = SDL_GetTicks();
     return clock_ret;
 }
 void ClockDestroy(Clock *clock)

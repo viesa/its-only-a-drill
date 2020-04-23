@@ -1,6 +1,6 @@
 #include "Cursor.h"
 
-struct Cursor
+struct
 {
     CursorType type;
     SDL_Cursor *sdl_cursor;

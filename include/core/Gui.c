@@ -25,7 +25,7 @@ void GuiUpdate(Gui *gui)
 {
     GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
     GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, gui->font->gfx->window->height / 5 * 4, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
-    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->height / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
+    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
     GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){gui->font->gfx->window->width / 5 * 4, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //if (rand() % 30 < 3)

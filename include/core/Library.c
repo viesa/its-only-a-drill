@@ -9,3 +9,16 @@ double toDegrees(double radians)
 {
     return (radians * 180) / PI_D;
 }
+
+float Clamp(float val, float low, float high)
+{
+    if (val < low)
+    {
+        val = low;
+    }
+    else if (val > high)
+    {
+        val = high;
+    }
+    return val;
+}

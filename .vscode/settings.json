@@ -41,6 +41,7 @@
                 "array": "c",
                 "string": "c",
                 "utility": "c",
-                "vector": "c"
+                "vector": "c",
+                "transition.h": "c"
         }
 }

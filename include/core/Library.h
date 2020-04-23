@@ -32,4 +32,6 @@ Vec2 RectMid(SDL_Rect rect);
 
 double toDegrees(double radians);
 
+float Clamp(float val, float low, float high);
+
 #endif
