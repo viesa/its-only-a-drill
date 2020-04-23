@@ -8,8 +8,8 @@
 Window *WindowCreate(const char *title)
 {
     Window *window = (Window *)SDL_malloc(sizeof(Window));
-    window->title = (char *)SDL_malloc(sizeof(char) * strlen(title));
-    strcpy(window->title, title);
+    window->title = NULL;
+    WindowSetTitle(window, title);
     window->width = 720;
     window->height = 480;
     SDL_DisplayMode displaymode;
@@ -108,7 +108,8 @@ void WindowSetFullscreen(Window *window, SDL_bool onoff)
 
 void WindowSetTitle(Window *window, const char *title)
 {
-    SDL_free(window->title);
+    if (window->title)
+        SDL_free(window->title);
     window->title = (char *)SDL_malloc(sizeof(char) * strlen(title));
     strcpy(window->title, title);
     SDL_SetWindowTitle(window->sdl_window, window->title);
@@ -125,7 +126,7 @@ void WindowSetIcon(Window *window, const char *filepath)
 {
     SDL_Surface *win_icon = SDL_LoadBMP(filepath);
     if (!win_icon)
-        log_error("Could not load win_icon: [%s]", filepath);
+        log_error("Could not load window icon: [%s]", filepath);
     SDL_SetWindowIcon(window->sdl_window, win_icon);
     if (win_icon)
         SDL_FreeSurface(win_icon);
