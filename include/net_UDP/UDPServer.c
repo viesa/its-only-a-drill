@@ -67,6 +67,9 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
                 Entity *e = (Entity *)p.data;
                 printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
                 break;
+            default:
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) %s, %d:%d\n", p.data, p.address.host, p.address.port);
+                break;
             }
 #endif
         }
@@ -114,6 +117,9 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                     UDPPackageRemoveTypeNULL(&p);
                     Entity *e = (Entity *)p.data;
                     printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+                    break;
+                default:
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) %s, %d:%d\n", p.data, p.address.host, p.address.port);
                     break;
                 }
 #endif
@@ -244,6 +250,9 @@ int UDPServerListen(UDPServer *server, int maxLen)
         UDPPackageRemoveTypeNULL(&p);
         Entity *e = (Entity *)p.data;
         printf("PARSED IN(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+        break;
+    default:
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(DEFAULT) %s, %d:%d\n", p.data, p.address.host, p.address.port);
         break;
     }
 #endif

@@ -47,6 +47,31 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     return entity;
 }
 
+CompressedEntity EntityCompress(Entity ent)
+{
+    CompressedEntity comp;
+    comp.health = ent.health;
+    comp.id = ent.id;
+    comp.position = ent.position;
+    comp.type = ent.type;
+    return comp;
+}
+Entity EntityUnCompress(CompressedEntity comp)
+{
+    Entity ent;
+    ent.health = comp.health;
+    ent.id = comp.id;
+    ent.position = comp.position;
+    ent.type = comp.type;
+    return ent;
+}
+void EntityAddCompressed(CompressedEntity comp, Entity *ent)
+{
+    ent->health = comp.health;
+    ent->id = comp.id;
+    ent->position = comp.position;
+    ent->type = comp.type;
+}
 void EntityDraw(Entity *entity, Camera *camera)
 {
     for (int i = 0; i < entity->nDrawables; i++)

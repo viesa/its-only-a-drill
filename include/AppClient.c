@@ -245,7 +245,8 @@ void AppClientUpdate(AppClient *app)
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->entityManager, app->clock);
 
-        UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
+        CompressedEntity sendCompressedEntity = EntityCompress(app->entityManager->entities[0]);
+        UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;

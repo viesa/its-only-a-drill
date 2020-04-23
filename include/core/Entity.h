@@ -28,7 +28,13 @@ typedef enum entityState
     // used only for player so that the player can take control
     EntityPlayer
 } EntityState;
-
+typedef struct CompressedEntity
+{
+    EntityType type;
+    Vec2 position;
+    int health;
+    int id;
+} CompressedEntity;
 typedef struct Entity
 {
     EntityType type;
@@ -58,6 +64,12 @@ typedef struct Entity
 ///Creates a entity
 ///\param type: what entity is being created
 Entity EntityCreate(Vec2 position, EntityType type, int id);
+
+CompressedEntity EntityCompress(Entity ent);
+
+Entity EntityUnCompress(CompressedEntity ent);
+
+void EntityAddCompressed(CompressedEntity comp, Entity *ent);
 
 void EntityDraw(Entity *entity, Camera *camera);
 

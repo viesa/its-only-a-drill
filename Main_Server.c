@@ -34,6 +34,14 @@ int main()
             UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, m_server.pack->len - 2);
             SDLNet_FreePacket(m_server.pack);
         }
+        if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeCompressedEntity)
+        {
+            UDPPackageRemoveTypeNULL(m_server.pack);
+            char buffer[m_server.pack->len - 2];
+            SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
+            UDPServerBroadcast(&m_server, UDPTypeCompressedEntity, m_server.pack->address, buffer, m_server.pack->len - 2);
+            SDLNet_FreePacket(m_server.pack);
+        }
     }
     UDPServerDestroy(&m_server);
     SDL_Quit();

@@ -15,21 +15,42 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             UDPPackageRemoveTypeNULL(client->pack);
             Entity ent;
             SDL_memcpy(&ent, client->pack->data, client->pack->len);
-            client->hasPacket = SDL_FALSE;
-            SDL_bool exist = SDL_FALSE;
+            SDL_bool exist1 = SDL_FALSE;
 
             for (int i = 11; i < entityManager->highestIndex; i++)
             {
                 if (entityManager->entities[i].id == ent.id) //entity exists
                 {
-                    exist = SDL_TRUE;
+                    exist1 = SDL_TRUE;
                     entityManager->entities[i] = ent;
                 }
             }
-            if (!exist) //entity doesnt exist, allocate
+            if (!exist1) //entity doesnt exist, allocate
             {
                 Entity *e = EntityManagerAdd(entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
                 *e = ent;
+                mgr->players[mgr->nrPlayers] = e;
+                mgr->nrPlayers++;
+            }
+            break;
+        case UDPTypeCompressedEntity:
+            UDPPackageRemoveTypeNULL(client->pack);
+            CompressedEntity comp;
+            SDL_memcpy(&comp, client->pack->data, sizeof(CompressedEntity));
+            SDL_bool exist2 = SDL_FALSE;
+
+            for (int i = 11; i < entityManager->highestIndex; i++)
+            {
+                if (entityManager->entities[i].id == comp.id) //entity exists
+                {
+                    exist2 = SDL_TRUE;
+                    EntityAddCompressed(comp, &entityManager->entities[i]);
+                }
+            }
+            if (!exist2) //entity doesnt exist, allocate
+            {
+                Entity *e = EntityManagerAdd(entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
+                EntityAddCompressed(comp, e);
                 mgr->players[mgr->nrPlayers] = e;
                 mgr->nrPlayers++;
             }
