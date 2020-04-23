@@ -51,15 +51,15 @@ void ListenToServer(void *args)
         UDPClientListen(client, MAX_MSGLEN);
     }
 }
-void UpdateFromServer(void *args)
-{
-    AppClient *app = (AppClient *)args;
-    while (app->client->isActive)
-    {
-        //SDL_Delay(5);
-        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
-    }
-}
+// void UpdateFromServer(void *args)
+// {
+//     AppClient *app = (AppClient *)args;
+//     while (app->client->isActive)
+//     {
+//         //SDL_Delay(5);
+//         UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
+//     }
+// }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
 {
 
@@ -95,10 +95,10 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
             UDPPackageRemoveTypeNULL(app->client->pack);
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
             app->player.entity->id = *(int *)app->client->pack->data;
-            app->client->hasPacket = SDL_FALSE;
+            app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
         }
     }
-    app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
+    //app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
     for (int i = 1; i < 10; i++)
     {
         Entity *npc = EntityManagerAdd(app->entityManager, ET_Woman, Vec2Create(100.0f * i, 0.0f));
@@ -106,12 +106,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     }
     app->player.entity->entityState = EntityPlayer;
 
-#ifdef APP_DEBUG
-    for (int i = 1; i < app->entityManager->highestIndex; i++)
-    {
-        app->entityManager->entities[i].id = 0;
-    }
-#endif
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
@@ -236,16 +230,17 @@ void AppClientUpdate(AppClient *app)
             // if there is ammo in ur weapon shoot
             if (app->player.entity->inventory.contents[app->player.entity->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(&app->entityManager->entities[0], app->camera, app->entityManager->entities, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, app->entityManager->entities, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
             }
         }
         BehaviorMoveEntity(app->entityManager);
         PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->entityManager, app->clock);
 
-        CompressedEntity sendCompressedEntity = EntityCompress(app->entityManager->entities[0]);
+        CompressedEntity sendCompressedEntity = EntityCompress(*app->player.entity);
         UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;

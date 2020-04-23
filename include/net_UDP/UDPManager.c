@@ -17,7 +17,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             SDL_memcpy(&ent, client->pack->data, client->pack->len);
             SDL_bool exist1 = SDL_FALSE;
 
-            for (int i = 11; i < entityManager->highestIndex; i++)
+            for (int i = 0; i < entityManager->highestIndex; i++)
             {
                 if (entityManager->entities[i].id == ent.id) //entity exists
                 {
@@ -39,7 +39,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             SDL_memcpy(&comp, client->pack->data, sizeof(CompressedEntity));
             SDL_bool exist2 = SDL_FALSE;
 
-            for (int i = 11; i < entityManager->highestIndex; i++)
+            for (int i = 0; i < entityManager->highestIndex; i++)
             {
                 if (entityManager->entities[i].id == comp.id) //entity exists
                 {
