@@ -1,7 +1,7 @@
 #include "Player.h"
 
+#include <stdlib.h>
 #include <SDL2/SDL_mouse.h>
-#include <stdio.h>
 
 #include "core/Library.h"
 
@@ -35,11 +35,8 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     {
         AnimStop(&player->leg);
         AnimPause(&player->body);
-        int randomNumber = rand() % 100;
-        if (randomNumber < 3)
-        {
+        if (rand() % 100 < 3)
             AnimRandomFrame(&player->body);
-        }
     }
     else
     {
