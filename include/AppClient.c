@@ -94,7 +94,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
-            app->entityManager->entities[0].id = *(int *)app->client->pack->data;
+            app->player.entity->id = *(int *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE;
         }
     }
@@ -179,13 +179,13 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
         { // if player is near to the item, then take it!
-            if (app->entityManager->entities[0].inventory.top < MAX_PLYER_ITEMS)
+            if (app->player.entity->inventory.top < MAX_PLYER_ITEMS)
             {
                 for (int tmp = 0; tmp < 2; tmp++)
                 {
-                    if (SDL_HasIntersection(&app->entityManager->entities[0].drawables[0].dst, &app->groundListItems.contents[tmp].drawable.dst))
+                    if (SDL_HasIntersection(&app->player.entity->drawables[0].dst, &app->groundListItems.contents[tmp].drawable.dst))
                     {
-                        ItemPickup(&app->entityManager->entities[0].inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
+                        ItemPickup(&app->player.entity->inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
                         log_info("you picked up an item. \n");
                     }
                 }
@@ -198,9 +198,9 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
         {
-            if (app->entityManager->entities[0].inventory.top > 1) // can't drop the knife
+            if (app->player.entity->inventory.top > 1) // can't drop the knife
             {
-                ItemDrop(&app->groundListItems, &app->entityManager->entities[0].inventory, app->entityManager->entities[0].position);
+                ItemDrop(&app->groundListItems, &app->player.entity->inventory, app->player.entity->position);
             }
         }
 
@@ -209,34 +209,34 @@ void AppClientUpdate(AppClient *app)
             if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
-                ItemDynamicDrop(&app->groundListItems, &app->entityManager->entities[0].inventory, app->entityManager->entities[0].position, 2);
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity->inventory, app->player.entity->position, 2);
             }
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_3))
         {
             log_info("You Pressed 3");
-            InventorySelectItem(&app->entityManager->entities[0].inventory, 3);
+            InventorySelectItem(&app->player.entity->inventory, 3);
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_4))
         {
             log_info("You Pressed 4");
-            InventorySelectItem(&app->entityManager->entities[0].inventory, 4);
+            InventorySelectItem(&app->player.entity->inventory, 4);
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_5))
         {
             log_info("You Pressed 5");
-            InventorySelectItem(&app->entityManager->entities[0].inventory, 5);
+            InventorySelectItem(&app->player.entity->inventory, 5);
         }
 
         if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
-            if (app->entityManager->entities[0].inventory.contents[app->entityManager->entities[0].inventory.top - 1].Stats.ammo > 0)
+            if (app->player.entity->inventory.contents[app->player.entity->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(&app->entityManager->entities[0], app->camera, app->entityManager->entities, app->entityManager->entities[0].inventory.contents[app->entityManager->entities[0].inventory.top - 1]);
+                playerShoot(&app->entityManager->entities[0], app->camera, app->entityManager->entities, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
             }
         }
         BehaviorMoveEntity(app->entityManager);
@@ -291,7 +291,7 @@ void AppClientDraw(AppClient *app)
         CameraSetFollow(app->camera, &app->player.aimFollow);
         MapDraw(&app->map, app->camera);
 
-        UpdateItemDraw(&app->entityManager->entities[0].inventory, &app->groundListItems, app->camera);
+        UpdateItemDraw(&app->player.entity->inventory, &app->groundListItems, app->camera);
 
         for (int i = 0; i < app->entityManager->highestIndex; i++)
         {
