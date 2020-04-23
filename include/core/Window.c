@@ -1,16 +1,8 @@
 #include "Window.h"
-#include "Macros.h"
-#include <string.h>
-#include <SDL2/SDL_hints.h>
-
-#include "Macros.h"
-#include "Log.h"
 
 Window *WindowCreate(const char *title)
 {
-    Window *window = (Window *)SDL_malloc(sizeof(Window));
-    window->width = 720;
-    window->height = 480;
+    Window *window = MALLOC(Window);
     SDL_DisplayMode displaymode;
     SDL_GetCurrentDisplayMode(0, &displaymode);
 #ifdef WINDOW_DEBUG

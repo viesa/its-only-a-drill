@@ -1,11 +1,8 @@
 #ifndef JSON_H
 #define JSON_H
 
-#include <stdlib.h>
-#include <SDL2/SDL_bits.h>
-
+#include "Dependencies.h"
 #include "JSONParser.h"
-#include "Log.h"
 
 typedef struct JSON
 {

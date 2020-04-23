@@ -1,6 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include "core/Dependencies.h"
 #include "core/EntityManager.h"
 #include "core/JSON.h"
 

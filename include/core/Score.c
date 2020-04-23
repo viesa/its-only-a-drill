@@ -1,5 +1,4 @@
 #include "Score.h"
-#include <stdio.h>
 
 struct Score
 {

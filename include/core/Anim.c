@@ -1,6 +1,6 @@
 #include "Anim.h"
 
-#include <stdlib.h>
+#include "Dependencies.h"
 
 Anim AnimCreate(AnimType animType, AnimRepeatOption anro, SpriteSheet spriteSheet, int startFrame, float delta)
 {

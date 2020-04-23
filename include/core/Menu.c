@@ -1,11 +1,10 @@
 #include "Menu.h"
 
-#include "Log.h"
 #include "Library.h"
 
 Menu *MenuCreate(Graphics *gfx, EntityManager *entityManager, Font *font, State *state)
 {
-    Menu *menu = (Menu *)SDL_malloc(sizeof(Menu));
+    Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
     menu->entityManager = entityManager;
     menu->font = font;

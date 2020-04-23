@@ -1,9 +1,6 @@
 #include "Map.h"
 
-#include <string.h>
-
 #include "core/Library.h"
-#include "core/Log.h"
 
 Map MapCreate(JSON *mapdata, EntityManager *entityManager)
 {
@@ -66,7 +63,7 @@ Map MapCreate(JSON *mapdata, EntityManager *entityManager)
     }
     map.n = layers->u.integer;
 
-    map.contents = (Entity **)SDL_malloc(sizeof(Entity *) * map.n);
+    map.contents = MALLOC_N(Entity *, map.n);
     for (uint32_t i = 0; i < map.n; i++)
     {
         json_value *current = JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX, i}, 2);

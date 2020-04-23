@@ -3,7 +3,7 @@
 
 #define MAX_ENTITIES 5000
 
-#include <SDL2/SDL_bits.h>
+#include "Dependencies.h"
 
 #include "Entity.h"
 

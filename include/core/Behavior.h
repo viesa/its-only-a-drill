@@ -1,5 +1,7 @@
 #ifndef BEHAVIOR_H
 #define BEHAVIOR_H
+
+#include "Dependencies.h"
 #include "EntityManager.h"
 #include "../math/Vec2.h"
 #include "Library.h"

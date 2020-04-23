@@ -1,10 +1,8 @@
 #include "FPSManager.h"
 
-#include <SDL2/SDL_timer.h>
-
 FPSManager *FPSManagerCreate()
 {
-    FPSManager *fpsManager = (FPSManager *)SDL_malloc(sizeof(FPSManager));
+    FPSManager *fpsManager = MALLOC(FPSManager);
     fpsManager->startWait = 0;
     fpsManager->endWait = 0;
     fpsManager->desiredFPS = 60;

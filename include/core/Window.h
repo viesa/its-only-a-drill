@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <SDL2/SDL_render.h>
+#include "Dependencies.h"
 
 typedef struct Window
 {

@@ -2,7 +2,7 @@
 
 EntityManager *EntityManagerCreate()
 {
-    EntityManager *entityManager = (EntityManager *)SDL_malloc(sizeof(EntityManager));
+    EntityManager *entityManager = MALLOC(EntityManager);
     entityManager->highestIndex = 0;
     for (int i = 0; i < MAX_ENTITIES; i++)
     {

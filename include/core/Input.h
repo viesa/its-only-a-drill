@@ -1,8 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
-#include <SDL2/SDL_bits.h>
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_mouse.h>
+
+#include "Dependencies.h"
 
 #include "../math/Vec2.h"
 

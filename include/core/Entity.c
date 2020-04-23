@@ -1,5 +1,4 @@
 #include "Entity.h"
-#include <stdio.h>
 
 #define FrictionMode
 

@@ -11,7 +11,7 @@ struct Event
 
 Event *EventCreate(Input *input, SDL_bool *running)
 {
-    Event *event_ret = (Event *)SDL_malloc(sizeof(Event));
+    Event *event_ret = MALLOC(Event);
     event_ret->m_input = input;
     event_ret->m_running = running;
     return event_ret;

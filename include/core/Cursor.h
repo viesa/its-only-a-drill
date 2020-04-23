@@ -1,7 +1,7 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
-#include <SDL2/SDL_mouse.h>
+#include "Dependencies.h"
 
 typedef enum CursorType
 {

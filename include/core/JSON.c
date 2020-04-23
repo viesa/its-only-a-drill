@@ -17,7 +17,7 @@ JSON *JSONCreate(char *filename)
         return NULL;
     }
     file_size = filestatus.st_size;
-    file_contents = (char *)SDL_malloc(filestatus.st_size);
+    file_contents = MALLOC_N(char, filestatus.st_size);
 
     if (file_contents == NULL)
     {
@@ -42,7 +42,7 @@ JSON *JSONCreate(char *filename)
     }
     fclose(fp);
 
-    JSON *json = (JSON *)SDL_malloc(sizeof(JSON));
+    JSON *json = MALLOC(JSON);
 
     json->file_contents = (json_char *)file_contents;
     json->value = json_parse(json->file_contents, file_size);

@@ -1,7 +1,5 @@
 #include "Inventory.h"
 
-#include <stdio.h>
-
 void InventoryDisplay(Graphics *gfx, InventoryListItems *i)
 {
     Drawable backround = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, ((gfx->window->height * 0.5) - 75), 300, 150}, SS_Tiles);
@@ -43,7 +41,7 @@ void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerP
             //held.postion.x = 300;
             //held.postion.y = 500;
             //GraphicsDraw(gfx,held.drawable);
-            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 20,PlayerPos.y}));
+            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 20, PlayerPos.y}));
         }
     }
 }

@@ -1,5 +1,4 @@
 #include "core/AppClient.h"
-#include <time.h>
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
@@ -18,6 +17,7 @@ struct AppClient
     Audio *audio;
     Font *font;
     Gui *gui;
+    TransitionMgr *transitonMgr;
     Camera *camera;
     Clock *clock;
     FPSManager *fpsManager;
@@ -55,7 +55,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     srand(time(NULL));
     CursorInitialize();
 
-    AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
+    AppClient *app = MALLOC(AppClient);
     app->running = running;
     app->state = StateCreate();
     app->clock = clock;
@@ -64,6 +64,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
     app->gui = GuiCreate(app->font, app->clock);
+    app->transitonMgr = TransitionMgrCreate(app->gfx, app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
     app->entityManager = EntityManagerCreate();
@@ -129,6 +130,7 @@ void AppClientDestroy(AppClient *app)
 
     MenuDestroy(app->menu);
     GuiDestroy(app->gui);
+    TransitionMgrDestroy(app->transitonMgr);
     FontDestroy(app->font);
     SDL_free(app);
 }
@@ -293,6 +295,7 @@ void AppClientUpdate(AppClient *app)
     default:
         break;
     }
+    TransitionMgrUpdate(app->transitonMgr);
 }
 
 void AppClientDraw(AppClient *app)
@@ -341,6 +344,5 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
-
-    GraphicsDrawGradient(app->gfx, (SDL_Rect){0, 0, app->gfx->window->width, app->gfx->window->height}, (SDL_Color){20, 180, 184, 50}, (SDL_Color){200, 159, 227, 50});
+    TransitionMgrDraw(app->transitonMgr);
 }

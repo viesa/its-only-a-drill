@@ -1,9 +1,12 @@
 #ifndef C_GAME_H
 #define C_GAME_H
-#include "Macros.h"
+
+#include "Dependencies.h"
+
 #include "Clock.h"
 #include "FPSManager.h"
 #include "Gui.h"
+#include "Transition.h"
 #include "Camera.h"
 #include "Input.h"
 #include "Menu.h"
@@ -12,7 +15,6 @@
 #include "State.h"
 #include "EntityManager.h"
 #include "Cursor.h"
-#include "Log.h"
 #include "../net_UDP/UDPClient.h"
 
 typedef struct AppClient AppClient;

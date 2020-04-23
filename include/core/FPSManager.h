@@ -1,6 +1,8 @@
 #ifndef FPSMANAGER_H
 #define FPSMANAGER_H
 
+#include "Dependencies.h"
+
 typedef struct FPSManager
 {
     unsigned long startWait;

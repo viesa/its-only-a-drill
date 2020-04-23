@@ -1,9 +1,5 @@
 #include "Graphics.h"
 
-#include <SDL2/SDL_image.h>
-
-#include "Log.h"
-
 Graphics *GraphicsCreate()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -11,7 +7,7 @@ Graphics *GraphicsCreate()
         log_error("Could not initialize video: %s", SDL_GetError());
     }
 
-    Graphics *gfx = (Graphics *)SDL_malloc(sizeof(Graphics));
+    Graphics *gfx = MALLOC(Graphics);
 
     gfx->window = WindowCreate("It's only a drill");
     gfx->mapWidth = 2000;
@@ -64,7 +60,7 @@ void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
     GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
 }
 
-void GraphicsDrawGradient(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
 {
     //Current color channels
     float CurR = (float)start.r;
@@ -81,6 +77,34 @@ void GraphicsDrawGradient(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Col
     for (float x = rect.x; x < rect.x + rect.w; x++)
     {
         SDL_Rect drawRect = {x, rect.y, 1, rect.h};
+        SDL_SetRenderDrawColor(gfx->window->renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
+        SDL_RenderFillRect(gfx->window->renderer, &drawRect);
+
+        //Add an increment to the color channels
+        CurR += dR;
+        CurG += dG;
+        CurB += dB;
+        CurA += dA;
+    }
+}
+
+void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+{
+    //Current color channels
+    float CurR = (float)start.r;
+    float CurG = (float)start.g;
+    float CurB = (float)start.b;
+    float CurA = (float)start.a;
+
+    //Calculate delta increments for each color channel
+    float dR = (float)(end.r - start.r) / (float)(rect.h);
+    float dG = (float)(end.g - start.g) / (float)(rect.h);
+    float dB = (float)(end.b - start.b) / (float)(rect.h);
+    float dA = (float)(end.a - start.a) / (float)(rect.h);
+
+    for (float y = rect.y; y < rect.y + rect.h; y++)
+    {
+        SDL_Rect drawRect = {rect.x, y, rect.w, 1};
         SDL_SetRenderDrawColor(gfx->window->renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
         SDL_RenderFillRect(gfx->window->renderer, &drawRect);
 

@@ -1,7 +1,5 @@
 #include "Font.h"
 
-#include "Log.h"
-
 Font *FontCreate(Graphics *gfx)
 {
     if (TTF_Init() < 0)
@@ -9,7 +7,7 @@ Font *FontCreate(Graphics *gfx)
         log_error("Could not initialize fonts: %s", SDL_GetError());
     }
 
-    Font *font = (Font *)SDL_malloc(sizeof(Font));
+    Font *font = MALLOC(Font);
     font->gfx = gfx;
 
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size

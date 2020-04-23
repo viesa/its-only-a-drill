@@ -1,6 +1,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 
+#include "core/Dependencies.h"
 #include "core/Camera.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
@@ -49,7 +50,7 @@ typedef struct groundListItems
 
 Item ItemCreate(ItemType type, Vec2 postion);
 void ItemDraw(Camera *camera, Item *item, Vec2 position);
- //Draws items in invemtory
+//Draws items in invemtory
 void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos);
 //Draws the equiped item
 void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos);
@@ -63,6 +64,6 @@ void groundListAdd(GroundListItems *g, InventoryListItems *i);
 void inventoryPop(InventoryListItems *i);
 void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera);
 
-void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item); 
+void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item);
 
 #endif

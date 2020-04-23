@@ -8,7 +8,7 @@ struct Clock
 
 Clock *ClockCreate()
 {
-    Clock *clock_ret = (Clock *)SDL_malloc(sizeof(Clock));
+    Clock *clock_ret = MALLOC(Clock);
     clock_ret->m_delta = 0;
     clock_ret->m_lastTickTime = 0;
     return clock_ret;

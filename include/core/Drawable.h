@@ -1,6 +1,7 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
-#include <SDL2/SDL_rect.h>
+
+#include "Dependencies.h"
 #include "SpriteSheet.h"
 #include "../math/Vec2.h"
 

@@ -1,7 +1,5 @@
 #include "Camera.h"
 
-#include <SDL2/SDL_rect.h>
-
 struct Camera
 {
     Graphics *gfx;
@@ -13,7 +11,7 @@ struct Camera
 
 Camera *CameraCreate(Graphics *gfx, Vec2 *follow)
 {
-    Camera *ret = (Camera *)SDL_malloc(sizeof(Camera));
+    Camera *ret = MALLOC(Camera);
     ret->gfx = gfx;
     ret->m_follow = follow;
     ret->m_centerRotation = 0.0f;

@@ -1,7 +1,7 @@
 #include "UDPPackager.h"
 char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
 {
-    char *buffer = (char *)SDL_malloc(size + 2);
+    char *buffer = MALLOC_N(char, size + 2);
     switch (type)
     {
     case UDPTypeText:

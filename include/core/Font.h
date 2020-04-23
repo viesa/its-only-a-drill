@@ -1,9 +1,8 @@
 #ifndef FONTS_H
 #define FONTS_H
 
+#include "Dependencies.h"
 #include "Graphics.h"
-
-#include <SDL2/SDL_ttf.h>
 
 typedef enum FontSheet
 {

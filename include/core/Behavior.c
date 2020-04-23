@@ -1,5 +1,6 @@
 #include "Behavior.h"
-#include <stdio.h>
+
+#include "Dependencies.h"
 
 #define addmove 1500.0f
 #define moxsize 50

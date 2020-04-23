@@ -1,9 +1,5 @@
 #include "List.h"
 
-#include <string.h>
-
-#include <SDL2/SDL_system.h>
-
 void NodeDelete(Node *node)
 {
     SDL_free(node->data);
@@ -28,7 +24,7 @@ void ListDestroy(List *list)
 Node *ListPushFront(List *list, const void *data, const size_t size)
 {
     SDL_LockMutex(list->lock);
-    Node *add = (Node *)SDL_malloc(sizeof(Node));
+    Node *add = MALLOC(Node);
     add->prev = NULL;
     add->data = SDL_malloc(size);
     add->size = size;
@@ -52,7 +48,7 @@ Node *ListPushFront(List *list, const void *data, const size_t size)
 }
 Node *ListPushBack(List *list, const void *data, size_t size)
 {
-    Node *add = (Node *)SDL_malloc(sizeof(Node));
+    Node *add = MALLOC(Node);
     add->next = NULL;
     add->data = SDL_malloc(size);
     add->size = size;
@@ -165,7 +161,7 @@ Node *ListInsert(List *list, const void *data, size_t size, const size_t index)
             Node *hit = list->front;
             for (size_t i = 0; i != index; hit = hit->next, i++)
                 ;
-            Node *add = (Node *)SDL_malloc(sizeof(Node));
+            Node *add = MALLOC(Node);
             add->next = hit;
             add->prev = hit->prev;
             add->data = SDL_malloc(size);
@@ -243,13 +239,13 @@ size_t ListSearch(List *list, const void *key, const size_t size)
     if (list->len > 0)
     {
         size_t index = 0;
-        char *cmp1 = (char *)SDL_malloc(size + 1);
+        char *cmp1 = MALLOC_N(char, size + 1);
         SDL_memcpy(cmp1, key, size);
         cmp1[size] = 0;
 
         for (Node *node = list->front; node; node = node->next, index++)
         {
-            char *cmp2 = (char *)SDL_malloc(node->size + 1);
+            char *cmp2 = MALLOC_N(char, node->size + 1);
             SDL_memcpy(cmp2, node->data, size);
             cmp2[size] = 0;
 

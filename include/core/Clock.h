@@ -1,7 +1,7 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
-#include <SDL2/SDL_timer.h>
+#include "Dependencies.h"
 
 typedef struct Clock Clock;
 

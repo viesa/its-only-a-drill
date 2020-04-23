@@ -10,7 +10,7 @@ Client *ClientCreate(const char *ip, Uint16 port)
         return NULL;
     }
 
-    Client *ret = (Client *)SDL_malloc(sizeof(Client));
+    Client *ret = MALLOC(Client);
     ret->m_port = 0;
     ret->m_ip = NULL;
     ret->m_socketSet = SDLNet_AllocSocketSet(1);

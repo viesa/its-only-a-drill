@@ -1,6 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
-#include <SDL2/SDL_events.h>
+
+#include "Dependencies.h"
 #include "Input.h"
 
 typedef struct Event Event;

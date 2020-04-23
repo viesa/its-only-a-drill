@@ -1,6 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "Dependencies.h"
 #include "EntityManager.h"
 #include "Font.h"
 #include "Input.h"

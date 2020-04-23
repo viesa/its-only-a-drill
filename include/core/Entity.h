@@ -1,9 +1,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <float.h>
+#include "Dependencies.h"
 
-#include "Macros.h"
 #include "Camera.h"
 #include "Clock.h"
 #include "Library.h"
