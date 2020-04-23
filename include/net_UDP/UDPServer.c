@@ -188,6 +188,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
             {
                 if (strcmp((char *)server->pack->data, "0quit") == 0)
                 {
+                    UDPServerEcho(server, UDPTypeIPaddress, &server->players[i].ip, sizeof(IPaddress));
                     server->nrPlayers--;
                     for (int j = i; j < server->nrPlayers; j++)
                     {

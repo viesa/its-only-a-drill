@@ -1,7 +1,7 @@
 #include "UDPPackager.h"
 char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
 {
-    char *buffer = MALLOC_N(char, size + 2);
+    char *buffer = (char *)SDL_malloc(size + 2);
     switch (type)
     {
     case UDPTypeText:
@@ -16,6 +16,16 @@ char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
         break;
     case UDPTypeEntity:
         buffer[0] = '2';
+        buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
+        break;
+    case UDPTypeCompressedEntity:
+        buffer[0] = '3';
+        buffer[size + 2] = '\0';
+        SDL_memcpy(buffer + 1, data, size);
+        break;
+    case UDPTypeIPaddress:
+        buffer[0] = '4';
         buffer[size + 2] = '\0';
         SDL_memcpy(buffer + 1, data, size);
         break;
@@ -39,6 +49,10 @@ UDPPackageTypes UDPPackageDecode(char *data)
         return UDPTypeint;
     case '2':
         return UDPTypeEntity;
+    case '3':
+        return UDPTypeCompressedEntity;
+    case '4':
+        return UDPTypeIPaddress;
     default:
         return 400;
     }

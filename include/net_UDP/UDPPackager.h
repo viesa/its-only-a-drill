@@ -7,7 +7,9 @@ typedef enum UDPPackageTypes
 {
     UDPTypeText,
     UDPTypeint,
-    UDPTypeEntity
+    UDPTypeEntity,
+    UDPTypeCompressedEntity,
+    UDPTypeIPaddress
 } UDPPackageTypes;
 // Allocates a package like this "{type}{data}\0"
 char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size);

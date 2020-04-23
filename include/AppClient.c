@@ -1,4 +1,5 @@
 #include "core/AppClient.h"
+#include <time.h>
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
@@ -28,6 +29,8 @@ struct AppClient
     //UDP stuff (client, server messages etc.)
     UDPClient *client;
     SDL_Thread *listenThread;
+    SDL_Thread *updateThread;
+    UDPManager udpManager;
 
     GroundListItems groundListItems;
 
@@ -42,17 +45,28 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
-        SDL_Delay(5);
+        //SDL_Delay(5);
         if (client->hasPacket)
             continue;
         UDPClientListen(client, MAX_MSGLEN);
     }
 }
+void UpdateFromServer(void *args)
+{
+    AppClient *app = (AppClient *)args;
+    while (app->client->isActive)
+    {
+        //SDL_Delay(5);
+        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
+    }
+}
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
 {
-    srand(time(NULL));
 
-    AppClient *app = MALLOC(AppClient);
+    srand(time(NULL));
+    CursorInitialize();
+
+    AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->state = StateCreate();
     app->clock = clock;
@@ -69,9 +83,22 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
     app->client = client;
-#ifdef APP_DEBUG
+    app->udpManager = UDPManagerCreate();
+
     app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
-#endif
+    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
+    {
+        log_info("Sending Message: alive\n");
+        SDL_Delay(2000);
+        if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
+        {
+            UDPPackageRemoveTypeNULL(app->client->pack);
+            log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
+            app->entityManager->entities[0].id = *(int *)app->client->pack->data;
+            app->client->hasPacket = SDL_FALSE;
+        }
+    }
+    app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
     for (int i = 1; i < 10; i++)
     {
         Entity *npc = EntityManagerAdd(app->entityManager, ET_Woman, Vec2Create(100.0f * i, 0.0f));
@@ -91,34 +118,12 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->groundListItems = GroundListCreate();
     app->player.entity->inventory = InventoryCreate();
 
-#ifdef APP_DEBUG
-    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
-    {
-        log_info("Sending Message: alive\n");
-        SDL_Delay(1000);
-        if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
-        {
-            UDPPackageRemoveTypeNULL(app->client->pack);
-            log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
-            app->entityManager->entities[0].id = *(int *)app->client->pack->data;
-            app->client->hasPacket = SDL_FALSE;
-        }
-    }
-#endif
-#ifndef APP_DEBUG
-    UDPClientSend(app->client, UDPTypeText, "alive\0", 6);
-#endif
     app->state.gameState = GS_Menu;
     app->state.menuState = MS_MainMenu;
 
     app->map.contents = NULL;
     app->map.n = 0;
     app->mapList = MapListCreate("maps");
-
-    CursorInitialize();
-    TransitionInitalize(app->gfx, app->font);
-
-    //TransitionStart(TT_Fade, 5.0f);
 
     return app;
 }
@@ -145,40 +150,6 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
-#ifdef APP_DEBUG
-    if (app->client->hasPacket)
-    {
-        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeText)
-        {
-            log_info("%s\n", app->client->pack->data);
-            app->client->hasPacket = SDL_FALSE;
-        }
-        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeEntity)
-        {
-            UDPPackageRemoveTypeNULL(app->client->pack);
-            printf("1\n");
-            Entity ent;
-            SDL_memcpy(&ent, app->client->pack->data, app->client->pack->len);
-            printf("2\n");
-            app->client->hasPacket = SDL_FALSE;
-            SDL_bool exist = SDL_FALSE;
-
-            for (int i = 11; i < app->entityManager->highestIndex; i++)
-            {
-                if (app->entityManager->entities[i].id == ent.id) //entity exists
-                {
-                    exist = SDL_TRUE;
-                    app->entityManager->entities[i] = ent;
-                }
-            }
-            if (!exist) //entity doesnt exist, allocate
-            {
-                Entity *e = EntityManagerAdd(app->entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
-                *e = ent;
-            }
-        }
-    }
-#endif
     switch (app->state.gameState)
     {
     case GS_Menu:
@@ -273,9 +244,8 @@ void AppClientUpdate(AppClient *app)
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->entityManager, app->clock);
-#ifdef APP_DEBUG
+
         UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
-#endif
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
@@ -328,7 +298,7 @@ void AppClientDraw(AppClient *app)
                 EntityDraw(&app->entityManager->entities[i], app->camera);
         }
         PlayerDraw(&app->player, app->camera);
-
+        UDPManagerDraw(&app->udpManager, app->camera);
         GuiUpdate(app->gui);
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
@@ -343,6 +313,4 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
-
-    TransitionDraw(app->clock);
 }
