@@ -9,7 +9,8 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
 {
     if (client->hasPacket)
     {
-        switch (UDPPackageDecode((char *)client->pack->data))
+        UDPPackageTypes type = UDPPackageDecode((char *)client->pack->data);
+        switch (type)
         {
         case UDPTypeEntity:
             UDPPackageRemoveTypeNULL(client->pack);
