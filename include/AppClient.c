@@ -5,10 +5,8 @@
 #include "MapList.h"
 #include "core/Behavior.h"
 #include "core/Weapon.h"
-#include "core/Behavior.h"
 #include "core/Score.h"
 #include "core/Inventory.h"
-
 #define MaxEntities 5
 struct AppClient
 {
@@ -82,11 +80,10 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->player.entity->entityState = EntityPlayer;
 
 #ifdef APP_DEBUG
-    for (int i = 1; i < app->entityManager->nrEntities; i++)
+    for (int i = 1; i < MAX_ENTITIES; i++)
     {
         app->entityManager->entities[i].id = 0;
     }
-    app->entityManager->nrEntities = 1;
 #endif
     ScoreCreate(0);
     ScoreIncrement(100, 0);
@@ -154,10 +151,14 @@ void AppClientUpdate(AppClient *app)
         if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeEntity)
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
-            Entity ent = *(Entity *)app->client->pack->data;
+            printf("1\n");
+            Entity ent;
+            SDL_memcpy(&ent, app->client->pack->data, app->client->pack->len);
+            printf("2\n");
             app->client->hasPacket = SDL_FALSE;
             SDL_bool exist = SDL_FALSE;
-            for (int i = 0; i < app->entityManager->nrEntities; i++)
+
+            for (int i = 11; i < MAX_ENTITIES; i++)
             {
                 if (app->entityManager->entities[i].id == ent.id) //entity exists
                 {
@@ -167,13 +168,12 @@ void AppClientUpdate(AppClient *app)
             }
             if (!exist) //entity doesnt exist, allocate
             {
-                app->entityManager->entities[app->entityManager->nrEntities] = ent;
-                app->entityManager->nrEntities++;
+                Entity *e = EntityManagerAdd(app->entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
+                *e = ent;
             }
         }
     }
 #endif
-
     switch (app->state.gameState)
     {
     case GS_Menu:

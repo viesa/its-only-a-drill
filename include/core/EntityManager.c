@@ -96,7 +96,7 @@ void EntityManagerOnCollision(EntityManager *entityManager)
 
 Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position)
 {
-    Entity entity = EntityCreate(position, entityType, -1);
+    Entity entity = EntityCreate(position, entityType, 0);
     int index = EntityManagerGetFreeIndex(entityManager);
     if (index == -1)
     {

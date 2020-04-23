@@ -1,6 +1,6 @@
+#include "include/core/Macros.h"
 #include "include/core/AppClient.h"
 #include "include/core/Event.h"
-
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
@@ -8,10 +8,10 @@ int main()
     Clock *m_clock = ClockCreate();
     Input *m_input = InputCreate();
     Event *m_event = EventCreate(m_input, &m_running);
-#ifndef DEGBUG
+#ifndef MAIN_DEBUG
     UDPClient m_client = UDPClientCreate("85.226.160.126", 1337); //drill.pierrelf.com port 1337
 #endif
-#ifdef DEGBUG
+#ifdef MAIN_DEBUG
     UDPClient m_client = UDPClientCreate("127.0.0.1", 1337);
 #endif
     AppClient *m_app = AppClientCreate(&m_running, m_clock, m_input, &m_client, m_fpsManager);
