@@ -9,7 +9,6 @@
 Window *WindowCreate(const char *title)
 {
     Window *window = (Window *)SDL_malloc(sizeof(Window));
-    WindowSetTitle(window, title);
     window->width = 720;
     window->height = 480;
     SDL_DisplayMode displaymode;
