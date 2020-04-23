@@ -3,6 +3,7 @@
 #include <string.h>
 #include <SDL2/SDL_hints.h>
 
+#include "Macros.h"
 #include "Log.h"
 
 Window *WindowCreate(const char *title)
