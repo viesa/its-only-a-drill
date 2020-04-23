@@ -79,6 +79,17 @@ void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos)
     }
 }
 
+void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos) 
+{
+    if(item->picked) 
+    {
+       item->postion = pos;
+        item->drawable.dst.x = item->postion.x;
+        item->drawable.dst.y = item->postion.y;
+        CameraDraw(camera, item->drawable); 
+    }
+}
+
 //Plocka up item
 void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp)
 {

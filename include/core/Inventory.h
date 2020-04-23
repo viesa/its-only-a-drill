@@ -11,6 +11,6 @@ void InventoryDisplay(Graphics *gfx,InventoryListItems *i);
 //Selects the "item"
 void InventorySelectItem(InventoryListItems *i, int item );
 //Shows the equiped item in the players hand
-void InventoryDisplayEquiped(Graphics *gfx,InventoryListItems *i, Vec2 PlayerPos);
+void InventoryDisplayEquiped(Camera *camera,InventoryListItems *i, Vec2 PlayerPos);
 
 #endif

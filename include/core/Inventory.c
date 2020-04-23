@@ -32,7 +32,7 @@ void InventorySelectItem(InventoryListItems *i, int item)
     }
 }
 
-void InventoryDisplayEquiped(Graphics *gfx, InventoryListItems *i, Vec2 PlayerPos)
+void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerPos)
 {
     for (int j = 0; j < i->top; j++)
     {
@@ -43,7 +43,7 @@ void InventoryDisplayEquiped(Graphics *gfx, InventoryListItems *i, Vec2 PlayerPo
             //held.postion.x = 300;
             //held.postion.y = 500;
             //GraphicsDraw(gfx,held.drawable);
-            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){200, 300}));
+            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 20,PlayerPos.y}));
         }
     }
 }

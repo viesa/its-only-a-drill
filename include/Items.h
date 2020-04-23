@@ -49,7 +49,10 @@ typedef struct groundListItems
 
 Item ItemCreate(ItemType type, Vec2 postion);
 void ItemDraw(Camera *camera, Item *item, Vec2 position);
-void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos); //Draws items in invemtory
+ //Draws items in invemtory
+void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos);
+//Draws the equiped item
+void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos);
 
 InventoryListItems InventoryCreate(void);
 void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp);
