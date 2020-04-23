@@ -45,21 +45,20 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
-        //SDL_Delay(5);
-        if (client->hasPacket)
-            continue;
+        while (client->hasPacket)
+            ;
         UDPClientListen(client, MAX_MSGLEN);
     }
 }
-// void UpdateFromServer(void *args)
-// {
-//     AppClient *app = (AppClient *)args;
-//     while (app->client->isActive)
-//     {
-//         //SDL_Delay(5);
-//         UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
-//     }
-// }
+void UpdateFromServer(void *args)
+{
+    AppClient *app = (AppClient *)args;
+    while (app->client->isActive)
+    {
+        //SDL_Delay(5);
+        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
+    }
+}
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
 {
 
@@ -98,7 +97,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
             app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
         }
     }
-    //app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
+    app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
     for (int i = 1; i < 10; i++)
     {
         Entity *npc = EntityManagerAdd(app->entityManager, ET_Woman, Vec2Create(100.0f * i, 0.0f));
@@ -235,13 +234,15 @@ void AppClientUpdate(AppClient *app)
         }
         BehaviorMoveEntity(app->entityManager);
         PlayerUpdate(&app->player, app->input, app->clock, app->camera);
-        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->entityManager, app->clock);
 
-        CompressedEntity sendCompressedEntity = EntityCompress(*app->player.entity);
-        UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
+        //CompressedEntity sendCompressedEntity = EntityCompress(app->entityManager->entities[0]);
+        //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
+
+        UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
+
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;

@@ -6,6 +6,8 @@ int main()
 {
     SDL_bool m_running = SDL_TRUE;
     UDPServer m_server = UDPServerCreate(1337);
+    system("clear");
+    printf("Server running...\n");
     while (m_running)
     {
         int rLen = UDPServerListen(&m_server, MAX_MSGLEN);
