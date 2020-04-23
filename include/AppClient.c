@@ -328,10 +328,10 @@ void AppClientDraw(AppClient *app)
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            InventoryDisplay(app->gfx, &app->entityManager->entities[0].inventory);
+            InventoryDisplay(app->gfx, &app->player.entity->inventory);
         }
 
-        InventoryDisplayEquiped(app->gfx, &app->player.entity->inventory, app->player.entity->position);
+        InventoryDisplayEquiped(app->camera, &app->player.entity->inventory, app->player.entity->position);
 
         break;
     }

@@ -3,13 +3,12 @@
 #include <string.h>
 #include <SDL2/SDL_hints.h>
 
+#include "Macros.h"
 #include "Log.h"
 
 Window *WindowCreate(const char *title)
 {
     Window *window = (Window *)SDL_malloc(sizeof(Window));
-    window->title = NULL;
-    WindowSetTitle(window, title);
     window->width = 720;
     window->height = 480;
     SDL_DisplayMode displaymode;
@@ -22,7 +21,7 @@ Window *WindowCreate(const char *title)
     window->height = displaymode.h - 100; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #endif
 
-    window->sdl_window = SDL_CreateWindow(window->title,
+    window->sdl_window = SDL_CreateWindow(title,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           window->width,
@@ -54,7 +53,6 @@ void WindowDestroy(Window *window)
 {
     SDL_DestroyRenderer(window->renderer);
     SDL_DestroyWindow(window->sdl_window);
-    SDL_free(window->title);
     SDL_free(window);
 }
 
@@ -108,11 +106,7 @@ void WindowSetFullscreen(Window *window, SDL_bool onoff)
 
 void WindowSetTitle(Window *window, const char *title)
 {
-    if (window->title)
-        SDL_free(window->title);
-    window->title = (char *)SDL_malloc(sizeof(char) * strlen(title));
-    strcpy(window->title, title);
-    SDL_SetWindowTitle(window->sdl_window, window->title);
+    SDL_SetWindowTitle(window->sdl_window, title);
 }
 
 void WindowSetSize(Window *window, int width, int height)

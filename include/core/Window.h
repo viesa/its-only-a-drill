@@ -7,8 +7,6 @@ typedef struct Window
 {
     SDL_Window *sdl_window;
     SDL_Renderer *renderer;
-
-    char *title;
     int width;
     int height;
     SDL_bool isFullscreen;
