@@ -1,5 +1,5 @@
 #include "Window.h"
-
+#include "Macros.h"
 #include <string.h>
 #include <SDL2/SDL_hints.h>
 

@@ -31,7 +31,7 @@ int main()
             UDPPackageRemoveTypeNULL(m_server.pack);
             char buffer[m_server.pack->len - 2];
             SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
-            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, sizeof(Entity));
+            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, m_server.pack->len - 2);
             SDLNet_FreePacket(m_server.pack);
         }
     }

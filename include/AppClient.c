@@ -80,7 +80,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->player.entity->entityState = EntityPlayer;
 
 #ifdef APP_DEBUG
-    for (int i = 1; i < MAX_ENTITIES; i++)
+    for (int i = 1; i < app->entityManager->highestIndex; i++)
     {
         app->entityManager->entities[i].id = 0;
     }
@@ -158,7 +158,7 @@ void AppClientUpdate(AppClient *app)
             app->client->hasPacket = SDL_FALSE;
             SDL_bool exist = SDL_FALSE;
 
-            for (int i = 11; i < MAX_ENTITIES; i++)
+            for (int i = 11; i < app->entityManager->highestIndex; i++)
             {
                 if (app->entityManager->entities[i].id == ent.id) //entity exists
                 {
