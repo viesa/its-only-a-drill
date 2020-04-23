@@ -65,4 +65,6 @@ void EntityDraw(Entity *entity, Camera *camera);
 // carculates the net Froces after friction and collision
 void EntityCalculateNetForces(Entity *entity);
 
+void EntityRotateAll(Entity *entity, float degrees);
+
 #endif

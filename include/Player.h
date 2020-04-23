@@ -11,7 +11,8 @@
 typedef struct Player
 {
     Entity *entity;
-    Anim walkAnim;
+    Anim leg;
+    Anim body;
     Vec2 aimFollow;
     Vec2 forward;
 } Player;
@@ -20,6 +21,6 @@ Player PlayerCreate(Camera *camera, EntityManager *entityManager);
 void PlayerDestroy(Player *player);
 
 void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera);
-void PlayerDraw(Player* player, Camera* camera);
+void PlayerDraw(Player *player, Camera *camera);
 
 #endif

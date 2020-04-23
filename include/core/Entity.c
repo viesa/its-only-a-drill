@@ -76,3 +76,13 @@ void EntityCalculateNetForces(Entity *entity)
     entity->Velocity.x = (fabs(entity->Velocity.x) < 6.1f) ? 0 : entity->Velocity.x;
     entity->Velocity.y = (fabs(entity->Velocity.y) < 6.1f) ? 0 : entity->Velocity.y;
 }
+
+void EntityRotateAll(Entity *entity, float degrees)
+{
+    for (int i = 0; i < entity->nDrawables; i++)
+    {
+        SDL_Rect dstMid = {0, 0, entity->drawables[i].dst.w, entity->drawables[i].dst.w};
+        entity->drawables[i].rot_anchor = RectMid(dstMid);
+        entity->drawables[i].rot = degrees;
+    }
+}

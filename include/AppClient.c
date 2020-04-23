@@ -1,4 +1,5 @@
 #include "core/AppClient.h"
+#include <time.h>
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
@@ -50,6 +51,8 @@ void ListenToServer(void *args)
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
 {
+
+    srand(time(NULL));
     CursorInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));

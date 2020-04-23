@@ -27,6 +27,11 @@
                 "json.h": "c",
                 "cstdlib": "c",
                 "entitymanager.h": "c",
-                "event.h": "c"
+                "event.h": "c",
+                "__bit_reference": "c",
+                "algorithm": "c",
+                "bitset": "c",
+                "chrono": "c",
+                "unordered_map": "c"
         }
 }
