@@ -31,7 +31,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.hitboxIndex = 0;
         break;
     case ET_Player:
-        entity.Friction = 7.7f;
+        entity.Friction = 9.7f;
         entity.mass = 50.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
@@ -94,11 +94,6 @@ void EntityCalculateNetForces(Entity *entity)
     FrictionVector = Vec2MulL(FrictionVector, entity->Friction);
     entity->Force.x += FrictionVector.x;
     entity->Force.y += FrictionVector.y;
-
-    // Garante stop Cause float
-    entity->Velocity = Vec2DivL(entity->Force, entity->mass);
-    entity->Velocity.x = (fabs(entity->Velocity.x) < 6.1f) ? 0 : entity->Velocity.x;
-    entity->Velocity.y = (fabs(entity->Velocity.y) < 6.1f) ? 0 : entity->Velocity.y;
 }
 
 void EntityRotateAll(Entity *entity, float degrees)

@@ -8,7 +8,7 @@
 Player PlayerCreate(Camera *camera, EntityManager *entityManager)
 {
     Player ret;
-    ret.entity = EntityManagerAdd(entityManager, ET_Player, Vec2Create(0.0f, 0.0f));
+    ret.entity = EntityManagerAdd(entityManager, ET_Player, Vec2Create(1000.0f + rand() % 200 - 100, 1000.0f + rand() % 200 - 100));
     ret.leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
     ret.body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
     ret.aimFollow = Vec2Create(0.0f, 0.0f);

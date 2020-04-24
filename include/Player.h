@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <stdlib.h>
 #include "core/EntityManager.h"
 #include "core/Input.h"
 #include "core/Anim.h"

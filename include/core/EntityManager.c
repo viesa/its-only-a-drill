@@ -30,6 +30,11 @@ void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
         { // carculate Net_force so friction & collision & the other forces is handle before
             EntityCalculateNetForces(&entityManager->entities[i]);
 
+            // Garante stop Cause float
+            entityManager->entities[i].Velocity = Vec2DivL(entityManager->entities[i].Force, entityManager->entities[i].mass);
+            entityManager->entities[i].Velocity.x = (fabs(entityManager->entities[i].Velocity.x) < 7.8f) ? 0 : entityManager->entities[i].Velocity.x;
+            entityManager->entities[i].Velocity.y = (fabs(entityManager->entities[i].Velocity.y) < 7.8f) ? 0 : entityManager->entities[i].Velocity.y;
+
             // update new position
             entityManager->entities[i].position.x += entityManager->entities[i].Velocity.x * ClockGetDeltaTime(clk);
             entityManager->entities[i].position.y += entityManager->entities[i].Velocity.y * ClockGetDeltaTime(clk);
