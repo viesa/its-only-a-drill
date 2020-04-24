@@ -20,11 +20,10 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             {
                 int id = 0;
                 char nr[10];
-                for (int i = 5; i < client->pack->len - 1; i++)
+                for (int i = 5; i < client->pack->len; i++)
                 {
                     nr[i - 5] = client->pack->data[i];
                 }
-                nr[client->pack->len - 4] = '\0';
                 id = atoi(nr);
                 for (int i = 0; i < mgr->nrPlayers; i++)
                 {

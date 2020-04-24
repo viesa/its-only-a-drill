@@ -55,7 +55,8 @@ void UpdateFromServer(void *args)
     AppClient *app = (AppClient *)args;
     while (app->client->isActive)
     {
-        //SDL_Delay(5);
+        while (!app->client->hasPacket)
+            ;
         UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
     }
 }
@@ -241,8 +242,12 @@ void AppClientUpdate(AppClient *app)
         //CompressedEntity sendCompressedEntity = EntityCompress(app->entityManager->entities[0]);
         //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
-        UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
-
+        SDL_mutex *m = SDL_CreateMutex();
+        SDL_LockMutex(m);
+        if (!app->client->hasPacket)
+            UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
+        SDL_UnlockMutex(m);
+        SDL_DestroyMutex(m);
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
