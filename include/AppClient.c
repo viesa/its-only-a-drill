@@ -247,7 +247,7 @@ void AppClientUpdate(AppClient *app)
             // if there is ammo in ur weapon shoot
             if (app->player.entity->inventory.contents[app->player.entity->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, app->entityManager->entities, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, app->entityManager, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
             }
         }
         BehaviorMoveEntity(app->entityManager);
