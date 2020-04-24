@@ -31,6 +31,7 @@ struct AppClient
     SDL_Thread *listenThread;
     SDL_Thread *updateThread;
     UDPManager udpManager;
+    SDL_ThreadPriority lowestPossibleThreadPriority;
 
     GroundListItems groundListItems;
 
@@ -44,6 +45,8 @@ void ListenToServer(void *args)
 {
     UDPClient *client = (UDPClient *)args;
     SDL_mutex *m = SDL_CreateMutex();
+    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
+    SDL_SetThreadPriority(priority);
     while (client->isActive)
     {
         while (client->hasPacket)
@@ -62,6 +65,8 @@ void UpdateFromServer(void *args)
 {
     AppClient *app = (AppClient *)args;
     SDL_mutex *m = SDL_CreateMutex();
+    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
+    SDL_SetThreadPriority(priority);
     while (app->client->isActive)
     {
         while (!app->client->hasPacket)
@@ -312,6 +317,7 @@ void AppClientDraw(AppClient *app)
                 EntityDraw(&app->entityManager->entities[i], app->camera);
         }
         PlayerDraw(&app->player, app->camera);
+
         UDPManagerDraw(&app->udpManager, app->camera);
         GuiUpdate(app->gui);
 
