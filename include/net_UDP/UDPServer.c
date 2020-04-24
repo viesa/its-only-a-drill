@@ -212,7 +212,9 @@ int UDPServerListen(UDPServer *server, int maxLen)
             {
                 if (strcmp((char *)server->pack->data, "0quit") == 0)
                 {
-                    UDPServerEcho(server, UDPTypeIPaddress, &server->players[i].ip, sizeof(IPaddress));
+                    char buffer[20];
+                    sprintf(buffer, "quit %d\0", server->players->id);
+                    UDPServerEcho(server, UDPTypeText, buffer, strlen(buffer) + 1);
                     server->nrPlayers--;
                     for (int j = i; j < server->nrPlayers; j++)
                     {
