@@ -1,10 +1,12 @@
 #include "MapList.h"
 
-MapList MapListCreate(char *directory)
+MapList MapListCreate(char *directory, Clock *clock)
 {
     MapList mapList;
     mapList.nMaps = 0;
     strcpy(mapList.directory, directory);
+    mapList.clock = clock;
+    mapList.lastUpdate = 0.0f;
     MapListUpdate(&mapList);
     return mapList;
 }
@@ -15,6 +17,13 @@ void MapListDestroy(MapList *mapList)
 
 void MapListUpdate(MapList *mapList)
 {
+    if (mapList->lastUpdate < 1.0f)
+    {
+        mapList->lastUpdate += ClockGetDeltaTime(mapList->clock);
+        return;
+    }
+    mapList->lastUpdate = 0.0f;
+
     DIR *d;
     struct dirent *dir;
     d = opendir(mapList->directory);
@@ -27,7 +36,8 @@ void MapListUpdate(MapList *mapList)
             {
                 //Load in mapinfo from mapfile
                 size_t bytes = (strlen(mapList->directory) + 1 + strlen(dir->d_name));
-                char *fullpath = (char *)SDL_calloc(bytes, sizeof(char) * bytes);
+                char *fullpath = CALLOC(bytes, char);
+                ALLOC_ERROR_CHECK(fullpath);
                 strcat(fullpath, mapList->directory);
                 strcat(fullpath, "/");
                 strcat(fullpath, dir->d_name);

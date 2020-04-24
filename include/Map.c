@@ -2,9 +2,9 @@
 
 #include "core/Library.h"
 
-Map MapCreate(JSON *mapdata, EntityManager *entityManager)
+Map MapCreate(JSON *mapdata)
 {
-    Map error_map = {NULL, 0, NULL};
+    Map error_map = {NULL, 0};
     Map map;
     map.n = 0;
     if (mapdata == NULL ||
@@ -63,7 +63,7 @@ Map MapCreate(JSON *mapdata, EntityManager *entityManager)
     }
     map.n = layers->u.integer;
 
-    map.contents = MALLOC_N(Entity *, map.n);
+    map.contents = MALLOC_N(EntityIndexP, map.n);
     for (uint32_t i = 0; i < map.n; i++)
     {
         json_value *current = JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX, i}, 2);
@@ -145,28 +145,24 @@ Map MapCreate(JSON *mapdata, EntityManager *entityManager)
         SDL_Rect dst = {(int)position.x, (int)position.y, width, height};
         SDL_Rect src = {src_x, src_y, src_w, src_h};
 
-        Entity *entity = EntityManagerAdd(entityManager, type, position);
-        entity->drawables[0].dst = dst;
-        entity->drawables[0].src = src;
-        entity->drawables[0].rot = rotation;
-        entity->drawables[0].rot_anchor = RectMid(entity->drawables[0].dst);
-        entity->mass = mass;
-        entity->isCollider = collider;
-        entity->hitboxIndex = 0;
-        entity->nDrawables = 1;
+        EntityIndexP index = EntityManagerAdd(type, position);
+        ENTITY_ARRAY[*index].drawables[0].dst = dst;
+        ENTITY_ARRAY[*index].drawables[0].src = src;
+        ENTITY_ARRAY[*index].drawables[0].rot = rotation;
+        ENTITY_ARRAY[*index].drawables[0].rot_anchor = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+        ENTITY_ARRAY[*index].mass = mass;
+        ENTITY_ARRAY[*index].isCollider = collider;
+        ENTITY_ARRAY[*index].hitboxIndex = 0;
+        ENTITY_ARRAY[*index].nDrawables = 1;
 
-        map.contents[i] = entity;
+        map.contents[i] = index;
     }
-
-    map.entityManager = entityManager;
     return map;
 }
 void MapDestroy(Map *map)
 {
-    for (int i = 0; i < map->n; i++)
-    {
-        EntityManagerRemove(map->entityManager, map->contents[i]);
-    }
+    EntityManagerRemoveRange(map->contents[0], map->contents[map->n - 1]);
+
     if (map->contents)
         SDL_free(map->contents);
     map->contents = NULL;
@@ -178,6 +174,6 @@ void MapDraw(Map *map, Camera *camera)
     if (map->contents)
         for (int i = 0; i < map->n; i++)
         {
-            EntityDraw(map->contents[i], camera);
+            EntityDrawIndex(map->contents[i], camera);
         }
 }

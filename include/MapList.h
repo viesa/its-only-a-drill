@@ -32,10 +32,12 @@ typedef struct MapList
     char directory[20];
     MapListEntry allMaps[MAX_MAPS];
     uint16_t nMaps;
+    Clock *clock;
+    float lastUpdate;
 } MapList;
 
 ///\param directory: Specifies which directory to load the map files from
-MapList MapListCreate(char *directory);
+MapList MapListCreate(char *directory, Clock *clock);
 void MapListDestroy(MapList *mapList);
 
 void MapListUpdate(MapList *mapList);

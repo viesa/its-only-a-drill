@@ -10,14 +10,14 @@
 
 typedef struct Player
 {
-    Entity *entity;
+    EntityIndexP entity;
     Anim leg;
     Anim body;
     Vec2 aimFollow;
     Vec2 forward;
 } Player;
 
-Player PlayerCreate(Camera *camera, EntityManager *entityManager);
+Player PlayerCreate(Camera *camera);
 void PlayerDestroy(Player *player);
 
 void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera);

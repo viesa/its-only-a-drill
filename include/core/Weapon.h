@@ -7,6 +7,6 @@
 
 #include "Library.h"
 
-void playerShoot(Entity *player, Camera *camera, Entity e[], Item item);
+void playerShoot(EntityIndexP index, Camera *camera, Entity e[], Item item);
 
 #endif

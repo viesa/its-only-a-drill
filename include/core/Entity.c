@@ -1,5 +1,7 @@
 #include "Entity.h"
 
+#include "EntityManager.h"
+
 #define FrictionMode
 
 Entity EntityCreate(Vec2 position, EntityType type, int id)
@@ -35,11 +37,10 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.mass = 50.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
-        entity.drawables[0] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
-        entity.drawables[1] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
-        entity.drawables[2] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
+        entity.drawables[0] = DrawableCreateDefaultConfig();
+        entity.drawables[1] = DrawableCreateDefaultConfig();
         entity.hitboxIndex = 0;
-        entity.nDrawables = 3;
+        entity.nDrawables = 2;
         break;
     default:
         break;
@@ -47,31 +48,32 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     return entity;
 }
 
-CompressedEntity EntityCompress(Entity ent)
+CompressedEntity EntityCompress(Entity *entity)
 {
-    CompressedEntity comp;
-    comp.health = ent.health;
-    comp.id = ent.id;
-    comp.position = ent.position;
-    comp.type = ent.type;
-    return comp;
+    CompressedEntity cEntity;
+    cEntity.health = entity->health;
+    cEntity.id = entity->id;
+    cEntity.position = entity->position;
+    cEntity.type = entity->type;
+    return cEntity;
 }
-Entity EntityUnCompress(CompressedEntity comp)
+Entity EntityDecompress(CompressedEntity *cEntity)
 {
-    Entity ent;
-    ent.health = comp.health;
-    ent.id = comp.id;
-    ent.position = comp.position;
-    ent.type = comp.type;
-    return ent;
+    Entity entity;
+    entity.health = cEntity->health;
+    entity.id = cEntity->id;
+    entity.position = cEntity->position;
+    entity.type = cEntity->type;
+    return entity;
 }
-void EntityAddCompressed(CompressedEntity comp, Entity *ent)
+void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity)
 {
-    ent->health = comp.health;
-    ent->id = comp.id;
-    ent->position = comp.position;
-    ent->type = comp.type;
+    entity->health = cEntity->health;
+    entity->id = cEntity->id;
+    entity->position = cEntity->position;
+    entity->type = cEntity->type;
 }
+
 void EntityDraw(Entity *entity, Camera *camera)
 {
     for (int i = 0; i < entity->nDrawables; i++)
@@ -80,6 +82,11 @@ void EntityDraw(Entity *entity, Camera *camera)
         entity->drawables[i].dst.y = entity->position.y;
         CameraDraw(camera, entity->drawables[i]);
     }
+}
+
+void EntityDrawIndex(EntityIndexP index, Camera *camera)
+{
+    EntityDraw(&ENTITY_ARRAY[*index], camera);
 }
 
 void EntityCalculateNetForces(Entity *entity)
@@ -101,12 +108,12 @@ void EntityCalculateNetForces(Entity *entity)
     entity->Velocity.y = (fabs(entity->Velocity.y) < 6.1f) ? 0 : entity->Velocity.y;
 }
 
-void EntityRotateAll(Entity *entity, float degrees)
+void EntityRotateAll(EntityIndexP index, float degrees)
 {
-    for (int i = 0; i < entity->nDrawables; i++)
+    for (int i = 0; i < ENTITY_ARRAY[*index].nDrawables; i++)
     {
-        SDL_Rect dstMid = {0, 0, entity->drawables[i].dst.w, entity->drawables[i].dst.w};
-        entity->drawables[i].rot_anchor = RectMid(dstMid);
-        entity->drawables[i].rot = degrees;
+        SDL_Rect dstMid = {0, 0, ENTITY_ARRAY[*index].drawables[i].dst.w, ENTITY_ARRAY[*index].drawables[i].dst.w};
+        ENTITY_ARRAY[*index].drawables[i].rot_anchor = RectMid(dstMid);
+        ENTITY_ARRAY[*index].drawables[i].rot = degrees;
     }
 }

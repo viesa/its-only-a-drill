@@ -128,3 +128,11 @@ void AnimRandomFrame(Anim *anim)
 {
     anim->currentFrame = rand() % anim->nFrames;
 }
+
+void AnimApplyToDrawable(Anim *anim, Drawable *drawable, float scale)
+{
+    drawable->dst.w = anim->active->dst.w * scale;
+    drawable->dst.h = anim->active->dst.h * scale;
+    drawable->src = anim->active->src;
+    drawable->spriteSheet = anim->active->spriteSheet;
+}

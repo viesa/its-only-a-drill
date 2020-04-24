@@ -6,13 +6,13 @@
 #define MAX_PLAYERS 10
 typedef struct UDPManager
 {
-    Entity *players[MAX_PLAYERS];
+    EntityIndexP players[MAX_PLAYERS];
     int nrPlayers;
 } UDPManager;
 // Returns a UDPManager struct with 0 as nr of players
 UDPManager UDPManagerCreate();
 // Updates the entire network situation for this client
-void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityManager);
+void UDPManagerUpdate(UDPManager *mgr, UDPClient *client);
 // Draws the entire network situation for this client
 void UDPManagerDraw(UDPManager *mgr, Camera *camera);
 #endif

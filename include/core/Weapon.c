@@ -1,30 +1,29 @@
 #include "Weapon.h"
 #include "Entity.h"
 
-void playerShoot(Entity *player, Camera *camera, Entity e[], Item item)
+void playerShoot(EntityIndexP index, Camera *camera, Entity e[], Item item)
 {
     int pos_x = 0;
     int pos_y = 0;
 
-    SDL_GetMouseState(&pos_x, &pos_y);
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(RectMid(player->drawables[0].dst), cameraPos);
+    Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*index].drawables[0].dst), cameraPos);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
     Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
     Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item.Stats.falloff);
-    pos_x = (int)(player->drawables[0].dst.x + (player->drawables[0].dst.w / 2)) + (int)itemFalloff.x;
-    pos_y = (int)(player->drawables[0].dst.x + (player->drawables[0].dst.w / 2)) + (int)itemFalloff.y;
+    pos_x = (int)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + (int)itemFalloff.x;
+    pos_y = (int)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + (int)itemFalloff.y;
 
     SDL_Point point;
-    point.x = player->drawables[0].dst.x + (player->drawables[0].dst.w / 2);
-    point.y = player->drawables[0].dst.y + (player->drawables[0].dst.h / 2);
+    point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
+    point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
 
     // push back
-    player->Force.x -= itemFalloff.x;
-    player->Force.y -= itemFalloff.y;
+    ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
+    ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
 #ifdef DegBug
     printf("line pos:\n");
     printf("X1: %d\n", point.x);
@@ -35,7 +34,6 @@ void playerShoot(Entity *player, Camera *camera, Entity e[], Item item)
     printf("X: %f\n", playerToMouse.x);
     printf("Y: %f\n", playerToMouse.y);
 #endif
-    srand(time(0));
     for (int i = 1; i < 3; i++)
     {
         tmpPosX = pos_x;

@@ -17,5 +17,6 @@ typedef struct Drawable
 } Drawable;
 
 Drawable DrawableCreate(SDL_Rect src, SDL_Rect dst, SpriteSheet spriteSheet);
+Drawable DrawableCreateDefaultConfig();
 
 #endif

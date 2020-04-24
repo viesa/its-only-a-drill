@@ -11,6 +11,8 @@
 
 #define MAX_DRAWABLES 3
 
+typedef size_t *EntityIndexP;
+
 typedef enum EntityType
 {
     ET_Player,
@@ -18,7 +20,9 @@ typedef enum EntityType
     //Used only by Map.c
     ET_PlayerSpawn,
     //Used only by Map.c
-    ET_MapObject
+    ET_MapObject,
+    ET_None,
+    ET_Count
 } EntityType;
 typedef enum entityState
 {
@@ -50,7 +54,7 @@ typedef struct Entity
     Vec2 Force;
     Vec2 Acceleration; // currently unused
     Vec2 Velocity;
-    float Friction; // don't make it Lager then 10
+    float Friction; // don't make it larger than 10
     float mass;
 
     SDL_bool isCollider;
@@ -62,20 +66,21 @@ typedef struct Entity
 } Entity;
 
 ///Creates a entity
-///\param type: what entity is being created
+///\param type: an entity preset
 Entity EntityCreate(Vec2 position, EntityType type, int id);
 
-CompressedEntity EntityCompress(Entity ent);
+CompressedEntity EntityCompress(Entity *entity);
 
-Entity EntityUnCompress(CompressedEntity ent);
+Entity EntityDecompress(CompressedEntity *cEntity);
 
-void EntityAddCompressed(CompressedEntity comp, Entity *ent);
+void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity);
 
 void EntityDraw(Entity *entity, Camera *camera);
+void EntityDrawIndex(EntityIndexP index, Camera *camera);
 
-// carculates the net Froces after friction and collision
+// calculates the net forces after friction and collision
 void EntityCalculateNetForces(Entity *entity);
 
-void EntityRotateAll(Entity *entity, float degrees);
+void EntityRotateAll(EntityIndexP index, float degrees);
 
 #endif

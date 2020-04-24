@@ -3,7 +3,7 @@
 Vector *VectorCreate(size_t elementSize, size_t initialReservedSize)
 {
     Vector *vector = MALLOC(Vector);
-    ALLOC_ERROR_CHECK(vector->data);
+    ALLOC_ERROR_CHECK(vector);
     vector->data = SDL_malloc(elementSize * initialReservedSize);
     ALLOC_ERROR_CHECK(vector->data);
     vector->dataP = &vector->data;
@@ -60,25 +60,44 @@ void VectorPopBack(Vector *vector)
 
 void VectorErase(Vector *vector, size_t index)
 {
-    if (index < 0 || index >= vector->size)
+    VectorEraseRange(vector, index, index + 1);
+}
+
+void VectorEraseRange(Vector *vector, size_t start, size_t end)
+{
+    assert(start <= end);
+    const size_t delta = end - start;
+    if (!delta)
+        return;
+
+    if (start < 0 || start >= vector->size)
     {
 #ifdef VECTOR_DEBUG
-        log_info("Attempted to remove a vector element out of scope");
+        log_info("Attempted to remove a vector element out of scope, start");
+#endif
+        return;
+    }
+    if (end < 0 || end >= vector->size)
+    {
+#ifdef VECTOR_DEBUG
+        log_info("Attempted to remove a vector element out of scope, end");
 #endif
         return;
     }
 
-    size_t bytesLeft = (vector->size - (index + 1)) * vector->elementSize;
+    size_t bytesLeft = (vector->size - (end + 1)) * vector->elementSize;
     if (bytesLeft)
     {
-        size_t dataOffset = index * vector->elementSize;
-        SDL_memmove((char *)(vector->data) + dataOffset, (char *)(vector->data) + dataOffset + vector->elementSize, bytesLeft);
+        size_t dataOffsetStart = start * vector->elementSize;
+        size_t dataOffsetEnd = end * vector->elementSize;
+        SDL_memmove((char *)(vector->data) + dataOffsetStart, (char *)(vector->data) + dataOffsetEnd + vector->elementSize, bytesLeft);
 #ifdef VECTOR_DEBUG_STRICT
-        log_info("Vector elements moved. Bytes moved: %llu", bytesLeft);
+        log_info("Vector elements moved. Bytes moved: %llu", delta, bytesLeft);
 #endif
     }
     vector->size--;
 #ifdef VECTOR_DEBUG_STRICT
-    log_info("Vector element removed. New size: %llu", vector->size);
+    log_info("%d Vector elements removed. New size: %llu", delta, vector->size);
 #endif
+    vector->size -= delta;
 }

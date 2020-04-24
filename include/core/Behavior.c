@@ -5,7 +5,7 @@
 #define addmove 1500.0f
 #define moxsize 50
 
-void BehaviorMoveEntity(EntityManager *entityManager)
+void BehaviorMoveEntity()
 {
     float axis_x1 = 200;
     float axis_y1 = 200;
@@ -16,28 +16,28 @@ void BehaviorMoveEntity(EntityManager *entityManager)
     SDL_Rect box1, box2;
     box1 = (SDL_Rect){(int)axis_x1 - moxsize, (int)axis_y1 - moxsize, moxsize, moxsize};
     box2 = (SDL_Rect){(int)axis_x2 - moxsize, (int)axis_y2 - moxsize, moxsize, moxsize};
-    for (int i = 0; i < entityManager->highestIndex; i++)
+    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (entityManager->bitmap[i] && entityManager->entities[i].isNPC)
+        if (ENTITY_ARRAY[i].isNPC)
         {
-            switch (entityManager->entities[i].entityState)
+            switch (ENTITY_ARRAY[i].entityState)
             {
             case GoForward:
             {
-                entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], axis_x1, axis_y1);
-                if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &box1))
+                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], axis_x1, axis_y1);
+                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &box1))
                 {
-                    entityManager->entities[i].entityState = GoBack;
+                    ENTITY_ARRAY[i].entityState = GoBack;
                 }
                 break;
             }
 
             case GoBack:
             {
-                entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], axis_x2, axis_y2);
-                if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &box2))
+                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], axis_x2, axis_y2);
+                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &box2))
                 {
-                    entityManager->entities[i].entityState = GoForward;
+                    ENTITY_ARRAY[i].entityState = GoForward;
                 }
                 break;
             }

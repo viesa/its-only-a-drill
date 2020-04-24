@@ -5,7 +5,7 @@ UDPManager UDPManagerCreate()
     mgr.nrPlayers = 0;
     return mgr;
 }
-void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityManager)
+void UDPManagerUpdate(UDPManager *mgr, UDPClient *client)
 {
     if (client->hasPacket)
     {
@@ -27,7 +27,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                 id = atoi(nr);
                 for (int i = 0; i < mgr->nrPlayers; i++)
                 {
-                    if (mgr->players[i]->id == id)
+                    if (ENTITY_ARRAY[*mgr->players[i]].id == id)
                     {
                         mgr->nrPlayers--;
                         for (int j = i; j < mgr->nrPlayers; j++)
@@ -45,19 +45,19 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             SDL_memcpy(&ent, client->pack->data, client->pack->len);
             SDL_bool exist1 = SDL_FALSE;
 
-            for (int i = 0; i < entityManager->highestIndex; i++)
+            for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
             {
-                if (entityManager->entities[i].id == ent.id) //entity exists
+                if (ENTITY_ARRAY[i].id == ent.id) //entity exists
                 {
                     exist1 = SDL_TRUE;
-                    entityManager->entities[i] = ent;
+                    ENTITY_ARRAY[i] = ent;
                     //printf("Updating old player\n");
                 }
             }
             if (!exist1) //entity doesnt exist, allocate
             {
-                Entity *e1 = EntityManagerAdd(entityManager, ET_Player, Vec2Create(100.0f * 11, 0.0f));
-                *e1 = ent;
+                EntityIndexP e1 = EntityManagerAdd(ET_Player, Vec2Create(100.0f * 11, 0.0f));
+                ENTITY_ARRAY[*e1] = ent;
                 mgr->players[mgr->nrPlayers] = e1;
                 log_info("Player(id:%d) connected\n", ent.id);
                 mgr->nrPlayers++;
@@ -65,22 +65,22 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             break;
         case UDPTypeCompressedEntity:
             UDPPackageRemoveTypeNULL(client->pack);
-            CompressedEntity comp;
-            SDL_memcpy(&comp, client->pack->data, sizeof(CompressedEntity));
+            CompressedEntity cEntity;
+            SDL_memcpy(&cEntity, client->pack->data, sizeof(CompressedEntity));
             SDL_bool exist2 = SDL_FALSE;
 
-            for (int i = 0; i < entityManager->highestIndex; i++)
+            for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
             {
-                if (entityManager->entities[i].id == comp.id) //entity exists
+                if (ENTITY_ARRAY[i].id == cEntity.id) //entity exists
                 {
                     exist2 = SDL_TRUE;
-                    EntityAddCompressed(comp, &entityManager->entities[i]);
+                    EntityAddCompressed(&ENTITY_ARRAY[i], &cEntity);
                 }
             }
             if (!exist2) //entity doesnt exist, allocate
             {
-                Entity *e2 = EntityManagerAdd(entityManager, ET_Player, Vec2Create(100.0f * 11, 0.0f));
-                EntityAddCompressed(comp, e2);
+                EntityIndexP e2 = EntityManagerAdd(ET_Player, Vec2Create(100.0f * 11, 0.0f));
+                EntityAddCompressed(&ENTITY_ARRAY[*e2], &cEntity);
                 mgr->players[mgr->nrPlayers] = e2;
                 mgr->nrPlayers++;
             }
@@ -95,6 +95,6 @@ void UDPManagerDraw(UDPManager *mgr, Camera *camera)
 {
     for (int i = 0; i < mgr->nrPlayers; i++)
     {
-        EntityDraw(mgr->players[i], camera);
+        EntityDrawIndex(mgr->players[i], camera);
     }
 }

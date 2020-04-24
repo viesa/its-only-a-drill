@@ -14,7 +14,6 @@
 typedef struct Menu
 {
     Graphics *gfx;
-    EntityManager *entityManager;
 
     Font *font;
     Drawable mainMenuDbl;
@@ -29,7 +28,7 @@ typedef struct Menu
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, EntityManager *entityManager, Font *font, State *state);
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
 void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
 void MenuUpdateOptions(Menu *menu, Input *input);
