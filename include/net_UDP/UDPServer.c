@@ -56,7 +56,12 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
             {
             case UDPTypeText:
                 UDPPackageRemoveType(&p);
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
+                for (int i = 0; i < p.len; i++)
+                {
+                    printf("%c", p.data[i]);
+                }
+                printf(", %d:%d\n", p.address.host, p.address.port);
                 break;
             case UDPTypeint:
                 UDPPackageRemoveTypeNULL(&p);
@@ -112,7 +117,12 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                 {
                 case UDPTypeText:
                     UDPPackageRemoveType(&p);
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
+                    for (int i = 0; i < p.len; i++)
+                    {
+                        printf("%c", p.data[i]);
+                    }
+                    printf(", %d:%d\n", p.address.host, p.address.port);
                     break;
                 case UDPTypeint:
                     UDPPackageRemoveTypeNULL(&p);
@@ -166,7 +176,12 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
         {
         case UDPTypeText:
             UDPPackageRemoveType(&p);
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
+            for (int i = 0; i < p.len; i++)
+            {
+                printf("%c", p.data[i]);
+            }
+            printf(", %d:%d\n", p.address.host, p.address.port);
             break;
         case UDPTypeint:
             UDPPackageRemoveTypeNULL(&p);
@@ -212,7 +227,9 @@ int UDPServerListen(UDPServer *server, int maxLen)
             {
                 if (strcmp((char *)server->pack->data, "0quit") == 0)
                 {
-                    UDPServerEcho(server, UDPTypeIPaddress, &server->players[i].ip, sizeof(IPaddress));
+                    char quitmsg[10];
+                    sprintf(quitmsg, "quit %d", server->players[i].id);
+                    UDPServerEcho(server, UDPTypeText, quitmsg, strlen(quitmsg) + 1);
                     server->nrPlayers--;
                     for (int j = i; j < server->nrPlayers; j++)
                     {
@@ -258,7 +275,12 @@ int UDPServerListen(UDPServer *server, int maxLen)
     {
     case UDPTypeText:
         UDPPackageRemoveType(&p);
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) %s, %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) ");
+        for (int i = 0; i < server->pack->len; i++)
+        {
+            printf("%c", server->pack->data[i]);
+        }
+        printf(", %d:%d\n", p.address.host, p.address.port);
         break;
     case UDPTypeint:
         UDPPackageRemoveTypeNULL(&p);

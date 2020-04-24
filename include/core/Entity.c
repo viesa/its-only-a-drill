@@ -1,7 +1,5 @@
 #include "Entity.h"
 
-#define FrictionMode
-
 Entity EntityCreate(Vec2 position, EntityType type, int id)
 {
     Entity entity;
@@ -40,7 +38,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         break;
 
     case ET_Player:
-        entity.Friction = 7.7f;
+        entity.Friction = 9.7f;
         entity.mass = 50.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
@@ -97,18 +95,19 @@ void EntityCalculateNetForces(Entity *entity)
     // first get momentum
     entity->Velocity = Vec2DivL(entity->Force, entity->mass);
 
-    // Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+// compute friendly
+#ifndef frictionReal
+    entity->Force = Vec2MulL(entity->Force, 0.95f);
+#endif
+// Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+#ifdef frictionReal
     Vec2 FrictionVector = Vec2Unit(entity->Velocity);
     FrictionVector = Vec2MulL(FrictionVector, -1.0F);
     FrictionVector = Vec2MulL(FrictionVector, entity->mass);
     FrictionVector = Vec2MulL(FrictionVector, entity->Friction);
     entity->Force.x += FrictionVector.x;
     entity->Force.y += FrictionVector.y;
-
-    // Garante stop Cause float
-    entity->Velocity = Vec2DivL(entity->Force, entity->mass);
-    entity->Velocity.x = (fabs(entity->Velocity.x) < 6.1f) ? 0 : entity->Velocity.x;
-    entity->Velocity.y = (fabs(entity->Velocity.y) < 6.1f) ? 0 : entity->Velocity.y;
+#endif
 }
 
 void EntityRotateAll(Entity *entity, float degrees)

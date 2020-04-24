@@ -1,4 +1,5 @@
 #include "EntityManager.h"
+//#define DegBug
 
 EntityManager *EntityManagerCreate()
 {
@@ -30,23 +31,28 @@ void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
         { // carculate Net_force so friction & collision & the other forces is handle before
             EntityCalculateNetForces(&entityManager->entities[i]);
 
+            // Garante stop Cause float
+            entityManager->entities[i].Velocity = Vec2DivL(entityManager->entities[i].Force, entityManager->entities[i].mass);
+            entityManager->entities[i].Velocity.x = (fabs(entityManager->entities[i].Velocity.x) < 7.8f) ? 0 : entityManager->entities[i].Velocity.x;
+            entityManager->entities[i].Velocity.y = (fabs(entityManager->entities[i].Velocity.y) < 7.8f) ? 0 : entityManager->entities[i].Velocity.y;
+
             // update new position
             entityManager->entities[i].position.x += entityManager->entities[i].Velocity.x * ClockGetDeltaTime(clk);
             entityManager->entities[i].position.y += entityManager->entities[i].Velocity.y * ClockGetDeltaTime(clk);
 #ifdef DegBug
-            if (entities[i].id == 0)
+            if (i == 0)
             {
                 log_debug("CurrentEntity:");
-                log_debug("position x: %f", entities[i].position.x);
-                log_debug("position y: %f", entities[i].position.y);
-                log_debug("Force x: %f", entities[i].Force.x);
-                log_debug("Force y: %f", entities[i].Force.y);
-                log_debug("Acceleration x: %f", entities[i].Acceleration.x);
-                log_debug("Acceleration y: %f", entities[i].Acceleration.y);
-                log_debug("Velocity x: %f", entities[i].Velocity.x);
-                log_debug("Velocity y: %f", entities[i].Velocity.y);
-                log_debug("Friction: %f", entities[i].Friction);
-                log_debug("mass: %f", entities[i].mass);
+                log_debug("position x: %f", entityManager->entities[i].position.x);
+                log_debug("position y: %f", entityManager->entities[i].position.y);
+                log_debug("Force x: %f", entityManager->entities[i].Force.x);
+                log_debug("Force y: %f", entityManager->entities[i].Force.y);
+                log_debug("Acceleration x: %f", entityManager->entities[i].Acceleration.x);
+                log_debug("Acceleration y: %f", entityManager->entities[i].Acceleration.y);
+                log_debug("Velocity x: %f", entityManager->entities[i].Velocity.x);
+                log_debug("Velocity y: %f", entityManager->entities[i].Velocity.y);
+                log_debug("Friction: %f", entityManager->entities[i].Friction);
+                log_debug("mass: %f", entityManager->entities[i].mass);
             }
 #endif
         }
