@@ -3,6 +3,7 @@
 UDPClient UDPClientCreate(const char *ip, Uint16 port)
 {
     UDPClient client;
+    client.hasInit = SDL_FALSE;
     client.hasPacket = SDL_FALSE;
     client.isActive = SDL_TRUE;
     /* Initialize SDL_net */

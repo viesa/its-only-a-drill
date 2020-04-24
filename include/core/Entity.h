@@ -8,6 +8,7 @@
 #include "Library.h"
 #include "../Items.h"
 #include "../math/Vec2.h"
+#include "Library.h"
 
 #define MAX_DRAWABLES 3
 
@@ -24,14 +25,18 @@ typedef enum EntityType
     ET_None,
     ET_Count
 } EntityType;
+
 typedef enum entityState
 {
     GoForward,
     GoBack,
     Fight,
+    Aggressive,
+    EntityDead,
     // used only for player so that the player can take control
     EntityPlayer
 } EntityState;
+
 typedef struct CompressedEntity
 {
     EntityType type;
@@ -42,7 +47,6 @@ typedef struct CompressedEntity
 typedef struct Entity
 {
     EntityType type;
-    EntityState entityState;
 
     SDL_bool isNPC;
 
@@ -61,6 +65,9 @@ typedef struct Entity
     unsigned int hitboxIndex;
 
     int health;
+    EntityState entityState;
+    Vec2 desiredPoint;
+    int indexPoint;
 
     InventoryListItems inventory;
 } Entity;

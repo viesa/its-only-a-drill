@@ -11,3 +11,4 @@
 // #define VECTOR_DEBUG
 // #define VECTOR_DEBUG_STRICT
 #endif
+//#define frictionReal // if define friction forumal Real runs else computed

@@ -31,6 +31,7 @@ struct AppClient
     SDL_Thread *listenThread;
     SDL_Thread *updateThread;
     UDPManager udpManager;
+    SDL_ThreadPriority lowestPossibleThreadPriority;
 
     GroundListItems groundListItems;
 
@@ -42,21 +43,36 @@ struct AppClient
 void ListenToServer(void *args)
 {
     UDPClient *client = (UDPClient *)args;
+    SDL_mutex *m = SDL_CreateMutex();
+    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
+    SDL_SetThreadPriority(priority);
     while (client->isActive)
     {
         while (client->hasPacket)
             ;
+        SDL_LockMutex(m);
         UDPClientListen(client, MAX_MSGLEN);
+        if (client->hasPacket && UDPPackageDecode((char *)client->pack->data) != UDPTypeint && !client->hasInit)
+        {
+            SDLNet_FreePacket(client->pack);
+            client->hasPacket = SDL_FALSE;
+        }
+        SDL_UnlockMutex(m);
     }
 }
 void UpdateFromServer(void *args)
 {
     AppClient *app = (AppClient *)args;
+    SDL_mutex *m = SDL_CreateMutex();
+    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
+    SDL_SetThreadPriority(priority);
     while (app->client->isActive)
     {
         while (!app->client->hasPacket)
             ;
+        SDL_LockMutex(m);
         UDPManagerUpdate(&app->udpManager, app->client);
+        SDL_UnlockMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
@@ -94,6 +110,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
             ENTITY_ARRAY[*app->player.entity].id = *(int *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
+            app->client->hasInit = SDL_TRUE;
         }
     }
     app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
@@ -230,10 +247,19 @@ void AppClientUpdate(AppClient *app)
             Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, ENTITY_ARRAY, ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
+
         BehaviorMoveEntity();
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
+        {
+            ENTITY_ARRAY[1].desiredPoint.x = 180;
+            ENTITY_ARRAY[1].desiredPoint.y = 180;
+            ENTITY_ARRAY[1].entityState = Aggressive;
+        }
+
+        //PlayerUpdate(&app->player, &app->entityManager.entities[0], app->input, app->clock, app->camera);
         PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate
@@ -242,12 +268,12 @@ void AppClientUpdate(AppClient *app)
         //CompressedEntity sendCompressedEntity = EntityCompress(app->ENTITY_ARRAY[*0]);
         //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
-        // SDL_mutex *m = SDL_CreateMutex();
-        // SDL_LockMutex(m);
-        // if (!app->client->hasPacket)
-        //     UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[0], sizeof(Entity));
-        // SDL_UnlockMutex(m);
-        // SDL_DestroyMutex(m);
+        SDL_mutex *m = SDL_CreateMutex();
+        SDL_LockMutex(m);
+        if (!app->client->hasPacket)
+            UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[0], sizeof(Entity));
+        SDL_UnlockMutex(m);
+        SDL_DestroyMutex(m);
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;

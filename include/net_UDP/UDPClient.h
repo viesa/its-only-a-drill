@@ -10,6 +10,7 @@ typedef struct UDPClient
     SDL_bool isActive;
     IPaddress serverip;
     UDPsocket sock;
+    SDL_bool hasInit;
 } UDPClient;
 // Creates a UDP client and targets it towards ip:port
 UDPClient UDPClientCreate(const char *ip, Uint16 port);

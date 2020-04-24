@@ -37,11 +37,16 @@ void EntityManagerUpdateMovement(Clock *clk)
         // carculate Net_force so friction & collision & the other forces is handle before
         EntityCalculateNetForces(&ENTITY_ARRAY[i]);
 
+        // Garante stop Cause float
+        ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
+        ENTITY_ARRAY[i].Velocity.x = (fabs(ENTITY_ARRAY[i].Velocity.x) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.x;
+        ENTITY_ARRAY[i].Velocity.y = (fabs(ENTITY_ARRAY[i].Velocity.y) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.y;
+
         // update new position
         ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime(clk);
         ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime(clk);
-#ifdef ENTITY_MANAGER_DEBUG
-        if (ENTITY_ARRAY[i].id == 0)
+#ifdef ENTITY_DEBUG
+        if (i == 0)
         {
             log_debug("CurrentEntity:");
             log_debug("position x: %f", ENTITY_ARRAY[i].position.x);

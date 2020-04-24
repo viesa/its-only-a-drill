@@ -1,7 +1,7 @@
 #include "Weapon.h"
 #include "Entity.h"
 
-void playerShoot(EntityIndexP index, Camera *camera, Entity e[], Item item)
+void playerShoot(EntityIndexP index, Camera *camera, Item item)
 {
     int pos_x = 0;
     int pos_y = 0;
@@ -34,18 +34,21 @@ void playerShoot(EntityIndexP index, Camera *camera, Entity e[], Item item)
     printf("X: %f\n", playerToMouse.x);
     printf("Y: %f\n", playerToMouse.y);
 #endif
-    for (int i = 1; i < 3; i++)
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        tmpPosX = pos_x;
-        tmpPosY = pos_y;
-        tmpPointX = point.x + (rand() % 20 - 10) / item.Stats.accuracy;
-        tmpPointY = point.y + (rand() % 20 - 10) / item.Stats.accuracy;
-        if (SDL_IntersectRectAndLine(&e[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
-        { // reduce accuracy
-            e[i].health -= item.Stats.Damage;
-            e[i].Force.x += itemFalloff.x;
-            e[i].Force.y += itemFalloff.y;
-            log_info("entity %d: health = %d\n", i, e[i].health);
+        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
+        {
+            tmpPosX = pos_x;
+            tmpPosY = pos_y;
+            tmpPointX = point.x + (rand() % 20 - 10) / item.Stats.accuracy;
+            tmpPointY = point.y + (rand() % 20 - 10) / item.Stats.accuracy;
+            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+            { // reduce accuracy
+                ENTITY_ARRAY[i].health -= item.Stats.Damage;
+                ENTITY_ARRAY[i].Force.x += itemFalloff.x;
+                ENTITY_ARRAY[i].Force.y += itemFalloff.y;
+                log_info("entity %d: health = %d\n", i, ENTITY_ARRAY[i].health);
+            }
         }
     }
 }

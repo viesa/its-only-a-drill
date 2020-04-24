@@ -25,6 +25,7 @@ Graphics *GraphicsCreate()
     gfx->m_allTextures[SS_Weapons] = GraphicsLoadTexture(gfx, "docs/spritesheets/weapons.png");
     gfx->m_allTextures[SS_BackgroundTiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/background-tiles.png");
     gfx->m_allTextures[SS_RedCircle] = GraphicsLoadTexture(gfx, "assets/img/red_circle.png");
+    gfx->m_allTextures[SS_Scanline] = GraphicsLoadTexture(gfx, "assets/img/scanlines.png");
 
     return gfx;
 }
