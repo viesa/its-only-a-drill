@@ -28,7 +28,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             }
             if (!exist1) //entity doesnt exist, allocate
             {
-                Entity *e1 = EntityManagerAdd(entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
+                Entity *e1 = EntityManagerAdd(entityManager, ET_Player, Vec2Create(100.0f * 11, 0.0f));
                 *e1 = ent;
                 mgr->players[mgr->nrPlayers] = e1;
                 mgr->nrPlayers++;
@@ -50,7 +50,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
             }
             if (!exist2) //entity doesnt exist, allocate
             {
-                Entity *e2 = EntityManagerAdd(entityManager, EntityPlayer, Vec2Create(100.0f * 11, 0.0f));
+                Entity *e2 = EntityManagerAdd(entityManager, ET_Player, Vec2Create(100.0f * 11, 0.0f));
                 EntityAddCompressed(comp, e2);
                 mgr->players[mgr->nrPlayers] = e2;
                 mgr->nrPlayers++;
@@ -72,6 +72,8 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                     }
                 }
             }
+            break;
+        default:
             break;
         }
         client->hasPacket = SDL_FALSE;
