@@ -7,7 +7,7 @@
 typedef struct moveingPattern
 {
     Vec2 point[10];
-} moveingPattern;
+} MoveingPattern;
 
 //mode 0 move between two points 2modes!
 void BehaviorMoveEntity(Entity entities[], int amountOfEntitys);

@@ -7,6 +7,7 @@
 Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
 {
     Entity e;
+    Vec2 enemyPos;
     e.id = uniqueIdentifier;
     e.position = position;
     e.Force = Vec2Create(0.0f, 0.0f);
@@ -19,6 +20,12 @@ Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
         e.health = 100;
         e.isCollider = SDL_TRUE;
         e.entityState = GoForward;
+        enemyPos = RectMid(e.drawable.dst);
+        enemyPos.x += 200;
+        enemyPos.y += 200;
+        Vec2Equ(e.desiredPoint,enemyPos);
+        e.indexPoint = 0;
+
         break;
     case EntityPlayerSpawn:
         e.drawable.spriteSheet = SS_BackgroundTiles;

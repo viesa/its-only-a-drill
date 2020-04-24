@@ -257,6 +257,13 @@ void AppClientUpdate(AppClient *app)
             }
         }
         BehaviorMoveEntity(app->entityManager.entities, app->entityManager.nrEntities);
+        if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
+        {
+            app->entityManager.entities[1].desiredPoint.x = 180;
+            app->entityManager.entities[1].desiredPoint.y = 180;
+            app->entityManager.entities[1].entityState = Aggressive;
+        }
+
         PlayerUpdate(&app->player, &app->entityManager.entities[0], app->input, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate

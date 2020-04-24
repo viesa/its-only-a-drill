@@ -6,6 +6,8 @@
 #include "../Items.h"
 #include "../math/Vec2.h"
 #include <float.h>
+#include "Library.h"
+
 typedef enum EntityPresets
 {
     EntityWoman,
@@ -19,6 +21,8 @@ typedef enum entityState
     GoForward,
     GoBack,
     Fight,
+    Aggressive,
+    EntityDead,
     // used only for player so that the player can take control
     EntityPlayer
 } EntityState;
@@ -37,6 +41,8 @@ typedef struct Entity
     InventoryListItems inventory;
     int health;
     EntityState entityState;
+    Vec2 desiredPoint;
+    int indexPoint;
 } Entity;
 
 ///Creates a entity
