@@ -20,10 +20,9 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
         entity.entityState = GoForward;
-        //enemyPos = RectMid(entity.drawable.dst);
-        enemyPos.x += 200;
-        enemyPos.y += 200;
-        Vec2Equ(entity.desiredPoint,enemyPos);
+
+        enemyPos = RectMid(entity.drawables[0].dst);        
+        entity.desiredPoint = Vec2AddL(enemyPos, 200);
         entity.indexPoint = 0;
         break;
 

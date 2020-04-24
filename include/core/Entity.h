@@ -45,7 +45,6 @@ typedef struct CompressedEntity
 typedef struct Entity
 {
     EntityType type;
-    EntityState entityState;
 
     SDL_bool isNPC;
 

@@ -7,9 +7,7 @@
 
 void BehaviorMoveEntity(EntityManager *entityManager)
 {
-    int amountOfEntitys = 8;    // ask??
     MoveingPattern mp;
-
     mp.point[0] = Vec2Create((float)200, (float)200);
     mp.point[1] = Vec2Create((float)283, (float)0);
     mp.point[2] = Vec2Create((float)200, (float)-200);
@@ -27,68 +25,71 @@ void BehaviorMoveEntity(EntityManager *entityManager)
     //box1 = (SDL_Rect){(int)axis_x1 - moxsize, (int)axis_y1 - moxsize, moxsize, moxsize};
     //box2 = (SDL_Rect){(int)axis_x2 - moxsize, (int)axis_y2 - moxsize, moxsize, moxsize};
 
-
-    for (int i = 0; i < amountOfEntitys; i++)
+    
+    for (int i = 0; i < entityManager->highestIndex; i++)
     {
-        boxDP = (SDL_Rect){(int)entities[i].desiredPoint.x - moxsize, (int)entities[i].desiredPoint.y - moxsize, moxsize, moxsize};
-
-        switch (entities[i].entityState)
+        if (entityManager->bitmap[i] && entityManager->entities[i].isNPC) // if there is an entity and npc = non playable charecter
         {
-            case GoForward:
+            boxDP = (SDL_Rect){(int)entityManager->entities[i].desiredPoint.x - moxsize, (int)entityManager->entities[i].desiredPoint.y - moxsize, moxsize, moxsize};
+
+            switch (entityManager->entities[i].entityState)
             {
-                    entities[i] = BehaviorMoveToPoint(entities[i], entities[i].desiredPoint.x, entities[i].desiredPoint.y);
-                    if (SDL_HasIntersection(&entities[i].drawable.dst, &boxDP))
+                case GoForward:
+                {
+                    
+                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
+                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
                     {
-                        entities[i].desiredPoint.x -= 200;
-                        entities[i].desiredPoint.y -= 200;
-                        entities[i].entityState = GoBack;                        
+                        entityManager->entities[i].desiredPoint.x -= 200;
+                        entityManager->entities[i].desiredPoint.y -= 200;
+                        entityManager->entities[i].entityState = GoBack;                        
                     }            
-                break;
-            }
-
-            case GoBack:
-            {
-                entities[i] = BehaviorMoveToPoint(entities[i], entities[i].desiredPoint.x, entities[i].desiredPoint.y);
-                if (SDL_HasIntersection(&entities[i].drawable.dst, &boxDP))
-                {
-                    entities[i].desiredPoint.x += 200;
-                    entities[i].desiredPoint.y += 200;
-                    entities[i].entityState = GoForward;
+                    break;
                 }
-                break;
-            }
 
-            case Fight:
-            {
-
-                break;
-            }
-
-            case EntityDead:
-            {
-
-                break;
-            }
-            case Aggressive:
-            {
-                entities[i] = BehaviorMoveToPoint(entities[i], entities[i].desiredPoint.x, entities[i].desiredPoint.y);
-                if (SDL_HasIntersection(&entities[i].drawable.dst, &boxDP))
+                case GoBack:
                 {
-                    Vec2Equ(entities[i].desiredPoint,mp.point[entities[i].indexPoint]);
-                    if (entities[i].indexPoint == 9)
+                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
+                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
                     {
-                        entities[i].indexPoint = 0;
-                    } else
-                    {
-                        entities[i].indexPoint++;
-                        //log_info("pointnr is : %d\n", entities[i].indexPoint);
+                        entityManager->entities[i].desiredPoint.x += 200;
+                        entityManager->entities[i].desiredPoint.y += 200;
+                        entityManager->entities[i].entityState = GoForward;
                     }
+                    break;
                 }
-                break;
-            }
 
-            default:
-                break;
+                case Fight:
+                {
+
+                    break;
+                }
+
+                case EntityDead:
+                {
+
+                    break;
+                }
+                case Aggressive:
+                {
+                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
+                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
+                    {                        
+                        entityManager->entities[i].desiredPoint = mp.point[entityManager->entities[i].indexPoint];
+                        if (entityManager->entities[i].indexPoint == 9)
+                        {
+                            entityManager->entities[i].indexPoint = 0;
+                        } else
+                        {
+                            entityManager->entities[i].indexPoint++;
+                        }
+                    }
+                    break;
+                }
+
+                default:
+                    break;
+            }
         }
     }
 }
