@@ -61,7 +61,7 @@ void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress excl
                 {
                     printf("%c", p.data[i]);
                 }
-                printf(", %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+                printf(", %d:%d\n", p.address.host, p.address.port);
                 break;
             case UDPTypeint:
                 UDPPackageRemoveTypeNULL(&p);
@@ -122,7 +122,7 @@ void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int siz
                     {
                         printf("%c", p.data[i]);
                     }
-                    printf(", %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+                    printf(", %d:%d\n", p.address.host, p.address.port);
                     break;
                 case UDPTypeint:
                     UDPPackageRemoveTypeNULL(&p);
@@ -181,7 +181,7 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
             {
                 printf("%c", p.data[i]);
             }
-            printf(", %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+            printf(", %d:%d\n", p.address.host, p.address.port);
             break;
         case UDPTypeint:
             UDPPackageRemoveTypeNULL(&p);
@@ -280,7 +280,7 @@ int UDPServerListen(UDPServer *server, int maxLen)
         {
             printf("%c", server->pack->data[i]);
         }
-        printf(", %d:%d\n", (char *)p.data, p.address.host, p.address.port);
+        printf(", %d:%d\n", p.address.host, p.address.port);
         break;
     case UDPTypeint:
         UDPPackageRemoveTypeNULL(&p);
