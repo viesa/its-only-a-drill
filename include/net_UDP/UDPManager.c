@@ -12,6 +12,34 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
         UDPPackageTypes type = UDPPackageDecode((char *)client->pack->data);
         switch (type)
         {
+        case UDPTypeText:
+            UDPPackageRemoveType(client->pack);
+            char msg[MAX_MSGLEN];
+            SDL_memcpy(msg, client->pack->data, client->pack->len);
+            if (msg[0] == 'q' && msg[1] == 'u' && msg[2] == 'i' && msg[3] == 't') // om strcmp funkar här snälla byt ut det :)
+            {
+                int id = 0;
+                char nr[10];
+                for (int i = 5; i < client->pack->len - 1; i++)
+                {
+                    nr[i - 5] = client->pack->data[i];
+                }
+                nr[client->pack->len - 4] = '\0';
+                id = atoi(nr);
+                for (int i = 0; i < mgr->nrPlayers; i++)
+                {
+                    if (mgr->players[i]->id == id)
+                    {
+                        mgr->nrPlayers--;
+                        for (int j = i; j < mgr->nrPlayers; j++)
+                        {
+                            mgr->players[j] = mgr->players[j + 1];
+                        }
+                    }
+                }
+                log_info("Player(id:%d) disconnected\n", id);
+            }
+            break;
         case UDPTypeEntity:
             UDPPackageRemoveTypeNULL(client->pack);
             Entity ent;
@@ -24,6 +52,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                 {
                     exist1 = SDL_TRUE;
                     entityManager->entities[i] = ent;
+                    //printf("Updating old player\n");
                 }
             }
             if (!exist1) //entity doesnt exist, allocate
@@ -31,6 +60,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                 Entity *e1 = EntityManagerAdd(entityManager, ET_Player, Vec2Create(100.0f * 11, 0.0f));
                 *e1 = ent;
                 mgr->players[mgr->nrPlayers] = e1;
+                log_info("Player(id:%d) connected\n", ent.id);
                 mgr->nrPlayers++;
             }
             break;
@@ -54,23 +84,6 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                 EntityAddCompressed(comp, e2);
                 mgr->players[mgr->nrPlayers] = e2;
                 mgr->nrPlayers++;
-            }
-            break;
-        case UDPTypeIPaddress:
-            UDPPackageRemoveTypeNULL(client->pack);
-            IPaddress ip;
-            SDL_memcpy(&ip, client->pack->data, sizeof(ip));
-            for (int i = 0; i < mgr->nrPlayers; i++)
-            {
-                if (client->serverip.host == ip.host && client->serverip.port == ip.port)
-                {
-                    EntityManagerRemove(entityManager, mgr->players[i]);
-                    mgr->nrPlayers--;
-                    for (int j = i; j < mgr->nrPlayers; i++)
-                    {
-                        mgr->players[j] = mgr->players[j + 1];
-                    }
-                }
             }
             break;
         default:
