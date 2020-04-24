@@ -1,9 +1,5 @@
 #include "Audio.h"
 
-#include <SDL2/SDL.h>
-
-#include "Log.h"
-
 #define N_CHANNELS 128
 
 struct Audio
@@ -21,7 +17,7 @@ Audio *AudioCreate()
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
         log_error("Could configure audio: %s", Mix_GetError());
 
-    Audio *ret = (Audio *)SDL_malloc(sizeof(Audio));
+    Audio *ret = MALLOC(Audio);
 
     //-------------------------------------------------
     //------------------ Sound files ------------------

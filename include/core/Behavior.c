@@ -1,12 +1,13 @@
 #include "Behavior.h"
-#include "Entity.h"
-#include <stdio.h>
+
+#include "Dependencies.h"
 
 #define addmove 1500.0f
 #define moxsize 50 //boxsize
 
-void BehaviorMoveEntity(Entity entities[], int amountOfEntitys)
+void BehaviorMoveEntity(EntityManager *entityManager)
 {
+    int amountOfEntitys = 8;    // ask??
     MoveingPattern mp;
 
     mp.point[0] = Vec2Create((float)200, (float)200);
@@ -96,7 +97,7 @@ Entity BehaviorMoveToPoint(Entity entity, float x, float y)
 {
     float MovementSpeed = 500.0f;
     Vec2 nextPoint = Vec2Create(x, y);
-    Vec2 enemyVec = Vec2Sub(nextPoint, RectMid(entity.drawable.dst));
+    Vec2 enemyVec = Vec2Sub(nextPoint, RectMid(entity.drawables[0].dst));
     Vec2 unitenemyVec = Vec2Unit(enemyVec);
     Vec2 enemyMovement = Vec2MulL(unitenemyVec, MovementSpeed);
     entity.Force.x += enemyMovement.x;

@@ -1,7 +1,7 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <SDL2/SDL_mixer.h>
+#include "Dependencies.h"
 
 // Enum used in array of pre-loaded sounds
 typedef enum SoundFile

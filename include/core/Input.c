@@ -1,7 +1,5 @@
 #include "Input.h"
 
-#include "Log.h"
-
 #define NUM_MOUSE_EVENTS 6
 
 struct Input
@@ -17,7 +15,7 @@ struct Input
 
 Input *InputCreate()
 {
-    Input *ret = (Input *)SDL_malloc(sizeof(Input));
+    Input *ret = MALLOC(Input);
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
     {
         ret->m_keymap[i] = SDL_FALSE;

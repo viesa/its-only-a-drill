@@ -2,11 +2,12 @@
 #include <SDL2/SDL_net.h>
 #include "include/core/Event.h"
 #include "include/net_UDP/UDPServer.h"
-#define DEGBUG
 int main()
 {
     SDL_bool m_running = SDL_TRUE;
     UDPServer m_server = UDPServerCreate(1337);
+    system("clear");
+    printf("Server running...\n");
     while (m_running)
     {
         int rLen = UDPServerListen(&m_server, MAX_MSGLEN);
@@ -32,7 +33,15 @@ int main()
             UDPPackageRemoveTypeNULL(m_server.pack);
             char buffer[m_server.pack->len - 2];
             SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
-            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, sizeof(Entity));
+            UDPServerBroadcast(&m_server, UDPTypeEntity, m_server.pack->address, buffer, m_server.pack->len - 2);
+            SDLNet_FreePacket(m_server.pack);
+        }
+        if (rLen && UDPPackageDecode((char *)m_server.pack->data) == UDPTypeCompressedEntity)
+        {
+            UDPPackageRemoveTypeNULL(m_server.pack);
+            char buffer[m_server.pack->len - 2];
+            SDL_memcpy(buffer, m_server.pack->data, m_server.pack->len - 2);
+            UDPServerBroadcast(&m_server, UDPTypeCompressedEntity, m_server.pack->address, buffer, m_server.pack->len - 2);
             SDLNet_FreePacket(m_server.pack);
         }
     }

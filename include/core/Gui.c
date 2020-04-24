@@ -1,15 +1,10 @@
 #include "Gui.h"
-#include <math.h>
-
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
 
 #include "Library.h"
 
 Gui *GuiCreate(Font *font, Clock *clock)
 {
-    Gui *gui = (Gui *)SDL_malloc(sizeof(Gui));
+    Gui *gui = MALLOC(Gui);
     gui->clock = clock;
     gui->font = font;
     gui->points = 3;
@@ -28,6 +23,10 @@ Gui *GuiCreate(Font *font, Clock *clock)
 
 void GuiUpdate(Gui *gui)
 {
+    GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
+    GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, gui->font->gfx->window->height / 5 * 4, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
+    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
+    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){gui->font->gfx->window->width / 5 * 4, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //if (rand() % 30 < 3)
     //    gui->points += rand() % 500;
@@ -79,7 +78,7 @@ void GuiUpdate(Gui *gui)
         {255 - gui->loopSwing, 180, 184},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3DCustom(gui->font, TTF_Antilles, pts, gui->font->gfx->windowWidth - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(gui->font, TTF_Antilles, pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Objective
     //SDL_Color objColor[2] = {
@@ -94,7 +93,7 @@ void GuiUpdate(Gui *gui)
     }
     // FPS
     char fps[10];
-    sprintf(fps, "%d FPS", gui->fps);
+    sprintf(fps, "%d", gui->fps);
     FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
 }
 

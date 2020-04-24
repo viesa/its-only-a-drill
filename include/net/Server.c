@@ -13,7 +13,7 @@ Server *ServerCreate()
         return NULL;
     }
 
-    Server *ret = (Server *)SDL_malloc(sizeof(Server));
+    Server *ret = MALLOC(Server);
     ret->m_port = 0;
     ret->m_clients = ListCreate();
     ret->m_socketSet = SDLNet_AllocSocketSet(100);

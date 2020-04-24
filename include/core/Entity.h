@@ -1,21 +1,29 @@
 #ifndef ENTITY_H
 #define ENTITY_H
+
+#include "Dependencies.h"
+
 #include "Camera.h"
 #include "Clock.h"
-#include "math.h"
+#include "Library.h"
 #include "../Items.h"
 #include "../math/Vec2.h"
 #include <float.h>
 #include "Library.h"
 
-typedef enum EntityPresets
+
+#define MAX_DRAWABLES 3
+
+typedef enum EntityType
 {
-    EntityWoman,
+    ET_Player,
+    ET_Woman,
     //Used only by Map.c
-    EntityPlayerSpawn,
+    ET_PlayerSpawn,
     //Used only by Map.c
-    EntityMapObject
-} EntityPresets;
+    ET_MapObject
+} EntityType;
+
 typedef enum entityState
 {
     GoForward,
@@ -27,38 +35,57 @@ typedef enum entityState
     EntityPlayer
 } EntityState;
 
+typedef struct CompressedEntity
+{
+    EntityType type;
+    Vec2 position;
+    int health;
+    int id;
+} CompressedEntity;
 typedef struct Entity
 {
-    int rot, id; // currently unused
-    SDL_bool isCollider;
-    Drawable drawable;
+    EntityType type;
+    EntityState entityState;
+
+    SDL_bool isNPC;
+
+    int id; // currently unused
+    Drawable drawables[MAX_DRAWABLES];
+    int nDrawables;
+
     Vec2 position;
     Vec2 Force;
-    Vec2 Accseleration; // currently unused
-    Vec2 Velosity;
+    Vec2 Acceleration; // currently unused
+    Vec2 Velocity;
     float Friction; // don't make it Lager then 10
     float mass;
-    InventoryListItems inventory;
+
+    SDL_bool isCollider;
+    unsigned int hitboxIndex;
+
     int health;
     EntityState entityState;
     Vec2 desiredPoint;
     int indexPoint;
+
+    InventoryListItems inventory;
 } Entity;
 
 ///Creates a entity
-///\param preset: what entity is being created
-///makes a entity and create it so it exists
-Entity EntityCreate(Vec2 position, EntityPresets preset, int id);
+///\param type: what entity is being created
+Entity EntityCreate(Vec2 position, EntityType type, int id);
 
-///Waring only one
-///\param entites: ALL entitys are needed
-///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
-void EntityUpdate(Entity entities[], int nrEnts, Clock *clk);
-void EntityDraw(Camera *camera, Entity *entity);
+CompressedEntity EntityCompress(Entity ent);
 
-void EntityUpdateMovment(Entity entities[], int nrEnts, Clock *clk);
-/// finds the collision and fixes the problem with rules
-SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk);
+Entity EntityUnCompress(CompressedEntity ent);
+
+void EntityAddCompressed(CompressedEntity comp, Entity *ent);
+
+void EntityDraw(Entity *entity, Camera *camera);
+
 // carculates the net Froces after friction and collision
-Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk);
+void EntityCalculateNetForces(Entity *entity);
+
+void EntityRotateAll(Entity *entity, float degrees);
+
 #endif

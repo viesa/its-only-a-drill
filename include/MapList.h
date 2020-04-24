@@ -1,6 +1,7 @@
 #ifndef MAPLIST_H
 #define MAPLIST_H
 
+#include "core/Dependencies.h"
 #ifdef __linux__
 #include <dirent.h>
 #endif
@@ -10,7 +11,6 @@
 #ifdef _WIN32
 #include "core/dirent.h"
 #endif
-#include <string.h>
 #include "core/List.h"
 #include "core/JSON.h"
 

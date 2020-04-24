@@ -1,140 +1,122 @@
 #include "Entity.h"
-#include <stdio.h>
 
-//#define DegBug
 #define FrictionMode
 
-Entity EntityCreate(Vec2 position, EntityPresets preset, int uniqueIdentifier)
+Entity EntityCreate(Vec2 position, EntityType type, int id)
 {
-    Entity e;
+    Entity entity;
     Vec2 enemyPos;
-    e.id = uniqueIdentifier;
-    e.position = position;
-    e.Force = Vec2Create(0.0f, 0.0f);
-    switch (preset)
+    entity.isNPC = SDL_FALSE;
+    entity.type = type;
+    entity.id = id;
+    entity.position = position;
+    entity.Force = Vec2Create(0.0f, 0.0f);
+    switch (type)
     {
-    case EntityWoman:
-        e.Friction = 7.7f;
-        e.mass = 50.0f;
-        e.drawable = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){e.position.x, e.position.y, 57, 43}, SS_Characters);
-        e.health = 100;
-        e.isCollider = SDL_TRUE;
-        e.entityState = GoForward;
-        enemyPos = RectMid(e.drawable.dst);
+    case ET_Woman:
+        entity.Friction = 7.7f;
+        entity.mass = 50.0f;
+        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
+        entity.hitboxIndex = 0;
+        entity.nDrawables = 1;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
+        entity.entityState = GoForward;
+        //enemyPos = RectMid(entity.drawable.dst);
         enemyPos.x += 200;
         enemyPos.y += 200;
-        Vec2Equ(e.desiredPoint,enemyPos);
-        e.indexPoint = 0;
+        Vec2Equ(entity.desiredPoint,enemyPos);
+        entity.indexPoint = 0;
+        break;
 
+    case ET_PlayerSpawn:
+        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+        entity.hitboxIndex = 0;
         break;
-    case EntityPlayerSpawn:
-        e.drawable.spriteSheet = SS_BackgroundTiles;
+
+    case ET_MapObject:
+        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+        entity.hitboxIndex = 0;
         break;
-    case EntityMapObject:
-        e.drawable.spriteSheet = SS_BackgroundTiles;
-        e.mass = FLT_MAX;
-        e.isCollider = SDL_TRUE;
+
+    case ET_Player:
+        entity.Friction = 7.7f;
+        entity.mass = 50.0f;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
+        entity.drawables[0] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
+        entity.drawables[1] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
+        entity.drawables[2] = DrawableCreate((SDL_Rect){872, 952 - 33 * 4, 33, 33}, (SDL_Rect){0, 0, 33, 33}, SS_Character_Prisoner);
+        entity.hitboxIndex = 0;
+        entity.nDrawables = 3;
         break;
+
     default:
         break;
     }
-    return e;
-}
-// the update logic
-void EntityUpdate(Entity entities[], int nrEnts, Clock *clk)
-{
-    EntityUpdateMovment(entities, nrEnts, clk);
-    EntityOnCollision(entities, nrEnts, clk);
-}
-
-void EntityUpdateMovment(Entity entities[], int nrEnts, Clock *clk)
-{
-
-    for (int i = 0; i < nrEnts; i++)
-    {
-        // carculate Net_force so friction & collision & the other forces is handle before
-        entities[i] = EntityNetForces(entities[i], nrEnts, clk);
-
-        // update new position
-        entities[i].position.x += entities[i].Velosity.x * ClockGetDeltaTime(clk);
-        entities[i].position.y += entities[i].Velosity.y * ClockGetDeltaTime(clk);
-#ifdef DegBug
-        if (entities[i].id == 0)
-        {
-            log_debug("CurrentEntity:");
-            log_debug("position x: %f", entities[i].position.x);
-            log_debug("position y: %f", entities[i].position.y);
-            log_debug("Force x: %f", entities[i].Force.x);
-            log_debug("Force y: %f", entities[i].Force.y);
-            log_debug("Accseleration x: %f", entities[i].Accseleration.x);
-            log_debug("Accseleration y: %f", entities[i].Accseleration.y);
-            log_debug("Velosity x: %f", entities[i].Velosity.x);
-            log_debug("Velosity y: %f", entities[i].Velosity.y);
-            log_debug("Friction: %f", entities[i].Friction);
-            log_debug("mass: %f", entities[i].mass);
-        }
-#endif
-    }
-}
-
-Entity EntityNetForces(Entity entity, int nrEnts, Clock *clk)
-{
-    // first get momentum
-    entity.Velosity = Vec2DivL(entity.Force, entity.mass);
-
-    // Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
-    Vec2 FrictionVector = Vec2Unit(entity.Velosity);
-    FrictionVector = Vec2MulL(FrictionVector, -1.0F);
-    FrictionVector = Vec2MulL(FrictionVector, entity.mass);
-    FrictionVector = Vec2MulL(FrictionVector, entity.Friction);
-    entity.Force.x += FrictionVector.x;
-    entity.Force.y += FrictionVector.y;
-
-    // Garante stop Cause float
-    entity.Velosity = Vec2DivL(entity.Force, entity.mass);
-    entity.Velosity.x = (fabs(entity.Velosity.x) < 6.1f) ? 0 : entity.Velosity.x;
-    entity.Velosity.y = (fabs(entity.Velosity.y) < 6.1f) ? 0 : entity.Velosity.y;
-
     return entity;
 }
 
-SDL_bool EntityOnCollision(Entity entities[], int nrEnts, Clock *clk)
+CompressedEntity EntityCompress(Entity ent)
 {
-    SDL_Rect result;
-    for (int Dominant = 0; Dominant < nrEnts; Dominant++)
-    {
-        for (int Recessive = 0; Recessive < nrEnts; Recessive++)
-        {
-            if (entities[Recessive].isCollider)
-            {
-                if (Dominant != Recessive)
-                {
-                    if (SDL_IntersectRect(&entities[Dominant].drawable.dst, &entities[Recessive].drawable.dst, &result))
-                    {
-                        Vec2 DominantCenter; // carculating center
-                        DominantCenter.x = (float)entities[Dominant].drawable.dst.x + (float)entities[Dominant].drawable.dst.w / 2.0f;
-                        DominantCenter.y = (float)entities[Dominant].drawable.dst.y + (float)entities[Dominant].drawable.dst.h / 2.0f;
-
-                        Vec2 RecessiveCenter; // carculating center
-                        RecessiveCenter.x = (float)entities[Recessive].drawable.dst.x + (float)entities[Recessive].drawable.dst.w / 2.0f;
-                        RecessiveCenter.y = (float)entities[Recessive].drawable.dst.y + (float)entities[Recessive].drawable.dst.h / 2.0f;
-
-                        Vec2 ResultDistance; // Carculating distance
-                        ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
-                        ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
-
-                        entities[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat affect
-                        entities[Recessive].position.y -= ResultDistance.y / 17.0f;
-                    }
-                }
-            }
-        }
-    }
-    return SDL_FALSE;
+    CompressedEntity comp;
+    comp.health = ent.health;
+    comp.id = ent.id;
+    comp.position = ent.position;
+    comp.type = ent.type;
+    return comp;
 }
-void EntityDraw(Camera *camera, Entity *entity)
+Entity EntityUnCompress(CompressedEntity comp)
 {
-    entity->drawable.dst.x = entity->position.x;
-    entity->drawable.dst.y = entity->position.y;
-    CameraDraw(camera, entity->drawable);
+    Entity ent;
+    ent.health = comp.health;
+    ent.id = comp.id;
+    ent.position = comp.position;
+    ent.type = comp.type;
+    return ent;
+}
+void EntityAddCompressed(CompressedEntity comp, Entity *ent)
+{
+    ent->health = comp.health;
+    ent->id = comp.id;
+    ent->position = comp.position;
+    ent->type = comp.type;
+}
+void EntityDraw(Entity *entity, Camera *camera)
+{
+    for (int i = 0; i < entity->nDrawables; i++)
+    {
+        entity->drawables[i].dst.x = entity->position.x;
+        entity->drawables[i].dst.y = entity->position.y;
+        CameraDraw(camera, entity->drawables[i]);
+    }
+}
+
+void EntityCalculateNetForces(Entity *entity)
+{
+    // first get momentum
+    entity->Velocity = Vec2DivL(entity->Force, entity->mass);
+
+    // Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+    Vec2 FrictionVector = Vec2Unit(entity->Velocity);
+    FrictionVector = Vec2MulL(FrictionVector, -1.0F);
+    FrictionVector = Vec2MulL(FrictionVector, entity->mass);
+    FrictionVector = Vec2MulL(FrictionVector, entity->Friction);
+    entity->Force.x += FrictionVector.x;
+    entity->Force.y += FrictionVector.y;
+
+    // Garante stop Cause float
+    entity->Velocity = Vec2DivL(entity->Force, entity->mass);
+    entity->Velocity.x = (fabs(entity->Velocity.x) < 6.1f) ? 0 : entity->Velocity.x;
+    entity->Velocity.y = (fabs(entity->Velocity.y) < 6.1f) ? 0 : entity->Velocity.y;
+}
+
+void EntityRotateAll(Entity *entity, float degrees)
+{
+    for (int i = 0; i < entity->nDrawables; i++)
+    {
+        SDL_Rect dstMid = {0, 0, entity->drawables[i].dst.w, entity->drawables[i].dst.w};
+        entity->drawables[i].rot_anchor = RectMid(dstMid);
+        entity->drawables[i].rot = degrees;
+    }
 }

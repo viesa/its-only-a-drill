@@ -7,7 +7,8 @@
 
 typedef enum AnimType
 {
-    AN_PlayerWalk,
+    AN_PlayerLegs,
+    AN_PlayerBody,
     AN_Count
 } AnimType;
 
@@ -42,5 +43,8 @@ void AnimPause(Anim *anim);
 void AnimResume(Anim *anim);
 
 void AnimStop(Anim *anim);
+
+void AnimNextFrame(Anim *anim);
+void AnimRandomFrame(Anim *anim);
 
 #endif

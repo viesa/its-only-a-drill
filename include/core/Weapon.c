@@ -9,17 +9,17 @@ void playerShoot(Entity *player, Camera *camera, Entity e[], Item item)
     SDL_GetMouseState(&pos_x, &pos_y);
     Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
     Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(RectMid(player->drawable.dst), cameraPos);
+    Vec2 playerPos = Vec2Sub(RectMid(player->drawables[0].dst), cameraPos);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
     Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
     Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item.Stats.falloff);
-    pos_x = (int)(player->drawable.dst.x + (player->drawable.dst.w / 2)) + (int)itemFalloff.x;
-    pos_y = (int)(player->drawable.dst.x + (player->drawable.dst.w / 2)) + (int)itemFalloff.y;
+    pos_x = (int)(player->drawables[0].dst.x + (player->drawables[0].dst.w / 2)) + (int)itemFalloff.x;
+    pos_y = (int)(player->drawables[0].dst.x + (player->drawables[0].dst.w / 2)) + (int)itemFalloff.y;
 
     SDL_Point point;
-    point.x = player->drawable.dst.x + (player->drawable.dst.w / 2);
-    point.y = player->drawable.dst.y + (player->drawable.dst.h / 2);
+    point.x = player->drawables[0].dst.x + (player->drawables[0].dst.w / 2);
+    point.y = player->drawables[0].dst.y + (player->drawables[0].dst.h / 2);
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
 
     // push back
@@ -42,7 +42,7 @@ void playerShoot(Entity *player, Camera *camera, Entity e[], Item item)
         tmpPosY = pos_y;
         tmpPointX = point.x + (rand() % 20 - 10) / item.Stats.accuracy;
         tmpPointY = point.y + (rand() % 20 - 10) / item.Stats.accuracy;
-        if (SDL_IntersectRectAndLine(&e[i].drawable.dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+        if (SDL_IntersectRectAndLine(&e[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
         { // reduce accuracy
             e[i].health -= item.Stats.Damage;
             e[i].Force.x += itemFalloff.x;

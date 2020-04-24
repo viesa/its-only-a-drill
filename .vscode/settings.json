@@ -25,6 +25,23 @@
                 "maplist.h": "c",
                 "dirent.h": "c",
                 "json.h": "c",
-                "cstdlib": "c"
+                "cstdlib": "c",
+                "entitymanager.h": "c",
+                "event.h": "c",
+                "__bit_reference": "c",
+                "algorithm": "c",
+                "bitset": "c",
+                "chrono": "c",
+                "unordered_map": "c",
+                "log.h": "c",
+                "cursor.h": "c",
+                "__node_handle": "c",
+                "__hash_table": "c",
+                "__split_buffer": "c",
+                "array": "c",
+                "string": "c",
+                "utility": "c",
+                "vector": "c",
+                "transition.h": "c"
         }
 }

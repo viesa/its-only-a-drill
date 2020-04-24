@@ -1,13 +1,13 @@
 #include "core/AppClient.h"
+#include <time.h>
 #include "Items.h"
 #include "Player.h"
-#include "./core/Behavior.h"
 #include "Map.h"
 #include "MapList.h"
-#include "core/Weapon.h"
 #include "core/Behavior.h"
-#include "./core/EntityManager.h"
-//#define DEGBUG
+#include "core/Weapon.h"
+#include "core/Score.h"
+#include "core/Inventory.h"
 #define MaxEntities 5
 struct AppClient
 {
@@ -20,7 +20,7 @@ struct AppClient
     Gui *gui;
     Camera *camera;
     Clock *clock;
-    FpsManger *FPSControls;
+    FPSManager *fpsManager;
     Input *input;
     Menu *menu;
 
@@ -29,10 +29,12 @@ struct AppClient
     //UDP stuff (client, server messages etc.)
     UDPClient *client;
     SDL_Thread *listenThread;
+    SDL_Thread *updateThread;
+    UDPManager udpManager;
 
     GroundListItems groundListItems;
 
-    EntityManager entityManager;
+    EntityManager *entityManager;
     Player player; // player == entity 0
 
     Map map;
@@ -43,69 +45,72 @@ void ListenToServer(void *args)
     UDPClient *client = (UDPClient *)args;
     while (client->isActive)
     {
-        SDL_Delay(5);
-        if (client->hasPacket)
-            continue;
+        while (client->hasPacket)
+            ;
         UDPClientListen(client, MAX_MSGLEN);
     }
 }
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FpsManger *FPSControls)
+void UpdateFromServer(void *args)
 {
+    AppClient *app = (AppClient *)args;
+    while (app->client->isActive)
+    {
+        //SDL_Delay(5);
+        UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
+    }
+}
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
+{
+
+    srand(time(NULL));
+    CursorInitialize();
+
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->state = StateCreate();
     app->clock = clock;
-    app->FPSControls = FPSControls;
+    app->fpsManager = fpsManager;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
-    app->menu = MenuCreate(app->gfx, app->font, &app->state);
-    app->player = PlayerCreate();
+    app->entityManager = EntityManagerCreate();
+    app->menu = MenuCreate(app->gfx, app->entityManager, app->font, &app->state);
+    app->player = PlayerCreate(app->camera, app->entityManager);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
     app->client = client;
-#ifdef DEGBUG
+    app->udpManager = UDPManagerCreate();
+
     app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
-#endif
-    app->entityManager = EntityManagerCreate();
-    EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){50, 50}, EntityWoman, 0));
-    for (int i = 1; i < 10; i++)
-        EntityManagerAdd(&app->entityManager, EntityCreate((Vec2){100 * i, 0}, EntityWoman, i));
-    app->entityManager.entities[0].entityState = EntityPlayer;
-
-#ifdef DEGBUG
-    for (int i = 1; i < app->entityManager.nrEntities; i++)
-    {
-        app->entityManager.entities[i].id = 0;
-    }
-    app->entityManager.nrEntities = 1;
-#endif
-    ScoreCreate(0);
-    ScoreIncrement(100, 0);
-
-    app->groundListItems = GroundListCreate();
-    app->entityManager.entities[0].inventory = InventoryCreate();
-
-#ifdef DEGBUG
     if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
     {
         log_info("Sending Message: alive\n");
-        SDL_Delay(1000);
+        SDL_Delay(2000);
         if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
         {
             UDPPackageRemoveTypeNULL(app->client->pack);
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
-            app->entityManager.entities[0].id = *(int *)app->client->pack->data;
-            app->client->hasPacket = SDL_FALSE;
+            app->player.entity->id = *(int *)app->client->pack->data;
+            app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
         }
     }
-#endif
-#ifndef DEGBUG
-    UDPClientSend(app->client, UDPTypeText, "alive\0", 6);
-#endif
+    app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
+    for (int i = 1; i < 10; i++)
+    {
+        Entity *npc = EntityManagerAdd(app->entityManager, ET_Woman, Vec2Create(100.0f * i, 0.0f));
+        npc->isNPC = SDL_TRUE;
+    }
+    app->player.entity->entityState = EntityPlayer;
+
+    ScoreCreate(0);
+    ScoreIncrement(100, 0);
+
+    app->groundListItems = GroundListCreate();
+    app->player.entity->inventory = InventoryCreate();
+
     app->state.gameState = GS_Menu;
     app->state.menuState = MS_MainMenu;
 
@@ -130,49 +135,19 @@ void AppClientDestroy(AppClient *app)
 
 void AppClientRun(AppClient *app)
 {
-    GraphicsClearScreen(app->gfx);
+    WindowClear(app->gfx->window);
     AppClientUpdate(app);
     AppClientDraw(app);
-    GraphicsPresentScreen(app->gfx);
+    WindowPresent(app->gfx->window);
 }
 
 void AppClientUpdate(AppClient *app)
 {
-#ifdef DEGBUG
-    if (app->client->hasPacket)
-    {
-        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeText)
-        {
-            log_info("%s\n", app->client->pack->data);
-            app->client->hasPacket = SDL_FALSE;
-        }
-        if (UDPPackageDecode((char *)app->client->pack->data) == UDPTypeEntity)
-        {
-            UDPPackageRemoveTypeNULL(app->client->pack);
-            Entity ent = *(Entity *)app->client->pack->data;
-            app->client->hasPacket = SDL_FALSE;
-            SDL_bool exist = SDL_FALSE;
-            for (int i = 0; i < app->entityManager.nrEntities; i++)
-            {
-                if (app->entityManager.entities[i].id == ent.id) //entity exists
-                {
-                    exist = SDL_TRUE;
-                    app->entityManager.entities[i] = ent;
-                }
-            }
-            if (!exist) //entity doesnt exist, allocate
-            {
-                app->entityManager.entities[app->entityManager.nrEntities] = ent;
-                app->entityManager.nrEntities++;
-            }
-        }
-    }
-#endif
-
     switch (app->state.gameState)
     {
     case GS_Menu:
     {
+        CursorChange(CT_Normal);
         MapListUpdate(&app->mapList);
         switch (app->state.menuState)
         {
@@ -186,6 +161,7 @@ void AppClientUpdate(AppClient *app)
     }
     case GS_Playing:
     {
+        CursorChange(CT_Crossair);
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
         {
             app->state.gameState = GS_Menu;
@@ -196,13 +172,13 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
         { // if player is near to the item, then take it!
-            if (app->entityManager.entities[0].inventory.top < MAX_PLYER_ITEMS)
+            if (app->player.entity->inventory.top < MAX_PLYER_ITEMS)
             {
                 for (int tmp = 0; tmp < 2; tmp++)
                 {
-                    if (SDL_HasIntersection(&app->entityManager.entities[0].drawable.dst, &app->groundListItems.contents[tmp].drawable.dst))
+                    if (SDL_HasIntersection(&app->player.entity->drawables[0].dst, &app->groundListItems.contents[tmp].drawable.dst))
                     {
-                        ItemPickup(&app->entityManager.entities[0].inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
+                        ItemPickup(&app->player.entity->inventory, &app->groundListItems.contents[tmp], &app->groundListItems, tmp);
                         log_info("you picked up an item. \n");
                     }
                 }
@@ -215,9 +191,9 @@ void AppClientUpdate(AppClient *app)
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
         {
-            if (app->entityManager.entities[0].inventory.top > 1) // can't drop the knife
+            if (app->player.entity->inventory.top > 1) // can't drop the knife
             {
-                ItemDrop(&app->groundListItems, &app->entityManager.entities[0].inventory, app->entityManager.entities[0].position);
+                ItemDrop(&app->groundListItems, &app->player.entity->inventory, app->player.entity->position);
             }
         }
 
@@ -226,51 +202,55 @@ void AppClientUpdate(AppClient *app)
             if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
-                ItemDynamicDrop(&app->groundListItems, &app->entityManager.entities[0].inventory, app->entityManager.entities[0].position, 2);
+                ItemDynamicDrop(&app->groundListItems, &app->player.entity->inventory, app->player.entity->position, 2);
             }
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_3))
         {
             log_info("You Pressed 3");
-            InventorySelectItem(&app->entityManager.entities[0].inventory, 3);
+            InventorySelectItem(&app->player.entity->inventory, 3);
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_4))
         {
             log_info("You Pressed 4");
-            InventorySelectItem(&app->entityManager.entities[0].inventory, 4);
+            InventorySelectItem(&app->player.entity->inventory, 4);
         }
 
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_5))
         {
             log_info("You Pressed 5");
-            InventorySelectItem(&app->entityManager.entities[0].inventory, 5);
+            InventorySelectItem(&app->player.entity->inventory, 5);
         }
 
         if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
-            if (app->entityManager.entities[0].inventory.contents[app->entityManager.entities[0].inventory.top - 1].Stats.ammo > 0)
+            if (app->player.entity->inventory.contents[app->player.entity->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(&app->entityManager.entities[0], app->camera, app->entityManager.entities, app->entityManager.entities[0].inventory.contents[app->entityManager.entities[0].inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, app->entityManager->entities, app->player.entity->inventory.contents[app->player.entity->inventory.top - 1]);
             }
         }
-        BehaviorMoveEntity(app->entityManager.entities, app->entityManager.nrEntities);
+        BehaviorMoveEntity(app->entityManager);
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
         {
-            app->entityManager.entities[1].desiredPoint.x = 180;
-            app->entityManager.entities[1].desiredPoint.y = 180;
-            app->entityManager.entities[1].entityState = Aggressive;
+            app->entityManager->entities[1].desiredPoint.x = 180;
+            app->entityManager->entities[1].desiredPoint.y = 180;
+            app->entityManager->entities[1].entityState = Aggressive;
         }
 
-        PlayerUpdate(&app->player, &app->entityManager.entities[0], app->input, app->clock, app->camera);
+        //PlayerUpdate(&app->player, &app->entityManager.entities[0], app->input, app->clock, app->camera);
+        PlayerUpdate(&app->player, app->input, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate
-        EntityUpdate(app->entityManager.entities, app->entityManager.nrEntities, app->clock);
-#ifdef DEGBUG
-        UDPClientSend(app->client, UDPTypeEntity, &app->entityManager.entities[0], sizeof(Entity));
-#endif
+        EntityManagerUpdate(app->entityManager, app->clock);
+
+        //CompressedEntity sendCompressedEntity = EntityCompress(app->entityManager->entities[0]);
+        //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
+
+        UDPClientSend(app->client, UDPTypeEntity, &app->entityManager->entities[0], sizeof(Entity));
+
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
@@ -302,48 +282,40 @@ void AppClientDraw(AppClient *app)
         {
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
-            if (app->map.contents)
-            {
-                for (int i = 0; i < app->map.n; i++)
-                {
-                    EntityDraw(app->camera, &app->map.contents[i]);
-                }
-            }
+            MapDraw(&app->map, app->camera);
             break;
         default:
             break;
         }
-        MenuUpdate(app->menu, app->input, app->FPSControls, &app->mapList, &app->map);
-        GraphicsChangeCursor(app->gfx, CU_Normal);
+        MenuUpdate(app->menu, app->input, app->fpsManager, &app->mapList, &app->map);
         break;
     }
     case GS_Playing:
     {
         CameraSetFollow(app->camera, &app->player.aimFollow);
-        if (app->map.contents)
-            for (int i = 0; i < app->map.n; i++)
-                EntityDraw(app->camera, &app->map.contents[i]);
+        MapDraw(&app->map, app->camera);
 
-        UpdateItemDraw(&app->entityManager.entities[0].inventory, &app->groundListItems, app->camera);
+        UpdateItemDraw(&app->player.entity->inventory, &app->groundListItems, app->camera);
 
-        for (int i = 0; i < app->entityManager.nrEntities; i++)
-            EntityDraw(app->camera, &app->entityManager.entities[i]);
-
+        for (int i = 0; i < app->entityManager->highestIndex; i++)
+        {
+            if (app->entityManager->bitmap[i] && app->entityManager->entities[i].isNPC)
+                EntityDraw(&app->entityManager->entities[i], app->camera);
+        }
+        PlayerDraw(&app->player, app->camera);
+        UDPManagerDraw(&app->udpManager, app->camera);
         GuiUpdate(app->gui);
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
         {
-            InventoryDisplay(app->gfx, &app->entityManager.entities[0].inventory);
+            InventoryDisplay(app->gfx, &app->player.entity->inventory);
         }
 
-        InventoryDisplayEquiped(app->gfx, &app->entityManager.entities[0].inventory, app->entityManager.entities[0].position);
+        InventoryDisplayEquiped(app->camera, &app->player.entity->inventory, app->player.entity->position);
 
-        GraphicsChangeCursor(app->gfx, CU_Crossair);
         break;
     }
     default:
         break;
     }
-
-    GraphicsDrawGradient(app->gfx, (SDL_Rect){0, 0, app->gfx->windowWidth, app->gfx->windowHeight}, (SDL_Color){20, 180, 184, 50}, (SDL_Color){200, 159, 227, 50});
 }

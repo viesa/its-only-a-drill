@@ -1,7 +1,5 @@
 #include "Sound.h"
 
-#include "Log.h"
-
 Sound SoundCreate(Audio *audio, SoundFile soundFile)
 {
     Sound ret;

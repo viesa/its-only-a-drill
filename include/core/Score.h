@@ -1,6 +1,8 @@
 #ifndef SCORE_H
 #define SCORE_H
 
+#include "Dependencies.h"
+
 //Skapar en scorebord för en spelare
 void ScoreCreate(int id);
 

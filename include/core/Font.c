@@ -1,7 +1,5 @@
 #include "Font.h"
 
-#include "Log.h"
-
 Font *FontCreate(Graphics *gfx)
 {
     if (TTF_Init() < 0)
@@ -9,7 +7,7 @@ Font *FontCreate(Graphics *gfx)
         log_error("Could not initialize fonts: %s", SDL_GetError());
     }
 
-    Font *font = (Font *)SDL_malloc(sizeof(Font));
+    Font *font = MALLOC(Font);
     font->gfx = gfx;
 
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
@@ -42,7 +40,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
         boxWidth = drawSize.w;
 
     SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font->fonts[fontEnum], text, color, boxWidth);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(GraphicsGetRenderer(font->gfx), surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
     SDL_FreeSurface(surface);
 
     int texW = 0;
@@ -50,7 +48,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
     SDL_Rect dstrect = {x - alignOffsetX, y, texW, texH};
 
-    SDL_RenderCopy(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect);
+    SDL_RenderCopy(font->gfx->window->renderer, texture, NULL, &dstrect);
 
     //SDL_RenderCopyEx(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect, 90, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
     SDL_DestroyTexture(texture);
@@ -62,7 +60,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(GraphicsGetRenderer(font->gfx), surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
     int x = 0;
     int y = 0;
     int texW = 0;

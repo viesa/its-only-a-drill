@@ -12,7 +12,7 @@ struct NetworkMgr
 
 NetworkMgr *NetworkMgrCreate()
 {
-    NetworkMgr *ret = (NetworkMgr *)SDL_malloc(sizeof(NetworkMgr));
+    NetworkMgr *ret = MALLOC(NetworkMgr);
     ret->m_clients = ListCreate();
     ret->m_servers = ListCreate();
     return ret;

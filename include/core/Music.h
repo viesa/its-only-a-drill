@@ -1,8 +1,7 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#include <SDL2/SDL_bits.h>
-
+#include "Dependencies.h"
 #include "Audio.h"
 
 typedef struct Music

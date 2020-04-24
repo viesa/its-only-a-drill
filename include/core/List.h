@@ -1,9 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <stddef.h>
-
-#include <SDL2/SDL_mutex.h>
+#include "Dependencies.h"
 
 typedef struct Node
 {

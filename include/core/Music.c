@@ -1,7 +1,5 @@
 #include "Music.h"
 
-#include "Log.h"
-
 Music MusicCreate(Audio *audio, MusicFile musicFile)
 {
     Music ret;

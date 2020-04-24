@@ -1,7 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "core/Entity.h"
+#include "core/EntityManager.h"
 #include "core/Input.h"
 #include "core/Anim.h"
 #include "math/Vec2.h"
@@ -10,14 +10,17 @@
 
 typedef struct Player
 {
-    Anim walkAnim;
+    Entity *entity;
+    Anim leg;
+    Anim body;
     Vec2 aimFollow;
     Vec2 forward;
 } Player;
 
-Player PlayerCreate();
+Player PlayerCreate(Camera *camera, EntityManager *entityManager);
 void PlayerDestroy(Player *player);
 
-void PlayerUpdate(Player *player, Entity *entity, Input *input, Clock *clock, Camera *camera);
+void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera);
+void PlayerDraw(Player *player, Camera *camera);
 
 #endif

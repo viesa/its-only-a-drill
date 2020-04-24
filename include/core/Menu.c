@@ -1,12 +1,12 @@
 #include "Menu.h"
 
-#include "Log.h"
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
+Menu *MenuCreate(Graphics *gfx, EntityManager *entityManager, Font *font, State *state)
 {
-    Menu *menu = (Menu *)SDL_malloc(sizeof(Menu));
+    Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
+    menu->entityManager = entityManager;
     menu->font = font;
     menu->state = state;
     menu->loopCount = 0;
@@ -14,17 +14,15 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
     menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
-    menu->Width = 640;
-    menu->Height = 480;
 
     SDL_Rect src = {0, 0, 1919, 942};
-    SDL_Rect dst = {0, 0, gfx->windowWidth, gfx->windowHeight};
+    SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
 
     return menu;
 }
 
-void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapList, Map *map)
+void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map)
 {
     if (menu->loopCount < 2 * PI)
     {
@@ -77,7 +75,7 @@ void MenuUpdate(Menu *menu, Input *input, FpsManger *FPSContorls, MapList *mapLi
         MenuUpdateResolution(menu, input);
         break;
     case MS_FPS:
-        MenuUpdateFPS(menu, input, FPSContorls);
+        MenuUpdateFPS(menu, input, fpsManager);
         break;
     case MS_CustomMap:
         MenuUpdateCustomMap(menu, input, mapList, map);
@@ -160,17 +158,13 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         switch (menu->activeIndex)
         {
         case 0: //toggle fullscreen
-            if (menu->gfx->isFullscreen)
-            { //Get out of fullscreen
-                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, 0);
-                menu->gfx->windowHeight -= 60;
-                menu->gfx->isFullscreen = 0;
+            if (menu->gfx->window->isFullscreen)
+            {
+                WindowSetFullscreen(menu->gfx->window, SDL_FALSE);
             }
             else
-            { //go to fullscreen
-                SDL_SetWindowFullscreen(menu->gfx->m_mainWindow, SDL_WINDOW_FULLSCREEN);
-                menu->gfx->windowHeight += 60;
-                menu->gfx->isFullscreen = 1;
+            {
+                WindowSetFullscreen(menu->gfx->window, SDL_TRUE);
             }
             break;
         case 1: //set resolution
@@ -180,15 +174,13 @@ void MenuUpdateOptions(Menu *menu, Input *input)
         break;
         case 2: //Vsync // do we use OpenGL?
         {
-            if (menu->gfx->vsync)
+            if (menu->gfx->window->vsyncEnabled)
             {
-                SDL_GL_SetSwapInterval(0);
-                menu->gfx->vsync = SDL_FALSE;
+                WindowSetVSync(menu->gfx->window, SDL_FALSE);
             }
             else
             {
-                SDL_GL_SetSwapInterval(1);
-                menu->gfx->vsync = SDL_TRUE;
+                WindowSetVSync(menu->gfx->window, SDL_TRUE);
             }
         }
         break;
@@ -226,49 +218,39 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
+        int width = -1;
+        int height = -1;
         switch (menu->activeIndex)
         {
         case 0:
-            menu->Width = 640;
-            menu->Height = 480;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 640;
+            height = 480;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 1:
-            menu->Width = 1280;
-            menu->Height = 720;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 1280;
+            height = 720;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 2:
-            menu->Width = 1920;
-            menu->Height = 1080;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 1920;
+            height = 1080;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 3:
-            menu->Width = 1920;
-            menu->Height = 1200;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 1920;
+            height = 1200;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 4:
-            menu->Width = 2560;
-            menu->Height = 1440;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 2560;
+            height = 1440;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 5:
-            menu->Width = 2560;
-            menu->Height = 1600;
-            SDL_SetWindowSize(menu->gfx->m_mainWindow, menu->Width, menu->Height);
-            menu->gfx->windowWidth = menu->Width;
-            menu->gfx->windowHeight = menu->Height;
+            width = 2560;
+            height = 1600;
+            WindowSetSize(menu->gfx->window, width, height);
             break;
         case 6:
         {
@@ -280,7 +262,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     }
     MenuDraw(menu, options, optionLength);
 }
-void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
+void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager)
 {
     //Determine menu options
     int optionLength = 6;
@@ -302,28 +284,28 @@ void MenuUpdateFPS(Menu *menu, Input *input, FpsManger *FPSContorls)
         {
         case 0:
         {
-            FPSContorls->DesiredFPS = 30;
+            fpsManager->desiredFPS = 30;
             break;
         }
         case 1:
         {
-            FPSContorls->DesiredFPS = 60;
+            fpsManager->desiredFPS = 60;
             break;
         }
         break;
         case 2:
         {
-            FPSContorls->DesiredFPS = 90;
+            fpsManager->desiredFPS = 90;
             break;
         }
         case 3:
         {
-            FPSContorls->DesiredFPS = 120;
+            fpsManager->desiredFPS = 120;
             break;
         }
         case 4:
         {
-            FPSContorls->DesiredFPS = 999; // they won't know
+            fpsManager->desiredFPS = 999; // they won't know
             break;
         }
         case 5:
@@ -381,7 +363,7 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
         }
         MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
         JSON *mapdata = JSONCreate(entry->filename);
-        *map = MapCreate(mapdata);
+        *map = MapCreate(mapdata, menu->entityManager);
         JSONDestroy(mapdata);
     }
 
@@ -391,8 +373,8 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
 void MenuDraw(Menu *menu, char options[][100], int optionLength)
 {
     //Get windows size
-    menu->mainMenuDbl.dst.w = menu->gfx->windowWidth;
-    menu->mainMenuDbl.dst.h = menu->gfx->windowHeight;
+    menu->mainMenuDbl.dst.w = menu->gfx->window->width;
+    menu->mainMenuDbl.dst.h = menu->gfx->window->height;
 
     //Draw background
     if (menu->state->menuState == MS_MainMenu)
@@ -426,11 +408,11 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
         {
             if (i == menu->activeIndex)
             {
-                FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->windowWidth / 2, menu->gfx->windowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+                FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
             }
             else
             {
-                FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->windowWidth / 2, menu->gfx->windowHeight / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+                FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
             }
         }
         break;

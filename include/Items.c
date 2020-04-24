@@ -1,5 +1,5 @@
 #include "Items.h"
-#include "core/Log.h"
+
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 
@@ -76,6 +76,17 @@ void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos)
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
         GraphicsDraw(gfx, item->drawable);
+    }
+}
+
+void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos)
+{
+    if (item->picked)
+    {
+        item->postion = pos;
+        item->drawable.dst.x = item->postion.x;
+        item->drawable.dst.y = item->postion.y;
+        CameraDraw(camera, item->drawable);
     }
 }
 

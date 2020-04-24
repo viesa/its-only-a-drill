@@ -1,9 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "Dependencies.h"
 #include "../math/Vec2.h"
 #include "Graphics.h"
-#include "Log.h"
 
 typedef struct Camera Camera;
 
