@@ -16,25 +16,31 @@ Gui *GuiCreate(Font *font, Clock *clock)
     gui->defaultEdge = 30;
     gui->defaultSize = 50;
     gui->defaultOffset = 3;
-    srand(time(NULL));
+    gui->scan = DrawableCreate((SDL_Rect){0, 0, 1600, 1200}, (SDL_Rect){0, 0, font->gfx->window->width, font->gfx->window->height}, SS_Scanline);
 
     return gui;
 }
 
+void GuiOverlayUpdate(Gui *gui)
+{
+    //Draw scanlines
+    gui->scan.dst.w = gui->font->gfx->window->width;
+    gui->scan.dst.h = gui->font->gfx->window->height;
+    GraphicsDraw(gui->font->gfx, gui->scan);
+}
+
 void GuiUpdate(Gui *gui)
 {
+    //Draw overlays
     GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
     GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, gui->font->gfx->window->height / 5 * 4, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
     GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
     GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){gui->font->gfx->window->width / 5 * 4, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
-    //if (rand() % 30 < 3)
-    //    gui->points += rand() % 500;
-    //
-    //if (gui->points > 50000)
-    //    gui->points = 0;
+    //Points
     gui->points = ScoreInfo(0); //Temp Score grej
 
+    //Update loop variables
     if (gui->loopCount < 2 * PI)
     {
         gui->loopCount += .1f;
@@ -63,7 +69,7 @@ void GuiUpdate(Gui *gui)
         gui->loopSwing--;
     }
 
-    // Points
+    // Disp. Points
     char pts[10];
     sprintf(pts, "%ld pts", gui->points);
     SDL_Color vitalsColor[10] = {
@@ -80,21 +86,25 @@ void GuiUpdate(Gui *gui)
 
     FontDraw3DCustom(gui->font, TTF_Antilles, pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
-    // Objective
+    // Disp. Objective
     //SDL_Color objColor[2] = {
     //{102 + cos(gui->loopCount) * 5, 16, 9},
     //{239 + sin(gui->loopCount) * 5, 193, 92}};
     //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
     //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
+#ifdef ANY_DEBUG
+    // Disp. FPS
     if (!gui->loopCount % 5)
     {
         gui->fps = (int)ClockGetFPS(gui->clock);
     }
-    // FPS
     char fps[10];
     sprintf(fps, "%d", gui->fps);
     FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
+#endif
+
+    GuiOverlayUpdate(gui);
 }
 
 void GuiDestroy(Gui *gui)
