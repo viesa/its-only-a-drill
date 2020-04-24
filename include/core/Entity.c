@@ -1,7 +1,5 @@
 #include "Entity.h"
 
-#define FrictionMode
-
 Entity EntityCreate(Vec2 position, EntityType type, int id)
 {
     Entity entity;
@@ -87,13 +85,19 @@ void EntityCalculateNetForces(Entity *entity)
     // first get momentum
     entity->Velocity = Vec2DivL(entity->Force, entity->mass);
 
-    // Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+// compute friendly
+#ifndef frictionReal
+    entity->Force = Vec2MulL(entity->Force, 0.95f);
+#endif
+// Friction formula (-1 * m * n * v(u)) v(u)= velocity unit vector
+#ifdef frictionReal
     Vec2 FrictionVector = Vec2Unit(entity->Velocity);
     FrictionVector = Vec2MulL(FrictionVector, -1.0F);
     FrictionVector = Vec2MulL(FrictionVector, entity->mass);
     FrictionVector = Vec2MulL(FrictionVector, entity->Friction);
     entity->Force.x += FrictionVector.x;
     entity->Force.y += FrictionVector.y;
+#endif
 }
 
 void EntityRotateAll(Entity *entity, float degrees)
