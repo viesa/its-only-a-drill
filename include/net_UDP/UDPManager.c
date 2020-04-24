@@ -29,6 +29,7 @@ void UDPManagerUpdate(UDPManager *mgr, UDPClient *client, EntityManager *entityM
                 {
                     if (mgr->players[i]->id == id)
                     {
+                        EntityManagerRemove(entityManager, mgr->players[i]);
                         mgr->nrPlayers--;
                         for (int j = i; j < mgr->nrPlayers; j++)
                         {

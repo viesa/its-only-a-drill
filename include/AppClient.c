@@ -43,21 +43,32 @@ struct AppClient
 void ListenToServer(void *args)
 {
     UDPClient *client = (UDPClient *)args;
+    SDL_mutex *m = SDL_CreateMutex();
     while (client->isActive)
     {
         while (client->hasPacket)
             ;
+        SDL_LockMutex(m);
         UDPClientListen(client, MAX_MSGLEN);
+        if (client->hasPacket && UDPPackageDecode((char *)client->pack->data) != UDPTypeint && !client->hasInit)
+        {
+            SDLNet_FreePacket(client->pack);
+            client->hasPacket = SDL_FALSE;
+        }
+        SDL_UnlockMutex(m);
     }
 }
 void UpdateFromServer(void *args)
 {
     AppClient *app = (AppClient *)args;
+    SDL_mutex *m = SDL_CreateMutex();
     while (app->client->isActive)
     {
         while (!app->client->hasPacket)
             ;
+        SDL_LockMutex(m);
         UDPManagerUpdate(&app->udpManager, app->client, app->entityManager);
+        SDL_UnlockMutex(m);
     }
 }
 AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
@@ -96,6 +107,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
             log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
             app->player.entity->id = *(int *)app->client->pack->data;
             app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
+            app->client->hasInit = SDL_TRUE;
         }
     }
     app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
