@@ -8,6 +8,8 @@
 #include <limits.h>
 #include <float.h>
 #include <math.h>
+#include <inttypes.h>
+#include <assert.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -22,5 +24,11 @@
 
 #define MALLOC(type) (type *)SDL_malloc(sizeof(type))
 #define MALLOC_N(type, n) (type *)SDL_malloc(sizeof(type) * (n))
+
+#define ALLOC_ERROR_CHECK(pointer)               \
+    if ((pointer) == NULL)                       \
+    {                                            \
+        log_error("Failed to alloacate memory"); \
+    }
 
 #endif
