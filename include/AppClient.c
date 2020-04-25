@@ -269,7 +269,7 @@ void AppClientUpdate(AppClient *app)
         //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
         if (!app->client->hasPacket)
-            UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[0], sizeof(Entity));
+            UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;

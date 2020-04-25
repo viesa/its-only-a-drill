@@ -146,7 +146,7 @@ void AppServerLogic(AppServer *app)
         break;
     }
 }
-void AppServerShowPlayers(UDPServer *server)
+void AppServerShowPlayerList(UDPServer *server)
 {
     printf("\nPlayer list\n");
     for (int i = 0; i < server->nrPlayers; i++)
