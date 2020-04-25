@@ -114,7 +114,7 @@ void AppServerBroadcastFromSender(UDPServer *server)
     {
         for (int i = 0; i < server->nrPlayers; i++)
         {
-            if (server->players[i].ip.host != server->pack->address.host && server->players[i].ip.port != server->pack->address.port)
+            if (server->players[i].ip.port != server->pack->address.port || server->players[i].ip.host != server->pack->address.host)
             {
                 server->pack->address = server->players[i].ip;
                 SDLNet_UDP_Send(server->sock, -1, server->pack);
