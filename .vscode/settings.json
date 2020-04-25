@@ -44,6 +44,8 @@
                 "vector": "c",
                 "transition.h": "c",
                 "type_traits": "cpp",
-                "xtr1common": "cpp"
+                "xtr1common": "cpp",
+                "udppackager.h": "c",
+                "dependencies.h": "c"
         }
 }

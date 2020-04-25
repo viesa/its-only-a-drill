@@ -121,7 +121,8 @@ EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position)
 
 void EntityManagerRemove(EntityIndexP index)
 {
-    EntityManagerRemoveRange(index, index + 1);
+    size_t end = *index + 1;
+    EntityManagerRemoveRange(index, (EntityIndexP)&end);
 }
 
 void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end)
@@ -129,8 +130,6 @@ void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end)
     VectorEraseRange(ENTITY_VECTOR, *start, *end);
     for (size_t i = *end; i < ENTITY_ARRAY_SIZE; i++)
         entityManager.indices[i]--;
-    for (EntityIndexP i = start; i < end; i++)
-        *i = 0;
 }
 
 Vector *EntityManagerGetVector()
