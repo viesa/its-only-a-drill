@@ -4,6 +4,7 @@
 UDPServer UDPServerCreate(Uint16 port)
 {
     UDPServer server;
+    server.hasPacket = SDL_FALSE;
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         server.ids[i] = 0;
@@ -209,55 +210,19 @@ void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int siz
 int UDPServerListen(UDPServer *server, int maxLen)
 {
     server->pack = SDLNet_AllocPacket(maxLen);
-    int exists = 0;
+
     int r = SDLNet_UDP_Recv(server->sock, server->pack);
     if (!r)
     {
+        server->hasPacket = SDL_FALSE;
         SDLNet_FreePacket(server->pack);
         return 0;
     }
+    server->hasPacket = SDL_TRUE;
 #ifdef DEGBUG
     system("clear");
 #endif
-    for (int i = 0; i < server->nrPlayers; i++)
-    {
-        if (server->players[i].ip.port == server->pack->address.port)
-        {
-            if (UDPPackageDecode((char *)server->pack->data) == UDPTypeText)
-            {
-                if (strcmp((char *)server->pack->data, "0quit") == 0)
-                {
-                    char quitmsg[10];
-                    sprintf(quitmsg, "quit %d", server->players[i].id);
-                    UDPServerEcho(server, UDPTypeText, quitmsg, strlen(quitmsg) + 1);
-                    server->nrPlayers--;
-                    for (int j = i; j < server->nrPlayers; j++)
-                    {
-                        server->players[j] = server->players[j + 1];
-                    }
-                    server->ids[i] = 0;
-                    SDL_memset(&server->players[server->nrPlayers], 0, sizeof(UDPPlayer));
-                }
-            }
-            exists = 1;
-        }
-    }
-    if (!exists)
-    {
-        if (server->nrPlayers == MAX_PLAYERS || strcmp((char *)server->pack->data, "0quit") == 0)
-            ;
-        else
-        {
-            server->players[server->nrPlayers].ip = server->pack->address;
-            server->nrPlayers++;
-        }
-    }
 #ifdef DEGBUG
-    printf("\nPlayer list\n");
-    for (int i = 0; i < server->nrPlayers; i++)
-        printf("(host:port): %d:%d\n", server->players[i].ip.host, server->players[i].ip.port);
-    printf("length of list %d\n", server->nrPlayers);
-    printf("End of player list\n\n");
 #ifdef RAWINOUT
     printf("RAW IN(message, host:port): ");
     for (int i = 0; i < server->pack->len; i++)

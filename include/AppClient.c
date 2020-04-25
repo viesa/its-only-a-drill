@@ -268,12 +268,8 @@ void AppClientUpdate(AppClient *app)
         //CompressedEntity sendCompressedEntity = EntityCompress(app->ENTITY_ARRAY[*0]);
         //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
-        SDL_mutex *m = SDL_CreateMutex();
-        SDL_LockMutex(m);
         if (!app->client->hasPacket)
             UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[0], sizeof(Entity));
-        SDL_UnlockMutex(m);
-        SDL_DestroyMutex(m);
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;

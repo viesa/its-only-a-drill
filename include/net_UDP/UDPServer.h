@@ -13,6 +13,7 @@ typedef struct UDPPlayer
 } UDPPlayer;
 typedef struct UDPServer
 {
+    SDL_bool hasPacket;
     UDPPlayer players[MAX_PLAYERS];
     int ids[MAX_PLAYERS]; //0 means taken
     int nrPlayers;
