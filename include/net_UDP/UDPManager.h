@@ -1,18 +1,31 @@
-#ifndef UDPMANAGER_H
-#define UDPMANAGER_H
+#ifndef CLIENTMANAGER_H
+#define CLIENTMANAGER_H
+
 #include "UDPClient.h"
-#include "../core/EntityManager.h"
-#include "../core/Entity.h"
-#define MAX_PLAYERS 10
-typedef struct UDPManager
+#include "../Player.h"
+
+#define UDPMANAGER_PLAYERS UDPManagerGetPlayersArray()
+
+struct
 {
-    EntityIndexP players[MAX_PLAYERS];
-    int nrPlayers;
-} UDPManager;
-// Returns a UDPManager struct with 0 as nr of players
-UDPManager UDPManagerCreate();
+    Vector *players;
+    Player *localPlayer;
+} udpManager;
+
+// Creates a vector to hold the players
+void UDPManagerInitialize(Player *player);
 // Updates the entire network situation for this client
-void UDPManagerUpdate(UDPManager *mgr, UDPClient *client);
+void UDPManagerUpdate();
 // Draws the entire network situation for this client
-void UDPManagerDraw(UDPManager *mgr, Camera *camera);
+void UDPManagerDrawConnectedPlayers(Camera *camera);
+
+// Handles different kind of packets
+void UDPManagerHandleTextPacket(ParsedUDPPacket packet);
+void UDPManagerHandlePlayerIDPacket(ParsedUDPPacket packet);
+void UDPManagerHandleEntityPacket(ParsedUDPPacket packet);
+void UDPManagerHandleCompressedEntityPacket(ParsedUDPPacket packet);
+void UDPManagerHandleIPaddressPacket(ParsedUDPPacket packet);
+
+EntityIndexP *UDPManagerGetPlayersArray();
+
 #endif

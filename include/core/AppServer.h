@@ -1,25 +1,28 @@
 #ifndef APPSERVER_H
 #define APPSERVER_H
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_net.h>
+
+#include "Dependencies.h"
+#include "Clock.h"
 #include "../net_UDP/UDPServer.h"
-#define MAX_PLAYERS 10
-typedef struct AppServer
-{
-    SDL_bool isRunning;
-    UDPServer server;
-    UDPPlayer players[MAX_PLAYERS];
-    int nrPlayers;
-} AppServer;
-AppServer AppServerCreate();
-void AppServerGo(AppServer *app);
-void AppServerListenToClients(AppServer *args);
-void AppServerCheckPlayerConnection(UDPServer *server, char joinMsg[], char leaveMsg[]);
-void AppServerCheckPlayerJoining(UDPServer *m_server, char joinMsg[]);
-void AppServerCheckPlayerLeaving(UDPServer *server, char leaveMsg[]);
-void AppServerEchoFromSender(UDPServer *server);
-void AppServerBroadcastFromSender(UDPServer *server);
-void AppServerLogic(AppServer *app);
-void AppServerShowPlayerList(UDPServer *server);
+
+typedef struct AppServer AppServer;
+
+AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock);
 void AppServerDestroy(AppServer *app);
+
+// Main loop
+void AppServerGo(AppServer *app);
+
+// Updates the entire network situation for this client
+void AppServerUpdate(AppServer *app);
+
+// Displays connected players to the console
+void AppServerShowPlayerList(AppServer *app);
+
+// Handles different kind of packets
+void AppServerHandleTextPacket(ParsedUDPPacket packet);
+void AppServerHandlePlayerIDPacket(ParsedUDPPacket packet);
+void AppServerHandleEntityPacket(ParsedUDPPacket packet);
+void AppServerHandleCompressedEntityPacket(ParsedUDPPacket packet);
+void AppServerHandleIPaddressPacket(ParsedUDPPacket packet);
 #endif

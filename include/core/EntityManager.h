@@ -22,6 +22,7 @@ void EntityManagerUpdateMovement(Clock *clk);
 void EntityManagerOnCollision();
 
 EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position);
+EntityIndexP EntityManagerAddNoConfig();
 void EntityManagerRemove(EntityIndexP index);
 void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end);
 

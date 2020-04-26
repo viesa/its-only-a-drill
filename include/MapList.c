@@ -6,7 +6,7 @@ MapList MapListCreate(char *directory, Clock *clock)
     mapList.nMaps = 0;
     strcpy(mapList.directory, directory);
     mapList.clock = clock;
-    mapList.lastUpdate = 0.0f;
+    mapList.lastUpdate = 1.0f;
     MapListUpdate(&mapList);
     return mapList;
 }

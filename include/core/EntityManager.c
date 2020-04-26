@@ -32,7 +32,7 @@ void EntityManagerUpdate(Clock *clk)
 
 void EntityManagerUpdateMovement(Clock *clk)
 {
-    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         // carculate Net_force so friction & collision & the other forces is handle before
         EntityCalculateNetForces(&ENTITY_ARRAY[i]);
@@ -67,10 +67,10 @@ void EntityManagerUpdateMovement(Clock *clk)
 void EntityManagerOnCollision()
 {
     SDL_Rect result;
-    for (int Dominant = 0; Dominant < ENTITY_ARRAY_SIZE; Dominant++)
+    for (int Dominant = 1; Dominant < ENTITY_ARRAY_SIZE; Dominant++)
     {
         if (ENTITY_ARRAY[Dominant].isCollider)
-            for (int Recessive = 0; Recessive < ENTITY_ARRAY_SIZE; Recessive++)
+            for (int Recessive = 1; Recessive < ENTITY_ARRAY_SIZE; Recessive++)
             {
                 if (ENTITY_ARRAY[Recessive].isCollider)
                 {
@@ -119,6 +119,11 @@ EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position)
     return (EntityIndexP)&entityManager.indices[freeIndex];
 }
 
+EntityIndexP EntityManagerAddNoConfig()
+{
+    return EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
+}
+
 void EntityManagerRemove(EntityIndexP index)
 {
     size_t end = *index + 1;
@@ -143,7 +148,7 @@ size_t EntityManagerGetVectorSize()
 }
 Entity *EntityManagerGetArray()
 {
-    return (Entity *)entityManager.entityVector->data;
+    return ((Entity *)entityManager.entityVector->data);
 }
 
 size_t EntityManagerGetFreeIndex()

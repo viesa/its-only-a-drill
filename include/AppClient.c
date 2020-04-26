@@ -8,7 +8,9 @@
 #include "core/Weapon.h"
 #include "core/Score.h"
 #include "core/Inventory.h"
+
 #define MaxEntities 5
+
 struct AppClient
 {
     SDL_bool *running;
@@ -26,13 +28,6 @@ struct AppClient
 
     Vec2 middleOfMap;
 
-    //UDP stuff (client, server messages etc.)
-    UDPClient *client;
-    SDL_Thread *listenThread;
-    SDL_Thread *updateThread;
-    UDPManager udpManager;
-    SDL_ThreadPriority lowestPossibleThreadPriority;
-
     GroundListItems groundListItems;
 
     Player player; // player == entity 0
@@ -40,42 +35,8 @@ struct AppClient
     Map map;
     MapList mapList;
 };
-void ListenToServer(void *args)
-{
-    UDPClient *client = (UDPClient *)args;
-    SDL_mutex *m = SDL_CreateMutex();
-    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
-    SDL_SetThreadPriority(priority);
-    while (client->isActive)
-    {
-        while (client->hasPacket)
-            ;
-        SDL_LockMutex(m);
-        UDPClientListen(client, MAX_MSGLEN);
-        if (client->hasPacket && UDPPackageDecode((char *)client->pack->data) != UDPTypeint && !client->hasInit)
-        {
-            SDLNet_FreePacket(client->pack);
-            client->hasPacket = SDL_FALSE;
-        }
-        SDL_UnlockMutex(m);
-    }
-}
-void UpdateFromServer(void *args)
-{
-    AppClient *app = (AppClient *)args;
-    SDL_mutex *m = SDL_CreateMutex();
-    SDL_ThreadPriority priority = SDL_THREAD_PRIORITY_LOW;
-    SDL_SetThreadPriority(priority);
-    while (app->client->isActive)
-    {
-        while (!app->client->hasPacket)
-            ;
-        SDL_LockMutex(m);
-        UDPManagerUpdate(&app->udpManager, app->client);
-        SDL_UnlockMutex(m);
-    }
-}
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPClient *client, FPSManager *fpsManager)
+
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSManager *fpsManager)
 {
     srand(time(NULL));
     CursorInitialize();
@@ -96,24 +57,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
     app->player = PlayerCreate(app->camera);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
-    app->client = client;
-    app->udpManager = UDPManagerCreate();
+    UDPManagerInitialize(&app->player);
+    UDPClientStart();
 
-    app->listenThread = SDL_CreateThread((SDL_ThreadFunction)ListenToServer, "Server Listen Thread", (void *)app->client);
-    if (UDPClientSend(app->client, UDPTypeText, "alive\0", 6))
-    {
-        log_info("Sending Message: alive\n");
-        SDL_Delay(2000);
-        if (app->client->hasPacket && UDPPackageDecode((char *)app->client->pack->data) == UDPTypeint)
-        {
-            UDPPackageRemoveTypeNULL(app->client->pack);
-            log_info("Incoming Message: %d\n", *(int *)app->client->pack->data);
-            ENTITY_ARRAY[*app->player.entity].id = *(int *)app->client->pack->data;
-            app->client->hasPacket = SDL_FALSE; // utanför threadsen bhöver mutex
-            app->client->hasInit = SDL_TRUE;
-        }
-    }
-    app->updateThread = SDL_CreateThread((SDL_ThreadFunction)UpdateFromServer, "Server Update Thread", (void *)app);
     for (int i = 1; i < 10; i++)
     {
         EntityIndexP npc = EntityManagerAdd(ET_Woman, Vec2Create(100.0f * i, 0.0f));
@@ -138,7 +84,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, UDPCli
 }
 void AppClientDestroy(AppClient *app)
 {
-    app->client->isActive = SDL_FALSE;
+    UDPClientStop();
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
@@ -160,6 +106,8 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
+    UDPManagerUpdate();
+
     switch (app->state.gameState)
     {
     case GS_Menu:
@@ -247,7 +195,7 @@ void AppClientUpdate(AppClient *app)
             Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, app->input, ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
 
@@ -266,10 +214,10 @@ void AppClientUpdate(AppClient *app)
         EntityManagerUpdate(app->clock);
 
         //CompressedEntity sendCompressedEntity = EntityCompress(app->ENTITY_ARRAY[*0]);
-        //UDPClientSend(app->client, UDPTypeCompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
+        //UDPClientSend(app->client, UDPType_CompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
-        if (!app->client->hasPacket)
-            UDPClientSend(app->client, UDPTypeEntity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
+        UDPClientSend(UDPType_Entity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
+
         // SDL_PixelFormat *fmt;
         // SDL_Color *color;
         // fmt = app->gfx->format;
@@ -322,7 +270,7 @@ void AppClientDraw(AppClient *app)
                 EntityDraw(&ENTITY_ARRAY[i], app->camera);
         }
         PlayerDraw(&app->player, app->camera);
-        UDPManagerDraw(&app->udpManager, app->camera);
+        UDPManagerDrawConnectedPlayers(app->camera);
         GuiUpdate(app->gui);
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))

@@ -46,6 +46,7 @@
                 "type_traits": "cpp",
                 "xtr1common": "cpp",
                 "udppackager.h": "c",
-                "dependencies.h": "c"
+                "dependencies.h": "c",
+                "udpserver.h": "c"
         }
 }

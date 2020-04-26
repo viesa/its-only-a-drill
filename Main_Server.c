@@ -1,13 +1,25 @@
 #include "include/core/AppServer.h"
+
 int main()
 {
-    AppServer app = AppServerCreate();
+    SDL_bool isRunning = SDL_TRUE;
+    // Has to be the first
+    UDPServerInitialize();
+    Clock *m_clock = ClockCreate();
+
+    AppServer *app = AppServerCreate(&isRunning, m_clock);
+
     printf("Server running...\n");
-    while (app.isRunning)
+    while (isRunning)
     {
-        AppServerGo(&app);
+        ClockTick(m_clock);
+        AppServerGo(app);
     }
-    AppServerDestroy(&app);
+
+    AppServerDestroy(app);
+    //Has to be the last
+    UDPServerUninitialize();
+
     SDL_Quit();
 
     return EXIT_SUCCESS;

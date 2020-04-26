@@ -10,6 +10,8 @@ Vector *VectorCreate(size_t elementSize, size_t initialReservedSize)
     vector->capacity = initialReservedSize;
     vector->size = 0ull;
     vector->elementSize = elementSize;
+    vector->initialReservedSize = initialReservedSize;
+    vector->resizable = SDL_TRUE;
 
 #ifdef VECTOR_DEBUG
     log_info("Vector created. Capacity: %llu E-size: %llu", vector->capacity, vector->elementSize);
@@ -35,6 +37,13 @@ void VectorPushBack(Vector *vector, void *element)
     assert(element != NULL);
     if (vector->size == vector->capacity)
     {
+        if (!vector->resizable)
+        {
+#ifdef VECTOR_DEBUG
+            log_info("Vector is not resizeable");
+#endif
+            return;
+        }
         vector->capacity *= 2ull;
         vector->data = SDL_realloc(vector->data, vector->capacity * vector->elementSize);
         ALLOC_ERROR_CHECK(vector->data);
@@ -77,7 +86,7 @@ void VectorEraseRange(Vector *vector, size_t start, size_t end)
 #endif
         return;
     }
-    if (end < 0 || end >= vector->size)
+    if (end < 0 || end > vector->size)
     {
 #ifdef VECTOR_DEBUG
         log_info("Attempted to remove a vector element out of scope, end");
@@ -85,19 +94,38 @@ void VectorEraseRange(Vector *vector, size_t start, size_t end)
         return;
     }
 
-    size_t bytesLeft = (vector->size - (end + 1)) * vector->elementSize;
+    size_t bytesLeft = (vector->size - end) * vector->elementSize;
     if (bytesLeft)
     {
         size_t dataOffsetStart = start * vector->elementSize;
         size_t dataOffsetEnd = end * vector->elementSize;
-        SDL_memmove((char *)(vector->data) + dataOffsetStart, (char *)(vector->data) + dataOffsetEnd + vector->elementSize, bytesLeft);
+        SDL_memmove((char *)(vector->data) + dataOffsetStart, (char *)(vector->data) + dataOffsetEnd, bytesLeft);
 #ifdef VECTOR_DEBUG_STRICT
         log_info("Vector elements moved. Bytes moved: %llu", delta, bytesLeft);
 #endif
     }
-    vector->size--;
+    vector->size -= delta;
 #ifdef VECTOR_DEBUG_STRICT
     log_info("%d Vector elements removed. New size: %llu", delta, vector->size);
 #endif
-    vector->size -= delta;
+}
+
+void VectorClear(Vector *vector)
+{
+#ifdef VECTOR_DEBUG_STRICT
+    size_t oldSize = vector->size;
+#endif
+    if (vector->capacity > vector->initialReservedSize)
+    {
+        SDL_free(vector->data);
+        vector->data = SDL_malloc(vector->elementSize * vector->initialReservedSize);
+        ALLOC_ERROR_CHECK(vector->data);
+        vector->dataP = &vector->data;
+        vector->capacity = vector->initialReservedSize;
+    }
+    vector->size = 0ull;
+#ifdef VECTOR_DEBUG_STRICT
+    if (oldSize != 0)
+        log_info("Vector cleared, %d elements removed", oldSize);
+#endif
 }

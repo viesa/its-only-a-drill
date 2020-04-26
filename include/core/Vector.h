@@ -10,6 +10,8 @@ typedef struct Vector
     size_t capacity;
     size_t size;
     size_t elementSize;
+    size_t initialReservedSize;
+    SDL_bool resizable;
 } Vector;
 
 typedef void **VectorP;
@@ -24,5 +26,6 @@ void VectorPopBack(Vector *vector);
 
 void VectorErase(Vector *vector, size_t index);
 void VectorEraseRange(Vector *vector, size_t start, size_t end);
+void VectorClear(Vector *vector);
 
 #endif

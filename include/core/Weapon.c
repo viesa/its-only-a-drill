@@ -1,20 +1,17 @@
 #include "Weapon.h"
 #include "Entity.h"
 
-void playerShoot(EntityIndexP index, Camera *camera, Item item)
+void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item item)
 {
-    int pos_x = 0;
-    int pos_y = 0;
-
-    Vec2 mousePos = Vec2Create((float)pos_x, (float)pos_y);
+    Vec2 mousePos = InputLastMousePos(input);
     Vec2 cameraPos = CameraGetPos(camera);
     Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*index].drawables[0].dst), cameraPos);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
     Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
     Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item.Stats.falloff);
-    pos_x = (int)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + (int)itemFalloff.x;
-    pos_y = (int)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + (int)itemFalloff.y;
+    mousePos.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.x;
+    mousePos.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.y;
 
     SDL_Point point;
     point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
@@ -38,8 +35,8 @@ void playerShoot(EntityIndexP index, Camera *camera, Item item)
     {
         if (ENTITY_ARRAY[i].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
         {
-            tmpPosX = pos_x;
-            tmpPosY = pos_y;
+            tmpPosX = mousePos.x;
+            tmpPosY = mousePos.y;
             tmpPointX = point.x + (rand() % 20 - 10) / item.Stats.accuracy;
             tmpPointY = point.y + (rand() % 20 - 10) / item.Stats.accuracy;
             if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
