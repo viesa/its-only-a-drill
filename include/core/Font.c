@@ -121,5 +121,4 @@ void FontDestroy(Font *font)
     }
 
     SDL_free(font);
-    TTF_Quit();
 }

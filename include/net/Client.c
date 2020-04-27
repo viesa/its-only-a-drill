@@ -42,7 +42,6 @@ void ClientUninitialize()
     SDL_UnlockMutex(client.inBufferMutex);
     SDL_DestroyMutex(client.inBufferMutex);
     SDLNet_UDP_Close(client.socket);
-    SDLNet_Quit();
     client.isInitialized = SDL_FALSE;
 }
 

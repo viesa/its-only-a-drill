@@ -24,7 +24,6 @@ void ServerDestroy(Server *server)
 
     SDLNet_FreeSocketSet(server->m_socketSet);
     SDL_free(server);
-    SDLNet_Quit();
 }
 
 void ServerSetPort(Server *server, Uint16 port)

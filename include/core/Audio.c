@@ -78,7 +78,6 @@ void AudioDestroy(Audio *audio)
 {
     for (int i = 0; i < SF_Count; i++)
         Mix_FreeChunk(audio->m_chunks[i]);
-    Mix_Quit();
     Mix_CloseAudio();
     SDL_free(audio);
 }

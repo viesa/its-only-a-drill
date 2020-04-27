@@ -22,7 +22,6 @@ void ClientDestroy(Client *client)
     if (client->m_ip != NULL)
         SDL_free(client->m_ip);
     SDL_free(client);
-    SDLNet_Quit();
 }
 
 void ClientSetNet(Client *client, const char *ip, Uint16 port)
