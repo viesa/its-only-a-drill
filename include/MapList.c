@@ -104,5 +104,6 @@ void MapListUpdate(MapList *mapList)
                 // --------
             }
     }
-    closedir(d);
+    if (d)
+        closedir(d);
 }

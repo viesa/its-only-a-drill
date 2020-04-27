@@ -17,8 +17,7 @@ Window *WindowCreate(const char *title)
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           window->width,
-                                          window->height,
-                                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+                                          window->height, SDL_WINDOW_SHOWN);
     if (!window->sdl_window)
         log_fatal("Could not create window: %s", SDL_GetError());
 
@@ -29,7 +28,6 @@ Window *WindowCreate(const char *title)
         log_fatal("Could not create renderer: %s", SDL_GetError());
     SDL_SetRenderDrawBlendMode(window->renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
