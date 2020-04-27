@@ -7,12 +7,6 @@
 
 Server *ServerCreate()
 {
-    if (SDLNet_Init() == -1)
-    {
-        log_error("Could not initialize net: %s", SDLNet_GetError());
-        return NULL;
-    }
-
     Server *ret = MALLOC(Server);
     ret->m_port = 0;
     ret->m_clients = ListCreate();

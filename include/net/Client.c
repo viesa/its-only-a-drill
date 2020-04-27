@@ -8,12 +8,6 @@ void ClientInitialize()
     client.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
     client.inBufferMutex = SDL_CreateMutex();
 
-    /* Initialize SDL_net */
-    if (SDLNet_Init() < 0)
-    {
-        log_error("Failed to init SDL_net: %s", SDLNet_GetError());
-        return;
-    }
     /* Open a socket on random port */
     if (!(client.socket = SDLNet_UDP_Open(0)))
     {

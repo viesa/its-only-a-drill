@@ -13,12 +13,6 @@ void ServerInitialize()
     server.isInitialized = SDL_FALSE;
     server.isActive = SDL_FALSE;
 
-    /* Initialize SDL_net */
-    if (SDLNet_Init() < 0)
-    {
-        log_error("SDLNet_Init: %s", SDLNet_GetError());
-        return;
-    }
     /* Open a socket */
     if (!(server.socket = SDLNet_UDP_Open(1337)))
     {

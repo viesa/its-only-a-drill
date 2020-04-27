@@ -2,11 +2,6 @@
 
 Font *FontCreate(Graphics *gfx)
 {
-    if (TTF_Init() < 0)
-    {
-        log_error("Could not initialize fonts: %s", SDL_GetError());
-    }
-
     Font *font = MALLOC(Font);
     font->gfx = gfx;
 

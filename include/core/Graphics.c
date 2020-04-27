@@ -2,11 +2,6 @@
 
 Graphics *GraphicsCreate()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        log_error("Could not initialize video: %s", SDL_GetError());
-    }
-
     Graphics *gfx = MALLOC(Graphics);
 
     gfx->window = WindowCreate("It's only a drill");

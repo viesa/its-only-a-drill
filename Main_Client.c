@@ -4,6 +4,8 @@
 
 int main()
 {
+    SDL_Init(SDL_INIT_EVERYTHING);
+
     SDL_bool m_running = SDL_TRUE;
     // Has to be the first
     ClientInitialize();
