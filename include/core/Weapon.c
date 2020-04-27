@@ -37,25 +37,25 @@ void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item item)
     }
 }
 
-void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item item)
+void entityShoot(int index, Vec2 Desierdpoint, Item item)
 {
-    Vec2 entityToPoint = Vec2Sub(Desierdpoint, RectMid(ENTITY_ARRAY[*index].drawables[0].dst));
+    Vec2 entityToPoint = Vec2Sub(Desierdpoint, RectMid(ENTITY_ARRAY[index].drawables[0].dst));
     Vec2 unit = Vec2Unit(entityToPoint);
     Vec2 itemFalloff = Vec2MulL(unit, item.Stats.falloff);
     Vec2 makeDestination;
-    makeDestination.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.x;
-    makeDestination.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.y;
+    makeDestination.x = (float)(ENTITY_ARRAY[index].drawables[0].dst.x + (ENTITY_ARRAY[index].drawables[0].dst.w / 2)) + itemFalloff.x;
+    makeDestination.y = (float)(ENTITY_ARRAY[index].drawables[0].dst.x + (ENTITY_ARRAY[index].drawables[0].dst.w / 2)) + itemFalloff.y;
 
     SDL_Point point;
-    point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
-    point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
+    point.x = ENTITY_ARRAY[index].drawables[0].dst.x + (ENTITY_ARRAY[index].drawables[0].dst.w / 2);
+    point.y = ENTITY_ARRAY[index].drawables[0].dst.y + (ENTITY_ARRAY[index].drawables[0].dst.h / 2);
 
     // push back
-    ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
-    ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
+    ENTITY_ARRAY[index].Force.x -= itemFalloff.x;
+    ENTITY_ARRAY[index].Force.y -= itemFalloff.y;
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (i != *index)
+        if (i != index)
             RayScan(i, makeDestination, point, item, itemFalloff);
     }
 }

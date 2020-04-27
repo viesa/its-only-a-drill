@@ -26,6 +26,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         enemyPos = RectMid(entity.drawables[0].dst);
         entity.desiredPoint = Vec2AddL(enemyPos, 200);
         entity.indexPoint = 0;
+        entity.inventory = InventoryCreate();
         break;
 
     case ET_PlayerSpawn:
