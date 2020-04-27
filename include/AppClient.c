@@ -217,21 +217,6 @@ void AppClientUpdate(AppClient *app)
         //UDPClientSend(app->client, UDPType_CompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
         UDPClientSend(UDPType_Entity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
-
-        // SDL_PixelFormat *fmt;
-        // SDL_Color *color;
-        // fmt = app->gfx->format;
-        // Uint8 index;
-        // index = *(Uint8 *)surface->pixels;
-        // color = &fmt->palette->colors[*index];
-        // for (int i = 0; i < ; i++)
-        // {
-        //     for (int j = 0; j < count; j++)
-        //     {
-        //         /* code */
-        //     }
-        //     printf("\n");
-        // }
         break;
     }
     default:
