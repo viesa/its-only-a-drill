@@ -194,7 +194,7 @@ void AppClientUpdate(AppClient *app)
             // if there is ammo in ur weapon shoot
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, app->input, &ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
+                playerShoot(app->player.entity, app->camera, app->input, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);

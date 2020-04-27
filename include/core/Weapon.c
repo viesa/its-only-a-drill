@@ -8,7 +8,7 @@ void weaponUpdate(Item *item, Clock *clk)
 
     // reserved for bullet update
 }
-void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item, Clock *clk)
+void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item)
 {
 #ifdef WEAPON_DEBIG
     log_debug("current cooldown %f", item->Stats.currentTime);
@@ -42,7 +42,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item, C
     }
 }
 
-void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item *item)
+void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item *item, Clock *clk)
 {
     item->Stats.currentTime -= ClockGetDeltaTimeMS(clk);
     if (item->Stats.currentTime <= 0)
