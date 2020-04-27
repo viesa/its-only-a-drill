@@ -188,15 +188,16 @@ void AppClientUpdate(AppClient *app)
             InventorySelectItem(&ENTITY_ARRAY[*app->player.entity].inventory, 5);
         }
 
+        Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
         if (InputIsMousePressed(app->input, BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
-            Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, app->input, ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, app->input, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
+        weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
 
         BehaviorMoveEntity();
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))

@@ -9,6 +9,7 @@
 void BehaviorMoveEntity()
 {
     MovingPattern mp;
+    int tmp = 0;
     mp.point[0] = Vec2Create((float)200, (float)200);
     mp.point[1] = Vec2Create((float)283, (float)0);
     mp.point[2] = Vec2Create((float)200, (float)-200);
@@ -22,26 +23,31 @@ void BehaviorMoveEntity()
 
     SDL_Rect boxDP;
 
-    Vec2 playerPosition = RectMid(ENTITY_ARRAY[0].drawables[0].dst);
-    Vec2 enemyPosition, enemyToPlayer;
+    Vec2 enemyPosition, enemyToPlayer, playerPosition;
 
-    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
+        if (ENTITY_ARRAY[i].type == ET_Player)
+        {
+            tmp = i;
+            playerPosition = RectMid(ENTITY_ARRAY[tmp].drawables[tmp].dst);
+        }
+
         if (ENTITY_ARRAY[i].isNPC) // if there is an entity and npc = non playable charecter
         {
             boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - moxsize, (int)ENTITY_ARRAY[i].desiredPoint.y - moxsize, moxsize, moxsize};
 
             enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
-            enemyToPlayer = Vec2Sub(enemyPosition,playerPosition);
-            
-            // if (Vec2Len(enemyToPlayer) < aggravationRadius)
-            // {
-            //     ENTITY_ARRAY[i].entityState = Fight;
-            // }
-            
-            if (ENTITY_ARRAY[i].health < 100)  
+            enemyToPlayer = Vec2Sub(playerPosition, enemyPosition);
+
+            if (Vec2Len(enemyToPlayer) < aggravationRadius)
             {
-                if(ENTITY_ARRAY[i].entityState != Fight)
+                ENTITY_ARRAY[i].entityState = Fight;
+            }
+
+            if (ENTITY_ARRAY[i].health < 100)
+            {
+                if (ENTITY_ARRAY[i].entityState != Fight)
                 {
                     ENTITY_ARRAY[i].entityState = Aggressive;
                 }
@@ -72,10 +78,19 @@ void BehaviorMoveEntity()
                 break;
             }
 
-                case Fight:
+            case Fight:
+            {
+                //entityShoot(i,playerPosition,ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
+                if (ENTITY_ARRAY[tmp].health < 0)
                 {
-                    break;
+                    ENTITY_ARRAY[i].entityState = GoForward;
                 }
+                if (Vec2Len(enemyToPlayer) > aggravationRadius)
+                {
+                    ENTITY_ARRAY[i].entityState = GoForward;
+                }
+                break;
+            }
 
             case EntityDead:
             {

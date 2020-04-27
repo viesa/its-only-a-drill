@@ -1,4 +1,4 @@
-//#define ANY_DEBUG
+#define ANY_DEBUG
 
 #ifdef ANY_DEBUG
 #define MAIN_DEBUG
@@ -18,6 +18,7 @@
 #define GRAPHICS_DEBUG
 
 //#define ENTITY_DEBUG
+//#define WEAPON_DEBIG
 
 #define VECTOR_DEBUG
 #define VECTOR_DEBUG_STRICT

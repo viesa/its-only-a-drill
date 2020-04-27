@@ -19,6 +19,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
         i.Stats.falloff = 5000;
+        i.Stats.cooldownMS = 750.0f;
+        i.Stats.currentTime = 10.0f;
         break;
     case ItemMetalSword:
         i.drawable = DrawableCreate((SDL_Rect){16, 16, 16, 16}, (SDL_Rect){50, 50, 30, 30}, SS_Weapons);
@@ -31,6 +33,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
         i.Stats.falloff = 500;
+        i.Stats.cooldownMS = 750.0f;
+        i.Stats.currentTime = 10.0f;
         break;
     case ItemEmpty:
         i.picked = 1;
@@ -40,6 +44,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.captivity = 0;
         i.Stats.Damage = 0;
         i.Stats.falloff = 0;
+        i.Stats.cooldownMS = 0.0f;
+        i.Stats.currentTime = 0.0f;
         break;
     default:
         i.Stats.accuracy = 0.0f;
@@ -48,6 +54,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.Damage = 0;
         i.Stats.falloff = 0;
         i.equiped = 0;
+        i.Stats.cooldownMS = 0.0f;
+        i.Stats.currentTime = 0.0f;
         break;
     }
     return i;

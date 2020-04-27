@@ -26,6 +26,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         enemyPos = RectMid(entity.drawables[0].dst);
         entity.desiredPoint = Vec2AddL(enemyPos, 200);
         entity.indexPoint = 0;
+        entity.inventory = InventoryCreate();
         break;
 
     case ET_PlayerSpawn:
@@ -47,6 +48,13 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.drawables[1] = DrawableCreateDefaultConfig();
         entity.hitboxIndex = 0;
         entity.nDrawables = 2;
+        break;
+    case ET_Bullet:
+        entity.Friction = 0.0f;
+        entity.mass = 5.0f;
+        entity.isCollider = SDL_TRUE;
+        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+        entity.hitboxIndex = 0;
         break;
 
     default:
