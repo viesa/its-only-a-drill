@@ -13,6 +13,7 @@ Font *FontCreate(Graphics *gfx)
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
     font->fonts[TTF_Robot_Crush] = TTF_OpenFont("./assets/fonts/Robot Crush.ttf", 50);
     font->fonts[TTF_Antilles] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 50);
+    font->fonts[TTF_AntillesBig] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
 
     return font;
 }

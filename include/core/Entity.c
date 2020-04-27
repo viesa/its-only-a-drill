@@ -99,7 +99,8 @@ void EntityDrawIndex(EntityIndexP index, Camera *camera)
 void EntityCalculateNetForces(Entity *entity)
 {
     // first get momentum
-    entity->Velocity = Vec2DivL(entity->Force, entity->mass);
+    float ComputedFormula = powf((1.0f + (2.0f / entity->mass)), entity->mass) / 8 + 0.059f;
+    entity->Velocity = Vec2DivL(entity->Force, ComputedFormula);
 
 // compute friendly
 #ifndef frictionReal

@@ -4,6 +4,7 @@
 
 #define addmove 1500.0f
 #define moxsize 50 //boxsize
+#define aggravationRadius 500.0f
 
 void BehaviorMoveEntity()
 {
@@ -21,8 +22,8 @@ void BehaviorMoveEntity()
 
     SDL_Rect boxDP;
 
-    //box1 = (SDL_Rect){(int)axis_x1 - moxsize, (int)axis_y1 - moxsize, moxsize, moxsize};
-    //box2 = (SDL_Rect){(int)axis_x2 - moxsize, (int)axis_y2 - moxsize, moxsize, moxsize};
+    Vec2 playerPosition = RectMid(ENTITY_ARRAY[0].drawables[0].dst);
+    Vec2 enemyPosition, enemyToPlayer;
 
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
@@ -30,6 +31,21 @@ void BehaviorMoveEntity()
         {
             boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - moxsize, (int)ENTITY_ARRAY[i].desiredPoint.y - moxsize, moxsize, moxsize};
 
+            enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
+            enemyToPlayer = Vec2Sub(enemyPosition,playerPosition);
+            
+            // if (Vec2Len(enemyToPlayer) < aggravationRadius)
+            // {
+            //     ENTITY_ARRAY[i].entityState = Fight;
+            // }
+            
+            if (ENTITY_ARRAY[i].health < 100)  
+            {
+                if(ENTITY_ARRAY[i].entityState != Fight)
+                {
+                    ENTITY_ARRAY[i].entityState = Aggressive;
+                }
+            }
             switch (ENTITY_ARRAY[i].entityState)
             {
             case GoForward:
@@ -56,11 +72,10 @@ void BehaviorMoveEntity()
                 break;
             }
 
-            case Fight:
-            {
-
-                break;
-            }
+                case Fight:
+                {
+                    break;
+                }
 
             case EntityDead:
             {
