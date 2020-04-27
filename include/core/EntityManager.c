@@ -94,7 +94,7 @@ void EntityManagerOnCollision()
                             ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
                             ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
 
-                            ENTITY_ARRAY[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat affect
+                            ENTITY_ARRAY[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat effect
                             ENTITY_ARRAY[Recessive].position.y -= ResultDistance.y / 17.0f;
                         }
                     }
