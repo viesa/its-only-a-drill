@@ -1,4 +1,4 @@
-// #define ANY_DEBUG
+//#define ANY_DEBUG
 
 #ifdef ANY_DEBUG
 #define MAIN_DEBUG
@@ -19,8 +19,8 @@
 
 //#define ENTITY_DEBUG
 
-// #define VECTOR_DEBUG
-// #define VECTOR_DEBUG_STRICT
+#define VECTOR_DEBUG
+#define VECTOR_DEBUG_STRICT
 #endif
 
 // If defined friction formula Real runs, else computed
