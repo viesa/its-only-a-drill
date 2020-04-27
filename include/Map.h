@@ -18,12 +18,11 @@
 
 typedef struct Map
 {
-    Entity **contents;
+    EntityIndexP *contents;
     uint32_t n;
-    EntityManager *entityManager;
 } Map;
 
-Map MapCreate(JSON *mapdata, EntityManager *entityManager);
+Map MapCreate(JSON *mapdata);
 void MapDestroy(Map *map);
 
 void MapDraw(Map *map, Camera *camera);

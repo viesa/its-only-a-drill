@@ -2,11 +2,10 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, EntityManager *entityManager, Font *font, State *state)
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
-    menu->entityManager = entityManager;
     menu->font = font;
     menu->state = state;
     menu->loopCount = 0;
@@ -363,7 +362,7 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
         }
         MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
         JSON *mapdata = JSONCreate(entry->filename);
-        *map = MapCreate(mapdata, menu->entityManager);
+        *map = MapCreate(mapdata);
         JSONDestroy(mapdata);
     }
 

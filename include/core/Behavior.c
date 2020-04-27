@@ -6,9 +6,9 @@
 #define moxsize 50 //boxsize
 #define aggravationRadius 500.0f
 
-void BehaviorMoveEntity(EntityManager *entityManager)
+void BehaviorMoveEntity()
 {
-    MoveingPattern mp;
+    MovingPattern mp;
     mp.point[0] = Vec2Create((float)200, (float)200);
     mp.point[1] = Vec2Create((float)283, (float)0);
     mp.point[2] = Vec2Create((float)200, (float)-200);
@@ -19,90 +19,89 @@ void BehaviorMoveEntity(EntityManager *entityManager)
     mp.point[7] = Vec2Create((float)50, (float)0);
     mp.point[8] = Vec2Create((float)150, (float)100);
     mp.point[9] = Vec2Create((float)200, (float)200);
-    
+
     SDL_Rect boxDP;
 
     Vec2 playerPosition = RectMid(entityManager->entities[0].drawables[0].dst);
     Vec2 enemyPosition, enemyToPlayer;
-    
-    for (int i = 0; i < entityManager->highestIndex; i++)
+
+    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (entityManager->bitmap[i] && entityManager->entities[i].isNPC) // if there is an entity and npc = non playable charecter
+        if (ENTITY_ARRAY[i].isNPC) // if there is an entity and npc = non playable charecter
         {
-            boxDP = (SDL_Rect){(int)entityManager->entities[i].desiredPoint.x - moxsize, (int)entityManager->entities[i].desiredPoint.y - moxsize, moxsize, moxsize};
-            
-            enemyPosition = RectMid(entityManager->entities[i].drawables[0].dst);
+            boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - moxsize, (int)ENTITY_ARRAY[i].desiredPoint.y - moxsize, moxsize, moxsize};
+
+            enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
             enemyToPlayer = Vec2Sub(enemyPosition,playerPosition);
             
             // if (Vec2Len(enemyToPlayer) < aggravationRadius)
             // {
-            //     entityManager->entities[i].entityState = Fight;
+            //     ENTITY_ARRAY[i].entityState = Fight;
             // }
             
-            if (entityManager->entities[i].health < 100)  
+            if (ENTITY_ARRAY[i].health < 100)  
             {
-                if(entityManager->entities[i].entityState != Fight)
+                if(ENTITY_ARRAY[i].entityState != Fight)
                 {
-                    entityManager->entities[i].entityState = Aggressive;
+                    ENTITY_ARRAY[i].entityState = Aggressive;
                 }
             }
-            
-            switch (entityManager->entities[i].entityState)
+            switch (ENTITY_ARRAY[i].entityState)
             {
-                case GoForward:
+            case GoForward:
+            {
+                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
+                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                 {
-                    
-                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
-                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
-                    {
-                        entityManager->entities[i].desiredPoint.x -= 200;
-                        entityManager->entities[i].desiredPoint.y -= 200;
-                        entityManager->entities[i].entityState = GoBack;                        
-                    }            
-                    break;
+                    ENTITY_ARRAY[i].desiredPoint.x -= 200;
+                    ENTITY_ARRAY[i].desiredPoint.y -= 200;
+                    ENTITY_ARRAY[i].entityState = GoBack;
                 }
+                break;
+            }
 
-                case GoBack:
+            case GoBack:
+            {
+                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
+                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                 {
-                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
-                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
-                    {
-                        entityManager->entities[i].desiredPoint.x += 200;
-                        entityManager->entities[i].desiredPoint.y += 200;
-                        entityManager->entities[i].entityState = GoForward;
-                    }
-                    break;
+                    ENTITY_ARRAY[i].desiredPoint.x += 200;
+                    ENTITY_ARRAY[i].desiredPoint.y += 200;
+                    ENTITY_ARRAY[i].entityState = GoForward;
                 }
+                break;
+            }
 
                 case Fight:
                 {
                     break;
                 }
 
-                case EntityDead:
-                {
+            case EntityDead:
+            {
 
-                    break;
-                }
-                case Aggressive:
+                break;
+            }
+            case Aggressive:
+            {
+                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
+                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                 {
-                    entityManager->entities[i] = BehaviorMoveToPoint(entityManager->entities[i], entityManager->entities[i].desiredPoint.x, entityManager->entities[i].desiredPoint.y);
-                    if (SDL_HasIntersection(&entityManager->entities[i].drawables[0].dst, &boxDP))
-                    {                        
-                        entityManager->entities[i].desiredPoint = mp.point[entityManager->entities[i].indexPoint];
-                        if (entityManager->entities[i].indexPoint == 9)
-                        {
-                            entityManager->entities[i].indexPoint = 0;
-                        } else
-                        {
-                            entityManager->entities[i].indexPoint++;
-                        }
+                    ENTITY_ARRAY[i].desiredPoint = mp.point[ENTITY_ARRAY[i].indexPoint];
+                    if (ENTITY_ARRAY[i].indexPoint == 9)
+                    {
+                        ENTITY_ARRAY[i].indexPoint = 0;
                     }
-                    break;
+                    else
+                    {
+                        ENTITY_ARRAY[i].indexPoint++;
+                    }
                 }
+                break;
+            }
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
     }

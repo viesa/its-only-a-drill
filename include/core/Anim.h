@@ -47,4 +47,6 @@ void AnimStop(Anim *anim);
 void AnimNextFrame(Anim *anim);
 void AnimRandomFrame(Anim *anim);
 
+void AnimApplyToDrawable(Anim *anim, Drawable *drawable, float scale);
+
 #endif

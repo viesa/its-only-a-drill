@@ -1,35 +1,36 @@
 #ifndef ENTITYMANAGER_H
 #define ENTITYMANAGER_H
 
-#define MAX_ENTITIES 5000
-
 #include "Dependencies.h"
-
 #include "Entity.h"
+#include "Vector.h"
 
-typedef struct EntityManager
-{
-    Entity entities[MAX_ENTITIES];
-    SDL_bool bitmap[MAX_ENTITIES];
-    int highestIndex;
-} EntityManager;
+#define ENTITY_VECTOR EntityManagerGetVector()
+#define ENTITY_ARRAY_SIZE EntityManagerGetVectorSize()
+#define ENTITY_ARRAY EntityManagerGetArray()
 
-EntityManager *EntityManagerCreate();
-void EntityManagerDestroy(EntityManager *entityManager);
+void EntityManagerInitialize();
+void EntityManagerDestroy();
 
 ///Waring only one
 ///\param entites: ALL entitys are needed
 ///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
-void EntityManagerUpdate(EntityManager *entityManager, Clock *clk);
+void EntityManagerUpdate(Clock *clk);
 
-void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk);
+void EntityManagerUpdateMovement(Clock *clk);
 /// finds the collision and fixes the problem with rules
-void EntityManagerOnCollision(EntityManager *entityManager);
+void EntityManagerOnCollision();
 
-Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position);
-void EntityManagerRemove(EntityManager *entityManager, Entity *entity);
+EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position);
+EntityIndexP EntityManagerAddNoConfig();
+void EntityManagerRemove(EntityIndexP index);
+void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end);
 
-int EntityManagerGetFreeIndex(EntityManager *entityManager);
-void EntityManagerCalculateHighestIndex(EntityManager *entityManager);
+Vector *EntityManagerGetVector();
+size_t EntityManagerGetVectorSize();
+Entity *EntityManagerGetArray();
+
+size_t EntityManagerGetFreeIndex();
+size_t EntityManagerGetHighestIndex();
 
 #endif

@@ -1,24 +1,40 @@
 #ifndef UDPCLIENT_H
 #define UDPCLIENT_H
-#include <SDL2/SDL_net.h>
+
+#include "../core/Dependencies.h"
+#include "../core/Vector.h"
 #include "UDPPackager.h"
-#define MAX_MSGLEN 1024
-typedef struct UDPClient
+
+#define UDPCLIENT_INBUFFER UDPClientGetInBufferArray()
+
+struct
 {
-    UDPpacket *pack;
-    SDL_bool hasPacket;
+    IPaddress serverIP;
+    UDPsocket socket;
+
+    Vector *inBuffer;
+    SDL_mutex *inBufferMutex;
+
     SDL_bool isActive;
-    IPaddress serverip;
-    UDPsocket sock;
-    SDL_bool hasInit;
-} UDPClient;
-// Creates a UDP client and targets it towards ip:port
-UDPClient UDPClientCreate(const char *ip, Uint16 port);
-// Sends the data with the absolute size to the server that was configured in UDPClientCreate.
-// NOTE: this function will free the packet when sending
-int UDPClientSend(UDPClient *client, UDPPackageTypes types, void *data, size_t size);
-// Listens for packets once from the server and puts them at the UDPpacket data pointer using maxLen so sdl_net is preventing overflow.
-int UDPClientListen(UDPClient *client, int maxLen);
-// Destroy the client: UDP_close() and free the UDPpacket
-void UDPClientDestroy(UDPClient *client);
+    SDL_bool isInitialized;
+    SDL_bool receivedPlayerID;
+
+    SDL_Thread *listenThread;
+
+} udpClient;
+
+void UDPClientInitialize();
+void UDPClientUninitialize();
+
+// Marks client as active and sends out threads
+void UDPClientStart();
+// Marks client as inactive and collects threads
+void UDPClientStop();
+// Sends a packet to the server
+int UDPClientSend(UDPPacketType type, void *data, size_t size);
+// Thread function to listen for server-packets, parse them and put them into inBuffer
+void UDPClientListenToServer();
+
+ParsedUDPPacket *UDPClientGetInBufferArray();
+
 #endif

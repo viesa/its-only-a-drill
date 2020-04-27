@@ -19,6 +19,7 @@ typedef struct Gui
     float defaultEdge;
     float defaultSize;
     float defaultOffset;
+    Drawable scan;
 } Gui;
 
 typedef enum GuiWindow
@@ -29,6 +30,7 @@ typedef enum GuiWindow
 
 Gui *GuiCreate(Font *font, Clock *clock);
 void GuiUpdate(Gui *gui);
+void GuiOverlayUpdate(Gui *gui);
 void GuiDestroy(Gui *gui);
 
 #endif

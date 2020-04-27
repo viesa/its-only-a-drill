@@ -25,8 +25,10 @@
 #define MALLOC(type) (type *)SDL_malloc(sizeof(type))
 #define MALLOC_N(type, n) (type *)SDL_malloc(sizeof(type) * (n))
 
+#define CALLOC(nblocks, type) (type *)SDL_calloc((nblocks), sizeof(type))
+
 #define ALLOC_ERROR_CHECK(pointer)               \
-    if ((pointer) == NULL)                       \
+    if ((void *)(pointer) == NULL)               \
     {                                            \
         log_error("Failed to alloacate memory"); \
     }

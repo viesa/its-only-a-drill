@@ -1,312 +1,311 @@
 #include "UDPServer.h"
-#define DEGBUG
-//#define RAWINOUT
-UDPServer UDPServerCreate(Uint16 port)
+
+void UDPServerInitialize()
 {
-    UDPServer server;
-    for (int i = 0; i < MAX_PLAYERS; i++)
-    {
-        server.ids[i] = 0;
-        server.players[i].id = 0;
-    }
-    server.nrPlayers = 0;
+    udpServer.players = VectorCreate(sizeof(UDPPlayer), 100);
+    udpServer.players->resizable = SDL_FALSE;
+    udpServer.ids = VectorCreate(sizeof(SDL_bool), 100);
+    udpServer.ids->resizable = SDL_FALSE;
+    for (size_t i = 0; i < udpServer.ids->capacity; i++)
+        UDPSERVER_IDS[i] = SDL_FALSE;
+    udpServer.inBuffer = VectorCreate(sizeof(ParsedUDPPacket), 100);
+    udpServer.inBufferMutex = SDL_CreateMutex();
+    udpServer.isInitialized = SDL_FALSE;
+    udpServer.isActive = SDL_FALSE;
+
     /* Initialize SDL_net */
     if (SDLNet_Init() < 0)
     {
-        fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
+        log_error("SDLNet_Init: %s", SDLNet_GetError());
+        return;
     }
     /* Open a socket */
-    if (!(server.sock = SDLNet_UDP_Open(port)))
+    if (!(udpServer.socket = SDLNet_UDP_Open(1337)))
     {
-        fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-        exit(EXIT_FAILURE);
+        log_error("SDLNet_UDP_Open: %s", SDLNet_GetError());
+        return;
     }
-    return server;
-}
-void UDPServerBroadcast(UDPServer *server, UDPPackageTypes types, IPaddress exclusive, void *data, int size)
-{
-    UDPpacket *pack = SDLNet_AllocPacket(size + 2);
-    char *payload = UDPPackageCreate(types, data, size);
-    SDL_memcpy(pack->data, payload, size + 2);
-    pack->len = size + 2;
-    for (int i = 0; i < server->nrPlayers; i++)
-    {
-        if (server->players[i].ip.port == exclusive.port && server->players[i].ip.host == exclusive.host)
-        {
-            continue;
-        }
-        pack->address = server->players[i].ip;
-        if (SDLNet_UDP_Send(server->sock, -1, pack))
-        {
-#ifdef RAWINOUT
-            printf("RAW OUT(message, host:port): ");
-            for (int i = 0; i < size + 2; i++)
-            {
-                printf("%c", pack->data[i]);
-            }
-            printf(", %d:%d\n", pack->address.host, pack->address.port);
-#endif
-#ifndef RAWINOUT
-            char buffer[MAX_MSGLEN];
-            SDL_memcpy(buffer, pack->data, pack->len);
-            UDPpacket p = *pack;
-            p.data = (Uint8 *)buffer;
-            switch (UDPPackageDecode((char *)pack->data))
-            {
-            case UDPTypeText:
-                UDPPackageRemoveType(&p);
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
-                for (int i = 0; i < p.len; i++)
-                {
-                    printf("%c", p.data[i]);
-                }
-                printf(", %d:%d\n", p.address.host, p.address.port);
-                break;
-            case UDPTypeint:
-                UDPPackageRemoveTypeNULL(&p);
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
-                break;
-            case UDPTypeEntity:
-                UDPPackageRemoveTypeNULL(&p);
-                Entity *e = (Entity *)p.data;
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
-                break;
-            default:
-                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) ");
-                for (int i = 0; i < p.len; i++)
-                {
-                    printf("%c", p.data[i]);
-                }
-                printf(", %d:%d\n ", p.address.host, p.address.port);
-                break;
-            }
-#endif
-        }
-    }
-    UDPPackageDestroy(payload);
-    SDLNet_FreePacket(pack);
-}
-void UDPServerEcho(UDPServer *server, UDPPackageTypes types, void *data, int size)
-{
-    UDPpacket *pack;
-    if ((pack = SDLNet_AllocPacket(size + 2)))
-    {
-        char *payload = UDPPackageCreate(types, data, size);
-        SDL_memcpy(pack->data, payload, size + 2);
-        pack->len = size + 2;
-        for (int i = 0; i < server->nrPlayers; i++)
-        {
-            pack->address = server->players[i].ip;
-            if (SDLNet_UDP_Send(server->sock, -1, pack))
-            {
-#ifdef RAWINOUT
-                printf("RAW OUT(message, host:port): ");
-                for (int i = 0; i < size + 2; i++)
-                {
-                    printf("%c", pack->data[i]);
-                }
-                printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
-#endif
-#ifndef RAWINOUT
-                char buffer[MAX_MSGLEN];
-                SDL_memcpy(buffer, server->pack->data, server->pack->len);
-                UDPpacket p = *server->pack;
-                p.data = (Uint8 *)buffer;
-                switch (UDPPackageDecode((char *)server->pack->data))
-                {
-                case UDPTypeText:
-                    UDPPackageRemoveType(&p);
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
-                    for (int i = 0; i < p.len; i++)
-                    {
-                        printf("%c", p.data[i]);
-                    }
-                    printf(", %d:%d\n", p.address.host, p.address.port);
-                    break;
-                case UDPTypeint:
-                    UDPPackageRemoveTypeNULL(&p);
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
-                    break;
-                case UDPTypeEntity:
-                    UDPPackageRemoveTypeNULL(&p);
-                    Entity *e = (Entity *)p.data;
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
-                    break;
-                default:
-                    printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) ");
-                    for (int i = 0; i < p.len; i++)
-                    {
-                        printf("%c", p.data[i]);
-                    }
-                    printf(", %d:%d\n ", p.address.host, p.address.port);
-                    break;
-                }
-#endif
-            }
-        }
-        UDPPackageDestroy(payload);
-        SDLNet_FreePacket(pack);
-    }
-}
-void UDPServerSend(UDPServer *server, UDPPackageTypes types, void *data, int size, IPaddress ip)
-{
-    UDPpacket *pack = SDLNet_AllocPacket(size + 2);
-    char *payload = UDPPackageCreate(types, data, size);
-    SDL_memcpy(pack->data, payload, size + 2);
-    pack->len = size + 2;
 
-    pack->address = ip;
-    if (SDLNet_UDP_Send(server->sock, -1, pack))
-    {
-#ifdef RAWINOUT
-        printf("RAW OUT(message, host:port): ");
-        for (int i = 0; i < size + 2; i++)
-        {
-            printf("%c", pack->data[i]);
-        }
-        printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
-#endif
-#ifndef RAWINOUT
-        char buffer[MAX_MSGLEN];
-        SDL_memcpy(buffer, pack->data, server->pack->len);
-        UDPpacket p = *pack;
-        p.data = (Uint8 *)buffer;
-        switch (UDPPackageDecode((char *)pack->data))
-        {
-        case UDPTypeText:
-            UDPPackageRemoveType(&p);
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
-            for (int i = 0; i < p.len; i++)
-            {
-                printf("%c", p.data[i]);
-            }
-            printf(", %d:%d\n", p.address.host, p.address.port);
-            break;
-        case UDPTypeint:
-            UDPPackageRemoveTypeNULL(&p);
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
-            break;
-        case UDPTypeEntity:
-            UDPPackageRemoveTypeNULL(&p);
-            Entity *e = (Entity *)p.data;
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
-            break;
-        default:
-            printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) ");
-            for (int i = 0; i < p.len; i++)
-            {
-                printf("%c", p.data[i]);
-            }
-            printf(", %d:%d\n ", p.address.host, p.address.port);
-            break;
-        }
-#endif
-    }
-    UDPPackageDestroy(payload);
-    SDLNet_FreePacket(pack);
+    udpServer.isInitialized = SDL_TRUE;
 }
-int UDPServerListen(UDPServer *server, int maxLen)
+
+void UDPServerUninitialize()
 {
-    server->pack = SDLNet_AllocPacket(maxLen);
-    int exists = 0;
-    int r = SDLNet_UDP_Recv(server->sock, server->pack);
-    if (!r)
+    UDPServerBroadcast(UDPType_Text, "serverQuit", 11);
+    for (size_t i = 0; i < udpServer.inBuffer->size; i++)
     {
-        SDLNet_FreePacket(server->pack);
-        return 0;
+        ParsedUDPPacketDestroy(&UDPSERVER_INBUFFER[i]);
     }
-#ifdef DEGBUG
-    system("clear");
+    VectorDestroy(udpServer.players);
+    VectorDestroy(udpServer.ids);
+    VectorDestroy(udpServer.inBuffer);
+    SDL_UnlockMutex(udpServer.inBufferMutex);
+    SDL_DestroyMutex(udpServer.inBufferMutex);
+    SDLNet_UDP_Unbind(udpServer.socket, 0);
+    SDLNet_UDP_Close(udpServer.socket);
+    SDLNet_Quit();
+    udpServer.isInitialized = SDL_FALSE;
+}
+
+void UDPServerStart()
+{
+    assert("Attempting to start server without initialization" && udpServer.isInitialized);
+
+    udpServer.isActive = SDL_TRUE;
+    udpServer.listenThread = SDL_CreateThread((SDL_ThreadFunction)UDPServerListenToClients, "Server Listen Thread", NULL);
+}
+
+void UDPServerStop()
+{
+    udpServer.isActive = SDL_FALSE;
+    SDL_WaitThread(udpServer.listenThread, NULL);
+}
+
+void UDPServerBroadcast(UDPPacketType type, void *data, int size)
+{
+    UDPpacket *packet = UDPPacketCreate(type, data, size);
+    for (int i = 0; i < udpServer.players->size; i++)
+    {
+        packet->address = UDPSERVER_PLAYERS[i].ip;
+        UDPServerOut(packet);
+    }
+    UDPPacketDestroy(packet);
+}
+
+void UDPServerBroadcastExclusive(UDPPacketType type, void *data, int size, IPaddress exclusive)
+{
+    UDPpacket *packet = UDPPacketCreate(type, data, size);
+    for (int i = 0; i < udpServer.players->size; i++)
+    {
+        if (UDPSERVER_PLAYERS[i].ip.port == exclusive.port && UDPSERVER_PLAYERS[i].ip.host == exclusive.host)
+            continue;
+
+        packet->address = UDPSERVER_PLAYERS[i].ip;
+        UDPServerOut(packet);
+    }
+    UDPPacketDestroy(packet);
+}
+void UDPServerSend(UDPPacketType type, void *data, int size, IPaddress ip)
+{
+    UDPpacket *packet = UDPPacketCreate(type, data, size);
+    packet->address = ip;
+    UDPServerOut(packet);
+    UDPPacketDestroy(packet);
+}
+
+void UDPServerOut(UDPpacket *packet)
+{
+    assert("Attempting to send packet without server initialization" && udpServer.isInitialized);
+
+#ifdef UDPSERVER_DEBUG_RAWINOUT
+    printf(" -- PACKET OUTGOING TO (%d | %d)\n", packet->address.host, packet->address.port);
+    printf(" Type: %d Raw Message: ", UDPPacketDecode(packet->data));
+    for (int i = 1; i < packet->len; i++)
+    {
+        printf("%c", ((char *)packet->data)[i]);
+    }
+    printf("\n -- END OF PACKET\n");
 #endif
-    for (int i = 0; i < server->nrPlayers; i++)
+
+    if (!SDLNet_UDP_Send(udpServer.socket, -1, packet))
     {
-        if (server->players[i].ip.port == server->pack->address.port)
-        {
-            if (UDPPackageDecode((char *)server->pack->data) == UDPTypeText)
-            {
-                if (strcmp((char *)server->pack->data, "0quit") == 0)
-                {
-                    char quitmsg[10];
-                    sprintf(quitmsg, "quit %d", server->players[i].id);
-                    UDPServerEcho(server, UDPTypeText, quitmsg, strlen(quitmsg) + 1);
-                    server->nrPlayers--;
-                    for (int j = i; j < server->nrPlayers; j++)
-                    {
-                        server->players[j] = server->players[j + 1];
-                    }
-                    server->ids[i] = 0;
-                    SDL_memset(&server->players[server->nrPlayers], 0, sizeof(UDPPlayer));
-                }
-            }
-            exists = 1;
-        }
-    }
-    if (!exists)
-    {
-        if (server->nrPlayers == MAX_PLAYERS || strcmp((char *)server->pack->data, "0quit") == 0)
-            ;
-        else
-        {
-            server->players[server->nrPlayers].ip = server->pack->address;
-            server->nrPlayers++;
-        }
-    }
-#ifdef DEGBUG
-    printf("\nPlayer list\n");
-    for (int i = 0; i < server->nrPlayers; i++)
-        printf("(host:port): %d:%d\n", server->players[i].ip.host, server->players[i].ip.port);
-    printf("length of list %d\n", server->nrPlayers);
-    printf("End of player list\n\n");
-#ifdef RAWINOUT
-    printf("RAW IN(message, host:port): ");
-    for (int i = 0; i < server->pack->len; i++)
-    {
-        printf("%c", server->pack->data[i]);
-    }
-    printf(", %d:%d\n", server->pack->address.host, server->pack->address.port);
+#ifdef UDPSERVER_DEBUG
+        log_warn("Failed to send UDP-packet from server: %s", SDLNet_GetError());
 #endif
-#ifndef RAWINOUT
-    char buffer[MAX_MSGLEN];
-    SDL_memcpy(buffer, server->pack->data, server->pack->len);
-    UDPpacket p = *server->pack;
-    p.data = (Uint8 *)buffer;
-    switch (UDPPackageDecode((char *)server->pack->data))
+    }
+
+#ifdef UDPSERVER_DEBUG_STRICT
+    switch (UDPPacketDecode(packet->data))
     {
-    case UDPTypeText:
-        UDPPackageRemoveType(&p);
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(CHAR) ");
-        for (int i = 0; i < server->pack->len; i++)
+    case UDPType_Text:
+        UDPPacketRemoveType(packet);
+        printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
+        for (int i = 0; i < packet->len; i++)
         {
-            printf("%c", server->pack->data[i]);
+            printf("%c", packet->data[i]);
         }
-        printf(", %d:%d\n", p.address.host, p.address.port);
+        printf(", %d:%d\n", packet->address.host, packet->address.port);
         break;
-    case UDPTypeint:
-        UDPPackageRemoveTypeNULL(&p);
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)p.data, p.address.host, p.address.port);
+    case UDPType_PlayerID:
+        UDPPacketRemoveType(packet);
+        printf("PARSED OUT(({type}) {message}, {host}:{port})\n(INT) %d, %d:%d\n", *(int *)packet->data, packet->address.host, packet->address.port);
         break;
-    case UDPTypeEntity:
-        UDPPackageRemoveTypeNULL(&p);
-        Entity *e = (Entity *)p.data;
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", e->position.x, e->position.y, e->id, p.address.host, p.address.port);
+    case UDPType_Entity:
+        UDPPacketRemoveType(packet);
+        Entity *entity = (Entity *)packet->data;
+        printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n", entity->position.x, entity->position.y, entity->id, packet->address.host, packet->address.port);
         break;
     default:
-        printf("PARSED IN(({type}) {message}, {host}:{port})\n(DEFAULT) ");
-        for (int i = 0; i < p.len; i++)
+        UDPPacketRemoveType(packet);
+        printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) ");
+        for (int i = 0; i < packet->len; i++)
         {
-            printf("%c", p.data[i]);
+            printf("%c", packet->data[i]);
         }
-        printf(", %d:%d\n ", p.address.host, p.address.port);
+        printf(", %d:%d\n ", packet->address.host, packet->address.port);
         break;
     }
 #endif
-#endif
-    return r;
 }
-void UDPServerDestroy(UDPServer *server)
+
+void UDPServerListenToClients()
 {
-    SDLNet_UDP_Unbind(server->sock, 0);
-    SDLNet_UDP_Close(server->sock);
-    SDLNet_Quit();
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
+    while (udpServer.isActive)
+    {
+        SDL_bool anyReceive = SDL_FALSE;
+        UDPpacket *incoming = SDLNet_AllocPacket(MAX_MSGLEN);
+
+        int result = SDLNet_UDP_Recv(udpServer.socket, incoming);
+        if (result == -1)
+        {
+            log_warn("Failed to recieve UDP-packet: %s", SDLNet_GetError());
+        }
+        if (result)
+        {
+            SDL_bool exist = SDL_FALSE;
+
+            for (int i = 0; i < udpServer.players->size; i++)
+                if (UDPSERVER_PLAYERS[i].ip.host == incoming->address.host &&
+                    UDPSERVER_PLAYERS[i].ip.port == incoming->address.port)
+                {
+                    exist = SDL_TRUE;
+                }
+            if (!exist && udpServer.players->size != udpServer.players->capacity)
+            {
+                UDPSERVER_PLAYERS[udpServer.players->size].ip = incoming->address;
+                UDPSERVER_PLAYERS[udpServer.players->size].id = -1; // ID will be given as a reply to "alive"-packet
+                udpServer.players->size++;
+            }
+
+            anyReceive = SDL_TRUE;
+            UDPPacketType type = UDPPacketDecode((char *)incoming->data);
+            UDPPacketRemoveType(incoming);
+            ParsedUDPPacket parsedPacket = ParsedUDPPacketCreate(type, incoming->data, incoming->len, incoming->address);
+            SDL_LockMutex(udpServer.inBufferMutex);
+            VectorPushBack(udpServer.inBuffer, &parsedPacket);
+#ifdef UDPSERVER_DEBUG_RAWINOUT
+            printf(" -- PACKET INCOMING FROM (host | port) (%d | %d)\n", parsedPacket.sender.host, parsedPacket.sender.port);
+            printf(" Type: %d Raw Message: ", parsedPacket.type);
+            for (int i = 0; i < parsedPacket.size; i++)
+            {
+                printf("%c", ((char *)parsedPacket.data)[i]);
+            }
+            printf("\n -- END OF PACKET\n");
+#endif
+#ifdef UDPSERVER_DEBUG_STRICT
+            switch (parsedPacket.type)
+            {
+            case UDPType_Text:
+            {
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(CHAR) ");
+                for (int i = 0; i < parsedPacket.size; i++)
+                {
+                    printf("%c", ((char *)parsedPacket.data)[i]);
+                }
+                printf(", %d:%d\n", parsedPacket.sender.host, parsedPacket.sender.port);
+            }
+            break;
+            case UDPType_PlayerID:
+            {
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(PlayerID) %d, %d:%d\n",
+                       *(int *)parsedPacket.data,
+                       parsedPacket.sender.host,
+                       parsedPacket.sender.port);
+            }
+            break;
+            case UDPType_Entity:
+            {
+                Entity *entity = (Entity *)parsedPacket.data;
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(ENTITY) x:%f, y:%f, id:%d, %d:%d\n",
+                       entity->position.x,
+                       entity->position.y,
+                       entity->id,
+                       parsedPacket.sender.host,
+                       parsedPacket.sender.port);
+            }
+            break;
+            default:
+            {
+                printf("PARSED OUT(({type}) {message}, {host}:{port})\n(DEFAULT) ");
+                for (int i = 0; i < parsedPacket.size; i++)
+                {
+                    printf("%c", ((char *)parsedPacket.data)[i]);
+                }
+                printf(", %d:%d\n", parsedPacket.sender.host, parsedPacket.sender.port);
+            }
+            break;
+            }
+#endif
+            SDL_UnlockMutex(udpServer.inBufferMutex);
+        }
+        UDPPacketDestroy(incoming);
+
+        if (!anyReceive)
+        {
+            SDL_Delay(0);
+        }
+    }
+}
+
+void UDPServerRemoveClient(IPaddress ip)
+{
+    int index = -1;
+    for (int i = 0; i < udpServer.players->size; i++)
+    {
+        if (UDPSERVER_PLAYERS[i].ip.host == ip.host &&
+            UDPSERVER_PLAYERS[i].ip.port == ip.port)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1)
+        return;
+    int id = UDPSERVER_PLAYERS[index].id;
+    UDPServerFreeID(id);
+    VectorErase(udpServer.players, index);
+
+    char quitmsg[10] = {0};
+    sprintf(quitmsg, "quit %d", UDPSERVER_PLAYERS[index].id);
+    UDPServerBroadcast(UDPType_Text, quitmsg, strlen(quitmsg));
+
+    printf("Player disconnected [id:%d]\n", id);
+}
+
+int UDPServerGetID(IPaddress ip)
+{
+
+    for (int i = 0; i < udpServer.players->capacity; i++)
+    {
+        if (!UDPSERVER_IDS[i])
+        {
+            UDPSERVER_IDS[i] = SDL_TRUE;
+            return i + 1;
+        }
+    }
+#ifdef UDPSERVER_DEBUG
+    log_warn("No available ID's!");
+#endif
+    return -1;
+}
+
+void UDPServerFreeID(int id)
+{
+    if (id < 1 || id > udpServer.players->capacity)
+        return;
+    UDPSERVER_IDS[id - 1] = 0;
+}
+
+ParsedUDPPacket *UDPServerGetInBufferArray()
+{
+    return (ParsedUDPPacket *)udpServer.inBuffer->data;
+}
+UDPPlayer *UDPServerGetPlayerArray()
+{
+    return (UDPPlayer *)udpServer.players->data;
+}
+SDL_bool *UDPServerGetIDArray()
+{
+    return (SDL_bool *)udpServer.ids->data;
 }

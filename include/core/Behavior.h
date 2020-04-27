@@ -6,13 +6,13 @@
 #include "../math/Vec2.h"
 #include "Library.h"
 
-typedef struct moveingPattern
+typedef struct MovingPattern
 {
     Vec2 point[10];
-} MoveingPattern;
+} MovingPattern;
 
 //mode 0 move between two points 2modes!
-void BehaviorMoveEntity(EntityManager *entityManager);
+void BehaviorMoveEntity();
 Entity BehaviorMoveToPoint(Entity entity, float x, float y);
 
 #endif

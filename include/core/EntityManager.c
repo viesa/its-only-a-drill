@@ -1,82 +1,85 @@
 #include "EntityManager.h"
-//#define DegBug
 
-EntityManager *EntityManagerCreate()
+#define MAX_ENTITY_INDICES 10000
+
+struct
 {
-    EntityManager *entityManager = MALLOC(EntityManager);
-    entityManager->highestIndex = 0;
-    for (int i = 0; i < MAX_ENTITIES; i++)
+    Vector *entityVector;
+    size_t *indices;
+} entityManager;
+
+void EntityManagerInitialize()
+{
+    entityManager.entityVector = VectorCreate(sizeof(Entity), 100);
+    entityManager.indices = MALLOC_N(size_t, MAX_ENTITY_INDICES);
+    ALLOC_ERROR_CHECK(entityManager.indices);
+    for (size_t i = 0; i < MAX_ENTITY_INDICES; i++)
+        entityManager.indices[i] = 0;
+    // Pushes back fallback entity
+    EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
+}
+
+void EntityManagerDestroy()
+{
+    VectorDestroy(entityManager.entityVector);
+}
+
+void EntityManagerUpdate(Clock *clk)
+{
+    EntityManagerUpdateMovement(clk);
+    EntityManagerOnCollision();
+}
+
+void EntityManagerUpdateMovement(Clock *clk)
+{
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        entityManager->bitmap[i] = SDL_FALSE;
-    }
-    return entityManager;
-}
+        // carculate Net_force so friction & collision & the other forces is handle before
+        EntityCalculateNetForces(&ENTITY_ARRAY[i]);
 
-void EntityManagerDestroy(EntityManager *entityManager)
-{
-    SDL_free(entityManager);
-}
+        // Garante stop Cause float
+        ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
+        ENTITY_ARRAY[i].Velocity.x = (fabs(ENTITY_ARRAY[i].Velocity.x) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.x;
+        ENTITY_ARRAY[i].Velocity.y = (fabs(ENTITY_ARRAY[i].Velocity.y) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.y;
 
-void EntityManagerUpdate(EntityManager *entityManager, Clock *clk)
-{
-    EntityManagerUpdateMovement(entityManager, clk);
-    EntityManagerOnCollision(entityManager);
-}
-
-void EntityManagerUpdateMovement(EntityManager *entityManager, Clock *clk)
-{
-    for (int i = 0; i < entityManager->highestIndex; i++)
-    {
-        if (entityManager->bitmap[i])
-        { // carculate Net_force so friction & collision & the other forces is handle before
-            EntityCalculateNetForces(&entityManager->entities[i]);
-
-            // Garante stop Cause float
-            entityManager->entities[i].Velocity = Vec2DivL(entityManager->entities[i].Force, entityManager->entities[i].mass);
-            entityManager->entities[i].Velocity.x = (fabs(entityManager->entities[i].Velocity.x) < 7.8f) ? 0 : entityManager->entities[i].Velocity.x;
-            entityManager->entities[i].Velocity.y = (fabs(entityManager->entities[i].Velocity.y) < 7.8f) ? 0 : entityManager->entities[i].Velocity.y;
-
-            // update new position
-            entityManager->entities[i].position.x += entityManager->entities[i].Velocity.x * ClockGetDeltaTime(clk);
-            entityManager->entities[i].position.y += entityManager->entities[i].Velocity.y * ClockGetDeltaTime(clk);
-#ifdef DegBug
-            if (i == 0)
-            {
-                log_debug("CurrentEntity:");
-                log_debug("position x: %f", entityManager->entities[i].position.x);
-                log_debug("position y: %f", entityManager->entities[i].position.y);
-                log_debug("Force x: %f", entityManager->entities[i].Force.x);
-                log_debug("Force y: %f", entityManager->entities[i].Force.y);
-                log_debug("Acceleration x: %f", entityManager->entities[i].Acceleration.x);
-                log_debug("Acceleration y: %f", entityManager->entities[i].Acceleration.y);
-                log_debug("Velocity x: %f", entityManager->entities[i].Velocity.x);
-                log_debug("Velocity y: %f", entityManager->entities[i].Velocity.y);
-                log_debug("Friction: %f", entityManager->entities[i].Friction);
-                log_debug("mass: %f", entityManager->entities[i].mass);
-            }
-#endif
+        // update new position
+        ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime(clk);
+        ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime(clk);
+#ifdef ENTITY_DEBUG
+        if (i == 0)
+        {
+            log_debug("CurrentEntity:");
+            log_debug("position x: %f", ENTITY_ARRAY[i].position.x);
+            log_debug("position y: %f", ENTITY_ARRAY[i].position.y);
+            log_debug("Force x: %f", ENTITY_ARRAY[i].Force.x);
+            log_debug("Force y: %f", ENTITY_ARRAY[i].Force.y);
+            log_debug("Acceleration x: %f", ENTITY_ARRAY[i].Acceleration.x);
+            log_debug("Acceleration y: %f", ENTITY_ARRAY[i].Acceleration.y);
+            log_debug("Velocity x: %f", ENTITY_ARRAY[i].Velocity.x);
+            log_debug("Velocity y: %f", ENTITY_ARRAY[i].Velocity.y);
+            log_debug("Friction: %f", ENTITY_ARRAY[i].Friction);
+            log_debug("mass: %f", ENTITY_ARRAY[i].mass);
         }
+#endif
     }
 }
 
-void EntityManagerOnCollision(EntityManager *entityManager)
+void EntityManagerOnCollision()
 {
     SDL_Rect result;
-    for (int Dominant = 0; Dominant < entityManager->highestIndex; Dominant++)
+    for (int Dominant = 1; Dominant < ENTITY_ARRAY_SIZE; Dominant++)
     {
-        if (entityManager->bitmap[Dominant] &&
-            entityManager->entities[Dominant].isCollider)
-            for (int Recessive = 0; Recessive < entityManager->highestIndex; Recessive++)
+        if (ENTITY_ARRAY[Dominant].isCollider)
+            for (int Recessive = 1; Recessive < ENTITY_ARRAY_SIZE; Recessive++)
             {
-                if (entityManager->bitmap[Recessive] &&
-                    entityManager->entities[Recessive].isCollider)
+                if (ENTITY_ARRAY[Recessive].isCollider)
                 {
                     if (Dominant != Recessive)
                     {
                         // Dominant hitbox
-                        SDL_Rect *dHitbox = &entityManager->entities[Dominant].drawables[entityManager->entities[Dominant].hitboxIndex].dst;
+                        SDL_Rect *dHitbox = &ENTITY_ARRAY[Dominant].drawables[ENTITY_ARRAY[Dominant].hitboxIndex].dst;
                         // Recessive hitbox
-                        SDL_Rect *rHitbox = &entityManager->entities[Recessive].drawables[entityManager->entities[Recessive].hitboxIndex].dst;
+                        SDL_Rect *rHitbox = &ENTITY_ARRAY[Recessive].drawables[ENTITY_ARRAY[Recessive].hitboxIndex].dst;
                         if (SDL_IntersectRect(dHitbox, rHitbox, &result))
                         {
                             Vec2 DominantCenter; // calculating center
@@ -91,8 +94,8 @@ void EntityManagerOnCollision(EntityManager *entityManager)
                             ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
                             ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
 
-                            entityManager->entities[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat affect
-                            entityManager->entities[Recessive].position.y -= ResultDistance.y / 17.0f;
+                            ENTITY_ARRAY[Recessive].position.x -= ResultDistance.x / 17.0f; // the reason it's divide in to 17 pices it's to avoid the heartbeat effect
+                            ENTITY_ARRAY[Recessive].position.y -= ResultDistance.y / 17.0f;
                         }
                     }
                 }
@@ -100,59 +103,70 @@ void EntityManagerOnCollision(EntityManager *entityManager)
     }
 }
 
-Entity *EntityManagerAdd(EntityManager *entityManager, EntityType entityType, Vec2 position)
+EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position)
 {
-    Entity entity = EntityCreate(position, entityType, 0);
-    int index = EntityManagerGetFreeIndex(entityManager);
-    if (index == -1)
+    size_t freeIndex = EntityManagerGetFreeIndex();
+    if (!freeIndex)
     {
-        log_fatal("EntityManager is FULL!");
-        return NULL;
+        log_fatal("No free entity indices");
     }
+    else
     {
-        entityManager->entities[index] = entity;
-        entityManager->bitmap[index] = SDL_TRUE;
-        EntityManagerCalculateHighestIndex(entityManager);
-        return &entityManager->entities[index];
+        Entity entity = EntityCreate(position, entityType, 0);
+        VectorPushBack(ENTITY_VECTOR, &entity);
+        entityManager.indices[freeIndex] = ENTITY_ARRAY_SIZE - 1;
     }
+    return (EntityIndexP)&entityManager.indices[freeIndex];
 }
 
-void EntityManagerRemove(EntityManager *entityManager, Entity *entity)
+EntityIndexP EntityManagerAddNoConfig()
 {
-    int index = -1;
-    for (int i = 0; i < entityManager->highestIndex; i++)
-    {
-        if (entityManager->bitmap[i] && entity == &entityManager->entities[i])
-        {
-            index = i;
-        }
-    }
-    if (index == -1)
-        return;
-
-    entityManager->bitmap[index] = SDL_FALSE;
-    EntityManagerCalculateHighestIndex(entityManager);
+    return EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
 }
 
-int EntityManagerGetFreeIndex(EntityManager *entityManager)
+void EntityManagerRemove(EntityIndexP index)
 {
-    for (int i = 0; i < MAX_ENTITIES; i++)
+    size_t end = *index + 1;
+    EntityManagerRemoveRange(index, (EntityIndexP)&end);
+}
+
+void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end)
+{
+    VectorEraseRange(ENTITY_VECTOR, *start, *end);
+    for (size_t i = *end; i < ENTITY_ARRAY_SIZE; i++)
+        entityManager.indices[i]--;
+}
+
+Vector *EntityManagerGetVector()
+{
+    return entityManager.entityVector;
+}
+
+size_t EntityManagerGetVectorSize()
+{
+    return entityManager.entityVector->size;
+}
+Entity *EntityManagerGetArray()
+{
+    return ((Entity *)entityManager.entityVector->data);
+}
+
+size_t EntityManagerGetFreeIndex()
+{
+    for (int i = 1; i < MAX_ENTITY_INDICES; i++)
     {
-        if (!entityManager->bitmap[i])
+        if (!entityManager.indices[i])
             return i;
     }
-    return -1;
+    return 0;
 }
 
-void EntityManagerCalculateHighestIndex(EntityManager *entityManager)
+size_t EntityManagerGetHighestIndex()
 {
-    for (int i = MAX_ENTITIES; i >= 0; i--)
+    for (size_t i = MAX_ENTITY_INDICES - 1; i > 0; i--)
     {
-        if (entityManager->bitmap[i])
-        {
-            entityManager->highestIndex = i;
-            return;
-        }
+        if (entityManager.indices[i])
+            return i;
     }
-    entityManager->highestIndex = 0;
+    return 0;
 }

@@ -1,79 +1,63 @@
 #include "UDPPackager.h"
-char *UDPPackageCreate(UDPPackageTypes type, void *data, size_t size)
+
+ParsedUDPPacket ParsedUDPPacketCreate(UDPPacketType type, void *data, size_t size, IPaddress sender)
 {
-    char *buffer = (char *)SDL_malloc(size + 2);
-    switch (type)
-    {
-    case UDPTypeText:
-        buffer[0] = '0';
-        buffer[size + 2] = '\0';
-        SDL_memcpy(buffer + 1, data, size);
-        break;
-    case UDPTypeint:
-        buffer[0] = '1';
-        buffer[size + 2] = '\0';
-        SDL_memcpy(buffer + 1, data, size);
-        break;
-    case UDPTypeEntity:
-        buffer[0] = '2';
-        buffer[size + 2] = '\0';
-        SDL_memcpy(buffer + 1, data, size);
-        break;
-    case UDPTypeCompressedEntity:
-        buffer[0] = '3';
-        buffer[size + 2] = '\0';
-        SDL_memcpy(buffer + 1, data, size);
-        break;
-    case UDPTypeIPaddress:
-        buffer[0] = '4';
-        buffer[size + 2] = '\0';
-        SDL_memcpy(buffer + 1, data, size);
-        break;
-    default:
-        break;
-    }
-    // for (int i = 0; i < size + 1; i++)
-    // {
-    //     printf("%c", buffer[i]);
-    // }
-    // printf("\n");
-    return buffer;
+    ParsedUDPPacket packet;
+    packet.type = type;
+    packet.data = (void *)MALLOC_N(char, size);
+    ALLOC_ERROR_CHECK(packet.data);
+    memcpy(packet.data, data, size);
+    packet.size = size;
+    packet.sender = sender;
+    return packet;
 }
-UDPPackageTypes UDPPackageDecode(char *data)
+void ParsedUDPPacketDestroy(ParsedUDPPacket *packet)
 {
-    switch (data[0])
+    if (packet)
+        SDL_free(packet->data);
+}
+
+UDPpacket *UDPPacketCreate(UDPPacketType type, void *data, size_t size)
+{
+    UDPpacket *packet = SDLNet_AllocPacket(size + 1);
+
+    char *itoa_buffer = MALLOC(char);
+    SDL_itoa((int)type, itoa_buffer, 10);
+    SDL_memcpy(packet->data, itoa_buffer, 1);
+    SDL_memcpy(packet->data + 1, data, size);
+    SDL_free(itoa_buffer);
+    packet->len = size + 1;
+
+    return packet;
+}
+
+void UDPPacketDestroy(UDPpacket *packet)
+{
+    if (packet)
+        SDLNet_FreePacket(packet);
+}
+
+UDPPacketType UDPPacketDecode(void *data)
+{
+    switch (((char *)data)[0])
     {
     case '0':
-        return UDPTypeText;
+        return UDPType_Text;
     case '1':
-        return UDPTypeint;
+        return UDPType_PlayerID;
     case '2':
-        return UDPTypeEntity;
+        return UDPType_Entity;
     case '3':
-        return UDPTypeCompressedEntity;
+        return UDPType_CompressedEntity;
     case '4':
-        return UDPTypeIPaddress;
+        return UDPType_IPaddress;
     default:
         return 400;
     }
 }
-void UDPPackageRemoveTypeNULL(UDPpacket *pack)
+void UDPPacketRemoveType(UDPpacket *packet)
 {
-    for (int i = 1; i < pack->len - 1; i++)
-    {
-        pack->data[i - 1] = pack->data[i];
-    }
-    SDLNet_ResizePacket(pack, -2);
-}
-void UDPPackageRemoveType(UDPpacket *pack)
-{
-    for (int i = 1; i < strlen((char *)pack->data) + 1; i++)
-    {
-        pack->data[i - 1] = pack->data[i];
-    }
-    SDLNet_ResizePacket(pack, -1);
-}
-void UDPPackageDestroy(void *data)
-{
-    SDL_free(data);
+    SDL_memmove(packet->data, packet->data + 1, packet->len - 1);
+    packet->len -= 1;
+    SDLNet_ResizePacket(packet, -1);
 }

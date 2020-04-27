@@ -14,6 +14,8 @@ Graphics *GraphicsCreate()
     gfx->mapHeight = 2000;
 
     //INIT ALL TEXTURES
+    for (int i = 0; i < SS_Count; i++)
+        gfx->m_allTextures[i] = NULL;
     gfx->m_allTextures[SS_Menu] = GraphicsLoadTexture(gfx, "docs/spritesheets/menu.png");
     gfx->m_allTextures[SS_Legacy] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tilemap.png");
     gfx->m_allTextures[SS_Tiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_tiles.png");
@@ -23,6 +25,7 @@ Graphics *GraphicsCreate()
     gfx->m_allTextures[SS_Weapons] = GraphicsLoadTexture(gfx, "docs/spritesheets/weapons.png");
     gfx->m_allTextures[SS_BackgroundTiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/background-tiles.png");
     gfx->m_allTextures[SS_RedCircle] = GraphicsLoadTexture(gfx, "assets/img/red_circle.png");
+    gfx->m_allTextures[SS_Scanline] = GraphicsLoadTexture(gfx, "assets/img/scanlines.png");
 
     return gfx;
 }
