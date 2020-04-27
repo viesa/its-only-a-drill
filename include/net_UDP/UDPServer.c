@@ -7,7 +7,7 @@ void UDPServerInitialize()
     udpServer.ids = VectorCreate(sizeof(SDL_bool), 100);
     udpServer.ids->resizable = SDL_FALSE;
     for (size_t i = 0; i < udpServer.ids->capacity; i++)
-        udpServer.ids[i] = 0;
+        UDPSERVER_IDS[i] = SDL_FALSE;
     udpServer.inBuffer = VectorCreate(sizeof(ParsedUDPPacket), 100);
     udpServer.inBufferMutex = SDL_CreateMutex();
     udpServer.isInitialized = SDL_FALSE;
