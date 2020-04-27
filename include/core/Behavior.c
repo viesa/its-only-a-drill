@@ -27,7 +27,7 @@ void BehaviorMoveEntity()
 
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (ENTITY_ARRAY[i].type = ET_Player)
+        if (ENTITY_ARRAY[i].type == ET_Player)
         {
             tmp = i;
             playerPosition = RectMid(ENTITY_ARRAY[tmp].drawables[tmp].dst);
