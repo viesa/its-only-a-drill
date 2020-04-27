@@ -4,7 +4,7 @@ int main()
 {
     SDL_bool isRunning = SDL_TRUE;
     // Has to be the first
-    UDPServerInitialize();
+    ServerInitialize();
     Clock *m_clock = ClockCreate();
 
     AppServer *app = AppServerCreate(&isRunning, m_clock);
@@ -18,7 +18,7 @@ int main()
 
     AppServerDestroy(app);
     //Has to be the last
-    UDPServerUninitialize();
+    ServerUninitialize();
 
     SDL_Quit();
 

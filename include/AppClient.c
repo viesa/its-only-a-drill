@@ -1,5 +1,4 @@
 #include "core/AppClient.h"
-#include <time.h>
 #include "Items.h"
 #include "Player.h"
 #include "Map.h"
@@ -57,8 +56,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->player = PlayerCreate(app->camera);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
-    UDPManagerInitialize(&app->player);
-    UDPClientStart();
+    ClientManagerInitialize(&app->player);
+    ClientStart();
 
     for (int i = 1; i < 10; i++)
     {
@@ -84,7 +83,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
 }
 void AppClientDestroy(AppClient *app)
 {
-    UDPClientStop();
+    ClientStop();
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
@@ -106,7 +105,7 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
-    UDPManagerUpdate();
+    ClientManagerUpdate();
 
     switch (app->state.gameState)
     {
@@ -214,9 +213,9 @@ void AppClientUpdate(AppClient *app)
         EntityManagerUpdate(app->clock);
 
         //CompressedEntity sendCompressedEntity = EntityCompress(app->ENTITY_ARRAY[*0]);
-        //UDPClientSend(app->client, UDPType_CompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
+        //ClientSend(app->client, PT_CompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
 
-        UDPClientSend(UDPType_Entity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
+        ClientSend(PT_Entity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
         break;
     }
     default:
@@ -255,7 +254,7 @@ void AppClientDraw(AppClient *app)
                 EntityDraw(&ENTITY_ARRAY[i], app->camera);
         }
         PlayerDraw(&app->player, app->camera);
-        UDPManagerDrawConnectedPlayers(app->camera);
+        ClientManagerDrawConnectedPlayers(app->camera);
         GuiUpdate(app->gui);
 
         if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))

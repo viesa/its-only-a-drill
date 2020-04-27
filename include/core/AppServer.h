@@ -3,7 +3,7 @@
 
 #include "Dependencies.h"
 #include "Clock.h"
-#include "../net_UDP/UDPServer.h"
+#include "../net/Server.h"
 
 typedef struct AppServer AppServer;
 
@@ -20,9 +20,9 @@ void AppServerUpdate(AppServer *app);
 void AppServerShowPlayerList(AppServer *app);
 
 // Handles different kind of packets
-void AppServerHandleTextPacket(ParsedUDPPacket packet);
-void AppServerHandlePlayerIDPacket(ParsedUDPPacket packet);
-void AppServerHandleEntityPacket(ParsedUDPPacket packet);
-void AppServerHandleCompressedEntityPacket(ParsedUDPPacket packet);
-void AppServerHandleIPaddressPacket(ParsedUDPPacket packet);
+void AppServerHandleTextPacket(ParsedPacket packet);
+void AppServerHandlePlayerIDPacket(ParsedPacket packet);
+void AppServerHandleEntityPacket(ParsedPacket packet);
+void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
+void AppServerHandleIPaddressPacket(ParsedPacket packet);
 #endif

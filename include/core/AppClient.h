@@ -15,8 +15,8 @@
 #include "State.h"
 #include "EntityManager.h"
 #include "Cursor.h"
-#include "../net_UDP/UDPClient.h"
-#include "../net_UDP/UDPManager.h"
+#include "../net/Client.h"
+#include "../net/ClientManager.h"
 
 typedef struct AppClient AppClient;
 

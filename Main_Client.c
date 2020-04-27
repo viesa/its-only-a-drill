@@ -6,7 +6,7 @@ int main()
 {
     SDL_bool m_running = SDL_TRUE;
     // Has to be the first
-    UDPClientInitialize();
+    ClientInitialize();
 
     FPSManager *m_fpsManager = FPSManagerCreate();
     Clock *m_clock = ClockCreate();
@@ -29,7 +29,7 @@ int main()
     EventDestroy(m_event);
     AppClientDestroy(m_app);
     //Has to be the last
-    UDPClientUninitialize();
+    ClientUninitialize();
 
     SDL_Quit();
 

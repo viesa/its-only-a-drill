@@ -1,20 +1,15 @@
-#ifndef UDPSERVER_h
-#define UDPSERVER_h
+#ifndef SERVER_h
+#define SERVER_h
 
 #include "../core/Dependencies.h"
 #include "../core/Vector.h"
 #include "../core/Entity.h"
-#include "UDPPackager.h"
+#include "Packager.h"
+#include "NetPlayer.h"
 
-#define UDPSERVER_INBUFFER UDPServerGetInBufferArray()
-#define UDPSERVER_PLAYERS UDPServerGetPlayerArray()
-#define UDPSERVER_IDS UDPServerGetIDArray()
-
-typedef struct UDPPlayer
-{
-    IPaddress ip;
-    int id;
-} UDPPlayer;
+#define SERVER_INBUFFER ServerGetInBufferArray()
+#define SERVER_PLAYERS ServerGetPlayerArray()
+#define SERVER_IDS ServerGetIDArray()
 
 struct
 {
@@ -29,35 +24,35 @@ struct
     SDL_bool isInitialized;
 
     SDL_Thread *listenThread;
-} udpServer;
+} server;
 
 // Creates a UDP server on a fixed port
-void UDPServerInitialize();
+void ServerInitialize();
 // Destroys the server (udp_close(), unbind, sdlnet close)
-void UDPServerUninitialize();
+void ServerUninitialize();
 // Marks server as active and sends out threads
-void UDPServerStart();
+void ServerStart();
 // Marks server as inactive and collects threads
-void UDPServerStop();
+void ServerStop();
 // Sends a message to everyone on that has sent a message to the server during the session
-void UDPServerBroadcast(UDPPacketType type, void *data, int size);
+void ServerBroadcast(PacketType type, void *data, int size);
 // Sends a message to everyone except a specified ip
-void UDPServerBroadcastExclusive(UDPPacketType type, void *data, int size, IPaddress exclusive);
+void ServerBroadcastExclusive(PacketType type, void *data, int size, IPaddress exclusive);
 // Sends a message to a specified ip address
-void UDPServerSend(UDPPacketType type, void *data, int size, IPaddress ip);
+void ServerSend(PacketType type, void *data, int size, IPaddress ip);
 // Final step before leaving the server
-void UDPServerOut(UDPpacket *packet);
+void ServerOut(UDPpacket *packet);
 // Thread function to listen to clients and receive packets, parse them and add them to inBuffer
-void UDPServerListenToClients();
+void ServerListenToClients();
 // Deletes the client from player-list and notifies all clients
-void UDPServerRemoveClient();
+void ServerRemoveClient();
 // Returns lowest free unique ID
-int UDPServerGetID(IPaddress ip);
+int ServerGetID(IPaddress ip);
 // Marks the id as non-taken
-void UDPServerFreeID(int id);
+void ServerFreeID(int id);
 
-ParsedUDPPacket *UDPServerGetInBufferArray();
-UDPPlayer *UDPServerGetPlayerArray();
-SDL_bool *UDPServerGetIDArray();
+ParsedPacket *ServerGetInBufferArray();
+NetPlayer *ServerGetPlayerArray();
+SDL_bool *ServerGetIDArray();
 
 #endif

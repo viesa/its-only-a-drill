@@ -1,11 +1,11 @@
-#ifndef UDPCLIENT_H
-#define UDPCLIENT_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include "../core/Dependencies.h"
 #include "../core/Vector.h"
-#include "UDPPackager.h"
+#include "Packager.h"
 
-#define UDPCLIENT_INBUFFER UDPClientGetInBufferArray()
+#define CLIENT_INBUFFER ClientGetInBufferArray()
 
 struct
 {
@@ -21,20 +21,20 @@ struct
 
     SDL_Thread *listenThread;
 
-} udpClient;
+} client;
 
-void UDPClientInitialize();
-void UDPClientUninitialize();
+void ClientInitialize();
+void ClientUninitialize();
 
 // Marks client as active and sends out threads
-void UDPClientStart();
+void ClientStart();
 // Marks client as inactive and collects threads
-void UDPClientStop();
+void ClientStop();
 // Sends a packet to the server
-int UDPClientSend(UDPPacketType type, void *data, size_t size);
+int ClientSend(PacketType type, void *data, size_t size);
 // Thread function to listen for server-packets, parse them and put them into inBuffer
-void UDPClientListenToServer();
+void ClientListenToServer();
 
-ParsedUDPPacket *UDPClientGetInBufferArray();
+ParsedPacket *ClientGetInBufferArray();
 
 #endif

@@ -1,8 +1,8 @@
-#include "UDPPackager.h"
+#include "Packager.h"
 
-ParsedUDPPacket ParsedUDPPacketCreate(UDPPacketType type, void *data, size_t size, IPaddress sender)
+ParsedPacket ParsedPacketCreate(PacketType type, void *data, size_t size, IPaddress sender)
 {
-    ParsedUDPPacket packet;
+    ParsedPacket packet;
     packet.type = type;
     packet.data = (void *)MALLOC_N(char, size);
     ALLOC_ERROR_CHECK(packet.data);
@@ -11,13 +11,13 @@ ParsedUDPPacket ParsedUDPPacketCreate(UDPPacketType type, void *data, size_t siz
     packet.sender = sender;
     return packet;
 }
-void ParsedUDPPacketDestroy(ParsedUDPPacket *packet)
+void ParsedPacketDestroy(ParsedPacket *packet)
 {
     if (packet)
         SDL_free(packet->data);
 }
 
-UDPpacket *UDPPacketCreate(UDPPacketType type, void *data, size_t size)
+UDPpacket *UDPPacketCreate(PacketType type, void *data, size_t size)
 {
     UDPpacket *packet = SDLNet_AllocPacket(size + 1);
 
@@ -37,20 +37,20 @@ void UDPPacketDestroy(UDPpacket *packet)
         SDLNet_FreePacket(packet);
 }
 
-UDPPacketType UDPPacketDecode(void *data)
+PacketType UDPPacketDecode(void *data)
 {
     switch (((char *)data)[0])
     {
     case '0':
-        return UDPType_Text;
+        return PT_Text;
     case '1':
-        return UDPType_PlayerID;
+        return PT_PlayerID;
     case '2':
-        return UDPType_Entity;
+        return PT_Entity;
     case '3':
-        return UDPType_CompressedEntity;
+        return PT_CompressedEntity;
     case '4':
-        return UDPType_IPaddress;
+        return PT_IPaddress;
     default:
         return 400;
     }
