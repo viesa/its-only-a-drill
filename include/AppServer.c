@@ -10,7 +10,7 @@ struct AppServer
 AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock)
 {
     AppServer *app = MALLOC(AppServer);
-    UDPServerStart();
+    ServerStart();
     app->isRunning = isRunning;
     app->clock = clock;
     app->displayTimer = 0.0f;
@@ -19,7 +19,7 @@ AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock)
 
 void AppServerDestroy(AppServer *app)
 {
-    UDPServerStop();
+    ServerStop();
 }
 
 void AppServerGo(AppServer *app)
@@ -30,39 +30,38 @@ void AppServerGo(AppServer *app)
 
 void AppServerUpdate(AppServer *app)
 {
-    // LOCK VECTOR
-    SDL_LockMutex(udpServer.inBufferMutex);
-    for (size_t i = 0; i < udpServer.inBuffer->size; i++)
+    SDL_LockMutex(server.inBufferMutex);
+    for (size_t i = 0; i < server.inBuffer->size; i++)
     {
-        ParsedUDPPacket nextPacket = UDPSERVER_INBUFFER[i];
+        ParsedPacket nextPacket = SERVER_INBUFFER[i];
 
         switch (nextPacket.type)
         {
-        case UDPType_Text:
+        case PT_Text:
             AppServerHandleTextPacket(nextPacket);
             break;
-        case UDPType_PlayerID:
+        case PT_PlayerID:
             AppServerHandlePlayerIDPacket(nextPacket);
             break;
-        case UDPType_Entity:
+        case PT_Entity:
             AppServerHandleEntityPacket(nextPacket);
             break;
-        case UDPType_CompressedEntity:
+        case PT_CompressedEntity:
             AppServerHandleCompressedEntityPacket(nextPacket);
             break;
-        case UDPType_IPaddress:
+        case PT_IPaddress:
             AppServerHandleIPaddressPacket(nextPacket);
             break;
         default:
             break;
         }
     }
-    for (size_t i = 0; i < udpServer.inBuffer->size; i++)
+    for (size_t i = 0; i < server.inBuffer->size; i++)
     {
-        ParsedUDPPacketDestroy(&UDPSERVER_INBUFFER[i]);
+        ParsedPacketDestroy(&SERVER_INBUFFER[i]);
     }
-    VectorClear(udpServer.inBuffer);
-    SDL_UnlockMutex(udpServer.inBufferMutex);
+    VectorClear(server.inBuffer);
+    SDL_UnlockMutex(server.inBufferMutex);
 }
 
 void AppServerShowPlayerList(AppServer *app)
@@ -88,24 +87,24 @@ void AppServerShowPlayerList(AppServer *app)
     // #endif
 
     printf("\n---- Player List ----\n");
-    for (int i = 0; i < udpServer.players->size; i++)
-        printf("%d:(host:port): %d:%d\n", UDPSERVER_PLAYERS[i].id, UDPSERVER_PLAYERS[i].ip.host, UDPSERVER_PLAYERS[i].ip.port);
-    printf("Ammount of players %u\n", (unsigned int)udpServer.players->size);
+    for (int i = 0; i < server.players->size; i++)
+        printf("%d:(host:port): %d:%d\n", SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].ip.host, SERVER_PLAYERS[i].ip.port);
+    printf("Ammount of players %u\n", (unsigned int)server.players->size);
     printf("---- End of player list ----\n\n");
 }
 
-void AppServerHandleTextPacket(ParsedUDPPacket packet)
+void AppServerHandleTextPacket(ParsedPacket packet)
 {
     if (!SDL_memcmp(packet.data, "alive", 5))
     {
-        for (int i = 0; i < udpServer.players->size; i++)
+        for (int i = 0; i < server.players->size; i++)
         {
-            if (UDPSERVER_PLAYERS[i].ip.host == packet.sender.host &&
-                UDPSERVER_PLAYERS[i].ip.port == packet.sender.port)
+            if (SERVER_PLAYERS[i].ip.host == packet.sender.host &&
+                SERVER_PLAYERS[i].ip.port == packet.sender.port)
             {
-                int ID = UDPServerGetID(packet.sender);
-                UDPSERVER_PLAYERS[i].id = ID;
-                UDPServerSend(UDPType_PlayerID, &ID, sizeof(int), packet.sender);
+                int ID = ServerGetID(packet.sender);
+                SERVER_PLAYERS[i].id = ID;
+                ServerSend(PT_PlayerID, &ID, sizeof(int), packet.sender);
                 log_info("Player(id:%d) connected\n", ID);
             }
         }
@@ -114,26 +113,26 @@ void AppServerHandleTextPacket(ParsedUDPPacket packet)
 
     if (!SDL_memcmp(packet.data, "quit", 4))
     {
-        UDPServerRemoveClient(packet.sender);
+        ServerRemoveClient(packet.sender);
         return;
     }
 }
 
-void AppServerHandlePlayerIDPacket(ParsedUDPPacket packet)
+void AppServerHandlePlayerIDPacket(ParsedPacket packet)
 {
 }
 
-void AppServerHandleEntityPacket(ParsedUDPPacket packet)
+void AppServerHandleEntityPacket(ParsedPacket packet)
 {
     Entity incomingEntity = *(Entity *)packet.data;
 
     SDL_bool exist = SDL_FALSE;
-    for (int i = 0; i < udpServer.players->size; i++)
+    for (int i = 0; i < server.players->size; i++)
     {
-        if (UDPSERVER_PLAYERS[i].id == incomingEntity.id) //entity exists
+        if (SERVER_PLAYERS[i].id == incomingEntity.id) //entity exists
         {
             exist = SDL_TRUE;
-            UDPServerBroadcastExclusive(UDPType_Entity, &incomingEntity, sizeof(Entity), packet.sender);
+            ServerBroadcastExclusive(PT_Entity, &incomingEntity, sizeof(Entity), packet.sender);
             break;
         }
     }
@@ -144,17 +143,17 @@ void AppServerHandleEntityPacket(ParsedUDPPacket packet)
 #endif
     }
 }
-void AppServerHandleCompressedEntityPacket(ParsedUDPPacket packet)
+void AppServerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity incomingCEntity = *(CompressedEntity *)packet.data;
 
     SDL_bool exist = SDL_FALSE;
-    for (int i = 0; i < udpServer.players->size; i++)
+    for (int i = 0; i < server.players->size; i++)
     {
-        if (UDPSERVER_PLAYERS[i].id == incomingCEntity.id) //entity exists
+        if (SERVER_PLAYERS[i].id == incomingCEntity.id) //entity exists
         {
             exist = SDL_TRUE;
-            UDPServerBroadcastExclusive(UDPType_CompressedEntity, &incomingCEntity, sizeof(CompressedEntity), packet.sender);
+            ServerBroadcastExclusive(PT_CompressedEntity, &incomingCEntity, sizeof(CompressedEntity), packet.sender);
             break;
         }
     }
@@ -165,6 +164,6 @@ void AppServerHandleCompressedEntityPacket(ParsedUDPPacket packet)
 #endif
     }
 }
-void AppServerHandleIPaddressPacket(ParsedUDPPacket packet)
+void AppServerHandleIPaddressPacket(ParsedPacket packet)
 {
 }

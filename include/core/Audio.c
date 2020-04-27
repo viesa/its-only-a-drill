@@ -11,9 +11,6 @@ struct Audio
 
 Audio *AudioCreate()
 {
-    if (SDL_Init(SDL_INIT_AUDIO) < 0)
-        log_error("Could not initialize audio: %s", SDL_GetError());
-
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
         log_error("Could configure audio: %s", Mix_GetError());
 

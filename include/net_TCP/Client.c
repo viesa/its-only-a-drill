@@ -4,12 +4,6 @@
 
 Client *ClientCreate(const char *ip, Uint16 port)
 {
-    if (SDLNet_Init() == -1)
-    {
-        log_error("Could not initialize net: %s", SDLNet_GetError());
-        return NULL;
-    }
-
     Client *ret = MALLOC(Client);
     ret->m_port = 0;
     ret->m_ip = NULL;

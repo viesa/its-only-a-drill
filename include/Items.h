@@ -23,6 +23,9 @@ typedef struct Weapon
     float accuracy;
     int ammo;
     int captivity;
+    float cooldownMS;   // in milisecondes
+    float currentTime;  // in milisecondes
+    float ReloadTimeMS; // in milisecondes
 } WeaponStats;
 
 typedef struct Item

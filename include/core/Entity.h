@@ -23,7 +23,9 @@ typedef enum EntityType
     //Used only by Map.c
     ET_MapObject,
     ET_None,
-    ET_Count
+    ET_Count,
+    //Used only by weapon.c
+    ET_Bullet
 } EntityType;
 
 typedef enum entityState

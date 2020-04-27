@@ -4,9 +4,18 @@
 
 int main()
 {
+    if (SDL_Init(SDL_INIT_EVERYTHING))
+        log_error("Failed to init SDL: %s", SDL_GetError());
+    if (SDLNet_Init() < 0)
+        log_error("Failed to init SDL_net: %s", SDLNet_GetError());
+    if (SDL_Init(SDL_INIT_AUDIO) < 0)
+        log_error("Could not initialize audio: %s", SDL_GetError());
+    if (TTF_Init() < 0)
+        log_error("Could not initialize fonts: %s", SDL_GetError());
+
     SDL_bool m_running = SDL_TRUE;
     // Has to be the first
-    UDPClientInitialize();
+    ClientInitialize();
 
     FPSManager *m_fpsManager = FPSManagerCreate();
     Clock *m_clock = ClockCreate();
@@ -29,7 +38,7 @@ int main()
     EventDestroy(m_event);
     AppClientDestroy(m_app);
     //Has to be the last
-    UDPClientUninitialize();
+    ClientUninitialize();
 
     SDL_Quit();
 

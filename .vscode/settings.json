@@ -47,6 +47,7 @@
                 "xtr1common": "cpp",
                 "udppackager.h": "c",
                 "dependencies.h": "c",
-                "udpserver.h": "c"
+                "udpserver.h": "c",
+                "appserver.h": "c"
         }
 }
