@@ -8,9 +8,13 @@
 
 #include "Library.h"
 
-void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item item);
-void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item item);
+void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item, Clock *clk);
+void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item *item);
 
-void RayScan(int index, Vec2 makeDestination, SDL_Point point, Item item, Vec2 ForceDir);
+//diffrent types of shooting
+void RayScan(int index, Vec2 makeDestination, SDL_Point point, Item *item, Vec2 ForceDir);
+// void bullet(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Direction);
+
+void weaponUpdate(Item *item, Clock *clk);
 
 #endif

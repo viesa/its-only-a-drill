@@ -48,6 +48,13 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.hitboxIndex = 0;
         entity.nDrawables = 2;
         break;
+    case ET_Bullet:
+        entity.Friction = 0.0f;
+        entity.mass = 5.0f;
+        entity.isCollider = SDL_TRUE;
+        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+        entity.hitboxIndex = 0;
+        break;
 
     default:
         break;
