@@ -64,6 +64,9 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     //Decides what shall be drawn on top
     switch (menu->state->menuState)
     {
+    case MS_Splash:
+        MenuUpdateSplash(menu, input, map);
+        break;
     case MS_MainMenu:
         MenuUpdateMainMenu(menu, input, map);
         break;
@@ -82,6 +85,31 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     default:
         break;
     }
+}
+
+void MenuUpdateSplash(Menu *menu, Input *input, Map *map)
+{
+    if (InputIsKeyPressed(input, SDL_SCANCODE_SPACE))
+    {
+        menu->state->menuState = MS_MainMenu;
+    }
+
+    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+
+    SDL_Color vitalsColor[10] = {
+        {menu->loopSwing, 159, 227},
+        {menu->loopSwing, 139, 207},
+        {menu->loopSwing, 119, 187},
+        {menu->loopSwing, 99, 167},
+        {menu->loopSwing, 79, 147},
+        {menu->loopSwing, 59, 127},
+        {menu->loopSwing, 39, 107},
+        {menu->loopSwing, 19, 87},
+        {255 - menu->loopSwing, 180, 184},
+        {255 - menu->loopSwing, 180, 184}};
+
+    FontDraw3DCustom(menu->font, TTF_AntillesBig, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+    FontDraw(menu->font, TTF_Antilles, "Press space", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
 }
 
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
@@ -376,7 +404,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     menu->mainMenuDbl.dst.h = menu->gfx->window->height;
 
     //Draw background
-    if (menu->state->menuState == MS_MainMenu)
+    if (menu->state->menuState != MS_CustomMap && menu->state->menuState != MS_Splash)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }

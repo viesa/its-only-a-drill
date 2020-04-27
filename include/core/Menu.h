@@ -30,6 +30,7 @@ typedef struct Menu
 // Creates menu
 Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
 void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map);
+void MenuUpdateSplash(Menu *menu, Input *input, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
 void MenuUpdateOptions(Menu *menu, Input *input);
 void MenuUpdateResolution(Menu *menu, Input *input);

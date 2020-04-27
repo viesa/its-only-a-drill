@@ -103,7 +103,6 @@ void GuiUpdate(Gui *gui)
     sprintf(fps, "%d", gui->fps);
     FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
 #endif
-
     GuiOverlayUpdate(gui);
 }
 

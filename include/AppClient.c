@@ -74,7 +74,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     ENTITY_ARRAY[*app->player.entity].inventory = InventoryCreate();
 
     app->state.gameState = GS_Menu;
-    app->state.menuState = MS_MainMenu;
+    app->state.menuState = MS_Splash;
 
     app->map.contents = NULL;
     app->map.n = 0;

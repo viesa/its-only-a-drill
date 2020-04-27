@@ -10,8 +10,9 @@ typedef enum GameState
 
 typedef enum MenuState
 {
-    MS_Options,
+    MS_Splash,
     MS_MainMenu,
+    MS_Options,
     MS_Resolution,
     MS_FPS,
     MS_CustomMap,

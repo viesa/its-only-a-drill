@@ -7,6 +7,7 @@
 typedef enum FontSheet
 {
     TTF_Antilles,
+    TTF_AntillesBig,
     TTF_Robot_Crush,
     TTF_Arial,
     TTF_Count
