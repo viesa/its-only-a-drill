@@ -6,8 +6,6 @@
 #include "../core/Entity.h"
 #include "UDPPackager.h"
 
-#define MAX_PLAYERS 10
-
 #define UDPSERVER_INBUFFER UDPServerGetInBufferArray()
 #define UDPSERVER_PLAYERS UDPServerGetPlayerArray()
 #define UDPSERVER_IDS UDPServerGetIDArray()

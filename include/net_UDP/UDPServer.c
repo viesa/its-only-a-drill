@@ -169,7 +169,7 @@ void UDPServerListenToClients()
                 {
                     exist = SDL_TRUE;
                 }
-            if (!exist && udpServer.players->size != MAX_PLAYERS)
+            if (!exist && udpServer.players->size != udpServer.players->capacity)
             {
                 UDPSERVER_PLAYERS[udpServer.players->size].ip = incoming->address;
                 UDPSERVER_PLAYERS[udpServer.players->size].id = -1; // ID will be given as a reply to "alive"-packet
@@ -273,19 +273,8 @@ void UDPServerRemoveClient(IPaddress ip)
 
 int UDPServerGetID(IPaddress ip)
 {
-// First check if player already own an ID
-#ifndef UDPSERVER_LOCAL
-    for (int i = 0; i < MAX_PLAYERS; i++)
-    {
-        if (UDPSERVER_PLAYERS[i].ip.host == ip.host)
-        {
-            UDPSERVER_IDS[i] = SDL_TRUE;
-            return i + 1;
-        }
-    }
-#endif
-    // Otherwise find a free one...
-    for (int i = 0; i < MAX_PLAYERS; i++)
+
+    for (int i = 0; i < udpServer.players->capacity; i++)
     {
         if (!UDPSERVER_IDS[i])
         {
@@ -301,7 +290,7 @@ int UDPServerGetID(IPaddress ip)
 
 void UDPServerFreeID(int id)
 {
-    if (id < 1 || id > MAX_PLAYERS)
+    if (id < 1 || id > udpServer.players->capacity)
         return;
     UDPSERVER_IDS[id - 1] = 0;
 }
