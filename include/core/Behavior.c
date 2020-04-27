@@ -22,7 +22,7 @@ void BehaviorMoveEntity()
 
     SDL_Rect boxDP;
 
-    Vec2 playerPosition = RectMid(entityManager->entities[0].drawables[0].dst);
+    Vec2 playerPosition = RectMid(ENTITY_ARRAY[0].drawables[0].dst);
     Vec2 enemyPosition, enemyToPlayer;
 
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
