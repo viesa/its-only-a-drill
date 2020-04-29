@@ -441,13 +441,17 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
         //Draw menu options
         for (size_t i = 0; i < optionLength; i++)
         {
+            //Calculate scrolling menu
+            int screenCenterY = menu->gfx->window->height / 2;
+            int yPos = screenCenterY - (spacing * menu->activeIndex) + spacing * i;
+
             if (i == menu->activeIndex)
             {
-                FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (spacing * optionLength / 2) + spacing * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+                FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, yPos, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
             }
             else
             {
-                FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (spacing * optionLength / 2) + spacing * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+                FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, yPos, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
             }
         }
         break;
