@@ -128,6 +128,8 @@ void AppClientUpdate(AppClient *app)
         switch (app->state.menuState)
         {
         case MS_CustomMap:
+        case MS_HostLobby:
+        case MS_JoinLobby:
             CameraUpdate(app->camera);
             break;
         default:
