@@ -27,10 +27,16 @@
 
 #define CALLOC(nblocks, type) (type *)SDL_calloc((nblocks), sizeof(type))
 
-#define ALLOC_ERROR_CHECK(pointer)               \
-    if ((void *)(pointer) == NULL)               \
-    {                                            \
-        log_error("Failed to alloacate memory"); \
+#define FREE(pointer)      \
+    if ((pointer))         \
+    {                      \
+        SDL_free(pointer); \
+    }
+
+#define ALLOC_ERROR_CHECK(pointer)              \
+    if ((void *)(pointer) == NULL)              \
+    {                                           \
+        log_error("Failed to allocate memory"); \
     }
 
 #endif

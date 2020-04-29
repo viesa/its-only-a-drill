@@ -8,7 +8,7 @@
  */
 #ifndef DIRENT_H
 #define DIRENT_H
-
+#ifdef _WIN32
 /* Hide warnings about unreferenced local functions */
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-function"
@@ -1218,5 +1218,6 @@ extern "C"
 
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif /*DIRENT_H*/

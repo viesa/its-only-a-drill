@@ -56,7 +56,9 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->player = PlayerCreate(app->camera);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
-    ClientManagerInitialize(&app->player);
+    ClientInitialize();
+    ClientManagerInitialize();
+    ClientSetPlayer(&app->player);
     ClientStart();
 
     for (int i = 1; i < 10; i++)
@@ -84,6 +86,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
 void AppClientDestroy(AppClient *app)
 {
     ClientStop();
+    ClientManagerUninitialize();
+    ClientUninitialize();
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
@@ -213,10 +217,8 @@ void AppClientUpdate(AppClient *app)
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->clock);
 
-        //CompressedEntity sendCompressedEntity = EntityCompress(app->ENTITY_ARRAY[*0]);
-        //ClientSend(app->client, PT_CompressedEntity, &sendCompressedEntity, sizeof(CompressedEntity));
-
-        ClientSend(PT_Entity, &ENTITY_ARRAY[*app->player.entity], sizeof(Entity));
+        CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[*app->player.entity]);
+        ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(Entity));
         break;
     }
     default:

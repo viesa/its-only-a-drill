@@ -21,8 +21,11 @@ void AppServerShowPlayerList(AppServer *app);
 
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
-void AppServerHandlePlayerIDPacket(ParsedPacket packet);
+void AppServerHandleConnectPacket(ParsedPacket packet);
+void AppServerHandleDisconnectPacket(ParsedPacket packet);
+void AppServerHandleNewPlayerPacket(ParsedPacket packet);
+void AppServerHandleDelPlayerPacket(ParsedPacket packet);
 void AppServerHandleEntityPacket(ParsedPacket packet);
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
-void AppServerHandleIPaddressPacket(ParsedPacket packet);
+
 #endif
