@@ -6,20 +6,31 @@
 #define moxsize 50 //boxsize
 #define aggravationRadius 250.0f
 
-void BehaviorMoveEntity(Clock *clk)
+MovingPattern *behaviorPathsCreate()
 {
-    MovingPattern mp;
+    MovingPattern *pattern = MALLOC(MovingPattern);
+    //pattern->point[0] //när enemy kommer till desierd point -> pattern + pos = new desierd point
+    pattern->point[0] = Vec2Create(200.0f,  200.0f);
+    pattern->point[1] = Vec2Create(283.0f,  0.0f);
+    pattern->point[2] = Vec2Create(200.0f,  -200.0f);
+    pattern->point[3] = Vec2Create( 0.0f,  -283.0f);
+    pattern->point[4] = Vec2Create( -200.0f,  200.0f);
+    pattern->point[5] = Vec2Create( -283.0f,  0.0f);
+    pattern->point[6] = Vec2Create( -200.0f,  -200.0f);
+    pattern->point[7] = Vec2Create( 50.0f,  0.0f);
+    pattern->point[8] = Vec2Create( 150.0f,  100.0f);
+    pattern->point[9] = Vec2Create( 200.0f,  200.0f);
+    return pattern;
+}
+
+void pathFree(MovingPattern *enemyP)
+{
+    SDL_free(enemyP);
+}
+
+void BehaviorMoveEntity(Clock *clk, MovingPattern *pattern)
+{
     int tmp = 0;
-    mp.point[0] = Vec2Create((float)200, (float)200);
-    mp.point[1] = Vec2Create((float)283, (float)0);
-    mp.point[2] = Vec2Create((float)200, (float)-200);
-    mp.point[3] = Vec2Create((float)0, (float)-283);
-    mp.point[4] = Vec2Create((float)-200, (float)200);
-    mp.point[5] = Vec2Create((float)-283, (float)0);
-    mp.point[6] = Vec2Create((float)-200, (float)-200);
-    mp.point[7] = Vec2Create((float)50, (float)0);
-    mp.point[8] = Vec2Create((float)150, (float)100);
-    mp.point[9] = Vec2Create((float)200, (float)200);
 
     SDL_Rect boxDP;
 
@@ -105,7 +116,7 @@ void BehaviorMoveEntity(Clock *clk)
                 ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
                 if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                 {
-                    ENTITY_ARRAY[i].desiredPoint = mp.point[ENTITY_ARRAY[i].indexPoint];
+                    ENTITY_ARRAY[i].desiredPoint = Vec2Add(pattern->point[ENTITY_ARRAY[i].indexPoint], enemyPosition);
                     if (ENTITY_ARRAY[i].indexPoint == 9)
                     {
                         ENTITY_ARRAY[i].indexPoint = 0;
