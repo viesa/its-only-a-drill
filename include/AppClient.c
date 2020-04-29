@@ -7,6 +7,7 @@
 #include "core/Weapon.h"
 #include "core/Score.h"
 #include "core/Inventory.h"
+#include "core/Keybinding.h"
 
 #define MaxEntities 5
 
@@ -24,7 +25,7 @@ struct AppClient
     FPSManager *fpsManager;
     Input *input;
     Menu *menu;
-
+    Keybinding *bindings;
     Vec2 middleOfMap;
 
     GroundListItems groundListItems;
@@ -52,7 +53,8 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
-    app->menu = MenuCreate(app->gfx, app->font, &app->state);
+    app->menu = MenuCreate(app->gfx, app->font, &app->state, app->clock);
+    app->bindings = KeybindingCreate();
     app->player = PlayerCreate(app->camera);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
@@ -94,8 +96,10 @@ void AppClientDestroy(AppClient *app)
     EntityManagerDestroy();
 
     MenuDestroy(app->menu);
+    KeybindingFree(app->bindings);
     GuiDestroy(app->gui);
     FontDestroy(app->font);
+
     SDL_free(app);
 }
 
@@ -217,8 +221,6 @@ void AppClientUpdate(AppClient *app)
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->clock);
 
-        CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[*app->player.entity]);
-        ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(Entity));
         break;
     }
     default:
@@ -260,7 +262,7 @@ void AppClientDraw(AppClient *app)
         ClientManagerDrawConnectedPlayers(app->camera);
         GuiUpdate(app->gui);
 
-        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
+        if (InputIsKeyDown(app->input, app->bindings->KeyArray[INVENTORY]))
         {
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }

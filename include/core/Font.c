@@ -5,10 +5,16 @@ Font *FontCreate(Graphics *gfx)
     Font *font = MALLOC(Font);
     font->gfx = gfx;
 
+    //Debug font
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
-    font->fonts[TTF_Robot_Crush] = TTF_OpenFont("./assets/fonts/Robot Crush.ttf", 50);
-    font->fonts[TTF_Antilles] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 50);
-    font->fonts[TTF_AntillesBig] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
+
+    //Dynamic sizing fonts
+    font->fonts[TTF_Antilles_XS] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 40);
+    font->fonts[TTF_Antilles_S] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 50);
+    font->fonts[TTF_Antilles_M] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 75);
+    font->fonts[TTF_Antilles_L] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 100);
+    font->fonts[TTF_Antilles_XL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 125);
+    font->fonts[TTF_Antilles_XXL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
 
     return font;
 }
@@ -110,6 +116,70 @@ void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, floa
     for (size_t i = 0; i < layers; i++)
     {
         FontDraw(font, fontEnum, text, x + offsetX * i, y + offsetY * i, align, boxWidth, color[i]);
+    }
+}
+
+FontSheet FontGetDynamicSizing(Font *font)
+{
+    //Dynamic sizes: XS, S(50), M, L, XL
+    //Screen resolutions:
+    //640x480: XS     307 200
+    //1280x720: S     921 600
+    //1920x1080: M  2 073 600
+    //1920x1200: L  2 304 000
+    //2560x1440: XL 3 686 400
+
+    //XS:   500 000
+    //S:  1 000 000
+    //M:  1 500 000
+    //L:  2 500 000
+    //XL: 3 500 000
+
+    int w = font->gfx->window->width;
+    int h = font->gfx->window->height;
+    int px = w * h;
+
+    if (px > 3500000)
+        return TTF_Antilles_XL;
+    if (px > 2500000)
+        return TTF_Antilles_L;
+    if (px > 1500000)
+        return TTF_Antilles_M;
+    if (px > 500000)
+        return TTF_Antilles_S;
+
+    return TTF_Antilles_XS;
+}
+
+int FontGetHeight(FontSheet fontEnum)
+{
+    switch (fontEnum)
+    {
+    case TTF_Arial:
+        return 25;
+        break;
+    case TTF_Antilles_XS:
+        return 40;
+        break;
+    case TTF_Antilles_S:
+        return 50;
+        break;
+    case TTF_Antilles_M:
+        return 75;
+        break;
+    case TTF_Antilles_L:
+        return 100;
+        break;
+    case TTF_Antilles_XL:
+        return 125;
+        break;
+    case TTF_Antilles_XXL:
+        return 175;
+        break;
+
+    default:
+        return 0;
+        break;
     }
 }
 

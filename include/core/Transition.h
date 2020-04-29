@@ -10,6 +10,7 @@ typedef enum TransitionType
 {
     TT_Swoosh,
     TT_Fade,
+    TT_FadeOut,
     TT_Count
 } TransitionType;
 

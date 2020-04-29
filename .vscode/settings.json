@@ -48,6 +48,7 @@
                 "udppackager.h": "c",
                 "dependencies.h": "c",
                 "udpserver.h": "c",
-                "appserver.h": "c"
+                "appserver.h": "c",
+                "gui.h": "c"
         }
 }

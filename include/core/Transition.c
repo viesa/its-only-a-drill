@@ -111,6 +111,29 @@ void TransitionDraw(Clock *clock)
 
         GraphicsDrawGradientX(trans.gfx, (SDL_Rect){0, 0, trans.gfx->window->width, trans.gfx->window->height}, (SDL_Color){0, 0, 0, trans.saveSlot1}, (SDL_Color){0, 0, 0, trans.saveSlot1});
     }
+    case TT_FadeOut:
+    {
+        float step = 255.0f / (trans.duration / dt);
+        if (trans.elapsed < 1)
+            trans.state = 0;
+        else
+            trans.state = 1;
+
+        switch (trans.state)
+        {
+        case 0:
+            break;
+        case 1:
+            trans.saveSlot1 -= step;
+            break;
+
+        default:
+            break;
+        }
+        trans.saveSlot1 = Clamp(trans.saveSlot1, 0, 255);
+
+        GraphicsDrawGradientX(trans.gfx, (SDL_Rect){0, 0, trans.gfx->window->width, trans.gfx->window->height}, (SDL_Color){0, 0, 0, trans.saveSlot1}, (SDL_Color){0, 0, 0, trans.saveSlot1});
+    }
     break;
 
     default:
@@ -135,6 +158,9 @@ void TransitionStart(TransitionType type, float duration)
         break;
     case TT_Fade:
         trans.saveSlot1 = 0.0f;
+        break;
+    case TT_FadeOut:
+        trans.saveSlot1 = 255.0f;
         break;
     default:
         break;
