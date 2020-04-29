@@ -1,4 +1,4 @@
-//#define ANY_DEBUG
+#define ANY_DEBUG
 
 #ifdef ANY_DEBUG
 #define MAIN_DEBUG
@@ -7,12 +7,9 @@
 #define APP_DEBUG_STRICT
 
 #define UDPCLIENT_DEBUG
-// #define UDPCLIENT_DEBUG_STRICT
-// #define UDPSERVER_DEBUG_RAWINOUT
-
 #define UDPSERVER_DEBUG
-// #define UDPSERVER_DEBUG_STRICT
-// #define UDPSERVER_DEBUG_RAWINOUT
+#define PACKAGER_DEBUG
+#define PACKAGER_DEBUG_RAWINOUT
 
 #define WINDOW_DEBUG
 #define GRAPHICS_DEBUG
@@ -28,4 +25,4 @@
 //#define frictionReal
 
 // If defined, multiple connection can be created from the same computer. It's a quick fix to prevent unused connections on the PI-server
-// #define UDPSERVER_LOCAL
+#define UDPSERVER_LOCAL

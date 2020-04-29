@@ -1,6 +1,6 @@
 #include "Packager.h"
 
-ParsedPacket ParsedPacketCreate(PacketType type, void *data, size_t size, IPaddress sender)
+ParsedPacket ParsedPacketCreate(PacketType type, void *data, size_t size, NetPlayer sender)
 {
     ParsedPacket packet;
     packet.type = type;
@@ -17,16 +17,19 @@ void ParsedPacketDestroy(ParsedPacket *packet)
         SDL_free(packet->data);
 }
 
-UDPpacket *UDPPacketCreate(PacketType type, void *data, size_t size)
+UDPpacket *UDPPacketCreate(PacketType type, int id, void *data, size_t size)
 {
-    UDPpacket *packet = SDLNet_AllocPacket(size + 1);
+    const int totalLength = NET_TYPE_SIZE + NET_ID_SIZE + size;
+    UDPpacket *packet = SDLNet_AllocPacket(totalLength);
 
-    char *itoa_buffer = MALLOC(char);
-    SDL_itoa((int)type, itoa_buffer, 10);
-    SDL_memcpy(packet->data, itoa_buffer, 1);
-    SDL_memcpy(packet->data + 1, data, size);
-    SDL_free(itoa_buffer);
-    packet->len = size + 1;
+    char itoa_typeBuffer[NET_TYPE_SIZE];
+    char itoa_idBuffer[NET_ID_SIZE];
+    SDL_itoa((int)type, itoa_typeBuffer, 10);
+    SDL_itoa((int)id, itoa_idBuffer, 10);
+    SDL_memcpy(packet->data, itoa_typeBuffer, NET_TYPE_SIZE);
+    SDL_memcpy(packet->data + NET_TYPE_SIZE, itoa_idBuffer, NET_ID_SIZE);
+    SDL_memcpy(packet->data + NET_TYPE_SIZE + NET_ID_SIZE, data, size);
+    packet->len = totalLength;
 
     return packet;
 }
@@ -37,27 +40,80 @@ void UDPPacketDestroy(UDPpacket *packet)
         SDLNet_FreePacket(packet);
 }
 
-PacketType UDPPacketDecode(void *data)
+void UDPPacketRemoveTypeAndID(UDPpacket *packet)
 {
-    switch (((char *)data)[0])
-    {
-    case '0':
-        return PT_Text;
-    case '1':
-        return PT_PlayerID;
-    case '2':
-        return PT_Entity;
-    case '3':
-        return PT_CompressedEntity;
-    case '4':
-        return PT_IPaddress;
-    default:
-        return 400;
-    }
+    const int toRemove = NET_TYPE_SIZE + NET_ID_SIZE;
+    SDL_memmove(packet->data, packet->data + toRemove, packet->len - toRemove);
+    packet->len -= toRemove;
+    SDLNet_ResizePacket(packet, packet->len);
 }
-void UDPPacketRemoveType(UDPpacket *packet)
+
+TCPpacket *TCPPacketCreate(PacketType type, int id, void *data, size_t size)
 {
-    SDL_memmove(packet->data, packet->data + 1, packet->len - 1);
-    packet->len -= 1;
-    SDLNet_ResizePacket(packet, -1);
+    const int headerSize = TCP_HEADER_SIZE;
+    const int packetSize = NET_TYPE_SIZE + NET_ID_SIZE + size;
+    const int totalSize = headerSize + packetSize;
+
+    TCPpacket *packet = MALLOC(TCPpacket);
+    packet->len = totalSize;
+    packet->data = MALLOC_N(Uint8, packet->len);
+    ALLOC_ERROR_CHECK(packet->data);
+
+    char itoa_headerBuffer[TCP_HEADER_SIZE] = {0};
+    char itoa_typeBuffer[NET_TYPE_SIZE] = {0};
+    char itoa_idBuffer[NET_ID_SIZE] = {0};
+    SDL_itoa(packetSize, itoa_headerBuffer, 10);
+    SDL_itoa((int)type, itoa_typeBuffer, 10);
+    SDL_itoa(id, itoa_idBuffer, 10);
+    SDL_memcpy(packet->data, itoa_headerBuffer, TCP_HEADER_SIZE);
+    SDL_memcpy(packet->data + TCP_HEADER_SIZE, itoa_typeBuffer, NET_TYPE_SIZE);
+    SDL_memcpy(packet->data + TCP_HEADER_SIZE + NET_TYPE_SIZE, itoa_idBuffer, NET_ID_SIZE);
+    SDL_memcpy(packet->data + TCP_HEADER_SIZE + NET_TYPE_SIZE + NET_ID_SIZE, data, size);
+
+    return packet;
+}
+
+void TCPPacketDestroy(TCPpacket *packet)
+{
+    if (packet)
+        FREE(packet->data);
+    FREE(packet);
+}
+
+int TCPPacketRemoveTypeAndID(void *data, int len)
+{
+    const int toRemove = NET_TYPE_SIZE + NET_ID_SIZE;
+    SDL_memmove(data, data + toRemove, len - toRemove);
+    return len - toRemove;
+}
+
+PacketType PacketDecodeType(void *data)
+{
+    char typeBuffer[NET_TYPE_SIZE + 1] = {0};
+    SDL_memcpy(typeBuffer, data, NET_TYPE_SIZE);
+    return (PacketType)SDL_atoi(typeBuffer);
+}
+
+PacketType PacketDecodeID(void *data)
+{
+    char idBuffer[NET_ID_SIZE + 1] = {0};
+    SDL_memcpy(idBuffer, data + NET_TYPE_SIZE, NET_ID_SIZE);
+    return SDL_atoi(idBuffer);
+}
+
+void PacketPrintInformation(PacketType type, int id, void *data, int size, IPaddress ip, const char *protocol, const char *inout)
+{
+#ifdef PACKAGER_DEBUG
+    printf(" [%s] [%s] (host | port) (%d | %d)\n", protocol, inout, ip.host, ip.port);
+    printf(" [ID:%d] [Type:%d] [Size:%d] \n", id, type, size);
+#ifdef PACKAGER_DEBUG_RAWINOUT
+    printf("\n ---- RAW DATA ----\n");
+    for (int i = 0; i < size; i++)
+    {
+        printf("%c", ((char *)data)[i]);
+    }
+    printf("\n ------------------\n");
+#endif
+    printf("\n [%s] [%s] END OF PACKET\n", protocol, inout);
+#endif
 }

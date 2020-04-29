@@ -13,9 +13,12 @@
 
 struct
 {
-    UDPsocket socket;
+    UDPsocket udpSocket;
+    TCPsocket tcpSocket;
+    SDLNet_SocketSet socketSet;
     Vector *players;
     Vector *ids; //0 means taken
+    int currentIDIndex;
 
     Vector *inBuffer;
     SDL_mutex *inBufferMutex;
@@ -34,20 +37,34 @@ void ServerUninitialize();
 void ServerStart();
 // Marks server as inactive and collects threads
 void ServerStop();
-// Sends a message to everyone on that has sent a message to the server during the session
-void ServerBroadcast(PacketType type, void *data, int size);
-// Sends a message to everyone except a specified ip
-void ServerBroadcastExclusive(PacketType type, void *data, int size, IPaddress exclusive);
-// Sends a message to a specified ip address
-void ServerSend(PacketType type, void *data, int size, IPaddress ip);
-// Final step before leaving the server
-void ServerOut(UDPpacket *packet);
+// Broadcast UDP-packet to connected clients
+void ServerUDPBroadcast(PacketType type, void *data, int size);
+// Broadcast UDP-packet to connected clients, with NetPlayer-exclusion option
+void ServerUDPBroadcastExclusive(PacketType type, void *data, int size, NetPlayer exclusive);
+// Sends UDP-packet to a specified NetPlayer
+void ServerUDPSend(PacketType type, void *data, int size, NetPlayer player);
+// Final step before UDP-packet leaving the server, every send operation leads to this step
+void ServerUDPOut(UDPpacket *packet);
+// Broadcast TCP-packet to connected clients
+void ServerTCPBroadcast(PacketType type, void *data, int size);
+// Broadcast TCP-packet to connected clients, with NetPlayer-exclusion option
+void ServerTCPBroadcastExclusive(PacketType type, void *data, int size, NetPlayer exclusive);
+// Sends TCP-packet to a specified NetPlayer
+void ServerTCPSend(PacketType type, void *data, int size, NetPlayer player);
+// Final step before TCP-packet leaving the server, every send operation leads to this step
+void ServerTCPOut(TCPpacket *packet);
 // Thread function to listen to clients and receive packets, parse them and add them to inBuffer
 void ServerListenToClients();
+// Try receive UDP-packet and add it to inBuffer
+int ServerTryReceiveUDPPacket();
+// Try accept a new TCP-socket and add it to socket set
+int ServerTryAcceptTCPSocket();
+// Try receive TCP packet of socket stored in specified NetPlayer
+int ServerTryReceiveTCPPacket(NetPlayer player);
 // Deletes the client from player-list and notifies all clients
-void ServerRemoveClient();
+void ServerRemoveClient(NetPlayer player);
 // Returns lowest free unique ID
-int ServerGetID(IPaddress ip);
+int ServerGetID();
 // Marks the id as non-taken
 void ServerFreeID(int id);
 

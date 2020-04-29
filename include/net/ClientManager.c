@@ -1,9 +1,15 @@
 #include "ClientManager.h"
 
-void ClientManagerInitialize(Player *player)
+void ClientManagerInitialize()
 {
     clientManager.players = VectorCreate(sizeof(EntityIndexP), 100);
-    clientManager.localPlayer = player;
+}
+
+void ClientManagerUninitialize()
+{
+    for (int i = 0; i < clientManager.players->size; i++)
+        EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
+    VectorDestroy(clientManager.players);
 }
 
 void ClientManagerUpdate()
@@ -18,17 +24,20 @@ void ClientManagerUpdate()
         case PT_Text:
             ClientManagerHandleTextPacket(nextPacket);
             break;
-        case PT_PlayerID:
-            ClientManagerHandlePlayerIDPacket(nextPacket);
+        case PT_Connect:
+            ClientManagerHandleConnectPacket(nextPacket);
             break;
-        case PT_Entity:
-            ClientManagerHandleEntityPacket(nextPacket);
+        case PT_Disconnect:
+            ClientManagerHandleDisconnectPacket(nextPacket);
+            break;
+        case PT_NewPlayer:
+            ClientManagerHandleNewPlayerPacket(nextPacket);
+            break;
+        case PT_DelPlayer:
+            ClientManagerHandleDelPlayerPacket(nextPacket);
             break;
         case PT_CompressedEntity:
             ClientManagerHandleCompressedEntityPacket(nextPacket);
-            break;
-        case PT_IPaddress:
-            ClientManagerHandleIPaddressPacket(nextPacket);
             break;
         default:
             break;
@@ -52,80 +61,70 @@ void ClientManagerDrawConnectedPlayers(Camera *camera)
 
 void ClientManagerHandleTextPacket(ParsedPacket packet)
 {
-    if (!SDL_memcmp(packet.data, "quit", 4))
-    {
-        char id_buffer[10] = {0};
-
-        for (int i = 5; i < packet.size; i++)
-        {
-            id_buffer[i - 5] = ((char *)packet.data)[i];
-        }
-        int id = SDL_atoi(id_buffer);
-        for (int i = 0; i < clientManager.players->size; i++)
-        {
-            if (ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]].id == id)
-            {
-                EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
-                VectorErase(clientManager.players, i);
-                break;
-            }
-        }
-        log_info("Player(id:%d) disconnected\n", id);
-    }
 }
-void ClientManagerHandlePlayerIDPacket(ParsedPacket packet)
+
+void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
     int ID = *(int *)packet.data;
-    ENTITY_ARRAY[*clientManager.localPlayer->entity].id = ID;
+    ENTITY_ARRAY[*client.player->entity].id = ID;
     client.receivedPlayerID = SDL_TRUE;
 }
+
+void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
+{
+    // Server quit
+}
+
+void ClientManagerHandleNewPlayerPacket(ParsedPacket packet)
+{
+    int id = *(int *)packet.data;
+
+    EntityIndexP newEntity = EntityManagerAdd(ET_Player, Vec2Create(0.0f, 0.0f));
+    ENTITY_ARRAY[*newEntity].id = id;
+    VectorPushBack(clientManager.players, &newEntity);
+}
+
+void ClientManagerHandleDelPlayerPacket(ParsedPacket packet)
+{
+    int id = *(int *)packet.data;
+
+    for (size_t i = 0; i < clientManager.players->size; i++)
+    {
+        if (ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]].id == id)
+        {
+            EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
+            VectorErase(clientManager.players, i);
+            break;
+        }
+    }
+}
+
 void ClientManagerHandleEntityPacket(ParsedPacket packet)
 {
     Entity incomingEntity = *(Entity *)packet.data;
 
-    SDL_bool exist = SDL_FALSE;
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].id == incomingEntity.id) //entity exists
         {
-            exist = SDL_TRUE;
             ENTITY_ARRAY[i] = incomingEntity;
-            //printf("Updating old player\n");
-            break;
+            return;
         }
     }
-    if (!exist) //entity doesnt exist, allocate
-    {
-        EntityIndexP newEntity = EntityManagerAddNoConfig();
-        ENTITY_ARRAY[*newEntity] = incomingEntity;
-        VectorPushBack(clientManager.players, &newEntity);
-
-        log_info("Player(id:%d) connected\n", incomingEntity.id);
-    }
 }
+
 void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity cEntity = *(CompressedEntity *)packet.data;
 
-    SDL_bool exist = SDL_FALSE;
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].id == cEntity.id) //entity exists
         {
-            exist = SDL_TRUE;
             EntityAddCompressed(&ENTITY_ARRAY[i], &cEntity);
-            break;
+            return;
         }
     }
-    if (!exist) //entity doesnt exist, allocate
-    {
-        EntityIndexP newEntity = EntityManagerAdd(ET_Player, Vec2Create(100.0f * 11, 0.0f));
-        EntityAddCompressed(&ENTITY_ARRAY[*newEntity], &cEntity);
-        VectorPushBack(clientManager.players, &newEntity);
-    }
-}
-void ClientManagerHandleIPaddressPacket(ParsedPacket packet)
-{
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()
