@@ -19,6 +19,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock)
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
+    menu->lobbyDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
     TransitionInitalize(menu->gfx, menu->font);
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
@@ -144,10 +145,12 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         case 0:
         {
             //Join party
+            break;
         }
         case 1:
         {
             //Host party
+            break;
         }
         case 2:
         {
@@ -398,6 +401,37 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
         JSONDestroy(mapdata);
     }
 
+    MenuDraw(menu, options, optionLength);
+}
+void MenuUpdateHostLobby(Menu *menu, Input *input)
+{
+    //Determine menu options
+    char hostid[100];
+
+    int optionLength = 2;
+    char options[2][100] = {
+        {hostid},
+        {"back"}};
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        menu->indexChanged = SDL_TRUE;
+        switch (menu->activeIndex)
+        {
+        case 0:
+            //host button
+            break;
+        case 6:
+        {
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_Options;
+            break;
+        }
+        }
+    }
     MenuDraw(menu, options, optionLength);
 }
 
