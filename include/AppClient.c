@@ -95,7 +95,7 @@ void AppClientDestroy(AppClient *app)
     KeybindingFree(app->bindings);
     GuiDestroy(app->gui);
     FontDestroy(app->font);
-    
+
     SDL_free(app);
 }
 
@@ -203,7 +203,7 @@ void AppClientUpdate(AppClient *app)
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
 
-        BehaviorMoveEntity();
+        BehaviorMoveEntity(app->clock);
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[1].desiredPoint.x = 180;

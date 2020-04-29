@@ -4,9 +4,9 @@
 
 #define addmove 1500.0f
 #define moxsize 50 //boxsize
-#define aggravationRadius 500.0f
+#define aggravationRadius 250.0f
 
-void BehaviorMoveEntity()
+void BehaviorMoveEntity(Clock *clk)
 {
     MovingPattern mp;
     int tmp = 0;
@@ -80,7 +80,10 @@ void BehaviorMoveEntity()
 
             case Fight:
             {
-                //entityShoot(i,playerPosition,ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
+                if (ENTITY_ARRAY[i].type == ET_Woman)
+                {
+                    entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], clk);
+                }
                 if (ENTITY_ARRAY[tmp].health < 0)
                 {
                     ENTITY_ARRAY[i].entityState = GoForward;

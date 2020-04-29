@@ -42,12 +42,17 @@ void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item)
     }
 }
 
-void entityShoot(EntityIndexP index, Vec2 Desierdpoint, Item *item, Clock *clk)
+void entityShoot(int *index, Vec2 Desierdpoint, Item *item, Clock *clk)
 {
     item->Stats.currentTime -= ClockGetDeltaTimeMS(clk);
     if (item->Stats.currentTime <= 0)
     {
-        Vec2 entityToPoint = Vec2Sub(RectMid(ENTITY_ARRAY[*index].drawables[0].dst), Desierdpoint);
+        item->Stats.currentTime = item->Stats.cooldownMS;
+#ifdef WEAPON_DEBIG
+        log_debug("Entity %d: SHOOT!", *index);
+        log_debug("Entity %d: aim at X:%f Y:%f", *index, Desierdpoint.x, Desierdpoint.y);
+#endif
+        Vec2 entityToPoint = Vec2Sub(Desierdpoint, RectMid(ENTITY_ARRAY[*index].drawables[0].dst));
         Vec2 unit = Vec2Unit(entityToPoint);
         Vec2 itemFalloff = Vec2MulL(unit, item->Stats.falloff);
         Vec2 makeDestination;
