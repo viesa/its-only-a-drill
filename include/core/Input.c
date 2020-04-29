@@ -85,6 +85,16 @@ SDL_bool InputIsKeyReleased(Input *input, const SDL_Scancode key)
     return !input->m_keymap[key] && input->m_prevKeymap[key];
 }
 
+SDL_bool InputIsAnyKeyDown(Input *input)
+{
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+    {
+        if (input->m_keymap[i])
+            return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
 SDL_bool InputIsMouseDown(Input *input, const MouseCode code)
 {
     return input->m_mousemap[code];

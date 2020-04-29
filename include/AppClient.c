@@ -52,7 +52,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
     app->input = input;
-    app->menu = MenuCreate(app->gfx, app->font, &app->state);
+    app->menu = MenuCreate(app->gfx, app->font, &app->state, app->clock);
     app->player = PlayerCreate(app->camera);
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
