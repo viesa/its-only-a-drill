@@ -29,6 +29,7 @@ Input *InputCreate()
         ret->m_prevMousemap[i] = SDL_FALSE;
     }
     ret->textLen = 0;
+    SDL_memset(ret->text, 0, 16);
     return ret;
 }
 void InputDestroy(Input *input)
