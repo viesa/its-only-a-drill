@@ -407,11 +407,11 @@ void MenuUpdateHostLobby(Menu *menu, Input *input)
 {
     //Determine menu options
     char hostid[100];
-
     int optionLength = 2;
     char options[2][100] = {
-        {hostid},
+        {""},
         {"back"}};
+    sprintf(options[0], "%s", hostid);
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
