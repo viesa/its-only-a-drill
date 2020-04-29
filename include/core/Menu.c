@@ -75,6 +75,12 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     case MS_MainMenu:
         MenuUpdateMainMenu(menu, input, map);
         break;
+    case MS_JoinLobby:
+        MenuUpdateJoinLobby(menu, input);
+        break;
+    case MS_HostLobby:
+        MenuUpdateHostLobby(menu, input, mapList, map);
+        break;
     case MS_Options:
         MenuUpdateOptions(menu, input);
         break;
@@ -128,8 +134,8 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
     //Determine menu options
     int optionLength = 5;
     char options[5][100] = {
-        {"Join party"},
-        {"Host party"},
+        {"Join lobby"},
+        {"Host lobby"},
         {"Local game"},
         {"Options"},
         {"Exit"}};
@@ -144,23 +150,30 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         {
         case 0:
         {
-            //Join party
+            menu->state->menuState = MS_JoinLobby;
+            menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
             break;
         }
         case 1:
         {
-            //Host party
+            menu->state->menuState = MS_HostLobby;
+            menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
             break;
         }
         case 2:
         {
             menu->state->menuState = MS_CustomMap;
             menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
             break;
         }
         case 3:
         {
             menu->state->menuState = MS_Options;
+            menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
             break;
         }
         case 4:
@@ -175,6 +188,96 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         }
     }
 
+    MenuDraw(menu, options, optionLength);
+}
+
+void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map)
+{
+    //Determine menu options
+    int optionLength = mapList->nMaps + 1;
+    char options[optionLength][100];
+    for (int i = 0; i < optionLength; i++)
+        for (int j = 0; j < 100; j++)
+            options[i][j] = 0;
+
+    for (int i = 0, j = 0; j < mapList->nMaps; i++, j++)
+    {
+        MapListEntry *entry = &mapList->allMaps[j];
+        sprintf(options[i], "%s [Players: %d]", entry->name, (int)entry->maxPlayers);
+    }
+    strcpy(options[optionLength - 1], "Back");
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        if (menu->activeIndex == optionLength - 1)
+        {
+            menu->indexChanged = SDL_TRUE;
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_MainMenu;
+        }
+        else
+        {
+            MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
+            LoadedFile lfile = LoadedFileCreate(entry->filename);
+
+            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
+            menu->indexChanged = SDL_TRUE;
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_WaitingForLobby;
+        }
+    }
+    else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
+    {
+        if (map->contents != NULL)
+        {
+            MapDestroy(map);
+        }
+        MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
+        JSON *mapdata = JSONCreate(entry->filename);
+        *map = MapCreate(mapdata);
+        JSONDestroy(mapdata);
+    }
+
+    MenuDraw(menu, options, optionLength);
+}
+
+void MenuUpdateJoinLobby(Menu *menu, Input *input)
+{
+    //Determine menu options
+    int optionLength = 1;
+    char options[1][100] = {
+        {"Back"}};
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        menu->indexChanged = SDL_TRUE;
+        switch (menu->activeIndex)
+        {
+        case 0:
+        {
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_MainMenu;
+            break;
+        }
+        }
+    }
+    MenuDraw(menu, options, optionLength);
+}
+
+void MenuUpdateWaitingForLobby(Menu *menu, Input *input)
+{
+    //Determine menu options
+    int optionLength = 1;
+    char options[1][100] = {
+        {"Waiting for lobby"}};
+
+    // State is changed by ClientManager upon receiving confirmation from server
     MenuDraw(menu, options, optionLength);
 }
 
@@ -403,37 +506,6 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
 
     MenuDraw(menu, options, optionLength);
 }
-void MenuUpdateHostLobby(Menu *menu, Input *input)
-{
-    //Determine menu options
-    char hostid[100];
-
-    int optionLength = 2;
-    char options[2][100] = {
-        {hostid},
-        {"back"}};
-
-    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
-    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
-
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
-    {
-        menu->indexChanged = SDL_TRUE;
-        switch (menu->activeIndex)
-        {
-        case 0:
-            //host button
-            break;
-        case 6:
-        {
-            menu->activeIndex = 0;
-            menu->state->menuState = MS_Options;
-            break;
-        }
-        }
-    }
-    MenuDraw(menu, options, optionLength);
-}
 
 void MenuDraw(Menu *menu, char options[][100], int optionLength)
 {
@@ -442,7 +514,10 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     menu->mainMenuDbl.dst.h = menu->gfx->window->height;
 
     //Draw background
-    if (menu->state->menuState != MS_CustomMap && menu->state->menuState != MS_Splash)
+    if (menu->state->menuState != MS_CustomMap &&
+        menu->state->menuState != MS_Splash &&
+        menu->state->menuState != MS_HostLobby &&
+        menu->state->menuState != MS_JoinLobby)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }
@@ -451,6 +526,8 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     {
     case MS_Options:
     case MS_MainMenu:
+    case MS_JoinLobby:
+    case MS_HostLobby:
     case MS_Resolution:
     case MS_FPS:
     case MS_CustomMap:

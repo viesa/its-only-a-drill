@@ -49,6 +49,7 @@
                 "dependencies.h": "c",
                 "udpserver.h": "c",
                 "appserver.h": "c",
-                "gui.h": "c"
+                "gui.h": "c",
+                "jsonparser.h": "c"
         }
 }

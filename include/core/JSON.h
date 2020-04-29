@@ -3,6 +3,7 @@
 
 #include "Dependencies.h"
 #include "JSONParser.h"
+#include "LoadedFile.h"
 
 typedef struct JSON
 {
@@ -12,6 +13,8 @@ typedef struct JSON
 
 /// Returns NULL if failed to load JSON-file
 JSON *JSONCreate(char *filename);
+/// Returns NULL if failed to load JSON-file
+JSON *JSONCreateFromArray(char *loadedfile, size_t size);
 void JSONDestroy(JSON *json);
 
 /// Formatted print of the JSON data

@@ -12,6 +12,10 @@ typedef enum MenuState
 {
     MS_Splash,
     MS_MainMenu,
+    MS_JoinLobby,
+    MS_HostLobby,
+    MS_WaitingForLobby,
+    MS_Lobby,
     MS_Options,
     MS_Resolution,
     MS_FPS,

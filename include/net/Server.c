@@ -14,6 +14,12 @@ void ServerInitialize()
     server.inBufferMutex = SDL_CreateMutex();
     server.isInitialized = SDL_FALSE;
     server.isActive = SDL_FALSE;
+    server.sessions = VectorCreate(sizeof(Session), 5);
+    server.sessionBitmap = VectorCreate(sizeof(SDL_bool), 100);
+    for (size_t i = 0; i < server.sessionBitmap->capacity; i++)
+    {
+        SERVER_SESSIONBITMAP[i] = SDL_FALSE;
+    }
 
     const Uint16 port = 1337;
 
@@ -75,6 +81,14 @@ void ServerUninitialize()
     VectorDestroy(server.players);
     VectorDestroy(server.ids);
     VectorDestroy(server.inBuffer);
+
+    for (size_t i = 0; i < server.sessions->size; i++)
+    {
+        SessionDestroy(&SERVER_SESSIONS[i]);
+    }
+    VectorDestroy(server.sessions);
+    VectorDestroy(server.sessionBitmap);
+
     SDL_UnlockMutex(server.inBufferMutex);
     SDL_DestroyMutex(server.inBufferMutex);
     server.isInitialized = SDL_FALSE;
@@ -107,17 +121,43 @@ void ServerUDPBroadcast(PacketType type, void *data, int size)
     }
     UDPPacketDestroy(packet);
 }
-
+void ServerUDPBroadcastSession(PacketType type, Session *session, void *data, int size)
+{
+    // Creates a UDP-packet to send. ID of server is 0
+    UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
+    NetPlayer **netplayers = SessionGetPlayers(session);
+    for (int i = 0; i < server.sessions->size; i++)
+    {
+        packet->address = *netplayers[i]->ip;
+        ServerUDPOut(packet);
+    }
+    UDPPacketDestroy(packet);
+}
 void ServerUDPBroadcastExclusive(PacketType type, void *data, int size, NetPlayer exclusive)
 {
     // Creates a UDP-packet to send. ID of server is 0
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
     for (int i = 0; i < server.players->size; i++)
     {
-        if (SERVER_PLAYERS[i].entity.id == exclusive.entity.id)
+        if (SERVER_PLAYERS[i].id == exclusive.id)
             continue;
 
         packet->address = *SERVER_PLAYERS[i].ip;
+        ServerUDPOut(packet);
+    }
+    UDPPacketDestroy(packet);
+}
+void ServerUDPBroadcastExclusiveSession(PacketType type, Session *session, void *data, int size, NetPlayer exclusive)
+{
+    // Creates a UDP-packet to send. ID of server is 0
+    UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
+    NetPlayer **netplayers = SessionGetPlayers(session);
+    for (int i = 0; i < session->playersP->size; i++)
+    {
+        if (netplayers[i]->id == exclusive.id)
+            continue;
+
+        packet->address = *netplayers[i]->ip;
         ServerUDPOut(packet);
     }
     UDPPacketDestroy(packet);
@@ -161,16 +201,44 @@ void ServerTCPBroadcast(PacketType type, void *data, int size)
     TCPPacketDestroy(packet);
 }
 
+void ServerTCPBroadcastSession(PacketType type, Session *session, void *data, int size)
+{
+    // Creates a TCP-packet to send. ID of server is 0
+    TCPpacket *packet = TCPPacketCreate(type, 0, data, size);
+    NetPlayer **netplayers = SessionGetPlayers(session);
+    for (int i = 0; i < session->playersP->size; i++)
+    {
+        packet->address = netplayers[i]->socket;
+        ServerTCPOut(packet);
+    }
+    TCPPacketDestroy(packet);
+}
+
 void ServerTCPBroadcastExclusive(PacketType type, void *data, int size, NetPlayer exclusive)
 {
     // Creates a TCP-packet to send. ID of server is 0
     TCPpacket *packet = TCPPacketCreate(type, 0, data, size);
     for (int i = 0; i < server.players->size; i++)
     {
-        if (SERVER_PLAYERS[i].entity.id == exclusive.entity.id)
+        if (SERVER_PLAYERS[i].id == exclusive.id)
             continue;
 
         packet->address = SERVER_PLAYERS[i].socket;
+        ServerTCPOut(packet);
+    }
+    TCPPacketDestroy(packet);
+}
+void ServerTCPBroadcastExclusiveSession(PacketType type, Session *session, void *data, int size, NetPlayer exclusive)
+{
+    // Creates a TCP-packet to send. ID of server is 0
+    TCPpacket *packet = TCPPacketCreate(type, 0, data, size);
+    NetPlayer **netplayers = SessionGetPlayers(session);
+    for (int i = 0; i < session->playersP->size; i++)
+    {
+        if (netplayers[i]->id == exclusive.id)
+            continue;
+
+        packet->address = netplayers[i]->socket;
         ServerTCPOut(packet);
     }
     TCPPacketDestroy(packet);
@@ -189,18 +257,56 @@ void ServerTCPOut(TCPpacket *packet)
 {
     assert("Attempting to send packet without server initialization" && server.isInitialized);
 
-    if (!SDLNet_TCP_Send(packet->address, packet->data, packet->len))
+    if (packet->len <= TCP_MAX_SIZE)
     {
-#ifdef SERVER_DEBUG
-        log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
-#endif
+        ServerTCPSmallOut(packet);
     }
+    else
+    {
+        ServerTCPBigOut(packet);
+    }
+
     PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
                            PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
                            packet->data,
                            packet->len,
                            *SDLNet_TCP_GetPeerAddress(packet->address),
                            "TCP", "OUTGOING");
+}
+
+void ServerTCPSmallOut(TCPpacket *packet)
+{
+    if (!SDLNet_TCP_Send(packet->address, packet->data, packet->len))
+    {
+#ifdef SERVER_DEBUG
+        log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
+#endif
+    }
+}
+
+void ServerTCPBigOut(TCPpacket *packet)
+{
+    int totalSizeToSend = (int)packet->len;
+    int nFullPackagesRequired = (int)(totalSizeToSend / TCP_MAX_SIZE);
+    int bytesLeft = totalSizeToSend % TCP_MAX_SIZE;
+
+    for (int i = 0; i < nFullPackagesRequired; i++)
+    {
+        if (!SDLNet_TCP_Send(packet->address, packet->data + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        {
+#ifdef CLIENT_DEBUG
+            log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
+#endif
+            return;
+        }
+    }
+    if (!SDLNet_TCP_Send(packet->address, packet->data + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
+    {
+#ifdef CLIENT_DEBUG
+        log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
+#endif
+        return;
+    }
 }
 
 void ServerListenToClients()
@@ -288,11 +394,12 @@ int ServerTryReceiveUDPPacket()
                 return 0;
             }
 
+            // Asserts that the senders IP-address has a TCP-connection as well, and that those IDs match
             NetPlayer *sender = NULL;
             for (int i = 0; i < server.players->size; i++)
             {
                 if (SERVER_PLAYERS[i].ip->host == incoming->address.host &&
-                    SERVER_PLAYERS[i].entity.id == id)
+                    SERVER_PLAYERS[i].id == id)
                 {
                     sender = &SERVER_PLAYERS[i];
                 }
@@ -303,7 +410,7 @@ int ServerTryReceiveUDPPacket()
                 SDL_LockMutex(server.inBufferMutex);
                 VectorPushBack(server.inBuffer, &parsedPacket);
                 PacketPrintInformation(parsedPacket.type,
-                                       parsedPacket.sender.entity.id,
+                                       parsedPacket.sender.id,
                                        parsedPacket.data,
                                        parsedPacket.size,
                                        *parsedPacket.sender.ip,
@@ -340,7 +447,7 @@ int ServerTryAcceptTCPSocket()
         ServerTCPSend(PT_Connect, &newPlayer.id, sizeof(int), newPlayer);
         VectorPushBack(server.players, &newPlayer);
 #ifdef SERVER_DEBUG
-        log_info("New Player connection (id:%d) (IP | PORT) (%d | %p)", newPlayer.entity.id, newPlayer.ip->host, newPlayer.ip->port);
+        log_info("New Player connection (id:%d) (IP | PORT) (%d | %p)", newPlayer.id, newPlayer.ip->host, newPlayer.ip->port);
 #endif
         return 1;
     }
@@ -360,53 +467,24 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
     if (SDLNet_TCP_Recv(player.socket, header, TCP_HEADER_SIZE))
     {
         const size_t packetSize = SDL_atoi(header);
-        SDL_bool badPacket = SDL_FALSE;
         if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
         {
 #ifdef SERVER_DEBUG
             log_info("Received a TCP-packet that was too small, throwing away...");
 #endif
-            badPacket = SDL_TRUE;
         }
-        char rest[packetSize];
-        SDL_memset(rest, 0, packetSize);
-        // Then receive the full packet
-        if (SDLNet_TCP_Recv(player.socket, rest, packetSize))
-        {
-            if (badPacket)
-                return 0;
-            // Parse data
-            PacketType type = PacketDecodeType(rest);
-            int id = PacketDecodeID(rest);
-            int dataLength = TCPPacketRemoveTypeAndID(rest, packetSize);
-            if (id < 0)
-            {
-#ifdef SERVER_DEBUG
-                log_info("Received a TCP-packet with invalid ID, throwin packet...");
-#endif
-            }
-            ParsedPacket parsedPacket = ParsedPacketCreate(type, rest, dataLength, player);
-            // Add to inBuffer.
-            // This type of packet is always sent to inBuffer as it might be a "greeting"-packet
-            SDL_LockMutex(server.inBufferMutex);
-            VectorPushBack(server.inBuffer, &parsedPacket);
-            PacketPrintInformation(parsedPacket.type,
-                                   parsedPacket.sender.entity.id,
-                                   parsedPacket.data,
-                                   parsedPacket.size,
-                                   *parsedPacket.sender.ip,
-                                   "TCP", "INCOMING");
-            SDL_UnlockMutex(server.inBufferMutex);
 
-            return 1;
+        // Then receive the full packet, piece by piece if required
+        int result = 0;
+        if (packetSize < TCP_MAX_SIZE)
+        {
+            result = ServerReceiveSmallTCPPacket(player, packetSize);
         }
         else
         {
-#ifdef SERVER_DEBUG
-            log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
-#endif
-            return 0;
+            result = ServerReceiveBigTCPPacket(player, packetSize);
         }
+        return result;
     }
     else
     {
@@ -415,6 +493,105 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
 #endif
         return 0;
     }
+}
+
+int ServerReceiveSmallTCPPacket(NetPlayer player, size_t packetSize)
+{
+    char buffer[packetSize];
+    SDL_memset(buffer, 0, packetSize);
+
+    if (SDLNet_TCP_Recv(player.socket, buffer, packetSize))
+    {
+        // Parse data
+        PacketType type = PacketDecodeType(buffer);
+        int id = PacketDecodeID(buffer);
+        int dataLength = TCPPacketRemoveTypeAndID(buffer, packetSize);
+        if (id < 0)
+        {
+#ifdef SERVER_DEBUG
+            log_info("Received a TCP-packet with invalid ID, throwin packet...");
+#endif
+            return 0;
+        }
+        ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, player);
+        // Add to inBuffer
+        SDL_LockMutex(server.inBufferMutex);
+        VectorPushBack(server.inBuffer, &parsedPacket);
+        PacketPrintInformation(parsedPacket.type,
+                               parsedPacket.sender.id,
+                               parsedPacket.data,
+                               parsedPacket.size,
+                               *parsedPacket.sender.ip,
+                               "TCP", "INCOMING");
+        SDL_UnlockMutex(server.inBufferMutex);
+        return 1;
+    }
+    else
+    {
+#ifdef SERVER_DEBUG
+        log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+#endif
+        return 0;
+    }
+}
+
+int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
+{
+    char *buffer = MALLOC_N(char, packetSize);
+    SDL_memset(buffer, 0, packetSize);
+
+    int totalSizeToReceive = (int)packetSize;
+    int nFullPackagesRequired = (int)(totalSizeToReceive / TCP_MAX_SIZE);
+    int bytesLeft = totalSizeToReceive % TCP_MAX_SIZE;
+
+    for (int i = 0; i < nFullPackagesRequired; i++)
+    {
+        if (!SDLNet_TCP_Recv(player.socket, buffer + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        {
+#ifdef SERVER_DEBUG
+            log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+#endif
+            FREE(buffer);
+            return 0;
+        }
+    }
+
+    if (!SDLNet_TCP_Recv(player.socket, buffer + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
+    {
+#ifdef SERVER_DEBUG
+        log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+#endif
+        FREE(buffer);
+        return 0;
+    }
+
+    // Parse data
+    PacketType type = PacketDecodeType(buffer);
+    int id = PacketDecodeID(buffer);
+    int dataLength = TCPPacketRemoveTypeAndID(buffer, packetSize);
+    if (id < 0)
+    {
+#ifdef SERVER_DEBUG
+        log_info("Received a TCP-packet with invalid ID, throwing packet...");
+#endif
+        FREE(buffer);
+        return 0;
+    }
+
+    ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, player);
+    // Add to inBuffer.
+    SDL_LockMutex(server.inBufferMutex);
+    VectorPushBack(server.inBuffer, &parsedPacket);
+    PacketPrintInformation(parsedPacket.type,
+                           parsedPacket.sender.id,
+                           parsedPacket.data,
+                           parsedPacket.size,
+                           *parsedPacket.sender.ip,
+                           "TCP", "INCOMING");
+    SDL_UnlockMutex(server.inBufferMutex);
+
+    FREE(buffer);
+    return 1;
 }
 
 void ServerRemoveClient(NetPlayer player)
@@ -436,8 +613,8 @@ void ServerRemoveClient(NetPlayer player)
     // Remove client from player-list before broadcasting
     VectorErase(server.players, index);
 
-    ServerFreeID(player.entity.id);
-    printf("Player disconnected [id:%d]\n", player.entity.id);
+    ServerFreeID(player.id);
+    printf("Player disconnected [id:%d]\n", player.id);
 }
 
 int ServerGetID()
@@ -466,7 +643,29 @@ int ServerGetID()
 void ServerFreeID(int id)
 {
     if (id > 0 || id <= server.players->capacity)
-        SERVER_IDS[id - 1] = 0;
+        SERVER_IDS[id - 1] = SDL_FALSE;
+}
+
+int ServerGetSessionID()
+{
+    for (size_t i = 0; i < server.sessionBitmap->size; i++)
+    {
+        if (!SERVER_SESSIONBITMAP[i])
+        {
+            SERVER_SESSIONBITMAP[i] = SDL_TRUE;
+            return i;
+        }
+    }
+#ifdef SERVER_DEBUG
+    log_warn("No available session IDs");
+#endif
+    return -1;
+}
+
+void ServerFreeSessionID(int id)
+{
+    if (id >= 0 || id < server.sessionBitmap->capacity)
+        SERVER_SESSIONBITMAP[id] = SDL_FALSE;
 }
 
 ParsedPacket *ServerGetInBufferArray()
@@ -480,4 +679,12 @@ NetPlayer *ServerGetPlayerArray()
 SDL_bool *ServerGetIDArray()
 {
     return (SDL_bool *)server.ids->data;
+}
+Session *ServerGetSessionArray()
+{
+    return (Session *)server.sessions;
+}
+SDL_bool *ServerGetSessionBitmapArray()
+{
+    return (SDL_bool *)server.sessionBitmap;
 }

@@ -10,7 +10,7 @@
 #define ENTITY_ARRAY EntityManagerGetArray()
 
 void EntityManagerInitialize();
-void EntityManagerDestroy();
+void EntityManagerUninitalize();
 
 ///Waring only one
 ///\param entites: ALL entitys are needed

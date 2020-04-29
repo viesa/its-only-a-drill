@@ -38,11 +38,13 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock);
 void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map);
 void MenuUpdateSplash(Menu *menu, Input *input, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
+void MenuUpdateJoinLobby(Menu *menu, Input *input);
+void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map);
+void MenuUpdateWaitingForLobby(Menu *menu, Input *input);
 void MenuUpdateOptions(Menu *menu, Input *input);
 void MenuUpdateResolution(Menu *menu, Input *input);
 void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager);
 void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map);
-void MenuUpdateHostLobby(Menu *menu, Input *input);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);

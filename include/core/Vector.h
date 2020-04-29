@@ -26,6 +26,7 @@ void VectorPopBack(Vector *vector);
 
 void VectorErase(Vector *vector, size_t index);
 void VectorEraseRange(Vector *vector, size_t start, size_t end);
+void VectorEraseElement(Vector *vector, void *element);
 void VectorClear(Vector *vector);
 
 #endif

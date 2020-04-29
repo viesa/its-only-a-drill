@@ -9,6 +9,8 @@ struct AppServer
 
 AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock)
 {
+    EntityManagerInitialize();
+
     AppServer *app = MALLOC(AppServer);
     ServerStart();
     app->isRunning = isRunning;
@@ -20,6 +22,7 @@ AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock)
 void AppServerDestroy(AppServer *app)
 {
     ServerStop();
+    EntityManagerUninitalize();
 }
 
 void AppServerGo(AppServer *app)
@@ -35,13 +38,6 @@ void AppServerUpdate(AppServer *app)
     {
         ParsedPacket nextPacket = SERVER_INBUFFER[i];
 
-        void AppServerHandleTextPacket(ParsedPacket packet);
-        void AppServerHandleConnectPacket(ParsedPacket packet);
-        void AppServerHandleDisconnectPacket(ParsedPacket packet);
-        void AppServerHandleNewPlayerPacket(ParsedPacket packet);
-        void AppServerHandleDelPlayerPacket(ParsedPacket packet);
-        void AppServerHandleEntityPacket(ParsedPacket packet);
-        void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
         switch (nextPacket.type)
         {
         case PT_Text:
@@ -65,6 +61,12 @@ void AppServerUpdate(AppServer *app)
         case PT_CompressedEntity:
             AppServerHandleCompressedEntityPacket(nextPacket);
             break;
+        case PT_CreateSession:
+            AppServerHandleCreateSessionPacket(nextPacket);
+            break;
+        case PT_JoinSession:
+            AppServerHandleJoinSessionPacket(nextPacket);
+            break;
         default:
             break;
         }
@@ -76,7 +78,6 @@ void AppServerUpdate(AppServer *app)
     VectorClear(server.inBuffer);
     SDL_UnlockMutex(server.inBufferMutex);
 }
-
 void AppServerShowPlayerList(AppServer *app)
 {
     if (app->displayTimer > 1.0f)
@@ -164,4 +165,33 @@ void AppServerHandleCompressedEntityPacket(ParsedPacket packet)
 #ifdef SERVERMANAGER_DEBUG
     log_warn("Received an compressed entity that did not correspond to any player");
 #endif
+}
+
+void AppServerHandleCreateSessionPacket(ParsedPacket packet)
+{
+    char *rawMap = (char *)packet.data;
+
+    NetPlayer *playerP = NULL;
+    for (size_t i = 0; i < server.players->size; i++)
+    {
+        if (!SDL_memcmp(&SERVER_PLAYERS[i], &packet.sender, sizeof(NetPlayer)))
+        {
+            playerP = &SERVER_PLAYERS[i];
+            break;
+        }
+    }
+
+    int sessionID = ServerGetSessionID();
+
+    Session session = SessionCreate(sessionID, playerP, rawMap, packet.size);
+    VectorPushBack(server.sessions, &session);
+    ServerTCPSend(PT_CreateSession, &session.id, sizeof(int), packet.sender);
+}
+
+void AppServerHandleJoinSessionPacket(ParsedPacket packet)
+{
+    // int sessionID = *(int *)packet.data; Kommenterar ut så vi inte pushar upp Unused variable varning
+}
+void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
+{
 }

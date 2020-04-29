@@ -110,6 +110,18 @@ void VectorEraseRange(Vector *vector, size_t start, size_t end)
 #endif
 }
 
+void VectorEraseElement(Vector *vector, void *element)
+{
+    for (size_t i = 0; i < vector->size; i++)
+    {
+        if (!SDL_memcmp(&((char *)vector->data)[i], element, vector->elementSize))
+        {
+            VectorErase(vector, i);
+            return;
+        }
+    }
+}
+
 void VectorClear(Vector *vector)
 {
 #ifdef VECTOR_DEBUG_STRICT

@@ -1,4 +1,4 @@
-#define SMALLWINDOW_PUBLICSERVER_NODEBUGLOGS
+// #define SMALLWINDOW_PUBLICSERVER_NODEBUGLOGS
 
 #ifdef SMALLWINDOW_PUBLICSERVER_NODEBUGLOGS
 #define WINDOW_DEBUG
@@ -25,10 +25,10 @@
 
 //#define VECTOR_DEBUG
 //#define VECTOR_DEBUG_STRICT
-//#define UDPSERVER_LOCAL
 #endif
 
 // If defined friction formula Real runs, else computed
 //#define frictionReal
 
-// If defined, multiple connection can be created from the same computer. It's a quick fix to prevent unused connections on the PI-serve
+// If defined, client will connect with 127.0.0.1
+// #define LOCAL_SERVER

@@ -5,7 +5,10 @@
 #include "NetPlayer.h"
 
 #define MAX_MSGLEN 2048
-#define TCP_HEADER_SIZE 5
+
+#define TCP_MAX_SIZE 65535 - 2000
+#define TCP_HEADER_SIZE 10
+
 #define NET_TYPE_SIZE 3
 #define NET_ID_SIZE 3
 
@@ -19,6 +22,9 @@ typedef enum PacketType
     PT_DelPlayer,        // When server broadcasts deletion of a player
     PT_Entity,           // When sending an entity
     PT_CompressedEntity, // When sending a compressed entity
+    PT_CreateSession,    // When client wants to create a lobby
+    PT_JoinSession,      // When client wants to join a lobby
+    PT_LeaveSession,
     PT_None,
     PT_Count
 } PacketType;

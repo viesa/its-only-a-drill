@@ -19,7 +19,7 @@ void EntityManagerInitialize()
     EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
 }
 
-void EntityManagerDestroy()
+void EntityManagerUninitalize()
 {
     VectorDestroy(entityManager.entityVector);
 }

@@ -39,6 +39,8 @@ void ClientManagerUpdate()
         case PT_CompressedEntity:
             ClientManagerHandleCompressedEntityPacket(nextPacket);
             break;
+        case PT_CreateSession:
+            break;
         default:
             break;
         }
@@ -103,7 +105,7 @@ void ClientManagerHandleEntityPacket(ParsedPacket packet)
 {
     Entity incomingEntity = *(Entity *)packet.data;
 
-    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].id == incomingEntity.id) //entity exists
         {
@@ -117,7 +119,7 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity cEntity = *(CompressedEntity *)packet.data;
 
-    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].id == cEntity.id) //entity exists
         {
@@ -126,8 +128,8 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
         }
     }
 }
-
-EntityIndexP *ClientManagerGetPlayersArray()
+EntityIndexP *
+ClientManagerGetPlayersArray()
 {
     return (EntityIndexP *)clientManager.players->data;
 }

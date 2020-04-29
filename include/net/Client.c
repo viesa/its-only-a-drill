@@ -9,7 +9,7 @@ void ClientInitialize()
     client.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
     client.inBufferMutex = SDL_CreateMutex();
 
-#ifdef UDPSERVER_LOCAL
+#ifdef LOCAL_SERVER
     const char *ip = "127.0.0.1";
     Uint16 port = 1337;
 #else
@@ -148,6 +148,27 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
 
 int ClientTCPOut(TCPpacket *packet)
 {
+    int result = 0;
+    if (packet->len <= TCP_MAX_SIZE)
+    {
+        result = ClientTCPSmallOut(packet);
+    }
+    else
+    {
+        result = ClientTCPBigOut(packet);
+    }
+
+    PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
+                           PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
+                           packet->data,
+                           packet->len,
+                           *SDLNet_TCP_GetPeerAddress(packet->address),
+                           "TCP", "OUTGOING");
+    return result;
+}
+
+int ClientTCPSmallOut(TCPpacket *packet)
+{
     if (!SDLNet_TCP_Send(packet->address, packet->data, packet->len))
     {
 #ifdef CLIENT_DEBUG
@@ -155,12 +176,32 @@ int ClientTCPOut(TCPpacket *packet)
 #endif
         return 0;
     }
-    PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
-                           PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
-                           packet->data,
-                           packet->len,
-                           *SDLNet_TCP_GetPeerAddress(packet->address),
-                           "TCP", "OUTGOING");
+    return 1;
+}
+
+int ClientTCPBigOut(TCPpacket *packet)
+{
+    int totalSizeToSend = (int)packet->len;
+    int nFullPackagesRequired = (int)(totalSizeToSend / TCP_MAX_SIZE);
+    int bytesLeft = totalSizeToSend % TCP_MAX_SIZE;
+
+    for (int i = 0; i < nFullPackagesRequired; i++)
+    {
+        if (!SDLNet_TCP_Send(packet->address, packet->data + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        {
+#ifdef CLIENT_DEBUG
+            log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
+#endif
+            return 0;
+        }
+    }
+    if (!SDLNet_TCP_Send(packet->address, packet->data + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
+    {
+#ifdef CLIENT_DEBUG
+        log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
+#endif
+        return 0;
+    }
     return 1;
 }
 
@@ -260,62 +301,31 @@ int ClientTryReceiveUDPPacket()
 
 int ClientTryReceiveTCPPacket()
 {
+
     char header[TCP_HEADER_SIZE] = {0};
     // First receive the header to know how big the packet is
     if (SDLNet_TCP_Recv(client.server.socket, header, TCP_HEADER_SIZE))
     {
-        SDL_bool badPacket = SDL_FALSE;
         const size_t packetSize = SDL_atoi(header);
         if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
         {
 #ifdef CLIENT_DEBUG
             log_info("Received a TCP-packet that was too small, throwing away...");
 #endif
-            badPacket = SDL_TRUE;
             return 0;
         }
-        char rest[packetSize];
-        SDL_memset(rest, 0, packetSize);
-        // Then receive the full packet
-        if (SDLNet_TCP_Recv(client.server.socket, (void *)rest, packetSize))
+
+        // Then receive the full packet, piece by piece if required
+        int result = 0;
+        if (packetSize < TCP_MAX_SIZE)
         {
-            if (badPacket)
-                return 0;
-            // Parse data
-            PacketType type = PacketDecodeType(rest);
-            int id = PacketDecodeID(rest);
-            int dataSize = TCPPacketRemoveTypeAndID(rest, packetSize);
-
-            if (id != 0)
-            {
-#ifdef CLIENT_DEBUG
-                log_info("Received TCP-packet with wrong ID, throwing away...");
-#endif
-                return 0;
-            }
-
-            ParsedPacket parsedPacket = ParsedPacketCreate(type, rest, dataSize, client.server);
-            // Add to inBuffer.
-            // This type of packet is always sent to inBuffer as it might be a "greeting"-packet
-            SDL_LockMutex(client.inBufferMutex);
-            VectorPushBack(client.inBuffer, &parsedPacket);
-            PacketPrintInformation(parsedPacket.type,
-                                   0,
-                                   parsedPacket.data,
-                                   parsedPacket.size,
-                                   *parsedPacket.sender.ip,
-                                   "TCP", "INCOMING");
-            SDL_UnlockMutex(client.inBufferMutex);
-
-            return 1;
+            result = ClientReceiveSmallTCPPacket(packetSize);
         }
         else
         {
-#ifdef CLIENT_DEBUG
-            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
-#endif
-            return 0;
+            result = ClientReceiveBigTCPPacket(packetSize);
         }
+        return result;
     }
     else
     {
@@ -324,6 +334,108 @@ int ClientTryReceiveTCPPacket()
 #endif
         return 0;
     }
+}
+
+int ClientReceiveSmallTCPPacket(size_t packetSize)
+{
+    char rest[packetSize];
+    SDL_memset(rest, 0, packetSize);
+    // Then receive the full packet
+    if (SDLNet_TCP_Recv(client.server.socket, (void *)rest, packetSize))
+    {
+        // Parse data
+        PacketType type = PacketDecodeType(rest);
+        int id = PacketDecodeID(rest);
+        int dataSize = TCPPacketRemoveTypeAndID(rest, packetSize);
+
+        if (id != 0)
+        {
+#ifdef CLIENT_DEBUG
+            log_info("Received TCP-packet with wrong ID, throwing away...");
+#endif
+            return 0;
+        }
+
+        ParsedPacket parsedPacket = ParsedPacketCreate(type, rest, dataSize, client.server);
+        // Add to inBuffer.
+        SDL_LockMutex(client.inBufferMutex);
+        VectorPushBack(client.inBuffer, &parsedPacket);
+        PacketPrintInformation(parsedPacket.type,
+                               0,
+                               parsedPacket.data,
+                               parsedPacket.size,
+                               *parsedPacket.sender.ip,
+                               "TCP", "INCOMING");
+        SDL_UnlockMutex(client.inBufferMutex);
+
+        return 1;
+    }
+    else
+    {
+#ifdef CLIENT_DEBUG
+        log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
+#endif
+        return 0;
+    }
+}
+
+int ClientReceiveBigTCPPacket(size_t packetSize)
+{
+    char *buffer = MALLOC_N(char, packetSize);
+    SDL_memset(buffer, 0, packetSize);
+
+    int totalSizeToReceive = (int)packetSize;
+    int nFullPackagesRequired = (int)(totalSizeToReceive / TCP_MAX_SIZE);
+    int bytesLeft = totalSizeToReceive % TCP_MAX_SIZE;
+
+    for (int i = 0; i < nFullPackagesRequired; i++)
+    {
+        if (!SDLNet_TCP_Recv(client.server.socket, buffer + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        {
+#ifdef CLIENT_DEBUG
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+#endif
+            FREE(buffer);
+            return 0;
+        }
+    }
+
+    if (!SDLNet_TCP_Recv(client.server.socket, buffer + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
+    {
+#ifdef CLIENT_DEBUG
+        log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+#endif
+        FREE(buffer);
+        return 0;
+    }
+
+    // Parse data
+    PacketType type = PacketDecodeType(buffer);
+    int id = PacketDecodeID(buffer);
+    int dataLength = TCPPacketRemoveTypeAndID(buffer, packetSize);
+    if (id < 0)
+    {
+#ifdef CLIENT_DEBUG
+        log_info("Received a TCP-packet with invalid ID, throwing packet...");
+#endif
+        FREE(buffer);
+        return 0;
+    }
+
+    ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, client.server);
+    // Add to inBuffer.
+    SDL_LockMutex(client.inBufferMutex);
+    VectorPushBack(client.inBuffer, &parsedPacket);
+    PacketPrintInformation(parsedPacket.type,
+                           parsedPacket.sender.id,
+                           parsedPacket.data,
+                           parsedPacket.size,
+                           *parsedPacket.sender.ip,
+                           "TCP", "INCOMING");
+    SDL_UnlockMutex(client.inBufferMutex);
+
+    FREE(buffer);
+    return 1;
 }
 
 ParsedPacket *ClientGetInBufferArray()

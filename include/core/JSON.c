@@ -1,56 +1,40 @@
 #include "JSON.h"
 
-#include <sys/stat.h>
-
 static void process_value(json_value *value, int depth);
 
 JSON *JSONCreate(char *filename)
 {
-    char *file_contents;
-    int file_size;
-    FILE *fp;
-    struct stat filestatus;
-
-    if (stat(filename, &filestatus) != 0)
-    {
-        log_error("JSON Loading error: File %s not found", filename);
-        return NULL;
-    }
-    file_size = filestatus.st_size;
-    file_contents = MALLOC_N(char, filestatus.st_size);
-
-    if (file_contents == NULL)
-    {
-        log_error("JSON Loading error: Unable to allocate %d bytes", file_size);
-        return NULL;
-    }
-
-    fp = fopen(filename, "rt");
-    if (fp == NULL)
-    {
-        log_error("JSON Loading error: Unable to open %s", filename);
-        fclose(fp);
-        SDL_free(file_contents);
-        return NULL;
-    }
-    if (fread(file_contents, file_size, 1, fp) != 1)
-    {
-        log_error("JSON Loading error: Unable to read contents of %s", filename);
-        fclose(fp);
-        SDL_free(file_contents);
-        return NULL;
-    }
-    fclose(fp);
 
     JSON *json = MALLOC(JSON);
 
-    json->file_contents = (json_char *)file_contents;
-    json->value = json_parse(json->file_contents, file_size);
+    LoadedFile lfile = LoadedFileCreate(filename);
+
+    json->file_contents = MALLOC_N(json_char, lfile.size);
+    memcpy(json->file_contents, lfile.contents, lfile.size);
+    json->value = json_parse(json->file_contents, lfile.size);
+
+    LoadedFileDestroy(&lfile);
 
     if (json->value == NULL)
     {
         log_error("JSON Loading error: Unable to parse data");
-        SDL_free(file_contents);
+        return NULL;
+    }
+
+    return json;
+}
+
+JSON *JSONCreateFromArray(char *loadedfile, size_t size)
+{
+    JSON *json = MALLOC(JSON);
+
+    json->file_contents = MALLOC_N(json_char, size);
+    memcpy(json->file_contents, loadedfile, size);
+    json->value = json_parse(json->file_contents, size);
+
+    if (json->value == NULL)
+    {
+        log_error("JSON Loading error: Unable to parse data");
         return NULL;
     }
 
@@ -60,8 +44,9 @@ JSON *JSONCreate(char *filename)
 void JSONDestroy(JSON *json)
 {
     json_value_free(json->value);
-    SDL_free(json->file_contents);
-    SDL_free(json);
+    if (json)
+        FREE(json->file_contents);
+    FREE(json);
 }
 
 void JSONPrint(JSON *json)

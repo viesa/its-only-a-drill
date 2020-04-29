@@ -93,12 +93,13 @@ void AppClientDestroy(AppClient *app)
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
-    EntityManagerDestroy();
 
     MenuDestroy(app->menu);
     KeybindingFree(app->bindings);
     GuiDestroy(app->gui);
     FontDestroy(app->font);
+
+    EntityManagerUninitalize();
 
     SDL_free(app);
 }
@@ -236,6 +237,9 @@ void AppClientDraw(AppClient *app)
     {
         switch (app->state.menuState)
         {
+        case MS_JoinLobby:
+        case MS_HostLobby:
+        case MS_WaitingForLobby:
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
             MapDraw(&app->map, app->camera);
@@ -253,7 +257,7 @@ void AppClientDraw(AppClient *app)
 
         UpdateItemDraw(&ENTITY_ARRAY[*app->player.entity].inventory, &app->groundListItems, app->camera);
 
-        for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+        for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
             if (ENTITY_ARRAY[i].isNPC)
                 EntityDraw(&ENTITY_ARRAY[i], app->camera);

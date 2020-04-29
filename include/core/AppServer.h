@@ -4,6 +4,7 @@
 #include "Dependencies.h"
 #include "Clock.h"
 #include "../net/Server.h"
+#include "EntityManager.h"
 
 typedef struct AppServer AppServer;
 
@@ -27,5 +28,8 @@ void AppServerHandleNewPlayerPacket(ParsedPacket packet);
 void AppServerHandleDelPlayerPacket(ParsedPacket packet);
 void AppServerHandleEntityPacket(ParsedPacket packet);
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
+void AppServerHandleCreateSessionPacket(ParsedPacket packet);
+void AppServerHandleJoinSessionPacket(ParsedPacket packet);
+void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
 
 #endif
