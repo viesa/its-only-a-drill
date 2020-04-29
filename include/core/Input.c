@@ -11,6 +11,8 @@ struct Input
     SDL_bool m_prevMousemap[NUM_MOUSE_EVENTS];
 
     Vec2 m_mousePosition;
+    int textLen;
+    char text[16];
 };
 
 Input *InputCreate()
@@ -26,6 +28,7 @@ Input *InputCreate()
         ret->m_mousemap[i] = SDL_FALSE;
         ret->m_prevMousemap[i] = SDL_FALSE;
     }
+    ret->textLen = 0;
     return ret;
 }
 void InputDestroy(Input *input)
@@ -113,4 +116,26 @@ SDL_bool InputIsMouseReleased(Input *input, const MouseCode code)
 Vec2 InputLastMousePos(Input *input)
 {
     return input->m_mousePosition;
+}
+
+void InputTypePortal(Input *input, char charPush)
+{
+    if (input->textLen > 10)
+        return;
+    input->text[input->textLen] = charPush;
+    input->textLen++;
+    input->text[input->textLen] = ' ';
+}
+
+char *InputGetPortalContent(Input *input)
+{
+    return input->text;
+}
+
+void InputPortalBackspace(Input *input)
+{
+    input->text[input->textLen - 1] = ' ';
+    if (input->textLen > 1)
+        input->textLen--;
+    return;
 }

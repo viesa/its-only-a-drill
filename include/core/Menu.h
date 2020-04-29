@@ -37,6 +37,7 @@ typedef struct Menu
 Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock);
 void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map);
 void MenuUpdateSplash(Menu *menu, Input *input, Map *map);
+void MenuUpdateName(Menu *menu, Input *input);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
 void MenuUpdateJoinLobby(Menu *menu, Input *input);
 void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map);

@@ -7,6 +7,8 @@ struct Event
     Input *m_input;
 
     SDL_bool *m_running;
+
+    char text[32];
 };
 
 Event *EventCreate(Input *input, SDL_bool *running)
@@ -59,6 +61,12 @@ void EventPollAll(Event *event)
             InputMouseMove(event->m_input, _new);
             break;
         }
+        case SDL_TEXTINPUT:
+            /* Add new text onto the end of our text */
+            //strcat(event->text, event->m_events.text.text);
+            InputTypePortal(event->m_input, event->m_events.text.text[0]);
+            strcpy(event->m_events.text.text, "");
+            break;
         default:
             break;
         }

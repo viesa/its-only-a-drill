@@ -11,6 +11,7 @@ typedef enum GameState
 typedef enum MenuState
 {
     MS_Splash,
+    MS_Name,
     MS_MainMenu,
     MS_JoinLobby,
     MS_HostLobby,

@@ -25,6 +25,8 @@ struct
 
     SDL_Thread *listenThread;
 
+    char name[16];
+
 } client;
 
 void ClientInitialize();

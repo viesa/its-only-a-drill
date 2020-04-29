@@ -27,6 +27,7 @@ struct AppClient
     Menu *menu;
     Keybinding *bindings;
     Vec2 middleOfMap;
+    MovingPattern *movingPattern;
 
     GroundListItems groundListItems;
 
@@ -56,6 +57,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->menu = MenuCreate(app->gfx, app->font, &app->state, app->clock);
     app->bindings = KeybindingCreate();
     app->player = PlayerCreate(app->camera);
+    app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
     ClientInitialize();
@@ -93,6 +95,7 @@ void AppClientDestroy(AppClient *app)
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
+    pathFree(app->movingPattern);
 
     MenuDestroy(app->menu);
     KeybindingFree(app->bindings);
@@ -208,7 +211,7 @@ void AppClientUpdate(AppClient *app)
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
 
-        BehaviorMoveEntity();
+        BehaviorMoveEntity(app->clock, app->movingPattern);
         if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[1].desiredPoint.x = 180;

@@ -33,7 +33,6 @@ void InputMouseDown(Input *input, const MouseCode code);
 void InputMouseUp(Input *input, const MouseCode code);
 /// Updates mouse position
 void InputMouseMove(Input *input, Vec2 pos);
-
 /// Returns true if key is down this frame
 SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key);
 /// Returns true if key is down this frame,
@@ -56,4 +55,7 @@ SDL_bool InputIsMouseReleased(Input *input, const MouseCode code);
 /// Returns the last captured mouse position
 Vec2 InputLastMousePos(Input *input);
 
+void InputTypePortal(Input *input, char charPush);
+char *InputGetPortalContent(Input *input);
+void InputPortalBackspace(Input *input);
 #endif
