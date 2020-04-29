@@ -12,6 +12,7 @@ Graphics *GraphicsCreate()
     for (int i = 0; i < SS_Count; i++)
         gfx->m_allTextures[i] = NULL;
     gfx->m_allTextures[SS_Menu] = GraphicsLoadTexture(gfx, "docs/spritesheets/menu.png");
+    gfx->m_allTextures[SS_Lobby] = GraphicsLoadTexture(gfx, "docs/spritesheets/lobby.png");
     gfx->m_allTextures[SS_Legacy] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tilemap.png");
     gfx->m_allTextures[SS_Tiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_tiles.png");
     gfx->m_allTextures[SS_Characters] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_characters.png");

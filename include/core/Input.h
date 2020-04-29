@@ -42,6 +42,8 @@ SDL_bool InputIsKeyPressed(Input *input, const SDL_Scancode key);
 /// Returns true if key is up this frame,
 /// but was in the previous frame
 SDL_bool InputIsKeyReleased(Input *input, const SDL_Scancode key);
+// Returns true if any key is down this frame
+SDL_bool InputIsAnyKeyDown(Input *input);
 
 /// Returns true if mouse is down this frame
 SDL_bool InputIsMouseDown(Input *input, const MouseCode code);

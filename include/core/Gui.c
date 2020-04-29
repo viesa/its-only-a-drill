@@ -84,7 +84,7 @@ void GuiUpdate(Gui *gui)
         {255 - gui->loopSwing, 180, 184},
         {255 - gui->loopSwing, 180, 184}};
 
-    FontDraw3DCustom(gui->font, TTF_Antilles, pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Disp. Objective
     //SDL_Color objColor[2] = {

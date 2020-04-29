@@ -1,10 +1,11 @@
 #include "NetPlayer.h"
 
-NetPlayer NetPlayerCreate(TCPsocket socket, IPaddress ip, int id)
+NetPlayer NetPlayerCreate(TCPsocket socket, int id)
 {
     NetPlayer netPlayer;
     netPlayer.socket = socket;
-    netPlayer.ip = ip;
+    if (socket)
+        netPlayer.ip = SDLNet_TCP_GetPeerAddress(socket);
     netPlayer.id = id;
     return netPlayer;
 }

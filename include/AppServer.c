@@ -35,22 +35,35 @@ void AppServerUpdate(AppServer *app)
     {
         ParsedPacket nextPacket = SERVER_INBUFFER[i];
 
+        void AppServerHandleTextPacket(ParsedPacket packet);
+        void AppServerHandleConnectPacket(ParsedPacket packet);
+        void AppServerHandleDisconnectPacket(ParsedPacket packet);
+        void AppServerHandleNewPlayerPacket(ParsedPacket packet);
+        void AppServerHandleDelPlayerPacket(ParsedPacket packet);
+        void AppServerHandleEntityPacket(ParsedPacket packet);
+        void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
         switch (nextPacket.type)
         {
         case PT_Text:
             AppServerHandleTextPacket(nextPacket);
             break;
-        case PT_PlayerID:
-            AppServerHandlePlayerIDPacket(nextPacket);
+        case PT_Connect:
+            AppServerHandleEntityPacket(nextPacket);
+            break;
+        case PT_Disconnect:
+            AppServerHandleDisconnectPacket(nextPacket);
+            break;
+        case PT_NewPlayer:
+            AppServerHandleNewPlayerPacket(nextPacket);
+            break;
+        case PT_DelPlayer:
+            AppServerHandleDelPlayerPacket(nextPacket);
             break;
         case PT_Entity:
             AppServerHandleEntityPacket(nextPacket);
             break;
         case PT_CompressedEntity:
             AppServerHandleCompressedEntityPacket(nextPacket);
-            break;
-        case PT_IPaddress:
-            AppServerHandleIPaddressPacket(nextPacket);
             break;
         default:
             break;
@@ -88,37 +101,30 @@ void AppServerShowPlayerList(AppServer *app)
 
     printf("\n---- Player List ----\n");
     for (int i = 0; i < server.players->size; i++)
-        printf("%d:(host:port): %d:%d\n", SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].ip.host, SERVER_PLAYERS[i].ip.port);
+        printf("%d:(host:port): %d:%d\n", SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].ip->host, SERVER_PLAYERS[i].ip->port);
     printf("Ammount of players %u\n", (unsigned int)server.players->size);
     printf("---- End of player list ----\n\n");
 }
 
 void AppServerHandleTextPacket(ParsedPacket packet)
 {
-    if (!SDL_memcmp(packet.data, "alive", 5))
-    {
-        for (int i = 0; i < server.players->size; i++)
-        {
-            if (SERVER_PLAYERS[i].ip.host == packet.sender.host &&
-                SERVER_PLAYERS[i].ip.port == packet.sender.port)
-            {
-                int ID = ServerGetID(packet.sender);
-                SERVER_PLAYERS[i].id = ID;
-                ServerSend(PT_PlayerID, &ID, sizeof(int), packet.sender);
-                log_info("Player(id:%d) connected\n", ID);
-            }
-        }
-        return;
-    }
-
-    if (!SDL_memcmp(packet.data, "quit", 4))
-    {
-        ServerRemoveClient(packet.sender);
-        return;
-    }
 }
 
-void AppServerHandlePlayerIDPacket(ParsedPacket packet)
+void AppServerHandleConnectPacket(ParsedPacket packet)
+{
+    //Add name?
+}
+
+void AppServerHandleDisconnectPacket(ParsedPacket packet)
+{
+    ServerRemoveClient(packet.sender);
+}
+
+void AppServerHandleNewPlayerPacket(ParsedPacket packet)
+{
+}
+
+void AppServerHandleDelPlayerPacket(ParsedPacket packet)
 {
 }
 
@@ -126,44 +132,36 @@ void AppServerHandleEntityPacket(ParsedPacket packet)
 {
     Entity incomingEntity = *(Entity *)packet.data;
 
-    SDL_bool exist = SDL_FALSE;
     for (int i = 0; i < server.players->size; i++)
     {
-        if (SERVER_PLAYERS[i].id == incomingEntity.id) //entity exists
+        if (SERVER_PLAYERS[i].entity.id == packet.sender.entity.id)
         {
-            exist = SDL_TRUE;
-            ServerBroadcastExclusive(PT_Entity, &incomingEntity, sizeof(Entity), packet.sender);
-            break;
+            ServerTCPBroadcastExclusive(PT_Entity, &incomingEntity, sizeof(Entity), packet.sender);
+            return;
         }
     }
-    if (!exist)
-    {
+
+    // THIS SHOULD NEVER HAPPEN
 #ifdef SERVERMANAGER_DEBUG
-        log_warn("Received an entity that did not correspond to any player");
+    log_warn("Received an compressed entity that did not correspond to any player");
 #endif
-    }
 }
+
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity incomingCEntity = *(CompressedEntity *)packet.data;
 
-    SDL_bool exist = SDL_FALSE;
     for (int i = 0; i < server.players->size; i++)
     {
-        if (SERVER_PLAYERS[i].id == incomingCEntity.id) //entity exists
+        if (SERVER_PLAYERS[i].entity.id == packet.sender.entity.id)
         {
-            exist = SDL_TRUE;
-            ServerBroadcastExclusive(PT_CompressedEntity, &incomingCEntity, sizeof(CompressedEntity), packet.sender);
-            break;
+            ServerUDPBroadcastExclusive(PT_CompressedEntity, &incomingCEntity, sizeof(CompressedEntity), packet.sender);
+            return;
         }
     }
-    if (!exist)
-    {
+
+    // THIS SHOULD NEVER HAPPEN
 #ifdef SERVERMANAGER_DEBUG
-        log_warn("Received an entity that did not correspond to any player");
+    log_warn("Received an compressed entity that did not correspond to any player");
 #endif
-    }
-}
-void AppServerHandleIPaddressPacket(ParsedPacket packet)
-{
 }

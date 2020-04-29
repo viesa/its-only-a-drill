@@ -6,8 +6,12 @@
 
 typedef enum FontSheet
 {
-    TTF_Antilles,
-    TTF_AntillesBig,
+    TTF_Antilles_XS,
+    TTF_Antilles_S,
+    TTF_Antilles_M,
+    TTF_Antilles_L,
+    TTF_Antilles_XL,
+    TTF_Antilles_XXL,
     TTF_Robot_Crush,
     TTF_Arial,
     TTF_Count
@@ -80,6 +84,9 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
 void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
 
 void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
+
+FontSheet FontGetDynamicSizing(Font *font);
+int FontGetHeight(FontSheet fontEnum);
 
 void FontDestroy(Font *font);
 

@@ -2,12 +2,14 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
     menu->font = font;
+    menu->loadingBar = LoadingBarCreate(menu->gfx);
     menu->state = state;
+    menu->clock = clock;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -17,7 +19,10 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
-
+    menu->lobbyDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
+    TransitionInitalize(menu->gfx, menu->font);
+    TransitionStart(TT_FadeOut, 2);
+    LoadingBarShow(menu->loadingBar);
     return menu;
 }
 
@@ -89,27 +94,33 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
 
 void MenuUpdateSplash(Menu *menu, Input *input, Map *map)
 {
-    if (InputIsKeyPressed(input, SDL_SCANCODE_SPACE))
+    if (!menu->loadingBar->active)
     {
-        menu->state->menuState = MS_MainMenu;
+        //Change if key pressed
+        if (InputIsAnyKeyDown(input))
+            menu->state->menuState = MS_MainMenu;
+
+        GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+
+        SDL_Color vitalsColor[10] = {
+            {menu->loopSwing, 159, 227},
+            {menu->loopSwing, 139, 207},
+            {menu->loopSwing, 119, 187},
+            {menu->loopSwing, 99, 167},
+            {menu->loopSwing, 79, 147},
+            {menu->loopSwing, 59, 127},
+            {menu->loopSwing, 39, 107},
+            {menu->loopSwing, 19, 87},
+            {255 - menu->loopSwing, 180, 184},
+            {255 - menu->loopSwing, 180, 184}};
+
+        FontDraw3DCustom(menu->font, TTF_Antilles_XXL, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press the any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
     }
-
-    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
-
-    SDL_Color vitalsColor[10] = {
-        {menu->loopSwing, 159, 227},
-        {menu->loopSwing, 139, 207},
-        {menu->loopSwing, 119, 187},
-        {menu->loopSwing, 99, 167},
-        {menu->loopSwing, 79, 147},
-        {menu->loopSwing, 59, 127},
-        {menu->loopSwing, 39, 107},
-        {menu->loopSwing, 19, 87},
-        {255 - menu->loopSwing, 180, 184},
-        {255 - menu->loopSwing, 180, 184}};
-
-    FontDraw3DCustom(menu->font, TTF_AntillesBig, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
-    FontDraw(menu->font, TTF_Antilles, "Press space", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
+    //Fade-in animation
+    TransitionDraw(menu->clock);
+    LoadingBarUpdate(menu->loadingBar);
+    LoadingBarAdd(menu->loadingBar, ClockGetFPS(menu->clock) * 4 / 100);
 }
 
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
@@ -134,10 +145,12 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
         case 0:
         {
             //Join party
+            break;
         }
         case 1:
         {
             //Host party
+            break;
         }
         case 2:
         {
@@ -229,14 +242,13 @@ void MenuUpdateOptions(Menu *menu, Input *input)
 void MenuUpdateResolution(Menu *menu, Input *input)
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 6;
+    char options[6][100] = {
         {"640x480"},
         {"1280x720"},
         {"1920x1080"},
         {"1920x1200"},
         {"2560x1440"},
-        {"2560x1600"},
         {"Back"}};
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -275,11 +287,6 @@ void MenuUpdateResolution(Menu *menu, Input *input)
             WindowSetSize(menu->gfx->window, width, height);
             break;
         case 5:
-            width = 2560;
-            height = 1600;
-            WindowSetSize(menu->gfx->window, width, height);
-            break;
-        case 6:
         {
             menu->activeIndex = 0;
             menu->state->menuState = MS_Options;
@@ -396,6 +403,37 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
 
     MenuDraw(menu, options, optionLength);
 }
+void MenuUpdateHostLobby(Menu *menu, Input *input)
+{
+    //Determine menu options
+    char hostid[100];
+    int optionLength = 2;
+    char options[2][100] = {
+        {""},
+        {"back"}};
+    sprintf(options[0], "%s", hostid);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        menu->indexChanged = SDL_TRUE;
+        switch (menu->activeIndex)
+        {
+        case 0:
+            //host button
+            break;
+        case 6:
+        {
+            menu->activeIndex = 0;
+            menu->state->menuState = MS_Options;
+            break;
+        }
+        }
+    }
+    MenuDraw(menu, options, optionLength);
+}
 
 void MenuDraw(Menu *menu, char options[][100], int optionLength)
 {
@@ -430,16 +468,24 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
             {255 - menu->loopSwing, 180, 184},
             {255 - menu->loopSwing, 180, 184}};
 
+        //Get font spacing
+        //*1.5 factor for space between lines
+        int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing(menu->font));
+
         //Draw menu options
         for (size_t i = 0; i < optionLength; i++)
         {
+            //Calculate scrolling menu
+            int screenCenterY = menu->gfx->window->height / 2;
+            int yPos = screenCenterY - (spacing * menu->activeIndex) + spacing * i;
+
             if (i == menu->activeIndex)
             {
-                FontDraw3DCustom(menu->font, TTF_Antilles, options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+                FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, yPos, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
             }
             else
             {
-                FontDraw3D(menu->font, TTF_Antilles, options[i], menu->gfx->window->width / 2, menu->gfx->window->height / 2 - (75 * optionLength / 2) + 75 * i, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
+                FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], menu->gfx->window->width / 2, yPos, FAL_C, 0, 1, F3D_TL, 10, vitalsColor);
             }
         }
         break;
@@ -451,5 +497,6 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
 
 void MenuDestroy(Menu *menu)
 {
+    LoadingBarDestroy(menu->loadingBar);
     SDL_free(menu);
 }

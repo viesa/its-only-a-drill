@@ -7,9 +7,12 @@
 #include "Input.h"
 #include "Clock.h"
 #include "FPSManager.h"
+#include "Transition.h"
+#include "Loadingbar.h"
 #include "State.h"
 #include "../MapList.h"
 #include "../Map.h"
+#include "../net/Client.h"
 
 typedef struct Menu
 {
@@ -17,7 +20,10 @@ typedef struct Menu
 
     Font *font;
     Drawable mainMenuDbl;
+    Drawable lobbyDbl;
+    LoadingBar *loadingBar;
     State *state;
+    Clock *clock;
     float loopCount;
     int loopSwing;
     int swingDir;
@@ -28,7 +34,7 @@ typedef struct Menu
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock);
 void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map);
 void MenuUpdateSplash(Menu *menu, Input *input, Map *map);
 void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map);
@@ -36,7 +42,7 @@ void MenuUpdateOptions(Menu *menu, Input *input);
 void MenuUpdateResolution(Menu *menu, Input *input);
 void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager);
 void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map);
-
+void MenuUpdateHostLobby(Menu *menu, Input *input);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);
