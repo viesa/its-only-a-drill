@@ -72,6 +72,9 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     case MS_Splash:
         MenuUpdateSplash(menu, input, map);
         break;
+    case MS_Name:
+        MenuUpdateName(menu, input);
+        break;
     case MS_MainMenu:
         MenuUpdateMainMenu(menu, input, map);
         break;
@@ -92,13 +95,42 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     }
 }
 
+void MenuUpdateName(Menu *menu, Input *input)
+{
+    SDL_Color vitalsColor[10] = {
+        {menu->loopSwing, 159, 227},
+        {menu->loopSwing, 139, 207},
+        {menu->loopSwing, 119, 187},
+        {menu->loopSwing, 99, 167},
+        {menu->loopSwing, 79, 147},
+        {menu->loopSwing, 59, 127},
+        {menu->loopSwing, 39, 107},
+        {menu->loopSwing, 19, 87},
+        {255 - menu->loopSwing, 180, 184},
+        {255 - menu->loopSwing, 180, 184}};
+
+    //SDL_StartTextInput(); - starts input? maybe needed, seems to work without idk
+    if (InputIsKeyPressed(input, SDL_SCANCODE_BACKSPACE))
+        InputPortalBackspace(input);
+
+    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(input), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+    FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Type a name, press [Enter] when done.", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
+
+    if (InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    {
+        strcpy(client.name, InputGetPortalContent(input));
+        menu->state->menuState = MS_MainMenu;
+    }
+}
+
 void MenuUpdateSplash(Menu *menu, Input *input, Map *map)
 {
     if (!menu->loadingBar->active)
     {
-        //Change if key pressed
         if (InputIsAnyKeyDown(input))
-            menu->state->menuState = MS_MainMenu;
+        {
+            menu->state->menuState = MS_Name;
+        }
 
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
 
