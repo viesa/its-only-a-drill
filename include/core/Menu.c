@@ -2,13 +2,12 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
+Menu *MenuCreate(Graphics *gfx, Font *font)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
     menu->font = font;
     menu->loadingBar = LoadingBarCreate(menu->gfx);
-    menu->state = state;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -66,7 +65,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
     menu->lastIndex = menu->activeIndex;
 
     //Decides what shall be drawn on top
-    switch (menu->state->menuState)
+    switch (MenuStateGet())
     {
     case MS_Splash:
         MenuUpdateSplash(menu, map);
@@ -82,6 +81,8 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
         break;
     case MS_HostLobby:
         MenuUpdateHostLobby(menu, mapList, map);
+    case MS_WaitingForLobby:
+        MenuUpdateWaitingForLobby(menu);
         break;
     case MS_Options:
         MenuUpdateOptions(menu);
@@ -124,7 +125,7 @@ void MenuUpdateName(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         strcpy(client.name, InputGetPortalContent());
-        menu->state->menuState = MS_MainMenu;
+        MenuStateSet(MS_MainMenu);
     }
 }
 
@@ -134,7 +135,7 @@ void MenuUpdateSplash(Menu *menu, Map *map)
     {
         if (InputIsAnyKeyDown())
         {
-            menu->state->menuState = MS_Name;
+            MenuStateSet(MS_Name);
         }
 
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
@@ -181,28 +182,28 @@ void MenuUpdateMainMenu(Menu *menu, Map *map)
         {
         case 0:
         {
-            menu->state->menuState = MS_JoinLobby;
+            MenuStateSet(MS_JoinLobby);
             menu->activeIndex = 0;
             menu->indexChanged = SDL_TRUE;
             break;
         }
         case 1:
         {
-            menu->state->menuState = MS_HostLobby;
+            MenuStateSet(MS_HostLobby);
             menu->activeIndex = 0;
             menu->indexChanged = SDL_TRUE;
             break;
         }
         case 2:
         {
-            menu->state->menuState = MS_CustomMap;
+            MenuStateSet(MS_CustomMap);
             menu->activeIndex = 0;
             menu->indexChanged = SDL_TRUE;
             break;
         }
         case 3:
         {
-            menu->state->menuState = MS_Options;
+            MenuStateSet(MS_Options);
             menu->activeIndex = 0;
             menu->indexChanged = SDL_TRUE;
             break;
@@ -247,7 +248,7 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map)
         {
             menu->indexChanged = SDL_TRUE;
             menu->activeIndex = 0;
-            menu->state->menuState = MS_MainMenu;
+            MenuStateSet(MS_MainMenu);
         }
         else
         {
@@ -257,7 +258,7 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map)
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
             menu->indexChanged = SDL_TRUE;
             menu->activeIndex = 0;
-            menu->state->menuState = MS_WaitingForLobby;
+            MenuStateSet(MS_WaitingForLobby);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
@@ -293,7 +294,7 @@ void MenuUpdateJoinLobby(Menu *menu)
         case 0:
         {
             menu->activeIndex = 0;
-            menu->state->menuState = MS_MainMenu;
+            MenuStateSet(MS_MainMenu);
             break;
         }
         }
@@ -343,7 +344,7 @@ void MenuUpdateOptions(Menu *menu)
             break;
         case 1: //set resolution
         {
-            menu->state->menuState = MS_Resolution;
+            MenuStateSet(MS_Resolution);
         }
         break;
         case 2: //Vsync // do we use OpenGL?
@@ -360,13 +361,13 @@ void MenuUpdateOptions(Menu *menu)
         break;
         case 3:
         {
-            menu->state->menuState = MS_FPS;
+            MenuStateSet(MS_FPS);
             break;
         }
         case 4:
         {
             menu->activeIndex = 0;
-            menu->state->menuState = MS_MainMenu;
+            MenuStateSet(MS_MainMenu);
             break;
         }
         }
@@ -423,7 +424,7 @@ void MenuUpdateResolution(Menu *menu)
         case 5:
         {
             menu->activeIndex = 0;
-            menu->state->menuState = MS_Options;
+            MenuStateSet(MS_Options);
             break;
         }
         }
@@ -479,7 +480,7 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
         case 5:
         {
             menu->activeIndex = 0;
-            menu->state->menuState = MS_Options;
+            MenuStateSet(MS_Options);
             break;
         }
         }
@@ -515,12 +516,12 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList, Map *map)
 
             menu->indexChanged = SDL_TRUE;
             menu->activeIndex = 0;
-            menu->state->menuState = MS_MainMenu;
+            MenuStateSet(MS_MainMenu);
         }
         else
         {
-            menu->state->menuState = MS_None;
-            menu->state->gameState = GS_Playing;
+            MenuStateSet(MS_None);
+            GameStateSet(GS_Playing);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
@@ -545,20 +546,22 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     menu->mainMenuDbl.dst.h = menu->gfx->window->height;
 
     //Draw background
-    if (menu->state->menuState != MS_CustomMap &&
-        menu->state->menuState != MS_Splash &&
-        menu->state->menuState != MS_HostLobby &&
-        menu->state->menuState != MS_JoinLobby)
+    MenuState current = MenuStateGet();
+    if (current != MS_CustomMap &&
+        current != MS_Splash &&
+        current != MS_HostLobby &&
+        current != MS_JoinLobby)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }
 
-    switch (menu->state->menuState)
+    switch (current)
     {
     case MS_Options:
     case MS_MainMenu:
     case MS_JoinLobby:
     case MS_HostLobby:
+    case MS_WaitingForLobby:
     case MS_Resolution:
     case MS_FPS:
     case MS_CustomMap:
