@@ -10,7 +10,7 @@ Window *WindowCreate(const char *title)
     window->height = 480;
 #else
     window->width = displaymode.w - 50;
-    window->height = displaymode.h - 100; // Remove 50 pixels to account for window not being in fullscreen, and compensate for menu bars.
+    window->height = displaymode.h - 100; // Remove 100 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #endif
 
     window->sdl_window = SDL_CreateWindow(title,
@@ -35,6 +35,9 @@ Window *WindowCreate(const char *title)
     SDL_GL_SetSwapInterval(1);
 
     WindowSetIcon(window, "assets/window_icon.bmp");
+
+    WindowSetFullscreen(window, SDL_FALSE);
+    WindowSetVSync(window, SDL_TRUE);
 
     return window;
 }
