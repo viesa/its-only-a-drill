@@ -73,26 +73,52 @@
                 <button id="center-btn" class="tool-buttons" title="Center canvas" onclick="centerCanvas()">
                     &nbsp;<i class="fas fa-crosshairs"></i></i>&nbsp;
                 </button>
+
+                <!-- Default settings for tile dropping -->
+
+                <button id="defaultMass" title="Default mass" class="tool-buttons">
+                    <label for="defaultMassInput"><i class="fas fa-weight-hanging"></i></label>
+                    <input class="tool-input" id="defaultMassInput" type="text" value="1000">
+                </button>
+
+                <button id="defaultCollider" title="Default collider" class="tool-buttons">
+                    <label for="defaultColliderInput"><i class="fas fa-car-crash"></i></label>
+                    <input class="tool-input" id="defaultColliderInput" type="text" value="0">
+                </button>
             </div>
         </div>
     </div>
 
     <div id="mapInfoContainer" style="display: none;">
         <label for="mapNameInput">Map name</label>
-        <input id="mapNameInput" type="text">
+        <br>
+        <input class="mapinfo-input" id="mapNameInput" type="text">
+        <br>
         <br>
 
-        <label for="maxPlayersInput">Max players:</label>
-        <input id="maxPlayersInput" type="text">
+        <label for="difficultyInput">Difficulty</label>
+        <br>
+        <input class="mapinfo-input" id="difficultyInput" type="text">
+        <br>
         <br>
 
-        <label for="difficultyInput">Difficulty:</label>
-        <input id="difficultyInput" type="text">
+        <label for="maxPlayersInput">Max players</label>
+        <br>
+        <input class="mapinfo-input" id="maxPlayersInput" type="text" readonly>
+        <br>
         <br>
 
-        <label for="uidInput">Uid:</label>
-        <input id="uidInput" type="text" readonly>
+        <label for="maxBotsInput">Max bots</label>
+        <br>
+        <input class="mapinfo-input" id="maxBotsInput" type="text" readonly>
+        <br>
+        <br>
+
+        <label for="uidInput">Unique Identifier</label>
+        <br>
+        <input class="mapinfo-input" id="uidInput" type="text" readonly>
         <br><br>
+        <br>
         <button id="mapInfoSave" onclick="saveMapInfo()">Save changes</button>
 
     </div>
