@@ -180,19 +180,14 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet)
 {
     char *rawMap = (char *)packet.data;
 
-    NetPlayer *playerP = NULL;
-    for (size_t i = 0; i < server.players->size; i++)
-    {
-        if (!SDL_memcmp(&SERVER_PLAYERS[i], &packet.sender, sizeof(NetPlayer)))
-        {
-            playerP = &SERVER_PLAYERS[i];
-            break;
-        }
-    }
+    NetPlayer *senderP = AppServerNetPlayerToPointer(packet.sender);
+    // If player doesnt acutally exist in server player array, discard packet
+    if (!senderP)
+        return;
 
     int sessionID = ServerGetSessionID();
 
-    Session session = SessionCreate(sessionID, playerP, rawMap, packet.size);
+    Session session = SessionCreate(sessionID, senderP, rawMap, packet.size);
     // If session ID is -1, something bad happened when it was created
     if (session.id == -1)
     {
@@ -210,24 +205,53 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet)
 void AppServerHandleJoinSessionPacket(ParsedPacket packet)
 {
     int sessionID = *(int *)packet.data;
-    NetPlayer *sender = AppServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = AppServerNetPlayerToPointer(packet.sender);
+    // If player doesnt acutally exist in server player array, discard packet
+    if (!senderP)
+        return;
+
+    // Check if player is already in another session, if so, disconnect it from the other session
+    if (packet.sender.sessionID != -1)
+    {
+        SDL_bool erased = SDL_FALSE;
+        for (size_t i = 0; i < server.sessions->size; i++)
+        {
+            // Find correct session
+            if (SERVER_SESSIONS[i].id == packet.sender.sessionID)
+            {
+                // Erase client from that session
+                VectorEraseElement(SERVER_SESSIONS[i].playersP, senderP);
+                erased = SDL_TRUE;
+            }
+        }
+        // Client had invalid session ID assigned to it, somehow...
+        if (!erased)
+            senderP->sessionID = -1;
+    }
+
     for (size_t i = 0; i < server.sessions->size; i++)
     {
         // Find correct session
         if (SERVER_SESSIONS[i].id == sessionID)
         {
-
-            if (SERVER_SESSIONS[i].mapMaxPlayers < SERVER_SESSIONS[i].playersP->size)
+            // Checks if there is room for player in the new session
+            if (SERVER_SESSIONS[i].playersP->size < SERVER_SESSIONS[i].mapMaxPlayers)
             {
                 // If there is no host, you are host
                 if (SERVER_SESSIONS[i].host == NULL)
-                    SERVER_SESSIONS[i].host = sender;
-                //Adds new player to session
-                VectorPushBack(SERVER_SESSIONS[i].playersP, sender);
-                // Notifies the host, that they are host
-                ServerTCPSend(PT_HostAssignSession, &SERVER_SESSIONS[i].host->id, sizeof(int), *sender);
+                {
+                    SERVER_SESSIONS[i].host = senderP;
+                    // Notifies client the he is host over the session
+                    ServerTCPSend(PT_HostAssignSession, &SERVER_SESSIONS[i].host->id, sizeof(int), packet.sender);
+                }
+                // Adds new player to session
+                VectorPushBack(SERVER_SESSIONS[i].playersP, senderP);
+                senderP->sessionID = sessionID;
+                // Sends the map to client
+                ServerTCPSend(PT_JoinSession, SERVER_SESSIONS[i].rawMap, SERVER_SESSIONS[i].rawMapDataSize, packet.sender);
             }
-            else if (SERVER_SESSIONS[i].mapMaxPlayers > SERVER_SESSIONS[i].playersP->size)
+            // If there is no room for client, send back FullSesssion packet
+            else
             {
                 ServerTCPSend(PT_FullSession, &SERVER_SESSIONS[i].id, sizeof(int), packet.sender);
             }
@@ -237,14 +261,18 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
 {
     int sessionID = *(int *)packet.data;
-    NetPlayer *sender = AppServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = AppServerNetPlayerToPointer(packet.sender);
+    // If player doesnt acutally exist in server player array, discard packet
+    if (!senderP)
+        return;
+
     for (size_t i = 0; i < server.sessions->size; i++)
     {
         // Find correct session
         if (SERVER_SESSIONS[i].id == sessionID)
         {
             // Remove leaving player from session
-            VectorEraseElement(SERVER_SESSIONS[i].playersP, sender);
+            VectorEraseElement(SERVER_SESSIONS[i].playersP, senderP);
 
             // If sessions player size is 0, remove session
             if (SERVER_SESSIONS[i].playersP->size == 0)
@@ -262,4 +290,6 @@ void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
             }
         }
     }
+    // Sets the sessionID of player to -1, so that they can join a new session
+    senderP->sessionID = -1;
 }

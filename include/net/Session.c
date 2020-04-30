@@ -23,6 +23,7 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
     VectorPushBack(session.playersP, session.host);
     session.rawMap = MALLOC_N(char, size);
     ALLOC_ERROR_CHECK(session.rawMap);
+    session.rawMapDataSize = size;
     SDL_memcpy(session.rawMap, rawmap, size);
 
     JSON *json = JSONCreateFromArray(session.rawMap, size);

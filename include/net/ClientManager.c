@@ -43,10 +43,13 @@ void ClientManagerUpdate()
             ClientManagerHandleCreateSessionPacket(nextPacket);
             break;
         case PT_JoinSession:
-            ClientManagerHandleCreateSessionPacket(nextPacket);
+            ClientManagerHandleJoinSessionPacket(nextPacket);
             break;
         case PT_LeaveSession:
-            ClientManagerHandleCreateSessionPacket(nextPacket);
+            ClientManagerHandleLeaveSessionPacket(nextPacket);
+            break;
+        case PT_FullSession:
+            ClientManagerHandleFullSessionPacket(nextPacket);
             break;
         default:
             break;
@@ -165,12 +168,16 @@ void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
     }
 }
 
-void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
-{
-}
 void ClientManagerHandleFullSessionPacket(ParsedPacket packet)
 {
-    MenuStateSet(MS_MainMenu);
+    if (MenuStateGet() == MS_WaitingForLobby)
+    {
+        MenuStateSet(MS_JoinLobby);
+    }
+}
+
+void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
+{
 }
 
 EntityIndexP *

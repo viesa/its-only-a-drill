@@ -10,6 +10,7 @@ typedef struct NetPlayer
     // A pointer to the IPaddress of specified NetPlayer's TCP-socket
     IPaddress *ip;
     int id;
+    int sessionID;
     // Only used to store the player's entity on server side
     // If you want this NetPlayer's ID, refer to the integer "id" instead
     Entity entity;

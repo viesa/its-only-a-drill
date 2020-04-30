@@ -13,6 +13,7 @@ typedef struct Session
     // Pointers to players in server
     Vector *playersP;
     char *rawMap;
+    size_t rawMapDataSize;
     char *mapName;
     int mapMaxPlayers;
 } Session;
