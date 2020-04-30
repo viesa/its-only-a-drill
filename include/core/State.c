@@ -1,9 +1,33 @@
 #include "State.h"
 
-State StateCreate()
+struct State
 {
-    State state;
+    GameState gameState;
+    MenuState menuState;
+} state;
+
+void StateInitialize()
+{
     state.gameState = GS_None;
     state.menuState = MS_None;
-    return state;
+}
+
+GameState GameStateGet()
+{
+    return state.gameState;
+}
+
+MenuState MenuStateGet()
+{
+    return state.menuState;
+}
+
+void GameStateSet(GameState newState)
+{
+    state.gameState = newState;
+}
+
+void MenuStateSet(MenuState newState)
+{
+    state.menuState = newState;
 }

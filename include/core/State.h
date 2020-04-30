@@ -1,5 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
+
 typedef enum GameState
 {
     GS_Menu,
@@ -25,12 +26,12 @@ typedef enum MenuState
     MS_NStates
 } MenuState;
 
-typedef struct State
-{
-    GameState gameState;
-    MenuState menuState;
-} State;
+void StateInitialize();
 
-State StateCreate();
+GameState GameStateGet();
+MenuState MenuStateGet();
+
+void GameStateSet(GameState newState);
+void MenuStateSet(MenuState newState);
 
 #endif

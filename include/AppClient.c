@@ -14,7 +14,6 @@
 struct AppClient
 {
     SDL_bool *running;
-    State state;
 
     Graphics *gfx;
     Audio *audio;
@@ -40,17 +39,17 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     srand(time(NULL));
     CursorInitialize();
     EntityManagerInitialize();
+    StateInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
-    app->state = StateCreate();
     app->fpsManager = fpsManager;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
     app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->menu = MenuCreate(app->gfx, app->font, &app->state);
+    app->menu = MenuCreate(app->gfx, app->font);
     app->bindings = KeybindingCreate();
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
@@ -74,8 +73,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->groundListItems = GroundListCreate();
     ENTITY_ARRAY[*app->player.entity].inventory = InventoryCreate();
 
-    app->state.gameState = GS_Menu;
-    app->state.menuState = MS_Splash;
+    GameStateSet(GS_Menu);
+    MenuStateSet(MS_Splash);
 
     app->map.contents = NULL;
     app->map.n = 0;
@@ -115,13 +114,13 @@ void AppClientUpdate(AppClient *app)
 {
     ClientManagerUpdate();
 
-    switch (app->state.gameState)
+    switch (GameStateGet())
     {
     case GS_Menu:
     {
         CursorChange(CT_Normal);
         MapListUpdate(&app->mapList);
-        switch (app->state.menuState)
+        switch (MenuStateGet())
         {
         case MS_CustomMap:
         case MS_HostLobby:
@@ -138,8 +137,8 @@ void AppClientUpdate(AppClient *app)
         CursorChange(CT_Crossair);
         if (InputIsKeyPressed(SDL_SCANCODE_ESCAPE))
         {
-            app->state.gameState = GS_Menu;
-            app->state.menuState = MS_MainMenu;
+            GameStateSet(GS_Menu);
+            MenuStateSet(MS_MainMenu);
             break;
         }
         CameraUpdate(app->camera);
@@ -232,11 +231,11 @@ void AppClientUpdate(AppClient *app)
 
 void AppClientDraw(AppClient *app)
 {
-    switch (app->state.gameState)
+    switch (GameStateGet())
     {
     case GS_Menu:
     {
-        switch (app->state.menuState)
+        switch (MenuStateGet())
         {
         case MS_JoinLobby:
         case MS_HostLobby:
