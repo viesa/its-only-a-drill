@@ -241,14 +241,64 @@ h3{
     width: 1.5rem;
 }
 
+.tool-input{
+    width: 5rem;
+    border:0;
+    border-bottom: 2px solid white;
+    background: transparent;
+    transition: background ease-in-out .2s;
+    color: white;
+    font-size: 1.25rem;
+    padding: .25rem;
+}
+.tool-input:focus, .tool-input:active{
+    outline:none;
+    background: rgba(80,80,80,.99);
+}
+
 /* Map info window */
 #mapInfoContainer{
     z-index: 999999999999999;
     position: fixed;
-    background: #444;
+    left: 100vh;
+    bottom: 7rem;
+    background: rgba(68,68,68,.99);
     padding: 2rem 3rem;
     border-radius: .2rem;
+    font-size: 1.25rem;
+    border: 2px solid white;
 }
+
+.mapinfo-input{
+    border:0;
+    border-bottom: 2px solid white;
+    background: transparent;
+    transition: background ease-in-out .2s;
+    color: white;
+    font-size: 1.25rem;
+    padding: .25rem;
+    margin-top: .5rem;
+}
+.mapinfo-input:focus, .mapinfo-input:active{
+    outline:none;
+    background: rgba(80,80,80,.99);
+}
+
+.mapinfo-input:read-only{
+cursor: not-allowed;
+}
+
+#mapInfoSave{
+    background: rgba(80,80,80,.99);    
+    color: white;
+    font-size: 1.25rem;
+    padding: .5rem;
+    width: 100%;
+    border-radius: .2rem;
+    border:2px solid white;
+    cursor: pointer;
+}
+
 
 /* TOOLTIPS */
 .ui-tooltip{

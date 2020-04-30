@@ -1,7 +1,14 @@
 function frontendUpdate() {
     var container = $("#layers-container");
     container.empty();
+    db.mapInfo.maxPlayers = 0;
     for (i = 0; i < db.list.length; i++) {
+
+        if (db.list[i].type == "player_spawn") {
+            db.mapInfo.maxPlayers += 1;
+            $("#maxPlayersInput").val(db.mapInfo.maxPlayers);
+        }
+
         var str1 = "<div class='layer-child' chnr='" + i + "'>";
 
         var str2 = "<div class='layer-child-first'><div class='layer-child-info'><label>Z-Index: " + i + "</label>";
@@ -118,7 +125,7 @@ $("#canvas").on("click", function () {
         var cvH = parseInt(selectedLayer.attr("sh"));
         //center of mouse parseInt(pos.x - cvW / 2), parseInt(pos.y - cvH / 2)
 
-        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(mouseX), parseInt(mouseY), cvW * 2, cvH * 2, parseInt(selectedLayer.attr("mass")), parseInt(selectedLayer.attr("collider")), parseInt(0), cvX, cvY, cvW, cvH));
+        db.list.push(objectGenerator(selectedLayer.attr("type"), document.getElementById(selectedLayer.attr("id")), parseInt(mouseX), parseInt(mouseY), cvW * 2, cvH * 2, parseInt($("#defaultMassInput").val()), parseInt($("#defaultColliderInput").val()), parseInt(0), cvX, cvY, cvW, cvH));
 
         update();
         $('#layers-container').scrollTop($('#layers-container')[0].scrollHeight);

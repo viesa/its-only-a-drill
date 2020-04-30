@@ -20,7 +20,7 @@ $(window).on("load", function () {
 
         for (i = 0; i < json.types.length; i++) {
             var str1 = '<div class="tiles-child-box"><span>' + json.types[i].name + '</span>';
-            var str2 = '<img src="../spritesheets/background-tiles.png" id="img-' + json.types[i].name + '" title="' + json.types[i].name + ': 16x16px" type="' + json.types[i].name + '" sx="' + json.types[i].x + '" sy="' + json.types[i].y + '" sw="' + json.types[i].w + '" sh="' + json.types[i].h + '" mass="1" collider="1" class="tile-selector" style="display:none">';
+            var str2 = '<img src="../spritesheets/background-tiles.png" id="img-' + json.types[i].name + '" title="' + json.types[i].name + ': 16x16px" type="' + json.types[i].name + '" sx="' + json.types[i].x + '" sy="' + json.types[i].y + '" sw="' + json.types[i].w + '" sh="' + json.types[i].h + '" mass="1" collider="0" class="tile-selector" style="display:none">';
             var str3 = '</div>';
             $("#tile-container").append(str1 + str2 + str3);
         };

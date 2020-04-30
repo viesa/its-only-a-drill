@@ -1,6 +1,13 @@
 {
     "types": [
         {
+            "name": "player_spawn",
+            "x": 16,
+            "y": 512,
+            "w": 16,
+            "h": 16
+        },
+        {
             "name": "brick_red",
             "x": 0,
             "y": 0,
