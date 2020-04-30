@@ -3,7 +3,7 @@
 #include "Dependencies.h"
 
 #define addmove 1500.0f
-#define moxsize 50 //boxsize
+#define boxSize 5 //boxsize
 #define aggravationRadius 250.0f
 
 MovingPattern *behaviorPathsCreate()
@@ -20,12 +20,33 @@ MovingPattern *behaviorPathsCreate()
     pattern->point[7] = Vec2Create(50.0f, 0.0f);
     pattern->point[8] = Vec2Create(150.0f, 100.0f);
     pattern->point[9] = Vec2Create(200.0f, 200.0f);
+    pattern->point[10] = Vec2Create(100.0f, 100.0f);
+    pattern->point[11] = Vec2Create(-100.0f, -100.0f);
+
     return pattern;
 }
 
 void pathFree(MovingPattern *enemyP)
 {
     SDL_free(enemyP);
+}
+
+void switchStateLogic(Vec2 *enemyToPlayer, int *i)
+{
+    if (Vec2Len(*enemyToPlayer) < aggravationRadius)
+    {
+        ENTITY_ARRAY[*i].entityState = Fight;
+    }
+
+    if (ENTITY_ARRAY[*i].health < 100)
+    {
+        if (ENTITY_ARRAY[*i].entityState != Fight)
+        {
+            ENTITY_ARRAY[*i].entityState = Aggressive;
+        }
+    }
+    if (ENTITY_ARRAY[*i].health < 0)
+        ENTITY_ARRAY[*i].entityState = EntityDead;
 }
 
 void BehaviorMoveEntity(MovingPattern *pattern)
@@ -38,99 +59,86 @@ void BehaviorMoveEntity(MovingPattern *pattern)
 
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (ENTITY_ARRAY[i].type == ET_Player)
+        if (ENTITY_ARRAY[i].entityState = EntityDead)
         {
-            tmp = i;
-            playerPosition = RectMid(ENTITY_ARRAY[tmp].drawables[tmp].dst);
-        }
-
-        if (ENTITY_ARRAY[i].isNPC) // if there is an entity and npc = non playable charecter
-        {
-            boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - moxsize, (int)ENTITY_ARRAY[i].desiredPoint.y - moxsize, moxsize, moxsize};
-
-            enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
-            enemyToPlayer = Vec2Sub(playerPosition, enemyPosition);
-
-            if (Vec2Len(enemyToPlayer) < aggravationRadius)
+            if (ENTITY_ARRAY[i].type == ET_Player)
             {
-                ENTITY_ARRAY[i].entityState = Fight;
+                tmp = i;
+                playerPosition = RectMid(ENTITY_ARRAY[tmp].drawables[tmp].dst);
             }
 
-            if (ENTITY_ARRAY[i].health < 100)
+            if (ENTITY_ARRAY[i].isNPC) // if there is an entity and npc = non playable charecter
             {
-                if (ENTITY_ARRAY[i].entityState != Fight)
-                {
-                    ENTITY_ARRAY[i].entityState = Aggressive;
-                }
-            }
-            switch (ENTITY_ARRAY[i].entityState)
-            {
-            case GoForward:
-            {
-                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
-                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
-                {
-                    ENTITY_ARRAY[i].desiredPoint.x -= 200;
-                    ENTITY_ARRAY[i].desiredPoint.y -= 200;
-                    ENTITY_ARRAY[i].entityState = GoBack;
-                }
-                break;
-            }
+                boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - boxSize, (int)ENTITY_ARRAY[i].desiredPoint.y - boxSize, boxSize, boxSize};
 
-            case GoBack:
-            {
-                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
-                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
-                {
-                    ENTITY_ARRAY[i].desiredPoint.x += 200;
-                    ENTITY_ARRAY[i].desiredPoint.y += 200;
-                    ENTITY_ARRAY[i].entityState = GoForward;
-                }
-                break;
-            }
+                enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
+                enemyToPlayer = Vec2Sub(playerPosition, enemyPosition);
 
-            case Fight:
-            {
-                if (ENTITY_ARRAY[i].type == ET_Woman)
-                {
-                    entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
-                }
-                if (ENTITY_ARRAY[tmp].health < 0)
-                {
-                    ENTITY_ARRAY[i].entityState = GoForward;
-                }
-                if (Vec2Len(enemyToPlayer) > aggravationRadius)
-                {
-                    ENTITY_ARRAY[i].entityState = GoForward;
-                }
-                break;
-            }
+                switchStateLogic(&enemyToPlayer, &i);
 
-            case EntityDead:
-            {
-
-                break;
-            }
-            case Aggressive:
-            {
-                ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
-                if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
+                switch (ENTITY_ARRAY[i].entityState)
                 {
-                    ENTITY_ARRAY[i].desiredPoint = Vec2Add(pattern->point[ENTITY_ARRAY[i].indexPoint], enemyPosition);
-                    if (ENTITY_ARRAY[i].indexPoint == 9)
+                case Passive:
+                {
+                    // unused
+                    break;
+                }
+                case Nutral:
+                {
+                    ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
+                    if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                     {
-                        ENTITY_ARRAY[i].indexPoint = 0;
+                        ENTITY_ARRAY[i].desiredPoint = Vec2Add(enemyPosition, pattern->point[ENTITY_ARRAY[i].indexPoint]);
+                        if (ENTITY_ARRAY[i].indexPoint == 11 || ENTITY_ARRAY[i].indexPoint <= 9)
+                            ENTITY_ARRAY[i].indexPoint = 10;
+                        else
+                            ENTITY_ARRAY[i].indexPoint++;
                     }
-                    else
-                    {
-                        ENTITY_ARRAY[i].indexPoint++;
-                    }
+                    break;
                 }
-                break;
-            }
+                case Fight:
+                {
+                    if (ENTITY_ARRAY[i].type == ET_Woman)
+                    {
+                        entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
+                    }
+                    if (ENTITY_ARRAY[tmp].health < 0)
+                    {
+                        ENTITY_ARRAY[i].entityState = Nutral;
+                    }
+                    if (Vec2Len(enemyToPlayer) > aggravationRadius)
+                    {
+                        ENTITY_ARRAY[i].entityState = Nutral;
+                    }
+                    break;
+                }
 
-            default:
-                break;
+                case EntityDead:
+                {
+                    // make mortal
+                    break;
+                }
+                case Aggressive:
+                {
+                    ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
+                    if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
+                    {
+                        ENTITY_ARRAY[i].desiredPoint = Vec2Add(pattern->point[ENTITY_ARRAY[i].indexPoint], enemyPosition);
+                        if (ENTITY_ARRAY[i].indexPoint == 9)
+                        {
+                            ENTITY_ARRAY[i].indexPoint = 0;
+                        }
+                        else
+                        {
+                            ENTITY_ARRAY[i].indexPoint++;
+                        }
+                    }
+                    break;
+                }
+
+                default:
+                    break;
+                }
             }
         }
     }
