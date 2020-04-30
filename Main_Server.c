@@ -17,7 +17,7 @@ int main()
     printf("Server running...\n");
     while (isRunning)
     {
-        ClockTick(clock);
+        ClockTick();
         AppServerGo(app);
     }
 

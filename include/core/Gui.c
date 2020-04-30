@@ -96,7 +96,7 @@ void GuiUpdate(Gui *gui)
     // Disp. FPS
     if (!gui->loopCount % 5)
     {
-        gui->fps = (int)ClockGetFPS(gui->clock);
+        gui->fps = (int)ClockGetFPS();
     }
     char fps[10];
     sprintf(fps, "%d", gui->fps);
