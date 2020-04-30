@@ -39,4 +39,6 @@
         log_error("Failed to allocate memory"); \
     }
 
+#define MAX_PLAYERNAME_SIZE 16
+
 #endif

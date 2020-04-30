@@ -126,15 +126,25 @@ EntityIndexP EntityManagerAddNoConfig()
 
 void EntityManagerRemove(EntityIndexP index)
 {
-    size_t end = *index + 1;
-    EntityManagerRemoveRange(index, (EntityIndexP)&end);
+    EntityManagerRemoveRange(*index, *index + 1);
 }
 
-void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end)
+void EntityManagerRemoveRange(size_t start, size_t end)
 {
-    VectorEraseRange(ENTITY_VECTOR, *start, *end);
-    for (size_t i = *end; i < ENTITY_ARRAY_SIZE; i++)
-        entityManager.indices[i]--;
+    size_t delta = end - start;
+    for (size_t i = 1; i < MAX_ENTITY_INDICES; i++)
+    {
+        if (entityManager.indices[i] >= start && entityManager.indices[i] < end)
+        {
+            entityManager.indices[i] = 0;
+        }
+    }
+    for (size_t i = 1; i < MAX_ENTITY_INDICES; i++)
+    {
+        if (entityManager.indices[i] >= end)
+            entityManager.indices[i] -= delta;
+    }
+    VectorEraseRange(ENTITY_VECTOR, start, end);
 }
 
 Vector *EntityManagerGetVector()

@@ -7,5 +7,6 @@ NetPlayer NetPlayerCreate(TCPsocket socket, int id)
     if (socket)
         netPlayer.ip = SDLNet_TCP_GetPeerAddress(socket);
     netPlayer.id = id;
+    strcpy(netPlayer.name, "Unnamed");
     return netPlayer;
 }

@@ -23,7 +23,7 @@ void EntityManagerOnCollision();
 EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position);
 EntityIndexP EntityManagerAddNoConfig();
 void EntityManagerRemove(EntityIndexP index);
-void EntityManagerRemoveRange(EntityIndexP start, EntityIndexP end);
+void EntityManagerRemoveRange(size_t start, size_t end);
 
 Vector *EntityManagerGetVector();
 size_t EntityManagerGetVectorSize();

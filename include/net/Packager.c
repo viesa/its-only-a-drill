@@ -106,6 +106,7 @@ void PacketPrintInformation(PacketType type, int id, void *data, int size, IPadd
 #ifdef PACKAGER_DEBUG
     printf(" [%s] [%s] (host | port) (%d | %d)\n", protocol, inout, ip.host, ip.port);
     printf(" [ID:%d] [Type:%d] [Size:%d] \n", id, type, size);
+#endif
 #ifdef PACKAGER_DEBUG_RAWINOUT
     printf("\n ---- RAW DATA ----\n");
     for (int i = 0; i < size; i++)
@@ -113,7 +114,6 @@ void PacketPrintInformation(PacketType type, int id, void *data, int size, IPadd
         printf("%c", ((char *)data)[i]);
     }
     printf("\n ------------------\n");
-#endif
     printf("\n [%s] [%s] END OF PACKET\n", protocol, inout);
 #endif
 }

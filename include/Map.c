@@ -2,18 +2,56 @@
 
 #include "core/Library.h"
 
-Map MapCreate(JSON *mapdata)
+// For map parsing purposes
+#define MAIN_LENGTH 3
+#define MAPINFO_LENGTH 4
+#define LIST_LENGTH 10
+#define SRC_LENGTH 4
+#define MAPINFO_INDEX 0
+#define LAYER_INDEX 1
+#define LIST_INDEX 2
+#define SRC_INDEX 9
+#define MAPINFO_STRING_INDEX 1
+
+struct
 {
-    Map error_map = {NULL, 0};
-    Map map;
+    EntityIndexP *contents;
+    unsigned int n;
+    int uid;
+} map;
+
+struct
+{
+    EntityIndexP *contents;
+    unsigned int n;
+    int uid;
+} bufferMap;
+
+void MapInitialize()
+{
+    map.contents = NULL;
     map.n = 0;
+    map.uid = 0;
+}
+
+void MapUninitialize()
+{
+    EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
+
+    FREE(map.contents);
+    map.contents = NULL;
+    map.n = 0;
+    map.uid = 0;
+}
+
+void MapGenerateNew(JSON *mapdata)
+{
     if (mapdata == NULL ||
         mapdata->value->type != json_object ||
         mapdata->value->u.object.length != MAIN_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Main)");
-        MapDestroy(&map);
-        return error_map;
+        return;
     }
 
     json_value *mapInfo = JSONGetValue(mapdata, (uint32_t[]){MAPINFO_INDEX}, 1);
@@ -22,8 +60,7 @@ Map MapCreate(JSON *mapdata)
         mapInfo->u.object.length != MAPINFO_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
-        MapDestroy(&map);
-        return error_map;
+        return;
     }
     SDL_bool badLoad = SDL_FALSE;
     json_object_entry *mapInfoEntries = mapInfo->u.object.values;
@@ -49,7 +86,16 @@ Map MapCreate(JSON *mapdata)
     if (badLoad)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
-        return error_map;
+        return;
+    }
+
+    // Fetch mad uid
+    bufferMap.uid = mapInfoEntries[0].value->u.integer;
+
+    if (bufferMap.uid == map.uid)
+    {
+        bufferMap.uid = 0;
+        return;
     }
 
     json_value *layers = JSONGetValue(mapdata, (uint32_t[]){LAYER_INDEX}, 1);
@@ -58,13 +104,14 @@ Map MapCreate(JSON *mapdata)
         layers->u.integer != JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX}, 1)->u.array.length)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Layers)");
-        MapDestroy(&map);
-        return error_map;
+        return;
     }
-    map.n = layers->u.integer;
 
-    map.contents = MALLOC_N(EntityIndexP, map.n);
-    for (uint32_t i = 0; i < map.n; i++)
+    // Load in all entities
+    bufferMap.n = layers->u.integer;
+    bufferMap.contents = MALLOC_N(EntityIndexP, bufferMap.n);
+
+    for (uint32_t i = 0; i < bufferMap.n; i++)
     {
         json_value *current = JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX, i}, 2);
         if (current == NULL ||
@@ -72,8 +119,9 @@ Map MapCreate(JSON *mapdata)
             current->u.object.length != LIST_LENGTH)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (List)");
-            MapDestroy(&map);
-            return error_map;
+            FREE(bufferMap.contents);
+            bufferMap.n = 0;
+            return;
         }
 
         json_object_entry *entries = current->u.object.values;
@@ -110,8 +158,9 @@ Map MapCreate(JSON *mapdata)
         if (badLoad)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (LIST CONTENTS)");
-            MapDestroy(&map);
-            return error_map;
+            FREE(bufferMap.contents);
+            bufferMap.n = 0;
+            return;
         }
         //----------------------------------------------------
 
@@ -119,8 +168,9 @@ Map MapCreate(JSON *mapdata)
             entries[SRC_INDEX].value->u.object.length != SRC_LENGTH)
         {
             log_error("Could not create map from mapfile: JSON-data was badly formatted (SRC)");
-            MapDestroy(&map);
-            return error_map;
+            FREE(bufferMap.contents);
+            bufferMap.n = 0;
+            return;
         }
 
         char *type_str = entries[0].value->u.string.ptr;
@@ -155,25 +205,37 @@ Map MapCreate(JSON *mapdata)
         ENTITY_ARRAY[*index].hitboxIndex = 0;
         ENTITY_ARRAY[*index].nDrawables = 1;
 
-        map.contents[i] = index;
+        bufferMap.contents[i] = index;
     }
-    return map;
+    if (map.n)
+    {
+        EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
+        FREE(map.contents);
+    }
+    map.contents = MALLOC_N(EntityIndexP, bufferMap.n);
+    SDL_memcpy(map.contents, bufferMap.contents, sizeof(EntityIndexP) * bufferMap.n);
+    map.n = bufferMap.n;
+    map.uid = bufferMap.uid;
+    FREE(bufferMap.contents);
+    bufferMap.n = 0;
+    bufferMap.uid = 0;
 }
-void MapDestroy(Map *map)
-{
-    EntityManagerRemoveRange(map->contents[0], map->contents[map->n - 1]);
 
-    if (map->contents)
-        SDL_free(map->contents);
-    map->contents = NULL;
-    map->n = 0;
-}
-
-void MapDraw(Map *map, Camera *camera)
+void MapDraw(Camera *camera)
 {
-    if (map->contents)
-        for (int i = 0; i < map->n; i++)
+    if (map.contents)
+        for (int i = 0; i < map.n; i++)
         {
-            EntityDrawIndex(map->contents[i], camera);
+            EntityDrawIndex(map.contents[i], camera);
         }
+}
+
+EntityIndexP *MapGetContents()
+{
+    return map.contents;
+}
+
+unsigned int MapGetContnetSize()
+{
+    return map.n;
 }

@@ -25,7 +25,7 @@ struct
 
     SDL_Thread *listenThread;
 
-    char name[16];
+    char name[MAX_PLAYERNAME_SIZE];
 
 } client;
 

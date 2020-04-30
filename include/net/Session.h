@@ -12,16 +12,13 @@ typedef struct Session
     NetPlayer *host;
     // Pointers to players in server
     Vector *playersP;
-
     char *rawMap;
-    Map map;
+    char *mapName;
+    int mapMaxPlayers;
 } Session;
 
 Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size);
 void SessionDestroy(Session *session);
-
-void SessionAddPlayer(Session *session, NetPlayer *player);
-void SessionRemovePlayer(Session *session, NetPlayer *player);
 
 NetPlayer **SessionGetPlayers(Session *session);
 

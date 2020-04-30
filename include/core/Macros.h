@@ -4,27 +4,27 @@
 #define WINDOW_DEBUG
 #endif
 
-//#define ANY_DEBUG
+// #define ANY_DEBUG
 
 #ifdef ANY_DEBUG
-#define MAIN_DEBUG
+// #define MAIN_DEBUG
 
-#define APP_DEBUG
-#define APP_DEBUG_STRICT
+// #define APP_DEBUG
+// #define APP_DEBUG_STRICT
 
-#define UDPCLIENT_DEBUG
-#define UDPSERVER_DEBUG
+// #define CLIENT_DEBUG
+#define SERVER_DEBUG
 #define PACKAGER_DEBUG
-#define PACKAGER_DEBUG_RAWINOUT
+// #define PACKAGER_DEBUG_RAWINOUT
 
-#define WINDOW_DEBUG
-#define GRAPHICS_DEBUG
+// #define WINDOW_DEBUG
+// #define GRAPHICS_DEBUG
 
 //#define ENTITY_DEBUG
 //#define WEAPON_DEBIG
 
-//#define VECTOR_DEBUG
-//#define VECTOR_DEBUG_STRICT
+// #define VECTOR_DEBUG
+// #define VECTOR_DEBUG_STRICT
 #endif
 
 // If defined friction formula Real runs, else computed

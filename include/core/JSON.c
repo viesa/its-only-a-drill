@@ -18,6 +18,7 @@ JSON *JSONCreate(char *filename)
     if (json->value == NULL)
     {
         log_error("JSON Loading error: Unable to parse data");
+        FREE(json);
         return NULL;
     }
 
@@ -35,6 +36,7 @@ JSON *JSONCreateFromArray(char *loadedfile, size_t size)
     if (json->value == NULL)
     {
         log_error("JSON Loading error: Unable to parse data");
+        FREE(json);
         return NULL;
     }
 

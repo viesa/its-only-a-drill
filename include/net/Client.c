@@ -75,7 +75,6 @@ void ClientStart()
 
     client.isActive = SDL_TRUE;
     client.listenThread = SDL_CreateThread((SDL_ThreadFunction)ClientListenToServer, "Server Listen Thread", NULL);
-    ClientTCPSend(PT_Connect, "MyName", 9);
 }
 
 void ClientStop()

@@ -30,7 +30,6 @@ struct AppClient
 
     Player player; // player == entity 0
 
-    Map map;
     MapList mapList;
 };
 
@@ -40,6 +39,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     CursorInitialize();
     EntityManagerInitialize();
     StateInitialize();
+    MapInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
@@ -76,8 +76,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
-    app->map.contents = NULL;
-    app->map.n = 0;
     app->mapList = MapListCreate("maps");
 
     return app;
@@ -87,6 +85,7 @@ void AppClientDestroy(AppClient *app)
     ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
+
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);
     CameraDestroy(app->camera);
@@ -97,6 +96,7 @@ void AppClientDestroy(AppClient *app)
     GuiDestroy(app->gui);
     FontDestroy(app->font);
 
+    MapUninitialize();
     EntityManagerUninitalize();
 
     SDL_free(app);
@@ -242,18 +242,20 @@ void AppClientDraw(AppClient *app)
         case MS_WaitingForLobby:
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
-            MapDraw(&app->map, app->camera);
+            MapDraw(app->camera);
             break;
+        case MS_Lobby:
+
         default:
             break;
         }
-        MenuUpdate(app->menu, app->fpsManager, &app->mapList, &app->map);
+        MenuUpdate(app->menu, app->fpsManager, &app->mapList);
         break;
     }
     case GS_Playing:
     {
         CameraSetFollow(app->camera, &app->player.aimFollow);
-        MapDraw(&app->map, app->camera);
+        MapDraw(app->camera);
 
         UpdateItemDraw(&ENTITY_ARRAY[*app->player.entity].inventory, &app->groundListItems, app->camera);
 

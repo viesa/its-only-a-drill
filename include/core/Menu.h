@@ -20,7 +20,8 @@ typedef struct Menu
 
     Font *font;
     Drawable mainMenuDbl;
-    Drawable lobbyDbl;
+    Drawable lobbyHostDbl;
+    Drawable lobbyNormalDbl;
     LoadingBar *loadingBar;
     float loopCount;
     int loopSwing;
@@ -33,17 +34,17 @@ typedef struct Menu
 
 // Creates menu
 Menu *MenuCreate(Graphics *gfx, Font *font);
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map);
-void MenuUpdateSplash(Menu *menu, Map *map);
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList);
+void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
-void MenuUpdateMainMenu(Menu *menu, Map *map);
+void MenuUpdateMainMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
-void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map);
+void MenuUpdateHostLobby(Menu *menu, MapList *mapList);
 void MenuUpdateWaitingForLobby(Menu *menu);
 void MenuUpdateOptions(Menu *menu);
 void MenuUpdateResolution(Menu *menu);
 void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
-void MenuUpdateCustomMap(Menu *menu, MapList *mapList, Map *map);
+void MenuUpdateCustomMap(Menu *menu, MapList *mapList);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);

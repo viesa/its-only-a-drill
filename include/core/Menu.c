@@ -17,14 +17,15 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
-    menu->lobbyDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
+    menu->lobbyNormalDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
+    menu->lobbyHostDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
     TransitionInitalize(menu->gfx, menu->font);
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
     return menu;
 }
 
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
 {
     if (menu->loopCount < 2 * PI)
     {
@@ -68,19 +69,19 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
     switch (MenuStateGet())
     {
     case MS_Splash:
-        MenuUpdateSplash(menu, map);
+        MenuUpdateSplash(menu);
         break;
     case MS_Name:
         MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, map);
+        MenuUpdateMainMenu(menu);
         break;
     case MS_JoinLobby:
         MenuUpdateJoinLobby(menu);
         break;
     case MS_HostLobby:
-        MenuUpdateHostLobby(menu, mapList, map);
+        MenuUpdateHostLobby(menu, mapList);
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby(menu);
         break;
@@ -94,7 +95,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
         MenuUpdateFPS(menu, fpsManager);
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(menu, mapList, map);
+        MenuUpdateCustomMap(menu, mapList);
         break;
     default:
         break;
@@ -125,11 +126,12 @@ void MenuUpdateName(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         strcpy(client.name, InputGetPortalContent());
+        ClientTCPSend(PT_Connect, client.name, strlen(client.name));
         MenuStateSet(MS_MainMenu);
     }
 }
 
-void MenuUpdateSplash(Menu *menu, Map *map)
+void MenuUpdateSplash(Menu *menu)
 {
     if (!menu->loadingBar->active)
     {
@@ -161,7 +163,7 @@ void MenuUpdateSplash(Menu *menu, Map *map)
     LoadingBarAdd(menu->loadingBar, ClockGetFPS() * 4 / 100);
 }
 
-void MenuUpdateMainMenu(Menu *menu, Map *map)
+void MenuUpdateMainMenu(Menu *menu)
 {
     //Determine menu options
     int optionLength = 5;
@@ -223,7 +225,7 @@ void MenuUpdateMainMenu(Menu *menu, Map *map)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map)
+void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
 {
     //Determine menu options
     int optionLength = mapList->nMaps + 1;
@@ -263,13 +265,10 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map)
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
     {
-        if (map->contents != NULL)
-        {
-            MapDestroy(map);
-        }
+
         MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
         JSON *mapdata = JSONCreate(entry->filename);
-        *map = MapCreate(mapdata);
+        MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
     }
 
@@ -488,7 +487,7 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateCustomMap(Menu *menu, MapList *mapList, Map *map)
+void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
 {
     //Determine menu options
     int optionLength = mapList->nMaps + 1;
@@ -526,13 +525,10 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList, Map *map)
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
     {
-        if (map->contents != NULL)
-        {
-            MapDestroy(map);
-        }
+
         MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
         JSON *mapdata = JSONCreate(entry->filename);
-        *map = MapCreate(mapdata);
+        MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
     }
 

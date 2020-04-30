@@ -13,6 +13,7 @@
 #define SERVER_IDS ServerGetIDArray()
 #define SERVER_SESSIONS ServerGetSessionArray()
 #define SERVER_SESSIONBITMAP ServerGetSessionBitmapArray()
+
 struct
 {
     UDPsocket udpSocket;

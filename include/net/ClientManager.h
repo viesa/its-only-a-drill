@@ -2,6 +2,8 @@
 #define CLIENTMANAGER_H
 
 #include "Client.h"
+#include "../core/State.h"
+#include "../Map.h"
 
 #define CLIENTMANAGER_PLAYERS ClientManagerGetPlayersArray()
 
@@ -27,6 +29,10 @@ void ClientManagerHandleNewPlayerPacket(ParsedPacket packet);
 void ClientManagerHandleDelPlayerPacket(ParsedPacket packet);
 void ClientManagerHandleEntityPacket(ParsedPacket packet);
 void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet);
+void ClientManagerHandleCreateSessionPacket(ParsedPacket packet);
+void ClientManagerHandleJoinSessionPacket(ParsedPacket packet);
+void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet);
+void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 

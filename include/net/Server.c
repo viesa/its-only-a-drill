@@ -546,6 +546,9 @@ int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
 
     for (int i = 0; i < nFullPackagesRequired; i++)
     {
+        // if (i != 0)
+        //     while (!SDLNet_SocketReady(player.socket))
+        //         ;
         if (!SDLNet_TCP_Recv(player.socket, buffer + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
         {
 #ifdef SERVER_DEBUG
@@ -561,6 +564,7 @@ int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
 #ifdef SERVER_DEBUG
         log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
 #endif
+
         FREE(buffer);
         return 0;
     }
@@ -587,7 +591,7 @@ int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
                            parsedPacket.data,
                            parsedPacket.size,
                            *parsedPacket.sender.ip,
-                           "TCP", "INCOMING");
+                           "BIG TCP", "INCOMING");
     SDL_UnlockMutex(server.inBufferMutex);
 
     FREE(buffer);
@@ -648,7 +652,7 @@ void ServerFreeID(int id)
 
 int ServerGetSessionID()
 {
-    for (size_t i = 0; i < server.sessionBitmap->size; i++)
+    for (size_t i = 0; i < server.sessionBitmap->capacity; i++)
     {
         if (!SERVER_SESSIONBITMAP[i])
         {
@@ -682,9 +686,9 @@ SDL_bool *ServerGetIDArray()
 }
 Session *ServerGetSessionArray()
 {
-    return (Session *)server.sessions;
+    return (Session *)server.sessions->data;
 }
 SDL_bool *ServerGetSessionBitmapArray()
 {
-    return (SDL_bool *)server.sessionBitmap;
+    return (SDL_bool *)server.sessionBitmap->data;
 }

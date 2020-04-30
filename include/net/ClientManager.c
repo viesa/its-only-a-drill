@@ -40,6 +40,13 @@ void ClientManagerUpdate()
             ClientManagerHandleCompressedEntityPacket(nextPacket);
             break;
         case PT_CreateSession:
+            ClientManagerHandleCreateSessionPacket(nextPacket);
+            break;
+        case PT_JoinSession:
+            ClientManagerHandleCreateSessionPacket(nextPacket);
+            break;
+        case PT_LeaveSession:
+            ClientManagerHandleCreateSessionPacket(nextPacket);
             break;
         default:
             break;
@@ -128,6 +135,44 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
         }
     }
 }
+
+void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
+{
+    int sessionID = *(int *)packet.data;
+
+    // If session was not created (error), return to main menu
+    if (sessionID == -1)
+    {
+        MenuStateSet(MS_MainMenu);
+    }
+    if (sessionID >= 0)
+    {
+        // If session was created successfully, attempt to join the session with sessionID
+        ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
+        MenuStateSet(MS_WaitingForLobby);
+    }
+}
+
+void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
+{
+    if (MenuStateGet() == MS_WaitingForLobby)
+    {
+        char *rawData = (char *)packet.data;
+        JSON *mapData = JSONCreateFromArray(rawData, packet.size);
+        MapGenerateNew(mapData);
+        JSONDestroy(mapData);
+        MenuStateSet(MS_Lobby);
+    }
+}
+
+void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
+{
+}
+void ClientManagerHandleFullSessionPacket(ParsedPacket packet)
+{
+    MenuStateSet(MS_MainMenu);
+}
+
 EntityIndexP *
 ClientManagerGetPlayersArray()
 {
