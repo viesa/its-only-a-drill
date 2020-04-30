@@ -59,7 +59,7 @@ void BehaviorMoveEntity(MovingPattern *pattern)
 
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (ENTITY_ARRAY[i].entityState = EntityDead)
+        if (ENTITY_ARRAY[i].entityState == EntityDead)
         {
             if (ENTITY_ARRAY[i].type == ET_Player)
             {
