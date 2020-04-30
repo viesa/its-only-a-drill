@@ -30,8 +30,8 @@ typedef enum EntityType
 
 typedef enum entityState
 {
-    GoForward,
-    GoBack,
+    Passive,
+    Nutral,
     Fight,
     Aggressive,
     EntityDead,

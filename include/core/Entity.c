@@ -21,7 +21,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.nDrawables = 1;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
-        entity.entityState = GoForward;
+        entity.entityState = Nutral;
 
         enemyPos = RectMid(entity.drawables[0].dst);
         entity.desiredPoint = Vec2AddL(enemyPos, 200);

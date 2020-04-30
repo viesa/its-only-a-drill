@@ -212,9 +212,9 @@ void AppClientUpdate(AppClient *app)
         BehaviorMoveEntity(app->movingPattern);
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
-            ENTITY_ARRAY[1].desiredPoint.x = 180;
-            ENTITY_ARRAY[1].desiredPoint.y = 180;
-            ENTITY_ARRAY[1].entityState = Aggressive;
+            ENTITY_ARRAY[2].desiredPoint.x = 180;
+            ENTITY_ARRAY[2].desiredPoint.y = 180;
+            ENTITY_ARRAY[2].entityState = Nutral;
         }
 
         //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
