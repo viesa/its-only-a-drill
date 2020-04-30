@@ -8,6 +8,13 @@
             "h": 16
         },
         {
+            "name": "enemy_spawn",
+            "x": 80,
+            "y": 512,
+            "w": 16,
+            "h": 16
+        },
+        {
             "name": "wall_vertical",
             "x": 368,
             "y": 96,

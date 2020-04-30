@@ -2,11 +2,16 @@ function frontendUpdate() {
     var container = $("#layers-container");
     container.empty();
     db.mapInfo.maxPlayers = 0;
+    db.mapInfo.maxBots = 0;
     for (i = 0; i < db.list.length; i++) {
 
         if (db.list[i].type == "player_spawn") {
             db.mapInfo.maxPlayers += 1;
             $("#maxPlayersInput").val(db.mapInfo.maxPlayers);
+        }
+        if (db.list[i].type == "enemy_spawn") {
+            db.mapInfo.maxBots += 1;
+            $("#maxBotsInput").val(db.mapInfo.maxBots);
         }
 
         var str1 = "<div class='layer-child' chnr='" + i + "'>";

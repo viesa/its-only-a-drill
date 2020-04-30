@@ -8,7 +8,8 @@ var db = {
         uid: 0,
         name: "Test map",
         difficulty: 0,
-        maxPlayers: 0
+        maxPlayers: 0,
+        maxBots: 0
     },
     layers: 0,
     list: []
@@ -70,6 +71,7 @@ function objectGenerator(imgType, image, xPos, yPos, width, height, mass, collid
 function showMapInfo() {
     $("#mapNameInput").val(db.mapInfo.name);
     $("#maxPlayersInput").val(db.mapInfo.maxPlayers);
+    $("#maxBotsInput").val(db.mapInfo.maxBots);
     $("#difficultyInput").val(db.mapInfo.difficulty);
     $("#uidInput").val(db.mapInfo.uid);
     $('#mapInfoContainer').fadeIn();
@@ -77,7 +79,6 @@ function showMapInfo() {
 
 function saveMapInfo() {
     db.mapInfo.name = $("#mapNameInput").val();
-    db.mapInfo.maxPlayers = $("#maxPlayersInput").val();
     db.mapInfo.difficulty = $("#difficultyInput").val();
     db.mapInfo.uid = $("#uidInput").val();
     $('#mapInfoContainer').fadeOut();
