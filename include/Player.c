@@ -17,18 +17,18 @@ void PlayerDestroy(Player *player)
 {
 }
 
-void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
+void PlayerUpdate(Player *player, Clock *clock, Camera *camera)
 {
     AnimUpdate(&player->leg, ClockGetDeltaTime(clock));
     AnimUpdate(&player->body, ClockGetDeltaTime(clock));
-    if (!InputIsKeyDown(input, SDL_SCANCODE_A) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_W) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_D) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_S) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_LEFT) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_UP) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_RIGHT) &&
-        !InputIsKeyDown(input, SDL_SCANCODE_DOWN))
+    if (!InputIsKeyDown(SDL_SCANCODE_A) &&
+        !InputIsKeyDown(SDL_SCANCODE_W) &&
+        !InputIsKeyDown(SDL_SCANCODE_D) &&
+        !InputIsKeyDown(SDL_SCANCODE_S) &&
+        !InputIsKeyDown(SDL_SCANCODE_LEFT) &&
+        !InputIsKeyDown(SDL_SCANCODE_UP) &&
+        !InputIsKeyDown(SDL_SCANCODE_RIGHT) &&
+        !InputIsKeyDown(SDL_SCANCODE_DOWN))
     {
         AnimStop(&player->leg);
         AnimPause(&player->body);
@@ -44,7 +44,7 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     AnimApplyToDrawable(&player->leg, &ENTITY_ARRAY[*player->entity].drawables[0], 1.5f);
     AnimApplyToDrawable(&player->body, &ENTITY_ARRAY[*player->entity].drawables[1], 1.5f);
 
-    Vec2 mousePos = InputLastMousePos(input);
+    Vec2 mousePos = InputLastMousePos();
     Vec2 cameraPos = CameraGetPos(camera);
     Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*player->entity].drawables[0].dst), cameraPos);
 
@@ -59,10 +59,10 @@ void PlayerUpdate(Player *player, Input *input, Clock *clock, Camera *camera)
     float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(player->entity, degrees);
 
-    ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(input, SDL_SCANCODE_S) || InputIsKeyDown(input, SDL_SCANCODE_DOWN)) -
-                                                    (InputIsKeyDown(input, SDL_SCANCODE_W) || InputIsKeyDown(input, SDL_SCANCODE_UP)));
-    ENTITY_ARRAY[*player->entity].Force.x += 500 * ((InputIsKeyDown(input, SDL_SCANCODE_D) || InputIsKeyDown(input, SDL_SCANCODE_RIGHT)) -
-                                                    (InputIsKeyDown(input, SDL_SCANCODE_A) || InputIsKeyDown(input, SDL_SCANCODE_LEFT)));
+    ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(SDL_SCANCODE_S) || InputIsKeyDown(SDL_SCANCODE_DOWN)) -
+                                                    (InputIsKeyDown(SDL_SCANCODE_W) || InputIsKeyDown(SDL_SCANCODE_UP)));
+    ENTITY_ARRAY[*player->entity].Force.x += 500 * ((InputIsKeyDown(SDL_SCANCODE_D) || InputIsKeyDown(SDL_SCANCODE_RIGHT)) -
+                                                    (InputIsKeyDown(SDL_SCANCODE_A) || InputIsKeyDown(SDL_SCANCODE_LEFT)));
 }
 
 void PlayerDraw(Player *player, Camera *camera)

@@ -26,7 +26,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock)
     return menu;
 }
 
-void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapList, Map *map)
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map)
 {
     if (menu->loopCount < 2 * PI)
     {
@@ -53,8 +53,8 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     }
 
     //Get input
-    menu->activeIndex += (InputIsKeyPressed(input, SDL_SCANCODE_S) || InputIsKeyPressed(input, SDL_SCANCODE_DOWN)) -
-                         (InputIsKeyPressed(input, SDL_SCANCODE_W) || InputIsKeyPressed(input, SDL_SCANCODE_UP));
+    menu->activeIndex += (InputIsKeyPressed(SDL_SCANCODE_S) || InputIsKeyPressed(SDL_SCANCODE_DOWN)) -
+                         (InputIsKeyPressed(SDL_SCANCODE_W) || InputIsKeyPressed(SDL_SCANCODE_UP));
 
     if (menu->lastIndex != menu->activeIndex)
     {
@@ -70,38 +70,38 @@ void MenuUpdate(Menu *menu, Input *input, FPSManager *fpsManager, MapList *mapLi
     switch (menu->state->menuState)
     {
     case MS_Splash:
-        MenuUpdateSplash(menu, input, map);
+        MenuUpdateSplash(menu, map);
         break;
     case MS_Name:
-        MenuUpdateName(menu, input);
+        MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, input, map);
+        MenuUpdateMainMenu(menu, map);
         break;
     case MS_JoinLobby:
-        MenuUpdateJoinLobby(menu, input);
+        MenuUpdateJoinLobby(menu);
         break;
     case MS_HostLobby:
-        MenuUpdateHostLobby(menu, input, mapList, map);
+        MenuUpdateHostLobby(menu, mapList, map);
         break;
     case MS_Options:
-        MenuUpdateOptions(menu, input);
+        MenuUpdateOptions(menu);
         break;
     case MS_Resolution:
-        MenuUpdateResolution(menu, input);
+        MenuUpdateResolution(menu);
         break;
     case MS_FPS:
-        MenuUpdateFPS(menu, input, fpsManager);
+        MenuUpdateFPS(menu, fpsManager);
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(menu, input, mapList, map);
+        MenuUpdateCustomMap(menu, mapList, map);
         break;
     default:
         break;
     }
 }
 
-void MenuUpdateName(Menu *menu, Input *input)
+void MenuUpdateName(Menu *menu)
 {
     SDL_Color vitalsColor[10] = {
         {menu->loopSwing, 159, 227},
@@ -116,24 +116,24 @@ void MenuUpdateName(Menu *menu, Input *input)
         {255 - menu->loopSwing, 180, 184}};
 
     //SDL_StartTextInput(); - starts input? maybe needed, seems to work without idk
-    if (InputIsKeyPressed(input, SDL_SCANCODE_BACKSPACE))
-        InputPortalBackspace(input);
+    if (InputIsKeyPressed(SDL_SCANCODE_BACKSPACE))
+        InputPortalBackspace();
 
-    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(input), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
+    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, vitalsColor);
     FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Type a name, press [Enter] when done.", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        strcpy(client.name, InputGetPortalContent(input));
+        strcpy(client.name, InputGetPortalContent());
         menu->state->menuState = MS_MainMenu;
     }
 }
 
-void MenuUpdateSplash(Menu *menu, Input *input, Map *map)
+void MenuUpdateSplash(Menu *menu, Map *map)
 {
     if (!menu->loadingBar->active)
     {
-        if (InputIsAnyKeyDown(input))
+        if (InputIsAnyKeyDown())
         {
             menu->state->menuState = MS_Name;
         }
@@ -161,7 +161,7 @@ void MenuUpdateSplash(Menu *menu, Input *input, Map *map)
     LoadingBarAdd(menu->loadingBar, ClockGetFPS(menu->clock) * 4 / 100);
 }
 
-void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
+void MenuUpdateMainMenu(Menu *menu, Map *map)
 {
     //Determine menu options
     int optionLength = 5;
@@ -175,7 +175,7 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
@@ -223,7 +223,7 @@ void MenuUpdateMainMenu(Menu *menu, Input *input, Map *map)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map)
+void MenuUpdateHostLobby(Menu *menu, MapList *mapList, Map *map)
 {
     //Determine menu options
     int optionLength = mapList->nMaps + 1;
@@ -242,7 +242,7 @@ void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         if (menu->activeIndex == optionLength - 1)
         {
@@ -276,7 +276,7 @@ void MenuUpdateHostLobby(Menu *menu, Input *input, MapList *mapList, Map *map)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateJoinLobby(Menu *menu, Input *input)
+void MenuUpdateJoinLobby(Menu *menu)
 {
     //Determine menu options
     int optionLength = 1;
@@ -286,7 +286,7 @@ void MenuUpdateJoinLobby(Menu *menu, Input *input)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
@@ -302,7 +302,7 @@ void MenuUpdateJoinLobby(Menu *menu, Input *input)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateWaitingForLobby(Menu *menu, Input *input)
+void MenuUpdateWaitingForLobby(Menu *menu)
 {
     //Determine menu options
     int optionLength = 1;
@@ -313,7 +313,7 @@ void MenuUpdateWaitingForLobby(Menu *menu, Input *input)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateOptions(Menu *menu, Input *input)
+void MenuUpdateOptions(Menu *menu)
 {
     //Determine menu options
     int optionLength = 5;
@@ -327,7 +327,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
@@ -374,7 +374,7 @@ void MenuUpdateOptions(Menu *menu, Input *input)
     }
     MenuDraw(menu, options, optionLength);
 }
-void MenuUpdateResolution(Menu *menu, Input *input)
+void MenuUpdateResolution(Menu *menu)
 {
     //Determine menu options
     int optionLength = 6;
@@ -389,7 +389,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
         int width = -1;
@@ -431,7 +431,7 @@ void MenuUpdateResolution(Menu *menu, Input *input)
     }
     MenuDraw(menu, options, optionLength);
 }
-void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager)
+void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
 {
     //Determine menu options
     int optionLength = 6;
@@ -446,7 +446,7 @@ void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
         switch (menu->activeIndex)
@@ -488,7 +488,7 @@ void MenuUpdateFPS(Menu *menu, Input *input, FPSManager *fpsManager)
     MenuDraw(menu, options, optionLength);
 }
 
-void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
+void MenuUpdateCustomMap(Menu *menu, MapList *mapList, Map *map)
 {
     //Determine menu options
     int optionLength = mapList->nMaps + 1;
@@ -509,7 +509,7 @@ void MenuUpdateCustomMap(Menu *menu, Input *input, MapList *mapList, Map *map)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(input, SDL_SCANCODE_E) || InputIsKeyPressed(input, SDL_SCANCODE_RETURN))
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         if (menu->activeIndex == optionLength - 1)
         {

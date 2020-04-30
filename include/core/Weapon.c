@@ -8,7 +8,7 @@ void weaponUpdate(Item *item, Clock *clk)
 
     // reserved for bullet update
 }
-void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item)
+void playerShoot(EntityIndexP index, Camera *camera, Item *item)
 {
 #ifdef WEAPON_DEBIG
     log_debug("current cooldown %f", item->Stats.currentTime);
@@ -16,7 +16,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item)
     if (item->Stats.currentTime <= 0)
     {
         item->Stats.currentTime = item->Stats.cooldownMS;
-        Vec2 mousePos = InputLastMousePos(input);
+        Vec2 mousePos = InputLastMousePos();
         Vec2 cameraPos = CameraGetPos(camera);
         Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*index].drawables[0].dst), cameraPos);
 

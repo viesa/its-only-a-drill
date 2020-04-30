@@ -14,48 +14,46 @@ typedef enum MouseCode
     BUTTON_X2 = 5
 } MouseCode;
 
-typedef struct Input Input;
-
-Input *InputCreate();
-void InputDestroy(Input *input);
+void InputInitialize();
+void InputUninitialize();
 
 /// Copies keymap of this frame the
 /// previous frame's keymap
-void InputUpdate(Input *input);
+void InputUpdateKeymaps();
 
 /// Updates keymap for this frame
-void InputKeyDown(Input *input, const SDL_Scancode key);
+void InputKeyDown(const SDL_Scancode key);
 /// Updates keymap for this frame
-void InputKeyUp(Input *input, const SDL_Scancode key);
+void InputKeyUp(const SDL_Scancode key);
 /// Updates mousemap for this frame
-void InputMouseDown(Input *input, const MouseCode code);
+void InputMouseDown(const MouseCode code);
 /// Updates mousemap for this frame
-void InputMouseUp(Input *input, const MouseCode code);
+void InputMouseUp(const MouseCode code);
 /// Updates mouse position
-void InputMouseMove(Input *input, Vec2 pos);
+void InputMouseMove(Vec2 pos);
 /// Returns true if key is down this frame
-SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key);
+SDL_bool InputIsKeyDown(const SDL_Scancode key);
 /// Returns true if key is down this frame,
 /// and down in the previous frame
-SDL_bool InputIsKeyPressed(Input *input, const SDL_Scancode key);
+SDL_bool InputIsKeyPressed(const SDL_Scancode key);
 /// Returns true if key is up this frame,
 /// but was in the previous frame
-SDL_bool InputIsKeyReleased(Input *input, const SDL_Scancode key);
+SDL_bool InputIsKeyReleased(const SDL_Scancode key);
 // Returns true if any key is down this frame
-SDL_bool InputIsAnyKeyDown(Input *input);
+SDL_bool InputIsAnyKeyDown();
 
 /// Returns true if mouse is down this frame
-SDL_bool InputIsMouseDown(Input *input, const MouseCode code);
+SDL_bool InputIsMouseDown(const MouseCode code);
 /// Returns true if mouse is down this frame,
 /// but not in the previous frame
-SDL_bool InputIsMousePressed(Input *input, const MouseCode code);
+SDL_bool InputIsMousePressed(const MouseCode code);
 /// Returns true if mouse is up this frame,
 /// and down in the previous frame
-SDL_bool InputIsMouseReleased(Input *input, const MouseCode code);
+SDL_bool InputIsMouseReleased(const MouseCode code);
 /// Returns the last captured mouse position
-Vec2 InputLastMousePos(Input *input);
+Vec2 InputLastMousePos();
 
-void InputTypePortal(Input *input, char charPush);
-char *InputGetPortalContent(Input *input);
-void InputPortalBackspace(Input *input);
+void InputTypePortal(char charPush);
+char *InputGetPortalContent();
+void InputPortalBackspace();
 #endif

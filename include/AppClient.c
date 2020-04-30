@@ -23,7 +23,6 @@ struct AppClient
     Camera *camera;
     Clock *clock;
     FPSManager *fpsManager;
-    Input *input;
     Menu *menu;
     Keybinding *bindings;
     Vec2 middleOfMap;
@@ -37,7 +36,7 @@ struct AppClient
     MapList mapList;
 };
 
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSManager *fpsManager)
+AppClient *AppClientCreate(SDL_bool *running, Clock *clock, FPSManager *fpsManager)
 {
     srand(time(NULL));
     CursorInitialize();
@@ -53,7 +52,6 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, Input *input, FPSMan
     app->font = FontCreate(app->gfx);
     app->gui = GuiCreate(app->font, app->clock);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->input = input;
     app->menu = MenuCreate(app->gfx, app->font, &app->state, app->clock);
     app->bindings = KeybindingCreate();
     app->player = PlayerCreate(app->camera);
@@ -140,7 +138,7 @@ void AppClientUpdate(AppClient *app)
     case GS_Playing:
     {
         CursorChange(CT_Crossair);
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_ESCAPE))
+        if (InputIsKeyPressed(SDL_SCANCODE_ESCAPE))
         {
             app->state.gameState = GS_Menu;
             app->state.menuState = MS_MainMenu;
@@ -148,7 +146,7 @@ void AppClientUpdate(AppClient *app)
         }
         CameraUpdate(app->camera);
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_Q))
+        if (InputIsKeyPressed(SDL_SCANCODE_Q))
         { // if player is near to the item, then take it!
             if (ENTITY_ARRAY[*app->player.entity].inventory.top < MAX_PLYER_ITEMS)
             {
@@ -167,7 +165,7 @@ void AppClientUpdate(AppClient *app)
             }
         }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_Z))
+        if (InputIsKeyPressed(SDL_SCANCODE_Z))
         {
             if (ENTITY_ARRAY[*app->player.entity].inventory.top > 1) // can't drop the knife
             {
@@ -175,54 +173,54 @@ void AppClientUpdate(AppClient *app)
             }
         }
 
-        if (InputIsKeyDown(app->input, SDL_SCANCODE_TAB))
+        if (InputIsKeyDown(SDL_SCANCODE_TAB))
         {
-            if (InputIsKeyPressed(app->input, SDL_SCANCODE_2))
+            if (InputIsKeyPressed(SDL_SCANCODE_2))
             {
                 log_info("You Pressed 2 while tab");
                 ItemDynamicDrop(&app->groundListItems, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position, 2);
             }
         }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_3))
+        if (InputIsKeyPressed(SDL_SCANCODE_3))
         {
             log_info("You Pressed 3");
             InventorySelectItem(&ENTITY_ARRAY[*app->player.entity].inventory, 3);
         }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_4))
+        if (InputIsKeyPressed(SDL_SCANCODE_4))
         {
             log_info("You Pressed 4");
             InventorySelectItem(&ENTITY_ARRAY[*app->player.entity].inventory, 4);
         }
 
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_5))
+        if (InputIsKeyPressed(SDL_SCANCODE_5))
         {
             log_info("You Pressed 5");
             InventorySelectItem(&ENTITY_ARRAY[*app->player.entity].inventory, 5);
         }
 
         Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
-        if (InputIsMousePressed(app->input, BUTTON_LEFT))
+        if (InputIsMousePressed(BUTTON_LEFT))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, app->input, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
 
         BehaviorMoveEntity(app->clock, app->movingPattern);
-        if (InputIsKeyPressed(app->input, SDL_SCANCODE_K))
+        if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[1].desiredPoint.x = 180;
             ENTITY_ARRAY[1].desiredPoint.y = 180;
             ENTITY_ARRAY[1].entityState = Aggressive;
         }
 
-        //PlayerUpdate(&app->player, &app->entityManager.entities[0], app->input, app->clock, app->camera);
-        PlayerUpdate(&app->player, app->input, app->clock, app->camera);
+        //PlayerUpdate(&app->player, &app->entityManager.entities[0],  app->clock, app->camera);
+        PlayerUpdate(&app->player, app->clock, app->camera);
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate(app->clock);
@@ -252,7 +250,7 @@ void AppClientDraw(AppClient *app)
         default:
             break;
         }
-        MenuUpdate(app->menu, app->input, app->fpsManager, &app->mapList, &app->map);
+        MenuUpdate(app->menu, app->fpsManager, &app->mapList, &app->map);
         break;
     }
     case GS_Playing:
@@ -271,7 +269,7 @@ void AppClientDraw(AppClient *app)
         ClientManagerDrawConnectedPlayers(app->camera);
         GuiUpdate(app->gui);
 
-        if (InputIsKeyDown(app->input, app->bindings->KeyArray[INVENTORY]))
+        if (InputIsKeyDown(app->bindings->KeyArray[INVENTORY]))
         {
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }

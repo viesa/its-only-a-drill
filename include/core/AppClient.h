@@ -20,7 +20,7 @@
 
 typedef struct AppClient AppClient;
 
-AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, Input *input, FPSManager *fpsManager);
+AppClient *AppClientCreate(SDL_bool *isRunning, Clock *clock, FPSManager *fpsManager);
 void AppClientDestroy(AppClient *app);
 
 void AppClientRun(AppClient *app);

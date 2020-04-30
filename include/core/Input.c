@@ -4,139 +4,151 @@
 
 struct Input
 {
-    SDL_bool m_keymap[SDL_NUM_SCANCODES];
-    SDL_bool m_prevKeymap[SDL_NUM_SCANCODES];
+    SDL_bool *keymap;
+    SDL_bool *prevKeymap;
 
-    SDL_bool m_mousemap[NUM_MOUSE_EVENTS];
-    SDL_bool m_prevMousemap[NUM_MOUSE_EVENTS];
+    SDL_bool *mousemap;
+    SDL_bool *prevMousemap;
 
-    Vec2 m_mousePosition;
+    Vec2 mousePosition;
     int textLen;
-    char text[16];
-};
+    char *text;
+} input;
 
-Input *InputCreate()
+void InputInitialize()
 {
-    Input *ret = MALLOC(Input);
+
+    input.keymap = MALLOC_N(SDL_bool, SDL_NUM_SCANCODES);
+    input.prevKeymap = MALLOC_N(SDL_bool, SDL_NUM_SCANCODES);
+
+    input.mousemap = MALLOC_N(SDL_bool, NUM_MOUSE_EVENTS);
+    input.prevMousemap = MALLOC_N(SDL_bool, NUM_MOUSE_EVENTS);
+
+    input.text = MALLOC_N(char, 16);
+
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
     {
-        ret->m_keymap[i] = SDL_FALSE;
-        ret->m_prevKeymap[i] = SDL_FALSE;
+        input.keymap[i] = SDL_FALSE;
+        input.prevKeymap[i] = SDL_FALSE;
     }
     for (int i = 0; i < NUM_MOUSE_EVENTS; i++)
     {
-        ret->m_mousemap[i] = SDL_FALSE;
-        ret->m_prevMousemap[i] = SDL_FALSE;
+        input.mousemap[i] = SDL_FALSE;
+        input.prevMousemap[i] = SDL_FALSE;
     }
-    ret->textLen = 0;
-    SDL_memset(ret->text, 0, 16);
-    return ret;
+
+    input.textLen = 0;
+    SDL_memset(input.text, 0, 16);
 }
-void InputDestroy(Input *input)
+void InputUninitialize()
 {
-    SDL_free(input);
+    FREE(input.keymap);
+    FREE(input.prevKeymap);
+    FREE(input.mousemap);
+    FREE(input.prevMousemap);
+    FREE(input.text);
 }
 
-void InputUpdate(Input *input)
+void InputUpdateKeymaps()
 {
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
     {
-        input->m_prevKeymap[i] = input->m_keymap[i];
+        input.prevKeymap[i] = input.keymap[i];
     }
     for (int i = 0; i < NUM_MOUSE_EVENTS; i++)
     {
-        input->m_prevMousemap[i] = input->m_mousemap[i];
+        input.prevMousemap[i] = input.mousemap[i];
     }
 }
 
-void InputKeyDown(Input *input, const SDL_Scancode key)
+void InputKeyDown(const SDL_Scancode key)
 {
-    input->m_keymap[key] = SDL_TRUE;
+    input.keymap[key] = SDL_TRUE;
 }
 
-void InputKeyUp(Input *input, const SDL_Scancode key)
+void InputKeyUp(const SDL_Scancode key)
 {
-    input->m_keymap[key] = SDL_FALSE;
+    input.keymap[key] = SDL_FALSE;
 }
 
-void InputMouseDown(Input *input, const MouseCode code)
+void InputMouseDown(const MouseCode code)
 {
-    input->m_mousemap[code] = SDL_TRUE;
+    input.mousemap[code] = SDL_TRUE;
 }
 
-void InputMouseUp(Input *input, const MouseCode code)
+void InputMouseUp(const MouseCode code)
 {
-    input->m_mousemap[code] = SDL_FALSE;
+    input.mousemap[code] = SDL_FALSE;
 }
 
-void InputMouseMove(Input *input, Vec2 pos)
+void InputMouseMove(Vec2 pos)
 {
-    input->m_mousePosition = pos;
+    input.mousePosition = pos;
 }
 
-SDL_bool InputIsKeyDown(Input *input, const SDL_Scancode key)
+SDL_bool InputIsKeyDown(const SDL_Scancode key)
 {
-    return input->m_keymap[key];
+    return input.keymap[key];
 }
 
-SDL_bool InputIsKeyPressed(Input *input, const SDL_Scancode key)
+SDL_bool InputIsKeyPressed(const SDL_Scancode key)
 {
-    return input->m_keymap[key] && !input->m_prevKeymap[key];
+    return input.keymap[key] && !input.prevKeymap[key];
 }
 
-SDL_bool InputIsKeyReleased(Input *input, const SDL_Scancode key)
+SDL_bool InputIsKeyReleased(const SDL_Scancode key)
 {
-    return !input->m_keymap[key] && input->m_prevKeymap[key];
+    return !input.keymap[key] && input.prevKeymap[key];
 }
 
-SDL_bool InputIsAnyKeyDown(Input *input)
+SDL_bool InputIsAnyKeyDown()
 {
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
     {
-        if (input->m_keymap[i])
+        if (input.keymap[i])
             return SDL_TRUE;
     }
     return SDL_FALSE;
 }
 
-SDL_bool InputIsMouseDown(Input *input, const MouseCode code)
+SDL_bool InputIsMouseDown(const MouseCode code)
 {
-    return input->m_mousemap[code];
+    return input.mousemap[code];
 }
 
-SDL_bool InputIsMousePressed(Input *input, const MouseCode code)
+SDL_bool InputIsMousePressed(const MouseCode code)
 {
-    return input->m_mousemap[code] && !input->m_prevMousemap[code];
+    return input.mousemap[code] && !input.prevMousemap[code];
 }
 
-SDL_bool InputIsMouseReleased(Input *input, const MouseCode code)
+SDL_bool InputIsMouseReleased(const MouseCode code)
 {
-    return !input->m_mousemap[code] && input->m_prevMousemap[code];
+    return !input.mousemap[code] && input.prevMousemap[code];
 }
 
-Vec2 InputLastMousePos(Input *input)
+Vec2 InputLastMousePos()
 {
-    return input->m_mousePosition;
+    return input.mousePosition;
 }
 
-void InputTypePortal(Input *input, char charPush)
+void InputTypePortal(char charPush)
 {
-    if (input->textLen > 10)
+    if (input.textLen > 10)
         return;
-    input->text[input->textLen] = charPush;
-    input->textLen++;
-    input->text[input->textLen] = ' ';
+    input.text[input.textLen] = charPush;
+    input.textLen++;
+    input.text[input.textLen] = ' ';
 }
 
-char *InputGetPortalContent(Input *input)
+char *InputGetPortalContent()
 {
-    return input->text;
+    return input.text;
 }
 
-void InputPortalBackspace(Input *input)
+void InputPortalBackspace()
 {
-    input->text[input->textLen - 1] = ' ';
-    if (input->textLen > 1)
-        input->textLen--;
+    input.text[input.textLen - 1] = ' ';
+    if (input.textLen > 1)
+        input.textLen--;
     return;
 }

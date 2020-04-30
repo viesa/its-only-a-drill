@@ -3,19 +3,17 @@
 
 struct Event
 {
-    SDL_Event m_events;
-    Input *m_input;
+    SDL_Event events;
 
-    SDL_bool *m_running;
+    SDL_bool *running;
 
     char text[32];
 };
 
-Event *EventCreate(Input *input, SDL_bool *running)
+Event *EventCreate(SDL_bool *running)
 {
     Event *event_ret = MALLOC(Event);
-    event_ret->m_input = input;
-    event_ret->m_running = running;
+    event_ret->running = running;
     return event_ret;
 }
 void EventDestroy(Event *event)
@@ -25,47 +23,47 @@ void EventDestroy(Event *event)
 
 void EventPollAll(Event *event)
 {
-    while (SDL_PollEvent(&event->m_events))
+    while (SDL_PollEvent(&event->events))
     {
-        switch (event->m_events.type)
+        switch (event->events.type)
         {
         case SDL_QUIT:
-            *event->m_running = SDL_FALSE;
+            *event->running = SDL_FALSE;
             break;
 
         case SDL_KEYDOWN:
         {
-            InputKeyDown(event->m_input, event->m_events.key.keysym.scancode);
+            InputKeyDown(event->events.key.keysym.scancode);
             break;
         }
         case SDL_KEYUP:
         {
-            InputKeyUp(event->m_input, event->m_events.key.keysym.scancode);
+            InputKeyUp(event->events.key.keysym.scancode);
             break;
         }
         case SDL_MOUSEBUTTONDOWN:
         {
-            InputMouseDown(event->m_input, event->m_events.button.button);
+            InputMouseDown(event->events.button.button);
             break;
         }
         case SDL_MOUSEBUTTONUP:
         {
-            InputMouseUp(event->m_input, event->m_events.button.button);
+            InputMouseUp(event->events.button.button);
             break;
         }
         case SDL_MOUSEMOTION:
         {
             Vec2 _new;
-            _new.x = (float)event->m_events.motion.x;
-            _new.y = (float)event->m_events.motion.y;
-            InputMouseMove(event->m_input, _new);
+            _new.x = (float)event->events.motion.x;
+            _new.y = (float)event->events.motion.y;
+            InputMouseMove(_new);
             break;
         }
         case SDL_TEXTINPUT:
             /* Add new text onto the end of our text */
-            //strcat(event->text, event->m_events.text.text);
-            InputTypePortal(event->m_input, event->m_events.text.text[0]);
-            strcpy(event->m_events.text.text, "");
+            //strcat(event->text, event->events.text.text);
+            InputTypePortal(event->events.text.text[0]);
+            strcpy(event->events.text.text, "");
             break;
         default:
             break;

@@ -8,7 +8,7 @@
 
 #include "Library.h"
 
-void playerShoot(EntityIndexP index, Camera *camera, Input *input, Item *item);
+void playerShoot(EntityIndexP index, Camera *camera, Item *item);
 void entityShoot(int *index, Vec2 Desierdpoint, Item *item, Clock *clk);
 
 //diffrent types of shooting
