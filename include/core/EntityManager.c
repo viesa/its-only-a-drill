@@ -24,13 +24,13 @@ void EntityManagerUninitalize()
     VectorDestroy(entityManager.entityVector);
 }
 
-void EntityManagerUpdate(Clock *clk)
+void EntityManagerUpdate()
 {
-    EntityManagerUpdateMovement(clk);
+    EntityManagerUpdateMovement();
     EntityManagerOnCollision();
 }
 
-void EntityManagerUpdateMovement(Clock *clk)
+void EntityManagerUpdateMovement()
 {
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
@@ -43,8 +43,8 @@ void EntityManagerUpdateMovement(Clock *clk)
         ENTITY_ARRAY[i].Velocity.y = (fabs(ENTITY_ARRAY[i].Velocity.y) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.y;
 
         // update new position
-        ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime(clk);
-        ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime(clk);
+        ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
+        ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime();
 #ifdef ENTITY_DEBUG
         if (i == 0)
         {

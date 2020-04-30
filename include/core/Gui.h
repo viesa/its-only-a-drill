@@ -10,7 +10,6 @@
 typedef struct Gui
 {
     Font *font;
-    Clock *clock;
     long int points;
     float loopCount;
     float loopSwing;
@@ -28,7 +27,7 @@ typedef enum GuiWindow
     GUI_Count
 } GuiWindow;
 
-Gui *GuiCreate(Font *font, Clock *clock);
+Gui *GuiCreate(Font *font);
 void GuiUpdate(Gui *gui);
 void GuiOverlayUpdate(Gui *gui);
 void GuiDestroy(Gui *gui);

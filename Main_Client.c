@@ -9,28 +9,27 @@ int main()
 {
     InitSDL();
 
-    SDL_bool m_running = SDL_TRUE;
+    SDL_bool running = SDL_TRUE;
 
     InputInitialize();
+    ClockInitialize();
 
-    FPSManager *m_fpsManager = FPSManagerCreate();
-    Clock *m_clock = ClockCreate();
-    Event *m_event = EventCreate(&m_running);
-    AppClient *m_app = AppClientCreate(&m_running, m_clock, m_fpsManager);
+    FPSManager *fpsManager = FPSManagerCreate();
+    Event *event = EventCreate(&running);
+    AppClient *app = AppClientCreate(&running, fpsManager);
 
-    while (m_running)
+    while (running)
     {
-        FPSManagerStart(m_fpsManager);
-        ClockTick(m_clock);
+        FPSManagerStart(fpsManager);
+        ClockTick();
         InputUpdateKeymaps();
-        EventPollAll(m_event);
-        AppClientRun(m_app);
-        FPSManagerAdjust(m_fpsManager);
+        EventPollAll(event);
+        AppClientRun(app);
+        FPSManagerAdjust(fpsManager);
     }
 
-    ClockDestroy(m_clock);
-    EventDestroy(m_event);
-    AppClientDestroy(m_app);
+    EventDestroy(event);
+    AppClientDestroy(app);
 
     InputUninitialize();
 

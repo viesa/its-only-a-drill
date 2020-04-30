@@ -31,7 +31,7 @@ void TransitionInitalize(Graphics *gfx, Font *font)
     trans.skipped = 0;
 }
 
-void TransitionDraw(Clock *clock)
+void TransitionDraw()
 {
     if (trans.skipped < 2)
     {
@@ -41,7 +41,7 @@ void TransitionDraw(Clock *clock)
     if (trans.elapsed > trans.duration)
         return;
 
-    float dt = ClockGetDeltaTime(clock);
+    float dt = ClockGetDeltaTime();
 
     switch (trans.type)
     {

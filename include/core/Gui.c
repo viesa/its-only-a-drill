@@ -2,10 +2,9 @@
 
 #include "Library.h"
 
-Gui *GuiCreate(Font *font, Clock *clock)
+Gui *GuiCreate(Font *font)
 {
     Gui *gui = MALLOC(Gui);
-    gui->clock = clock;
     gui->font = font;
     gui->points = 3;
     gui->loopCount = 0;

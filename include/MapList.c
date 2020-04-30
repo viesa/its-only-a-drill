@@ -1,11 +1,10 @@
 #include "MapList.h"
 
-MapList MapListCreate(char *directory, Clock *clock)
+MapList MapListCreate(char *directory)
 {
     MapList mapList;
     mapList.nMaps = 0;
     strcpy(mapList.directory, directory);
-    mapList.clock = clock;
     mapList.lastUpdate = 1.0f;
     MapListUpdate(&mapList);
     return mapList;
@@ -19,7 +18,7 @@ void MapListUpdate(MapList *mapList)
 {
     if (mapList->lastUpdate < 1.0f)
     {
-        mapList->lastUpdate += ClockGetDeltaTime(mapList->clock);
+        mapList->lastUpdate += ClockGetDeltaTime();
         return;
     }
     mapList->lastUpdate = 0.0f;

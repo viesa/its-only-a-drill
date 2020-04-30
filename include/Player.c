@@ -17,10 +17,10 @@ void PlayerDestroy(Player *player)
 {
 }
 
-void PlayerUpdate(Player *player, Clock *clock, Camera *camera)
+void PlayerUpdate(Player *player, Camera *camera)
 {
-    AnimUpdate(&player->leg, ClockGetDeltaTime(clock));
-    AnimUpdate(&player->body, ClockGetDeltaTime(clock));
+    AnimUpdate(&player->leg, ClockGetDeltaTime());
+    AnimUpdate(&player->body, ClockGetDeltaTime());
     if (!InputIsKeyDown(SDL_SCANCODE_A) &&
         !InputIsKeyDown(SDL_SCANCODE_W) &&
         !InputIsKeyDown(SDL_SCANCODE_D) &&

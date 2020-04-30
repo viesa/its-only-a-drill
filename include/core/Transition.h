@@ -16,7 +16,7 @@ typedef enum TransitionType
 
 void TransitionInitalize(Graphics *gfx, Font *font);
 
-void TransitionDraw(Clock *clock);
+void TransitionDraw();
 
 void TransitionStart(TransitionType type, float duration);
 void TransitionStop();

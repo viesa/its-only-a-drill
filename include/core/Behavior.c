@@ -10,16 +10,16 @@ MovingPattern *behaviorPathsCreate()
 {
     MovingPattern *pattern = MALLOC(MovingPattern);
     //pattern->point[0] //när enemy kommer till desierd point -> pattern + pos = new desierd point
-    pattern->point[0] = Vec2Create(200.0f,  200.0f);
-    pattern->point[1] = Vec2Create(283.0f,  0.0f);
-    pattern->point[2] = Vec2Create(200.0f,  -200.0f);
-    pattern->point[3] = Vec2Create( 0.0f,  -283.0f);
-    pattern->point[4] = Vec2Create( -200.0f,  200.0f);
-    pattern->point[5] = Vec2Create( -283.0f,  0.0f);
-    pattern->point[6] = Vec2Create( -200.0f,  -200.0f);
-    pattern->point[7] = Vec2Create( 50.0f,  0.0f);
-    pattern->point[8] = Vec2Create( 150.0f,  100.0f);
-    pattern->point[9] = Vec2Create( 200.0f,  200.0f);
+    pattern->point[0] = Vec2Create(200.0f, 200.0f);
+    pattern->point[1] = Vec2Create(283.0f, 0.0f);
+    pattern->point[2] = Vec2Create(200.0f, -200.0f);
+    pattern->point[3] = Vec2Create(0.0f, -283.0f);
+    pattern->point[4] = Vec2Create(-200.0f, 200.0f);
+    pattern->point[5] = Vec2Create(-283.0f, 0.0f);
+    pattern->point[6] = Vec2Create(-200.0f, -200.0f);
+    pattern->point[7] = Vec2Create(50.0f, 0.0f);
+    pattern->point[8] = Vec2Create(150.0f, 100.0f);
+    pattern->point[9] = Vec2Create(200.0f, 200.0f);
     return pattern;
 }
 
@@ -28,7 +28,7 @@ void pathFree(MovingPattern *enemyP)
     SDL_free(enemyP);
 }
 
-void BehaviorMoveEntity(Clock *clk, MovingPattern *pattern)
+void BehaviorMoveEntity(MovingPattern *pattern)
 {
     int tmp = 0;
 
@@ -93,7 +93,7 @@ void BehaviorMoveEntity(Clock *clk, MovingPattern *pattern)
             {
                 if (ENTITY_ARRAY[i].type == ET_Woman)
                 {
-                    entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], clk);
+                    entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
                 }
                 if (ENTITY_ARRAY[tmp].health < 0)
                 {

@@ -23,7 +23,6 @@ typedef struct Menu
     Drawable lobbyDbl;
     LoadingBar *loadingBar;
     State *state;
-    Clock *clock;
     float loopCount;
     int loopSwing;
     int swingDir;
@@ -34,7 +33,7 @@ typedef struct Menu
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock);
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state);
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Map *map);
 void MenuUpdateSplash(Menu *menu, Map *map);
 void MenuUpdateName(Menu *menu);

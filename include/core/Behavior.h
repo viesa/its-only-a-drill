@@ -13,7 +13,7 @@ typedef struct MovingPattern
 } MovingPattern;
 
 //mode 0 move between two points 2modes!
-void BehaviorMoveEntity(Clock *clk, MovingPattern *Pattern);
+void BehaviorMoveEntity(MovingPattern *Pattern);
 Entity BehaviorMoveToPoint(Entity entity, float x, float y);
 MovingPattern *behaviorPathsCreate();
 void pathFree(MovingPattern *enemyP);

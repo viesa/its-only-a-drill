@@ -2,18 +2,14 @@
 #define CLOCK_H
 
 #include "Dependencies.h"
-
-typedef struct Clock Clock;
-
-Clock *ClockCreate();
-void ClockDestroy(Clock *clock);
+void ClockInitialize();
 
 /// Updates the deltatime (the clock's ticks)
-void ClockTick(Clock *clock);
+void ClockTick();
 /// Returns the ammount of seconds passed since last update
-const float ClockGetDeltaTime(Clock *clock);
-const float ClockGetFPS(Clock *clock);
+float ClockGetDeltaTime();
+float ClockGetFPS();
 /// Returns the ammount of milliseconds passed since last update
-const float ClockGetDeltaTimeMS(Clock *clock);
+float ClockGetDeltaTimeMS();
 
 #endif

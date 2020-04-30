@@ -2,14 +2,13 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, State *state, Clock *clock)
+Menu *MenuCreate(Graphics *gfx, Font *font, State *state)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
     menu->font = font;
     menu->loadingBar = LoadingBarCreate(menu->gfx);
     menu->state = state;
-    menu->clock = clock;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -156,9 +155,9 @@ void MenuUpdateSplash(Menu *menu, Map *map)
         FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press the any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, vitalsColor[9]);
     }
     //Fade-in animation
-    TransitionDraw(menu->clock);
+    TransitionDraw();
     LoadingBarUpdate(menu->loadingBar);
-    LoadingBarAdd(menu->loadingBar, ClockGetFPS(menu->clock) * 4 / 100);
+    LoadingBarAdd(menu->loadingBar, ClockGetFPS() * 4 / 100);
 }
 
 void MenuUpdateMainMenu(Menu *menu, Map *map)

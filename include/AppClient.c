@@ -21,7 +21,6 @@ struct AppClient
     Font *font;
     Gui *gui;
     Camera *camera;
-    Clock *clock;
     FPSManager *fpsManager;
     Menu *menu;
     Keybinding *bindings;
@@ -36,7 +35,7 @@ struct AppClient
     MapList mapList;
 };
 
-AppClient *AppClientCreate(SDL_bool *running, Clock *clock, FPSManager *fpsManager)
+AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 {
     srand(time(NULL));
     CursorInitialize();
@@ -45,14 +44,13 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, FPSManager *fpsManag
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->state = StateCreate();
-    app->clock = clock;
     app->fpsManager = fpsManager;
     app->gfx = GraphicsCreate();
     app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
-    app->gui = GuiCreate(app->font, app->clock);
+    app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
-    app->menu = MenuCreate(app->gfx, app->font, &app->state, app->clock);
+    app->menu = MenuCreate(app->gfx, app->font, &app->state);
     app->bindings = KeybindingCreate();
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
@@ -81,7 +79,7 @@ AppClient *AppClientCreate(SDL_bool *running, Clock *clock, FPSManager *fpsManag
 
     app->map.contents = NULL;
     app->map.n = 0;
-    app->mapList = MapListCreate("maps", app->clock);
+    app->mapList = MapListCreate("maps");
 
     return app;
 }
@@ -209,9 +207,9 @@ void AppClientUpdate(AppClient *app)
                 playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
             }
         }
-        weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->clock);
+        weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
 
-        BehaviorMoveEntity(app->clock, app->movingPattern);
+        BehaviorMoveEntity(app->movingPattern);
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[1].desiredPoint.x = 180;
@@ -219,11 +217,11 @@ void AppClientUpdate(AppClient *app)
             ENTITY_ARRAY[1].entityState = Aggressive;
         }
 
-        //PlayerUpdate(&app->player, &app->entityManager.entities[0],  app->clock, app->camera);
-        PlayerUpdate(&app->player, app->clock, app->camera);
+        //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
+        PlayerUpdate(&app->player, app->camera);
 
         // EntityUpdate most be after input, playerupdate
-        EntityManagerUpdate(app->clock);
+        EntityManagerUpdate();
 
         break;
     }

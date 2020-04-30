@@ -21,7 +21,7 @@ typedef struct Player
 Player PlayerCreate(Camera *camera);
 void PlayerDestroy(Player *player);
 
-void PlayerUpdate(Player *player, Clock *clock, Camera *camera);
+void PlayerUpdate(Player *player, Camera *camera);
 void PlayerDraw(Player *player, Camera *camera);
 
 #endif

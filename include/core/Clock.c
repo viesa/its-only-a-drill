@@ -2,40 +2,34 @@
 
 struct Clock
 {
-    int m_lastTickTime;
-    int m_delta;
-};
+    int lastTickTime;
+    int delta;
+} appClock;
 
-Clock *ClockCreate()
+void ClockInitialize()
 {
-    Clock *clock_ret = MALLOC(Clock);
-    clock_ret->m_delta = 0;
-    clock_ret->m_lastTickTime = SDL_GetTicks();
-    return clock_ret;
-}
-void ClockDestroy(Clock *clock)
-{
-    SDL_free(clock);
+    appClock.delta = 0;
+    appClock.lastTickTime = SDL_GetTicks();
 }
 
-void ClockTick(Clock *clock)
+void ClockTick()
 {
     uint32_t tick_time = SDL_GetTicks();
-    clock->m_delta = tick_time - clock->m_lastTickTime;
-    clock->m_lastTickTime = tick_time;
+    appClock.delta = tick_time - appClock.lastTickTime;
+    appClock.lastTickTime = tick_time;
 }
 
-const float ClockGetDeltaTime(Clock *clock)
+float ClockGetDeltaTime()
 {
-    return (float)clock->m_delta / 1000.0f;
+    return (float)appClock.delta / 1000.0f;
 }
 
-const float ClockGetFPS(Clock *clock)
+float ClockGetFPS()
 {
-    return 1 / ClockGetDeltaTime(clock);
+    return 1 / ClockGetDeltaTime(appClock);
 }
 
-const float ClockGetDeltaTimeMS(Clock *clock)
+float ClockGetDeltaTimeMS()
 {
-    return (float)clock->m_delta;
+    return (float)appClock.delta;
 }

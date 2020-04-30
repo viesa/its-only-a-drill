@@ -1,10 +1,10 @@
 #include "Weapon.h"
 #include "Entity.h"
 
-void weaponUpdate(Item *item, Clock *clk)
+void weaponUpdate(Item *item)
 {
     // counts the cooldown
-    item->Stats.currentTime -= ClockGetDeltaTimeMS(clk);
+    item->Stats.currentTime -= ClockGetDeltaTimeMS();
 
     // reserved for bullet update
 }
@@ -42,9 +42,9 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item)
     }
 }
 
-void entityShoot(int *index, Vec2 Desierdpoint, Item *item, Clock *clk)
+void entityShoot(int *index, Vec2 Desierdpoint, Item *item)
 {
-    item->Stats.currentTime -= ClockGetDeltaTimeMS(clk);
+    item->Stats.currentTime -= ClockGetDeltaTimeMS();
     if (item->Stats.currentTime <= 0)
     {
         item->Stats.currentTime = item->Stats.cooldownMS;

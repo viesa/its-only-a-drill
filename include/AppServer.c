@@ -3,18 +3,16 @@
 struct AppServer
 {
     SDL_bool *isRunning;
-    Clock *clock;
     float displayTimer;
 };
 
-AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock)
+AppServer *AppServerCreate(SDL_bool *isRunning)
 {
     EntityManagerInitialize();
 
     AppServer *app = MALLOC(AppServer);
     ServerStart();
     app->isRunning = isRunning;
-    app->clock = clock;
     app->displayTimer = 0.0f;
     return app;
 }
@@ -86,7 +84,7 @@ void AppServerShowPlayerList(AppServer *app)
     }
     else
     {
-        app->displayTimer += ClockGetDeltaTime(app->clock);
+        app->displayTimer += ClockGetDeltaTime();
         return;
     }
 

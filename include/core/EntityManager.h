@@ -13,11 +13,10 @@ void EntityManagerInitialize();
 void EntityManagerUninitalize();
 
 ///Waring only one
-///\param entites: ALL entitys are needed
 ///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
-void EntityManagerUpdate(Clock *clk);
+void EntityManagerUpdate();
 
-void EntityManagerUpdateMovement(Clock *clk);
+void EntityManagerUpdateMovement();
 /// finds the collision and fixes the problem with rules
 void EntityManagerOnCollision();
 

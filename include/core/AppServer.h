@@ -8,7 +8,7 @@
 
 typedef struct AppServer AppServer;
 
-AppServer *AppServerCreate(SDL_bool *isRunning, Clock *clock);
+AppServer *AppServerCreate(SDL_bool *isRunning);
 void AppServerDestroy(AppServer *app);
 
 // Main loop

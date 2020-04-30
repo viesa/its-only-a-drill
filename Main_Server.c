@@ -10,14 +10,14 @@ int main()
     SDL_bool isRunning = SDL_TRUE;
     // Has to be the first
     ServerInitialize();
-    Clock *m_clock = ClockCreate();
+    ClockInitialize();
 
-    AppServer *app = AppServerCreate(&isRunning, m_clock);
+    AppServer *app = AppServerCreate(&isRunning);
 
     printf("Server running...\n");
     while (isRunning)
     {
-        ClockTick(m_clock);
+        ClockTick(clock);
         AppServerGo(app);
     }
 
