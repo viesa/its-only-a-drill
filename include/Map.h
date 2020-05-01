@@ -8,7 +8,7 @@
 void MapInitialize();
 void MapUninitialize();
 
-void MapGenerateNew(JSON *mapdata);
+int MapGenerateNew(JSON *mapdata);
 
 void MapDraw(Camera *camera);
 

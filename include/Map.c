@@ -44,14 +44,14 @@ void MapUninitialize()
     map.uid = 0;
 }
 
-void MapGenerateNew(JSON *mapdata)
+int MapGenerateNew(JSON *mapdata)
 {
     if (mapdata == NULL ||
         mapdata->value->type != json_object ||
         mapdata->value->u.object.length != MAIN_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Main)");
-        return;
+        return 0;
     }
 
     json_value *mapInfo = JSONGetValue(mapdata, (uint32_t[]){MAPINFO_INDEX}, 1);
@@ -60,7 +60,7 @@ void MapGenerateNew(JSON *mapdata)
         mapInfo->u.object.length != MAPINFO_LENGTH)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
-        return;
+        return 0;
     }
     SDL_bool badLoad = SDL_FALSE;
     json_object_entry *mapInfoEntries = mapInfo->u.object.values;
@@ -86,7 +86,7 @@ void MapGenerateNew(JSON *mapdata)
     if (badLoad)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
-        return;
+        return 0;
     }
 
     // Fetch mad uid
@@ -95,7 +95,7 @@ void MapGenerateNew(JSON *mapdata)
     if (bufferMap.uid == map.uid)
     {
         bufferMap.uid = 0;
-        return;
+        return 0;
     }
 
     json_value *layers = JSONGetValue(mapdata, (uint32_t[]){LAYER_INDEX}, 1);
@@ -104,7 +104,7 @@ void MapGenerateNew(JSON *mapdata)
         layers->u.integer != JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX}, 1)->u.array.length)
     {
         log_error("Could not create map from mapfile: JSON-data was badly formatted (Layers)");
-        return;
+        return 0;
     }
 
     // Load in all entities
@@ -121,7 +121,7 @@ void MapGenerateNew(JSON *mapdata)
             log_error("Could not create map from mapfile: JSON-data was badly formatted (List)");
             FREE(bufferMap.contents);
             bufferMap.n = 0;
-            return;
+            return 0;
         }
 
         json_object_entry *entries = current->u.object.values;
@@ -160,7 +160,7 @@ void MapGenerateNew(JSON *mapdata)
             log_error("Could not create map from mapfile: JSON-data was badly formatted (LIST CONTENTS)");
             FREE(bufferMap.contents);
             bufferMap.n = 0;
-            return;
+            return 0;
         }
         //----------------------------------------------------
 
@@ -170,7 +170,7 @@ void MapGenerateNew(JSON *mapdata)
             log_error("Could not create map from mapfile: JSON-data was badly formatted (SRC)");
             FREE(bufferMap.contents);
             bufferMap.n = 0;
-            return;
+            return 0;
         }
 
         char *type_str = entries[0].value->u.string.ptr;
@@ -219,6 +219,7 @@ void MapGenerateNew(JSON *mapdata)
     FREE(bufferMap.contents);
     bufferMap.n = 0;
     bufferMap.uid = 0;
+    return 1;
 }
 
 void MapDraw(Camera *camera)
