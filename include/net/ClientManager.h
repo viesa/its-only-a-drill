@@ -2,14 +2,18 @@
 #define CLIENTMANAGER_H
 
 #include "Client.h"
+#include "JoinableSesssion.h"
 #include "../core/State.h"
 #include "../Map.h"
 
 #define CLIENTMANAGER_PLAYERS ClientManagerGetPlayersArray()
+#define CLIENTMANAGER_JOINLIST ClientManagerGetJoinListArray()
 
 struct
 {
     Vector *players;
+    // A vector of structs, JoinableSession
+    Vector *joinList;
 } clientManager;
 
 // Creates the client manager
@@ -33,7 +37,9 @@ void ClientManagerHandleCreateSessionPacket(ParsedPacket packet);
 void ClientManagerHandleJoinSessionPacket(ParsedPacket packet);
 void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet);
 void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
+void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
+JoinableSession *ClientManagerGetJoinListArray();
 
 #endif

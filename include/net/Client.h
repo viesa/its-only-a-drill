@@ -44,22 +44,14 @@ int ClientUDPSend(PacketType type, void *data, size_t size);
 int ClientUDPOut(UDPpacket *packet);
 // Sends a TCP-packet to the server
 int ClientTCPSend(PacketType type, void *data, size_t size);
-// Chooses how to send the packet, if it is big or small
+// Final step before TCP-packet leaving the client
 int ClientTCPOut(TCPpacket *packet);
-// Final step before TCP-packet leaving the client, packetsize < 63535
-int ClientTCPSmallOut(TCPpacket *packet);
-// Final step before TCP-packet leaving the client, packetsize > 63535
-int ClientTCPBigOut(TCPpacket *packet);
 // Thread function to listen for server-packets, parse them and put them into inBuffer
 void ClientListenToServer();
 // Try receive UDP-packet and add it to inBuffer
 int ClientTryReceiveUDPPacket();
-// Receives header of TCP-packet and chooses how to receive the rest, big or small
+// Try receive TCP-packet and add it to inBuffer
 int ClientTryReceiveTCPPacket();
-// Receives TCP-packet and add it to inBuffer, packetsize < 63535
-int ClientReceiveSmallTCPPacket(size_t packetSize);
-// Receives TCP-packet and add it to inBuffer, packetsize > 63535
-int ClientReceiveBigTCPPacket(size_t packetSize);
 
 ParsedPacket *ClientGetInBufferArray();
 

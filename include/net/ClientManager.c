@@ -3,6 +3,7 @@
 void ClientManagerInitialize()
 {
     clientManager.players = VectorCreate(sizeof(EntityIndexP), 100);
+    clientManager.joinList = VectorCreate(sizeof(JoinableSession), 5);
 }
 
 void ClientManagerUninitialize()
@@ -10,6 +11,7 @@ void ClientManagerUninitialize()
     for (int i = 0; i < clientManager.players->size; i++)
         EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
     VectorDestroy(clientManager.players);
+    VectorDestroy(clientManager.joinList);
 }
 
 void ClientManagerUpdate()
@@ -50,6 +52,9 @@ void ClientManagerUpdate()
             break;
         case PT_FullSession:
             ClientManagerHandleFullSessionPacket(nextPacket);
+            break;
+        case PT_FetchSessions:
+            ClientManagerHandleFetchSessionsPacket(nextPacket);
             break;
         default:
             break;
@@ -180,8 +185,38 @@ void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
 {
 }
 
-EntityIndexP *
-ClientManagerGetPlayersArray()
+void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
+{
+    // If no session exists, add spcecial element to joinList
+    if (!packet.size)
+    {
+        JoinableSession empty;
+        strcpy(empty.name, "No session avaiable");
+        empty.maxPlayers = -1;
+        empty.currentPlayers = -1;
+        empty.sessionID = -1;
+        VectorPushBack(clientManager.joinList, &empty);
+    }
+
+    JoinableSession *fetched = (JoinableSession *)packet.data;
+    int nSessions = packet.size / sizeof(JoinableSession);
+
+    // Clear joinList of old joinable sessions
+    VectorClear(clientManager.joinList);
+
+    // Add all joinable sessions to joinList
+    for (int i = 0; i < nSessions; i++)
+    {
+        VectorPushBack(clientManager.joinList, &fetched[i]);
+    }
+}
+
+EntityIndexP *ClientManagerGetPlayersArray()
 {
     return (EntityIndexP *)clientManager.players->data;
+}
+
+JoinableSession *ClientManagerGetJoinListArray()
+{
+    return (JoinableSession *)clientManager.joinList->data;
 }

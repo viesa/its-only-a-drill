@@ -257,13 +257,22 @@ void ServerTCPOut(TCPpacket *packet)
 {
     assert("Attempting to send packet without server initialization" && server.isInitialized);
 
-    if (packet->len <= TCP_MAX_SIZE)
+    int totalSizeToSend = (int)packet->len;
+    int totalSent = 0;
+
+    while (totalSent < totalSizeToSend)
     {
-        ServerTCPSmallOut(packet);
-    }
-    else
-    {
-        ServerTCPBigOut(packet);
+        // Attempts to send as much as possible
+        int newSend = SDLNet_TCP_Send(packet->address, packet->data + totalSent, totalSizeToSend - totalSent);
+        // If nothing was sent, or negative, connection was dissrupted
+        if (newSend <= 0)
+        {
+#ifdef CLIENT_DEBUG
+            log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
+#endif
+            return;
+        }
+        totalSent += newSend;
     }
 
     PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
@@ -272,41 +281,6 @@ void ServerTCPOut(TCPpacket *packet)
                            packet->len,
                            *SDLNet_TCP_GetPeerAddress(packet->address),
                            "TCP", "OUTGOING");
-}
-
-void ServerTCPSmallOut(TCPpacket *packet)
-{
-    if (!SDLNet_TCP_Send(packet->address, packet->data, packet->len))
-    {
-#ifdef SERVER_DEBUG
-        log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
-#endif
-    }
-}
-
-void ServerTCPBigOut(TCPpacket *packet)
-{
-    int totalSizeToSend = (int)packet->len;
-    int nFullPackagesRequired = (int)(totalSizeToSend / TCP_MAX_SIZE);
-    int bytesLeft = totalSizeToSend % TCP_MAX_SIZE;
-
-    for (int i = 0; i < nFullPackagesRequired; i++)
-    {
-        if (!SDLNet_TCP_Send(packet->address, packet->data + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
-        {
-#ifdef CLIENT_DEBUG
-            log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
-#endif
-            return;
-        }
-    }
-    if (!SDLNet_TCP_Send(packet->address, packet->data + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
-    {
-#ifdef CLIENT_DEBUG
-        log_warn("Failed to send TCP-packet to client: %s", SDLNet_GetError());
-#endif
-        return;
-    }
 }
 
 void ServerListenToClients()
@@ -349,7 +323,7 @@ void ServerListenToClients()
                 }
             }
         }
-        else if (nReadySockets == -1)
+        else if (nReadySockets < 0)
         {
 #ifdef SERVER_DEBUG
             log_error("Failed to check socket in socket set: %s", SDLNet_GetError());
@@ -464,92 +438,43 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
 {
     char header[TCP_HEADER_SIZE] = {0};
     // First receive the header to know how big the packet is
-    if (SDLNet_TCP_Recv(player.socket, header, TCP_HEADER_SIZE))
+    int headerReceived = 0;
+    while (headerReceived < TCP_HEADER_SIZE)
     {
-        const size_t packetSize = SDL_atoi(header);
-        if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
+        // Attempts to receive as much as possible
+        int newReceive = SDLNet_TCP_Recv(player.socket, header + headerReceived, TCP_HEADER_SIZE - headerReceived);
+        // If nothing was received, or negative, connection was dissrupted
+        if (newReceive <= 0)
         {
 #ifdef SERVER_DEBUG
-            log_info("Received a TCP-packet that was too small, throwing away...");
-#endif
-        }
-
-        // Then receive the full packet, piece by piece if required
-        int result = 0;
-        if (packetSize < TCP_MAX_SIZE)
-        {
-            result = ServerReceiveSmallTCPPacket(player, packetSize);
-        }
-        else
-        {
-            result = ServerReceiveBigTCPPacket(player, packetSize);
-        }
-        return result;
-    }
-    else
-    {
-#ifdef SERVER_DEBUG
-        log_warn("Failed to receive TCP-header from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
-#endif
-        return 0;
-    }
-}
-
-int ServerReceiveSmallTCPPacket(NetPlayer player, size_t packetSize)
-{
-    char buffer[packetSize];
-    SDL_memset(buffer, 0, packetSize);
-
-    if (SDLNet_TCP_Recv(player.socket, buffer, packetSize))
-    {
-        // Parse data
-        PacketType type = PacketDecodeType(buffer);
-        int id = PacketDecodeID(buffer);
-        int dataLength = TCPPacketRemoveTypeAndID(buffer, packetSize);
-        if (id < 0)
-        {
-#ifdef SERVER_DEBUG
-            log_info("Received a TCP-packet with invalid ID, throwin packet...");
+            log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
 #endif
             return 0;
         }
-        ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, player);
-        // Add to inBuffer
-        SDL_LockMutex(server.inBufferMutex);
-        VectorPushBack(server.inBuffer, &parsedPacket);
-        PacketPrintInformation(parsedPacket.type,
-                               parsedPacket.sender.id,
-                               parsedPacket.data,
-                               parsedPacket.size,
-                               *parsedPacket.sender.ip,
-                               "TCP", "INCOMING");
-        SDL_UnlockMutex(server.inBufferMutex);
-        return 1;
+        headerReceived += newReceive;
     }
-    else
+    const size_t packetSize = SDL_atoi(header);
+    if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
     {
 #ifdef SERVER_DEBUG
-        log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+        log_info("Received a TCP-packet that was too small, throwing away...");
 #endif
-        return 0;
     }
-}
 
-int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
-{
+    // Then receive the full packet, piece by piece if required
     char *buffer = MALLOC_N(char, packetSize);
     SDL_memset(buffer, 0, packetSize);
 
     int totalSizeToReceive = (int)packetSize;
-    int nFullPackagesRequired = (int)(totalSizeToReceive / TCP_MAX_SIZE);
-    int bytesLeft = totalSizeToReceive % TCP_MAX_SIZE;
+    int totalReceived = 0;
 
-    for (int i = 0; i < nFullPackagesRequired; i++)
+    // Receive bytes until you received whole packet, or until the connection is dissrupted
+    while (totalReceived < totalSizeToReceive)
     {
-        // if (i != 0)
-        //     while (!SDLNet_SocketReady(player.socket))
-        //         ;
-        if (!SDLNet_TCP_Recv(player.socket, buffer + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        // Attempts to receive as much as possible
+        int newReceive = SDLNet_TCP_Recv(player.socket, buffer + totalReceived, totalSizeToReceive - totalReceived);
+        // If nothing was received, or negative, connection was dissrupted
+        if (newReceive <= 0)
         {
 #ifdef SERVER_DEBUG
             log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
@@ -557,16 +482,7 @@ int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
             FREE(buffer);
             return 0;
         }
-    }
-
-    if (!SDLNet_TCP_Recv(player.socket, buffer + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
-    {
-#ifdef SERVER_DEBUG
-        log_warn("Failed to receive TCP-packet from client (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
-#endif
-
-        FREE(buffer);
-        return 0;
+        totalReceived += newReceive;
     }
 
     // Parse data
@@ -591,7 +507,7 @@ int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize)
                            parsedPacket.data,
                            parsedPacket.size,
                            *parsedPacket.sender.ip,
-                           "BIG TCP", "INCOMING");
+                           "TCP", "INCOMING");
     SDL_UnlockMutex(server.inBufferMutex);
 
     FREE(buffer);
@@ -609,6 +525,15 @@ void ServerRemoveClient(NetPlayer player)
             break;
         }
     }
+
+    // Try to disconnect and clean up ot make sure client is not still in memory
+    // Even if no corrent ID was found
+    if (player.socket)
+    {
+        SDLNet_TCP_DelSocket(server.socketSet, player.socket);
+        SDLNet_TCP_Close(player.socket);
+    }
+
     // If NetPlayer was not found in current players,
     // it was already deleted -> Return
     if (index == -1)

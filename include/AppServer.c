@@ -62,6 +62,8 @@ void AppServerUpdate(AppServer *app)
         case PT_LeaveSession:
             AppServerHandleLeaveSessionPacket(nextPacket);
             break;
+        case PT_FetchSessions:
+            AppServerHandleFetchSessionsPacket(nextPacket);
         default:
             break;
         }
@@ -234,26 +236,31 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
         // Find correct session
         if (SERVER_SESSIONS[i].id == sessionID)
         {
+            Session *session = &SERVER_SESSIONS[i];
             // Checks if there is room for player in the new session
-            if (SERVER_SESSIONS[i].playersP->size < SERVER_SESSIONS[i].mapMaxPlayers)
+            if (session->playersP->size < session->mapMaxPlayers)
             {
                 // If there is no host, you are host
-                if (SERVER_SESSIONS[i].host == NULL)
+                if (session->host == NULL)
                 {
-                    SERVER_SESSIONS[i].host = senderP;
+                    session->host = senderP;
                     // Notifies client the he is host over the session
-                    ServerTCPSend(PT_HostAssignSession, &SERVER_SESSIONS[i].host->id, sizeof(int), packet.sender);
+                    ServerTCPSend(PT_HostAssignSession, &session->host->id, sizeof(int), packet.sender);
                 }
-                // Adds new player to session
-                VectorPushBack(SERVER_SESSIONS[i].playersP, senderP);
+                // Makes sure client isn't already in this session somehow
+                if (VectorFind(session->playersP, senderP) == session->playersP->size)
+                {
+                    // Adds new player to session
+                    VectorPushBack(session->playersP, senderP);
+                }
                 senderP->sessionID = sessionID;
-                // Sends the map to client
-                ServerTCPSend(PT_JoinSession, SERVER_SESSIONS[i].rawMap, SERVER_SESSIONS[i].rawMapDataSize, packet.sender);
+                // Sends the session's map to client
+                ServerTCPSend(PT_JoinSession, session->rawMap, session->rawMapDataSize, packet.sender);
             }
             // If there is no room for client, send back FullSesssion packet
             else
             {
-                ServerTCPSend(PT_FullSession, &SERVER_SESSIONS[i].id, sizeof(int), packet.sender);
+                ServerTCPSend(PT_FullSession, &session->id, sizeof(int), packet.sender);
             }
         }
     }
@@ -292,4 +299,29 @@ void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
     }
     // Sets the sessionID of player to -1, so that they can join a new session
     senderP->sessionID = -1;
+}
+
+void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
+{
+    int nSessions = server.sessions->size;
+    JoinableSession outgoing[nSessions];
+
+    for (int i = 0; i < nSessions; i++)
+    {
+        Session *current = &SERVER_SESSIONS[i];
+        SDL_memset(outgoing[i].name, 0, 20);
+        if (strlen(current->mapName) > 16)
+        {
+            SDL_memcpy(outgoing[i].name, current->mapName, 16);
+            strcpy(outgoing[i].name + 16, "...");
+        }
+        else
+        {
+            strcpy(outgoing[i].name, current->mapName);
+        }
+        outgoing[i].maxPlayers = current->mapMaxPlayers;
+        outgoing[i].currentPlayers = current->playersP->size;
+        outgoing[i].sessionID = current->id;
+    }
+    ServerTCPSend(PT_FetchSessions, outgoing, sizeof(outgoing), packet.sender);
 }

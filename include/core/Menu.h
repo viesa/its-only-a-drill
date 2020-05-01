@@ -12,7 +12,7 @@
 #include "State.h"
 #include "../MapList.h"
 #include "../Map.h"
-#include "../net/Client.h"
+#include "../net/ClientManager.h"
 
 typedef struct Menu
 {
@@ -29,6 +29,7 @@ typedef struct Menu
     int activeIndex;
     int lastIndex;
     SDL_bool indexChanged;
+    float fetchSessionsTimer;
 
 } Menu;
 

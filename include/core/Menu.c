@@ -13,6 +13,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
+    menu->fetchSessionsTimer = 2.0f;
 
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
@@ -82,6 +83,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
         break;
     case MS_HostLobby:
         MenuUpdateHostLobby(menu, mapList);
+        break;
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby(menu);
         break;
@@ -277,10 +279,26 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
 
 void MenuUpdateJoinLobby(Menu *menu)
 {
+    // Updates menu every 2 seconds
+    if (menu->fetchSessionsTimer >= 2.0f)
+    {
+        menu->fetchSessionsTimer -= 2.0f;
+        ClientTCPSend(PT_FetchSessions, NULL, 0);
+    }
+    else
+    {
+        menu->fetchSessionsTimer += ClockGetDeltaTime();
+    }
+
     //Determine menu options
-    int optionLength = 1;
-    char options[1][100] = {
-        {"Back"}};
+    int optionLength = clientManager.joinList->size + 1;
+    char options[optionLength][100];
+    for (int i = 0; i < optionLength - 1; i++)
+    {
+        JoinableSession *jl = &CLIENTMANAGER_JOINLIST[i];
+        sprintf(options[i], "%s [%d/%d]", jl->name, jl->currentPlayers, jl->maxPlayers);
+    }
+    strcpy(options[optionLength - 1], "Back");
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
@@ -288,14 +306,10 @@ void MenuUpdateJoinLobby(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         menu->indexChanged = SDL_TRUE;
-        switch (menu->activeIndex)
-        {
-        case 0:
+        if (menu->activeIndex == optionLength - 1)
         {
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
-            break;
-        }
         }
     }
     MenuDraw(menu, options, optionLength);
@@ -307,6 +321,8 @@ void MenuUpdateWaitingForLobby(Menu *menu)
     int optionLength = 1;
     char options[1][100] = {
         {"Waiting for lobby"}};
+
+    menu->activeIndex = 0;
 
     // State is changed by ClientManager upon receiving confirmation from server
     MenuDraw(menu, options, optionLength);

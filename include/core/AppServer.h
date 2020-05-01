@@ -3,8 +3,9 @@
 
 #include "Dependencies.h"
 #include "Clock.h"
-#include "../net/Server.h"
 #include "EntityManager.h"
+#include "../net/Server.h"
+#include "../net/JoinableSesssion.h"
 
 typedef struct AppServer AppServer;
 
@@ -14,7 +15,7 @@ void AppServerDestroy(AppServer *app);
 // Main loop
 void AppServerGo(AppServer *app);
 
-// Updates the entire network situation for this client
+// Handles all incoming packets and updates command line GUI
 void AppServerUpdate(AppServer *app);
 
 // Displays connected players to the console
@@ -29,5 +30,6 @@ void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
 void AppServerHandleCreateSessionPacket(ParsedPacket packet);
 void AppServerHandleJoinSessionPacket(ParsedPacket packet);
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
+void AppServerHandleFetchSessionsPacket(ParsedPacket packet);
 
 #endif

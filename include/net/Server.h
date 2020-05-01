@@ -65,25 +65,17 @@ void ServerTCPBroadcastExclusive(PacketType type, void *data, int size, NetPlaye
 void ServerTCPBroadcastExclusiveSession(PacketType type, Session *session, void *data, int size, NetPlayer exclusive);
 // Sends TCP-packet to a specified NetPlayer
 void ServerTCPSend(PacketType type, void *data, int size, NetPlayer player);
-// Chooses how to send the packet, if it is big or small
+// // Final step before TCP-packet leaving the client
 // Every other sending operation leads to this step
 void ServerTCPOut(TCPpacket *packet);
-// Final step before TCP-packet leaving the client, packetsize < 63535
-void ServerTCPSmallOut(TCPpacket *packet);
-// Final step before TCP-packet leaving the client, packetsize > 63535
-void ServerTCPBigOut(TCPpacket *packet);
 // Thread function to listen to clients and receive packets, parse them and add them to inBuffer
 void ServerListenToClients();
 // Try receive UDP-packet and add it to inBuffer
 int ServerTryReceiveUDPPacket();
 // Try accept a new TCP-socket and add it to socket set
 int ServerTryAcceptTCPSocket();
-// Receives header of TCP-packet and chooses how to receive the rest, big or small
+// Try receive TCP-packet and add it to inBuffer
 int ServerTryReceiveTCPPacket(NetPlayer player);
-// Receives TCP-packet and add it to inBuffer, packetsize < 63535
-int ServerReceiveSmallTCPPacket(NetPlayer player, size_t packetSize);
-// Receives TCP-packet and add it to inBuffer, packetsize > 63535
-int ServerReceiveBigTCPPacket(NetPlayer player, size_t packetSize);
 // Deletes the client from player-list and notifies all clients
 void ServerRemoveClient(NetPlayer player);
 // Returns lowest free unique ID

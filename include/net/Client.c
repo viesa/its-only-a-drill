@@ -147,14 +147,24 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
 
 int ClientTCPOut(TCPpacket *packet)
 {
-    int result = 0;
-    if (packet->len <= TCP_MAX_SIZE)
+    assert("Attempting to send packet without client initialization" && client.isInitialized);
+
+    int totalSizeToSend = (int)packet->len;
+    int totalSent = 0;
+
+    while (totalSent < totalSizeToSend)
     {
-        result = ClientTCPSmallOut(packet);
-    }
-    else
-    {
-        result = ClientTCPBigOut(packet);
+        // Attempts to send as much as possible
+        int newSend = SDLNet_TCP_Send(packet->address, packet->data + totalSent, totalSizeToSend - totalSent);
+        // If nothing was sent, or negative, connection was dissrupted
+        if (newSend <= 0)
+        {
+#ifdef CLIENT_DEBUG
+            log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
+#endif
+            return 0;
+        }
+        totalSent += newSend;
     }
 
     PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
@@ -163,44 +173,6 @@ int ClientTCPOut(TCPpacket *packet)
                            packet->len,
                            *SDLNet_TCP_GetPeerAddress(packet->address),
                            "TCP", "OUTGOING");
-    return result;
-}
-
-int ClientTCPSmallOut(TCPpacket *packet)
-{
-    if (!SDLNet_TCP_Send(packet->address, packet->data, packet->len))
-    {
-#ifdef CLIENT_DEBUG
-        log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
-#endif
-        return 0;
-    }
-    return 1;
-}
-
-int ClientTCPBigOut(TCPpacket *packet)
-{
-    int totalSizeToSend = (int)packet->len;
-    int nFullPackagesRequired = (int)(totalSizeToSend / TCP_MAX_SIZE);
-    int bytesLeft = totalSizeToSend % TCP_MAX_SIZE;
-
-    for (int i = 0; i < nFullPackagesRequired; i++)
-    {
-        if (!SDLNet_TCP_Send(packet->address, packet->data + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
-        {
-#ifdef CLIENT_DEBUG
-            log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
-#endif
-            return 0;
-        }
-    }
-    if (!SDLNet_TCP_Send(packet->address, packet->data + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
-    {
-#ifdef CLIENT_DEBUG
-        log_warn("Failed to send TCP-packet to server: %s", SDLNet_GetError());
-#endif
-        return 0;
-    }
     return 1;
 }
 
@@ -303,93 +275,43 @@ int ClientTryReceiveTCPPacket()
 
     char header[TCP_HEADER_SIZE] = {0};
     // First receive the header to know how big the packet is
-    if (SDLNet_TCP_Recv(client.server.socket, header, TCP_HEADER_SIZE))
+    int headerReceived = 0;
+    while (headerReceived < TCP_HEADER_SIZE)
     {
-        const size_t packetSize = SDL_atoi(header);
-        if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
+        // Attempts to receive as much as possible
+        int newReceive = SDLNet_TCP_Recv(client.server.socket, header + headerReceived, TCP_HEADER_SIZE - headerReceived);
+        // If nothing was received, or negative, connection was dissrupted
+        if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
-            log_info("Received a TCP-packet that was too small, throwing away...");
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
 #endif
             return 0;
         }
-
-        // Then receive the full packet, piece by piece if required
-        int result = 0;
-        if (packetSize < TCP_MAX_SIZE)
-        {
-            result = ClientReceiveSmallTCPPacket(packetSize);
-        }
-        else
-        {
-            result = ClientReceiveBigTCPPacket(packetSize);
-        }
-        return result;
+        headerReceived += newReceive;
     }
-    else
+    const size_t packetSize = SDL_atoi(header);
+    if (packetSize < NET_TYPE_SIZE + NET_ID_SIZE)
     {
 #ifdef CLIENT_DEBUG
-        log_warn("Failed to receive TCP-header from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
+        log_info("Received a TCP-packet that was too small, throwing away...");
 #endif
-        return 0;
     }
-}
 
-int ClientReceiveSmallTCPPacket(size_t packetSize)
-{
-    char rest[packetSize];
-    SDL_memset(rest, 0, packetSize);
-    // Then receive the full packet
-    if (SDLNet_TCP_Recv(client.server.socket, (void *)rest, packetSize))
-    {
-        // Parse data
-        PacketType type = PacketDecodeType(rest);
-        int id = PacketDecodeID(rest);
-        int dataSize = TCPPacketRemoveTypeAndID(rest, packetSize);
-
-        if (id != 0)
-        {
-#ifdef CLIENT_DEBUG
-            log_info("Received TCP-packet with wrong ID, throwing away...");
-#endif
-            return 0;
-        }
-
-        ParsedPacket parsedPacket = ParsedPacketCreate(type, rest, dataSize, client.server);
-        // Add to inBuffer.
-        SDL_LockMutex(client.inBufferMutex);
-        VectorPushBack(client.inBuffer, &parsedPacket);
-        PacketPrintInformation(parsedPacket.type,
-                               0,
-                               parsedPacket.data,
-                               parsedPacket.size,
-                               *parsedPacket.sender.ip,
-                               "TCP", "INCOMING");
-        SDL_UnlockMutex(client.inBufferMutex);
-
-        return 1;
-    }
-    else
-    {
-#ifdef CLIENT_DEBUG
-        log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
-#endif
-        return 0;
-    }
-}
-
-int ClientReceiveBigTCPPacket(size_t packetSize)
-{
+    // Then receive the full packet, piece by piece if required
     char *buffer = MALLOC_N(char, packetSize);
     SDL_memset(buffer, 0, packetSize);
 
     int totalSizeToReceive = (int)packetSize;
-    int nFullPackagesRequired = (int)(totalSizeToReceive / TCP_MAX_SIZE);
-    int bytesLeft = totalSizeToReceive % TCP_MAX_SIZE;
+    int totalReceived = 0;
 
-    for (int i = 0; i < nFullPackagesRequired; i++)
+    // Receive bytes until you received whole packet, or until the connection is dissrupted
+    while (totalReceived < totalSizeToReceive)
     {
-        if (!SDLNet_TCP_Recv(client.server.socket, buffer + i * TCP_MAX_SIZE, TCP_MAX_SIZE))
+        // Attempts to receive as much as possible
+        int newReceive = SDLNet_TCP_Recv(client.server.socket, buffer + totalReceived, totalSizeToReceive - totalReceived);
+        // If nothing was received, or negative, connection was dissrupted
+        if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
             log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
@@ -397,24 +319,16 @@ int ClientReceiveBigTCPPacket(size_t packetSize)
             FREE(buffer);
             return 0;
         }
-    }
-
-    if (!SDLNet_TCP_Recv(client.server.socket, buffer + nFullPackagesRequired * TCP_MAX_SIZE, bytesLeft))
-    {
-#ifdef CLIENT_DEBUG
-        log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
-#endif
-        FREE(buffer);
-        return 0;
+        totalReceived += newReceive;
     }
 
     // Parse data
     PacketType type = PacketDecodeType(buffer);
     int id = PacketDecodeID(buffer);
     int dataLength = TCPPacketRemoveTypeAndID(buffer, packetSize);
-    if (id < 0)
+    if (id != 0)
     {
-#ifdef CLIENT_DEBUG
+#ifdef SERVER_DEBUG
         log_info("Received a TCP-packet with invalid ID, throwing packet...");
 #endif
         FREE(buffer);
