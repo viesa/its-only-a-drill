@@ -50,6 +50,8 @@
                 "udpserver.h": "c",
                 "appserver.h": "c",
                 "gui.h": "c",
-                "jsonparser.h": "c"
+                "jsonparser.h": "c",
+                "joinablesesssion.h": "c",
+                "server.h": "c"
         }
 }

@@ -4,6 +4,8 @@ struct AppServer
 {
     SDL_bool *isRunning;
     float displayTimer;
+    CLIState cliState;
+    SDL_Thread *cliWorker;
 };
 
 AppServer *AppServerCreate(SDL_bool *isRunning)
@@ -14,6 +16,8 @@ AppServer *AppServerCreate(SDL_bool *isRunning)
     ServerStart();
     app->isRunning = isRunning;
     app->displayTimer = 0.0f;
+    app->cliState = CS_Main;
+    app->cliWorker = SDL_CreateThread((SDL_ThreadFunction)AppServerUpdateCLI, "CLI Update", app);
     return app;
 }
 
@@ -25,11 +29,10 @@ void AppServerDestroy(AppServer *app)
 
 void AppServerGo(AppServer *app)
 {
-    AppServerUpdate(app);
-    AppServerShowPlayerList(app);
+    AppServerHandleAllPackets(app);
 }
 
-void AppServerUpdate(AppServer *app)
+void AppServerHandleAllPackets(AppServer *app)
 {
     SDL_LockMutex(server.inBufferMutex);
     for (size_t i = 0; i < server.inBuffer->size; i++)
@@ -75,34 +78,137 @@ void AppServerUpdate(AppServer *app)
     VectorClear(server.inBuffer);
     SDL_UnlockMutex(server.inBufferMutex);
 }
-void AppServerShowPlayerList(AppServer *app)
+
+void AppServerUpdateCLI(AppServer *app)
 {
-    if (app->displayTimer > 1.0f)
-    {
-        app->displayTimer -= 1.0f;
-    }
-    else
-    {
-        app->displayTimer += ClockGetDeltaTime();
-        return;
-    }
 
-    // #ifdef __linux__
-    //     system("clear");
-    // #endif
-    // #ifdef __APPLE__
-    //     system("clear");
-    // #endif
-    // #ifdef _WIN32
-    //     system("cls");
-    // #endif
+    while (server.isActive)
+    {
+        AppServerDrawCLI(app);
 
-    printf("\n---- Player List ----\n");
-    for (int i = 0; i < server.players->size; i++)
-        printf("%s [%d]:(host:port): %d:%d\n", SERVER_PLAYERS[i].name, SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].ip->host, SERVER_PLAYERS[i].ip->port);
-    printf("Ammount of players %u\n", (unsigned int)server.players->size);
-    printf("---- End of player list ----\n\n");
+        char input;
+        scanf(" %c", &input);
+        input = toupper(input);
+        switch (app->cliState)
+        {
+        case CS_Main:
+        {
+            if (input == 'P')
+            {
+                app->cliState = CS_PlayerList;
+            }
+            if (input == 'S')
+            {
+                app->cliState = CS_SessionList;
+            }
+            if (input == 'T')
+            {
+                app->cliState = CS_Traffic;
+            }
+            if (input == 'Q')
+            {
+                *app->isRunning = SDL_FALSE;
+            }
+        }
+        break;
+        case CS_PlayerList:
+        {
+            if (input == 'R')
+            {
+            }
+            if (input == 'B')
+            {
+                app->cliState = CS_Main;
+            }
+        }
+        break;
+        case CS_SessionList:
+        {
+            if (input == 'R')
+            {
+            }
+            if (input == 'B')
+            {
+                app->cliState = CS_Main;
+            }
+        }
+        break;
+        case CS_Traffic:
+        {
+            if (input == 'B')
+            {
+                app->cliState = CS_Main;
+            }
+        }
+        break;
+        default:
+            break;
+        }
+    }
 }
+
+void AppServerDrawCLI(AppServer *app)
+{
+#ifdef __linux__
+    system("clear");
+#endif
+#ifdef __APPLE__
+    system("clear");
+#endif
+#ifdef _WIN32
+    system("cls");
+#endif
+
+    printf("   ____                    \n");
+    printf("  / __/__ _____  _____ ____\n");
+    printf(" _\\ \\/ -_) __/ |/ / -_) __/\n");
+    printf("/___/\\__/_/  |___/\\__/_/   \n\n");
+    switch (app->cliState)
+    {
+    case CS_Main:
+    {
+        printf("(P) Show Playerlist\n");
+        printf("(S) Show Sessionlist\n");
+        printf("(T) Show Traffic\n");
+        printf("(Q) Quit\n");
+    }
+    break;
+    case CS_PlayerList:
+    {
+        printf("Number of players: %zu\n\n", server.players->size);
+        for (int i = 0; i < server.players->size; i++)
+            printf("[ID:%d] %s IP: %d:%d\n", SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].name, SERVER_PLAYERS[i].ip->host, SERVER_PLAYERS[i].ip->port);
+        if (server.players->size > 0)
+            printf("\n");
+        printf("(R) Reload\n");
+        printf("(B) Go Back\n");
+    }
+    break;
+    case CS_SessionList:
+    {
+        printf("Number of sessions: %zu\n\n", server.sessions->size);
+        for (int i = 0; i < server.sessions->size; i++)
+        {
+            Session *session = &SERVER_SESSIONS[i];
+            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapName, session->playersP->size, session->mapMaxPlayers);
+        }
+        if (server.sessions->size > 0)
+            printf("\n");
+        printf("(R) Reload\n");
+        printf("(B) Go Back\n");
+    }
+    break;
+    case CS_Traffic:
+    {
+        printf("(B) Go Back\n");
+    }
+    break;
+    default:
+        break;
+    }
+    printf("\n");
+}
+
 NetPlayer *AppServerNetPlayerToPointer(NetPlayer player)
 {
     for (size_t i = 0; i < server.players->size; i++)

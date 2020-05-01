@@ -7,6 +7,16 @@
 #include "../net/Server.h"
 #include "../net/JoinableSesssion.h"
 
+typedef enum CLIState
+{
+    CS_Main,
+    CS_PlayerList,
+    CS_SessionList,
+    CS_Traffic,
+    CS_None,
+    CS_Count
+} CLIState;
+
 typedef struct AppServer AppServer;
 
 AppServer *AppServerCreate(SDL_bool *isRunning);
@@ -15,11 +25,13 @@ void AppServerDestroy(AppServer *app);
 // Main loop
 void AppServerGo(AppServer *app);
 
-// Handles all incoming packets and updates command line GUI
-void AppServerUpdate(AppServer *app);
+// Handles all incoming packets
+void AppServerHandleAllPackets(AppServer *app);
 
-// Displays connected players to the console
-void AppServerShowPlayerList(AppServer *app);
+// Thread function to update command line interface, CLI
+void AppServerUpdateCLI(AppServer *app);
+
+void AppServerDrawCLI(AppServer *app);
 
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
