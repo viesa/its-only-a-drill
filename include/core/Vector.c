@@ -141,3 +141,16 @@ void VectorClear(Vector *vector)
         log_info("Vector cleared, %d elements removed", oldSize);
 #endif
 }
+
+size_t VectorFind(Vector *vector, void *element)
+{
+    for (size_t i = 0; i < vector->size; i++)
+    {
+        if (!SDL_memcmp(&((char *)vector->data)[i], element, vector->elementSize))
+        {
+            return i;
+        }
+    }
+    // If element was not found, return index = size
+    return vector->size;
+}

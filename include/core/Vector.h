@@ -29,4 +29,6 @@ void VectorEraseRange(Vector *vector, size_t start, size_t end);
 void VectorEraseElement(Vector *vector, void *element);
 void VectorClear(Vector *vector);
 
+size_t VectorFind(Vector *vector, void *element);
+
 #endif
