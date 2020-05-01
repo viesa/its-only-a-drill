@@ -26,12 +26,25 @@ typedef enum MenuState
     MS_NStates
 } MenuState;
 
+// Used only on server
+typedef enum CLIState
+{
+    CS_Main,
+    CS_PlayerList,
+    CS_SessionList,
+    CS_Traffic,
+    CS_None,
+    CS_Count
+} CLIState;
+
 void StateInitialize();
 
 GameState GameStateGet();
 MenuState MenuStateGet();
+CLIState CLIStateGet();
 
 void GameStateSet(GameState newState);
 void MenuStateSet(MenuState newState);
+void CLIStateSet(CLIState newState);
 
 #endif

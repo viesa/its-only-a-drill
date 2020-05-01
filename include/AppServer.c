@@ -4,19 +4,18 @@ struct AppServer
 {
     SDL_bool *isRunning;
     float displayTimer;
-    CLIState cliState;
     SDL_Thread *cliWorker;
 };
 
 AppServer *AppServerCreate(SDL_bool *isRunning)
 {
     EntityManagerInitialize();
+    CLIStateSet(CS_Main);
 
     AppServer *app = MALLOC(AppServer);
     ServerStart();
     app->isRunning = isRunning;
     app->displayTimer = 0.0f;
-    app->cliState = CS_Main;
     app->cliWorker = SDL_CreateThread((SDL_ThreadFunction)AppServerUpdateCLI, "CLI Update", app);
     return app;
 }
@@ -25,6 +24,8 @@ void AppServerDestroy(AppServer *app)
 {
     ServerStop();
     EntityManagerUninitalize();
+    if (app->cliWorker)
+        SDL_WaitThread(app->cliWorker, NULL);
 }
 
 void AppServerGo(AppServer *app)
@@ -81,7 +82,7 @@ void AppServerHandleAllPackets(AppServer *app)
 
 void AppServerUpdateCLI(AppServer *app)
 {
-
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
     while (server.isActive)
     {
         AppServerDrawCLI(app);
@@ -89,21 +90,23 @@ void AppServerUpdateCLI(AppServer *app)
         char input;
         scanf(" %c", &input);
         input = toupper(input);
-        switch (app->cliState)
+        switch (CLIStateGet())
         {
         case CS_Main:
         {
             if (input == 'P')
             {
-                app->cliState = CS_PlayerList;
+                CLIStateSet(CS_PlayerList);
             }
             if (input == 'S')
             {
-                app->cliState = CS_SessionList;
+                CLIStateSet(CS_SessionList);
             }
             if (input == 'T')
             {
-                app->cliState = CS_Traffic;
+                CLIStateSet(CS_Traffic);
+                // Takes the lock so that "(B) Go back" is printed before any traffic
+                SDL_LockMutex(server.trafficMutex);
             }
             if (input == 'Q')
             {
@@ -118,7 +121,7 @@ void AppServerUpdateCLI(AppServer *app)
             }
             if (input == 'B')
             {
-                app->cliState = CS_Main;
+                CLIStateSet(CS_Main);
             }
         }
         break;
@@ -129,7 +132,7 @@ void AppServerUpdateCLI(AppServer *app)
             }
             if (input == 'B')
             {
-                app->cliState = CS_Main;
+                CLIStateSet(CS_Main);
             }
         }
         break;
@@ -137,7 +140,7 @@ void AppServerUpdateCLI(AppServer *app)
         {
             if (input == 'B')
             {
-                app->cliState = CS_Main;
+                CLIStateSet(CS_Main);
             }
         }
         break;
@@ -147,23 +150,19 @@ void AppServerUpdateCLI(AppServer *app)
     }
 }
 
-void AppServerDrawCLI(AppServer *app)
+void AppServerDrawTitle(AppServer *app)
 {
-#ifdef __linux__
-    system("clear");
-#endif
-#ifdef __APPLE__
-    system("clear");
-#endif
-#ifdef _WIN32
-    system("cls");
-#endif
-
     printf("   ____                    \n");
     printf("  / __/__ _____  _____ ____\n");
     printf(" _\\ \\/ -_) __/ |/ / -_) __/\n");
     printf("/___/\\__/_/  |___/\\__/_/   \n\n");
-    switch (app->cliState)
+}
+
+void AppServerDrawCLI(AppServer *app)
+{
+    AppServerClearTerminal(app);
+    AppServerDrawTitle(app);
+    switch (CLIStateGet())
     {
     case CS_Main:
     {
@@ -201,12 +200,26 @@ void AppServerDrawCLI(AppServer *app)
     case CS_Traffic:
     {
         printf("(B) Go Back\n");
+        SDL_UnlockMutex(server.trafficMutex);
     }
     break;
     default:
         break;
     }
     printf("\n");
+}
+
+void AppServerClearTerminal(AppServer *app)
+{
+#ifdef __linux__
+    system("clear");
+#endif
+#ifdef __APPLE__
+    system("clear");
+#endif
+#ifdef _WIN32
+    system("cls");
+#endif
 }
 
 NetPlayer *AppServerNetPlayerToPointer(NetPlayer player)

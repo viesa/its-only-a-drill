@@ -4,6 +4,7 @@
 #include "../core/Dependencies.h"
 #include "../core/Vector.h"
 #include "../core/Entity.h"
+#include "../core/State.h"
 #include "Packager.h"
 #include "NetPlayer.h"
 #include "Session.h"
@@ -13,6 +14,8 @@
 #define SERVER_IDS ServerGetIDArray()
 #define SERVER_SESSIONS ServerGetSessionArray()
 #define SERVER_SESSIONBITMAP ServerGetSessionBitmapArray()
+
+#define TRAFFIC_BUFFER_SIZE 5000
 
 struct
 {
@@ -33,6 +36,8 @@ struct
     SDL_bool isInitialized;
 
     SDL_Thread *listenThread;
+
+    SDL_mutex *trafficMutex;
 } server;
 
 // Creates a UDP server on a fixed port

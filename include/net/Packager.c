@@ -103,10 +103,10 @@ PacketType PacketDecodeID(void *data)
 
 void PacketPrintInformation(PacketType type, int id, void *data, int size, IPaddress ip, const char *protocol, const char *inout)
 {
-#ifdef PACKAGER_DEBUG
-    printf(" [%s] [%s] (host | port) (%d | %d)\n", protocol, inout, ip.host, ip.port);
+
+    printf(" [%s] [%s] IP: %d:%d\n", protocol, inout, ip.host, ip.port);
     printf(" [ID:%d] [Type:%d] [Size:%d] \n", id, type, size);
-#endif
+
 #ifdef PACKAGER_DEBUG_RAWINOUT
     printf("\n ---- RAW DATA ----\n");
     for (int i = 0; i < size; i++)

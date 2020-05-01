@@ -111,12 +111,14 @@ int ClientUDPOut(UDPpacket *packet)
 #endif
         return 0;
     }
+#ifdef CLIENT_IO
     PacketPrintInformation(PacketDecodeType(packet->data),
                            PacketDecodeID(packet->data),
                            packet->data,
                            packet->len,
                            packet->address,
                            "UDP", "OUTGOING");
+#endif
     return 1;
 }
 
@@ -167,12 +169,14 @@ int ClientTCPOut(TCPpacket *packet)
         totalSent += newSend;
     }
 
+#ifdef CLIENT_IO
     PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
                            PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
                            packet->data,
                            packet->len,
                            *SDLNet_TCP_GetPeerAddress(packet->address),
                            "TCP", "OUTGOING");
+#endif
     return 1;
 }
 
@@ -257,12 +261,14 @@ int ClientTryReceiveUDPPacket()
             ParsedPacket parsedPacket = ParsedPacketCreate(type, incoming->data, incoming->len, client.server);
             SDL_LockMutex(client.inBufferMutex);
             VectorPushBack(client.inBuffer, &parsedPacket);
+#ifdef CLIENT_IO
             PacketPrintInformation(parsedPacket.type,
                                    0,
                                    parsedPacket.data,
                                    parsedPacket.size,
                                    *parsedPacket.sender.ip,
                                    "UDP", "INCOMING");
+#endif
             SDL_UnlockMutex(client.inBufferMutex);
         }
     }
@@ -339,12 +345,14 @@ int ClientTryReceiveTCPPacket()
     // Add to inBuffer.
     SDL_LockMutex(client.inBufferMutex);
     VectorPushBack(client.inBuffer, &parsedPacket);
+#ifdef CLIENT_IO
     PacketPrintInformation(parsedPacket.type,
                            parsedPacket.sender.id,
                            parsedPacket.data,
                            parsedPacket.size,
                            *parsedPacket.sender.ip,
                            "TCP", "INCOMING");
+#endif
     SDL_UnlockMutex(client.inBufferMutex);
 
     FREE(buffer);

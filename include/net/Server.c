@@ -181,12 +181,17 @@ void ServerUDPOut(UDPpacket *packet)
         log_warn("Failed to send UDP-packet to client: %s", SDLNet_GetError());
 #endif
     }
-    PacketPrintInformation(PacketDecodeType(packet->data),
-                           PacketDecodeID(packet->data),
-                           packet->data,
-                           packet->len,
-                           packet->address,
-                           "UDP", "OUTGOING");
+    if (CLIStateGet() == CS_Traffic)
+    {
+        SDL_LockMutex(server.trafficMutex);
+        PacketPrintInformation(PacketDecodeType(packet->data),
+                               PacketDecodeID(packet->data),
+                               packet->data,
+                               packet->len,
+                               packet->address,
+                               "UDP", "OUTGOING");
+        SDL_UnlockMutex(server.trafficMutex);
+    }
 }
 
 void ServerTCPBroadcast(PacketType type, void *data, int size)
@@ -275,12 +280,17 @@ void ServerTCPOut(TCPpacket *packet)
         totalSent += newSend;
     }
 
-    PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
-                           PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
-                           packet->data,
-                           packet->len,
-                           *SDLNet_TCP_GetPeerAddress(packet->address),
-                           "TCP", "OUTGOING");
+    if (CLIStateGet() == CS_Traffic)
+    {
+        SDL_LockMutex(server.trafficMutex);
+        PacketPrintInformation(PacketDecodeType(((char *)packet->data) + TCP_HEADER_SIZE),
+                               PacketDecodeID(((char *)packet->data) + TCP_HEADER_SIZE),
+                               packet->data,
+                               packet->len,
+                               *SDLNet_TCP_GetPeerAddress(packet->address),
+                               "TCP", "OUTGOING");
+        SDL_UnlockMutex(server.trafficMutex);
+    }
 }
 
 void ServerListenToClients()
@@ -383,12 +393,18 @@ int ServerTryReceiveUDPPacket()
                 ParsedPacket parsedPacket = ParsedPacketCreate(type, incoming->data, incoming->len, *sender);
                 SDL_LockMutex(server.inBufferMutex);
                 VectorPushBack(server.inBuffer, &parsedPacket);
-                PacketPrintInformation(parsedPacket.type,
-                                       parsedPacket.sender.id,
-                                       parsedPacket.data,
-                                       parsedPacket.size,
-                                       *parsedPacket.sender.ip,
-                                       "UDP", "INCOMING");
+
+                if (CLIStateGet() == CS_Traffic)
+                {
+                    SDL_LockMutex(server.trafficMutex);
+                    PacketPrintInformation(parsedPacket.type,
+                                           parsedPacket.sender.id,
+                                           parsedPacket.data,
+                                           parsedPacket.size,
+                                           *parsedPacket.sender.ip,
+                                           "UDP", "INCOMING");
+                    SDL_UnlockMutex(server.trafficMutex);
+                }
                 SDL_UnlockMutex(server.inBufferMutex);
             }
             else
@@ -502,12 +518,18 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
     // Add to inBuffer.
     SDL_LockMutex(server.inBufferMutex);
     VectorPushBack(server.inBuffer, &parsedPacket);
-    PacketPrintInformation(parsedPacket.type,
-                           parsedPacket.sender.id,
-                           parsedPacket.data,
-                           parsedPacket.size,
-                           *parsedPacket.sender.ip,
-                           "TCP", "INCOMING");
+
+    if (CLIStateGet() == CS_Traffic)
+    {
+        SDL_LockMutex(server.trafficMutex);
+        PacketPrintInformation(parsedPacket.type,
+                               parsedPacket.sender.id,
+                               parsedPacket.data,
+                               parsedPacket.size,
+                               *parsedPacket.sender.ip,
+                               "TCP", "INCOMING");
+        SDL_UnlockMutex(server.trafficMutex);
+    }
     SDL_UnlockMutex(server.inBufferMutex);
 
     FREE(buffer);
@@ -543,7 +565,6 @@ void ServerRemoveClient(NetPlayer player)
     VectorErase(server.players, index);
 
     ServerFreeID(player.id);
-    printf("Player disconnected [id:%d]\n", player.id);
 }
 
 int ServerGetID()

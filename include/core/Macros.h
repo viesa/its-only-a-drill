@@ -4,7 +4,7 @@
 #define WINDOW_DEBUG
 #endif
 
-#define ANY_DEBUG
+// #define ANY_DEBUG
 
 #ifdef ANY_DEBUG
 // #define MAIN_DEBUG
@@ -12,9 +12,9 @@
 // #define APP_DEBUG
 // #define APP_DEBUG_STRICT
 
-// #define CLIENT_DEBUG
-#define SERVER_DEBUG
-#define PACKAGER_DEBUG
+// // #define CLIENT_DEBUG
+// #define CLIENT_IO
+// #define SERVER_DEBUG
 // #define PACKAGER_DEBUG_RAWINOUT
 
 #define WINDOW_DEBUG
@@ -31,4 +31,4 @@
 //#define frictionReal
 
 // If defined, client will connect with 127.0.0.1
-#define LOCAL_SERVER
+// #define LOCAL_SERVER

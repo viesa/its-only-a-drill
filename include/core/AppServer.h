@@ -4,18 +4,9 @@
 #include "Dependencies.h"
 #include "Clock.h"
 #include "EntityManager.h"
+#include "State.h"
 #include "../net/Server.h"
 #include "../net/JoinableSesssion.h"
-
-typedef enum CLIState
-{
-    CS_Main,
-    CS_PlayerList,
-    CS_SessionList,
-    CS_Traffic,
-    CS_None,
-    CS_Count
-} CLIState;
 
 typedef struct AppServer AppServer;
 
@@ -31,7 +22,9 @@ void AppServerHandleAllPackets(AppServer *app);
 // Thread function to update command line interface, CLI
 void AppServerUpdateCLI(AppServer *app);
 
+void AppServerDrawTitle(AppServer *app);
 void AppServerDrawCLI(AppServer *app);
+void AppServerClearTerminal(AppServer *app);
 
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
