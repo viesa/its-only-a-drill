@@ -55,6 +55,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
+    LobbyInitialize();
     ClientInitialize();
     ClientManagerInitialize();
     ClientSetPlayer(&app->player);
@@ -85,6 +86,7 @@ void AppClientDestroy(AppClient *app)
     ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
+    LobbyUninitialize();
 
     GraphicsDestroy(app->gfx);
     AudioDestroy(app->audio);

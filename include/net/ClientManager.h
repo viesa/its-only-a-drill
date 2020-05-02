@@ -3,6 +3,7 @@
 
 #include "Client.h"
 #include "JoinableSesssion.h"
+#include "Lobby.h"
 #include "../core/State.h"
 #include "../Map.h"
 
@@ -37,7 +38,9 @@ void ClientManagerHandleCreateSessionPacket(ParsedPacket packet);
 void ClientManagerHandleJoinSessionPacket(ParsedPacket packet);
 void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet);
 void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
+void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
+void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

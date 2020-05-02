@@ -53,9 +53,14 @@ void ClientManagerUpdate()
         case PT_FullSession:
             ClientManagerHandleFullSessionPacket(nextPacket);
             break;
+        case PT_HostAssign:
+            ClientManagerHandleHostAssignPacket(nextPacket);
+            break;
         case PT_FetchSessions:
             ClientManagerHandleFetchSessionsPacket(nextPacket);
             break;
+        case PT_FetchLobby:
+            ClientManagerHandleFetchLobbyPacket(nextPacket);
         default:
             break;
         }
@@ -148,9 +153,9 @@ void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
 {
     int sessionID = *(int *)packet.data;
 
-    // If session was not created (error), return to main menu
     if (sessionID == -1)
     {
+        // If session failed to be created, return to main menu
         MenuStateSet(MS_MainMenu);
     }
     if (sessionID >= 0)
@@ -158,6 +163,9 @@ void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
         // If session was created successfully, attempt to join the session with sessionID
         ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
         MenuStateSet(MS_WaitingForLobby);
+        // Assume you are accepted into the session
+        // This is will be set to -1 if it wasn't possible to join the session
+        lobby.sessionID = sessionID;
     }
 }
 
@@ -167,8 +175,24 @@ void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
     {
         char *rawData = (char *)packet.data;
         JSON *mapData = JSONCreateFromArray(rawData, packet.size);
-        MapGenerateNew(mapData);
-        JSONDestroy(mapData);
+        if (!mapData)
+        {
+            // Failed to create a JSON-mapdata from incoming data
+            MenuStateSet(MS_MainMenu);
+            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+            lobby.sessionID = -1;
+            return;
+        }
+        int result = MapGenerateNew(mapData);
+        if (!result)
+        {
+            // Failed to create a map from JSON-data
+            JSONDestroy(mapData);
+            MenuStateSet(MS_MainMenu);
+            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+            lobby.sessionID = -1;
+            return;
+        }
         MenuStateSet(MS_Lobby);
     }
 }
@@ -178,11 +202,17 @@ void ClientManagerHandleFullSessionPacket(ParsedPacket packet)
     if (MenuStateGet() == MS_WaitingForLobby)
     {
         MenuStateSet(MS_JoinLobby);
+        lobby.sessionID = -1;
     }
 }
 
 void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
 {
+}
+
+void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
+{
+    lobby.isHost = SDL_TRUE;
 }
 
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
@@ -208,6 +238,21 @@ void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
     for (int i = 0; i < nSessions; i++)
     {
         VectorPushBack(clientManager.joinList, &fetched[i]);
+    }
+}
+
+void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
+{
+    char *allMembers = (char *)packet.data;
+
+    int nLobbyMembers = packet.size / 20;
+
+    VectorClear(lobby.names);
+    for (int i = 0; i < nLobbyMembers; i++)
+    {
+        LobbyName name = {0};
+        strcpy(name.data, allMembers + i * 20);
+        VectorPushBack(lobby.names, &name);
     }
 }
 

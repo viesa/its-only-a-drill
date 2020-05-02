@@ -92,10 +92,12 @@ int MapGenerateNew(JSON *mapdata)
     // Fetch mad uid
     bufferMap.uid = mapInfoEntries[0].value->u.integer;
 
+    // If new map has same ID as the old, it is regarded as the same map
     if (bufferMap.uid == map.uid)
     {
         bufferMap.uid = 0;
-        return 0;
+        // Return 1 here, because we didn't "fail"
+        return 1;
     }
 
     json_value *layers = JSONGetValue(mapdata, (uint32_t[]){LAYER_INDEX}, 1);

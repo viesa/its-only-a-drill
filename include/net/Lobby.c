@@ -1,5 +1,18 @@
 #include "Lobby.h"
 
-struct Lobby
+void LobbyInitialize()
 {
-} lobby;
+    lobby.sessionID = -1;
+    lobby.names = VectorCreate(sizeof(LobbyName), 10);
+    lobby.isHost = SDL_FALSE;
+}
+
+void LobbyUninitialize()
+{
+    VectorDestroy(lobby.names);
+}
+
+LobbyName *LobbyGetNamesArray()
+{
+    return (LobbyName *)lobby.names->data;
+}

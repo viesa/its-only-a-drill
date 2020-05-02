@@ -14,20 +14,21 @@
 
 typedef enum PacketType
 {
-    PT_Text,              // When plain text is to be sent
-    PT_Connect,           // When client connects to server, recieve their name sends out ID
-    PT_Disconnect,        // When client or server disconnectes
-    PT_NewPlayer,         // When server broadcasts a new player join,
-                          // or when server updates a new client with current players
-    PT_DelPlayer,         // When server broadcasts deletion of a player
-    PT_Entity,            // When sending an entity
-    PT_CompressedEntity,  // When sending a compressed entity
-    PT_CreateSession,     // When client wants to create a lobby
-    PT_JoinSession,       // When client wants to join a lobby
-    PT_LeaveSession,      // When client notifies the server it is leaving the session
-    PT_FullSession,       // When the server notifies the client the session is full
-    PT_HostAssignSession, // When the host notfies the ID of the host
-    PT_FetchSessions,     // When client asks servers what sessions exists
+    PT_Text,             // When plain text is to be sent
+    PT_Connect,          // When client connects to server, recieve their name sends out ID
+    PT_Disconnect,       // When client or server disconnectes
+    PT_NewPlayer,        // When server broadcasts a new player join,
+                         // or when server updates a new client with current players
+    PT_DelPlayer,        // When server broadcasts deletion of a player
+    PT_Entity,           // When sending an entity
+    PT_CompressedEntity, // When sending a compressed entity
+    PT_CreateSession,    // When client wants to create a lobby
+    PT_JoinSession,      // When client wants to join a lobby
+    PT_LeaveSession,     // When client notifies the server it is leaving the session
+    PT_FullSession,      // When the server notifies the client the session is full
+    PT_HostAssign,       // When the host notfies the ID of the host
+    PT_FetchSessions,    // When client asks server what sessions exists
+    PT_FetchLobby,       // When client asks server which players are in given lobby
     PT_None,
     PT_Count
 } PacketType;

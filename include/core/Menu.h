@@ -13,6 +13,7 @@
 #include "../MapList.h"
 #include "../Map.h"
 #include "../net/ClientManager.h"
+#include "../net/Lobby.h"
 
 typedef struct Menu
 {
@@ -30,7 +31,7 @@ typedef struct Menu
     int lastIndex;
     SDL_bool indexChanged;
     float fetchSessionsTimer;
-
+    float fetchLobbyTimer;
 } Menu;
 
 // Creates menu
@@ -42,6 +43,7 @@ void MenuUpdateMainMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
 void MenuUpdateHostLobby(Menu *menu, MapList *mapList);
 void MenuUpdateWaitingForLobby(Menu *menu);
+void MenuUpdateLobby(Menu *menu);
 void MenuUpdateOptions(Menu *menu);
 void MenuUpdateResolution(Menu *menu);
 void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);

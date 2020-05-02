@@ -14,6 +14,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font)
     menu->activeIndex = 0;
     menu->lastIndex = 0;
     menu->fetchSessionsTimer = 2.0f;
+    menu->fetchSessionsTimer = 0.5f;
 
     SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
@@ -86,6 +87,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
         break;
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby(menu);
+        break;
+    case MS_Lobby:
+        MenuUpdateLobby(menu);
         break;
     case MS_Options:
         MenuUpdateOptions(menu);
@@ -280,9 +284,10 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
 void MenuUpdateJoinLobby(Menu *menu)
 {
     // Updates menu every 2 seconds
-    if (menu->fetchSessionsTimer >= 2.0f)
+    const float delay = 2.0f;
+    if (menu->fetchSessionsTimer >= delay)
     {
-        menu->fetchSessionsTimer -= 2.0f;
+        menu->fetchSessionsTimer -= delay;
         ClientTCPSend(PT_FetchSessions, NULL, 0);
     }
     else
@@ -325,6 +330,58 @@ void MenuUpdateWaitingForLobby(Menu *menu)
     menu->activeIndex = 0;
 
     // State is changed by ClientManager upon receiving confirmation from server
+    // We could add a timeout
+
+    MenuDraw(menu, options, optionLength);
+}
+
+void MenuUpdateLobby(Menu *menu)
+{
+    // Updates lobby every 0.5 seconds
+    const float delay = 0.5f;
+    if (menu->fetchLobbyTimer >= delay)
+    {
+        menu->fetchLobbyTimer -= delay;
+        ClientTCPSend(PT_FetchLobby, &lobby.sessionID, sizeof(int));
+    }
+    else
+    {
+        menu->fetchLobbyTimer += ClockGetDeltaTime();
+    }
+
+    //Determine menu options
+    int optionLength = lobby.names->size + 2 + (int)lobby.isHost;
+    char options[optionLength][100];
+
+    //Determine menu options
+    strcpy(options[0], "Lobby");
+    for (int i = 1; i < optionLength - 1 - (int)lobby.isHost; i++)
+    {
+        sprintf(options[i], "%s", LOBBY_NAMES[i - 1].data);
+    }
+    strcpy(options[optionLength - 1 - (int)lobby.isHost], "Disconnect");
+    if (lobby.isHost)
+    {
+        strcpy(options[optionLength - 1], "Start");
+    }
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        menu->indexChanged = SDL_TRUE;
+        if (menu->activeIndex == optionLength - 1 - (int)lobby.isHost)
+        {
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+            VectorClear(lobby.names);
+            lobby.sessionID = -1;
+            lobby.isHost = SDL_FALSE;
+        }
+    }
+
     MenuDraw(menu, options, optionLength);
 }
 
@@ -574,6 +631,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     case MS_JoinLobby:
     case MS_HostLobby:
     case MS_WaitingForLobby:
+    case MS_Lobby:
     case MS_Resolution:
     case MS_FPS:
     case MS_CustomMap:

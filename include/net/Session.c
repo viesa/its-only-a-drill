@@ -20,7 +20,7 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
     session.id = id;
     session.host = host;
     session.playersP = VectorCreate(sizeof(NetPlayer *), 10);
-    VectorPushBack(session.playersP, session.host);
+    VectorPushBack(session.playersP, &session.host);
     session.rawMap = MALLOC_N(char, size);
     ALLOC_ERROR_CHECK(session.rawMap);
     session.rawMapDataSize = size;

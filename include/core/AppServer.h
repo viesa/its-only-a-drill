@@ -35,6 +35,7 @@ void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
 void AppServerHandleCreateSessionPacket(ParsedPacket packet);
 void AppServerHandleJoinSessionPacket(ParsedPacket packet);
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
+void AppServerHandleFetchLobbyPacket(ParsedPacket packet);
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet);
 
 #endif
