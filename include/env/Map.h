@@ -1,9 +1,9 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "core/Dependencies.h"
-#include "core/EntityManager.h"
-#include "core/JSON.h"
+#include "Dependencies.h"
+#include "EntityManager.h"
+#include "JSON.h"
 
 void MapInitialize();
 void MapUninitialize();

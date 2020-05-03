@@ -2,8 +2,8 @@
 #define ENTITYMANAGER_H
 
 #include "Dependencies.h"
-#include "Entity.h"
 #include "Vector.h"
+#include "Entity.h"
 
 #define ENTITY_VECTOR EntityManagerGetVector()
 #define ENTITY_ARRAY_SIZE EntityManagerGetVectorSize()

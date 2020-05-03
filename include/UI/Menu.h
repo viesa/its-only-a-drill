@@ -10,10 +10,10 @@
 #include "Transition.h"
 #include "Loadingbar.h"
 #include "State.h"
-#include "../MapList.h"
-#include "../Map.h"
-#include "../net/ClientManager.h"
-#include "../net/Lobby.h"
+#include "MapList.h"
+#include "Map.h"
+#include "ClientManager.h"
+#include "Lobby.h"
 
 typedef struct Menu
 {

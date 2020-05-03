@@ -2,7 +2,7 @@
 #define LIBRARY_H
 
 #include "Dependencies.h"
-#include "../math/Vec2.h"
+#include "Vec2.h"
 
 #define INF ((size_t)18446744073709551615)
 #define PI_D (3.141592653589793238462643383279)

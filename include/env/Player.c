@@ -1,6 +1,6 @@
 #include "Player.h"
 
-#include "core/Library.h"
+#include "Library.h"
 
 Player PlayerCreate(Camera *camera)
 {

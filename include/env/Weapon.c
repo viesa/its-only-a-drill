@@ -1,4 +1,5 @@
 #include "Weapon.h"
+
 #include "Entity.h"
 
 void weaponUpdate(Item *item)

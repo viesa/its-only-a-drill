@@ -52,6 +52,17 @@
                 "gui.h": "c",
                 "jsonparser.h": "c",
                 "joinablesesssion.h": "c",
-                "server.h": "c"
+                "server.h": "c",
+                "input.h": "c",
+                "anim.h": "c",
+                "camera.h": "c",
+                "inventory.h": "c",
+                "score.h": "c",
+                "weapon.h": "c",
+                "behavior.h": "c",
+                "packager.h": "c",
+                "netplayer.h": "c",
+                "session.h": "c",
+                "font.h": "c"
         }
 }

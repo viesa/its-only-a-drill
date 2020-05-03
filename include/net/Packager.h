@@ -1,7 +1,7 @@
 #ifndef UDPPACKAGER_H
 #define UDPPACKAGER_H
 
-#include "../core/Dependencies.h"
+#include "Dependencies.h"
 #include "NetPlayer.h"
 
 #define MAX_MSGLEN 2048

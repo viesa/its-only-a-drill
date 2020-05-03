@@ -1,10 +1,10 @@
 #ifndef SERVER_h
 #define SERVER_h
 
-#include "../core/Dependencies.h"
-#include "../core/Vector.h"
-#include "../core/Entity.h"
-#include "../core/State.h"
+#include "Dependencies.h"
+#include "Vector.h"
+#include "Entity.h"
+#include "State.h"
 #include "Packager.h"
 #include "NetPlayer.h"
 #include "Session.h"

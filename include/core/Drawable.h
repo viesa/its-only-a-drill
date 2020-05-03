@@ -3,7 +3,7 @@
 
 #include "Dependencies.h"
 #include "SpriteSheet.h"
-#include "../math/Vec2.h"
+#include "Vec2.h"
 
 typedef struct Drawable
 {

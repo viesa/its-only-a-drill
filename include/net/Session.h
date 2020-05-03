@@ -1,10 +1,10 @@
 #ifndef SESSION_H
 #define SESSIOn_H
 
-#include "../core/Dependencies.h"
-#include "../core/Vector.h"
+#include "Dependencies.h"
+#include "Vector.h"
 #include "NetPlayer.h"
-#include "../Map.h"
+#include "Map.h"
 
 typedef struct Session
 {

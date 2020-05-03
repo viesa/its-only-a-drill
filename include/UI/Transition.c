@@ -1,5 +1,7 @@
 #include "Transition.h"
 
+#include "Library.h"
+
 struct
 {
     Graphics *gfx;

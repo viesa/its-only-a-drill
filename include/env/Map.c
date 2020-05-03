@@ -1,6 +1,6 @@
 #include "Map.h"
 
-#include "core/Library.h"
+#include "Library.h"
 
 // For map parsing purposes
 #define MAIN_LENGTH 3

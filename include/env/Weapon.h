@@ -2,11 +2,10 @@
 #define Weapon_H
 
 #include "Dependencies.h"
-#include "Input.h"
-#include "../Items.h"
-#include "../Player.h"
-
 #include "Library.h"
+#include "Input.h"
+#include "Items.h"
+#include "Player.h"
 
 void playerShoot(EntityIndexP index, Camera *camera, Item *item);
 void entityShoot(int *index, Vec2 Desierdpoint, Item *item);

@@ -1,11 +1,11 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "core/Dependencies.h"
-#include "core/EntityManager.h"
-#include "core/Input.h"
-#include "core/Anim.h"
-#include "math/Vec2.h"
+#include "Dependencies.h"
+#include "Input.h"
+#include "Vec2.h"
+#include "EntityManager.h"
+#include "Anim.h"
 
 #define RADIUS 25
 

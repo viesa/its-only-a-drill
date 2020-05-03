@@ -1,18 +1,9 @@
 #ifndef MAPLIST_H
 #define MAPLIST_H
 
-#include "core/Dependencies.h"
-#ifdef __linux__
-#include <dirent.h>
-#endif
-#ifdef __APPLE__
-#include <dirent.h>
-#endif
-#ifdef _WIN32
-#include "core/dirent.h"
-#endif
-#include "core/List.h"
-#include "core/JSON.h"
+#include "Dependencies.h"
+#include "Dirent.h"
+#include "JSON.h"
 
 #include "Map.h"
 

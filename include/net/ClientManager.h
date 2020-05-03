@@ -4,8 +4,8 @@
 #include "Client.h"
 #include "JoinableSesssion.h"
 #include "Lobby.h"
-#include "../core/State.h"
-#include "../Map.h"
+#include "State.h"
+#include "Map.h"
 
 #define CLIENTMANAGER_PLAYERS ClientManagerGetPlayersArray()
 #define CLIENTMANAGER_JOINLIST ClientManagerGetJoinListArray()

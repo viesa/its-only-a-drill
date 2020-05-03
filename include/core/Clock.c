@@ -24,12 +24,12 @@ float ClockGetDeltaTime()
     return (float)appClock.delta / 1000.0f;
 }
 
-float ClockGetFPS()
-{
-    return 1 / ClockGetDeltaTime(appClock);
-}
-
 float ClockGetDeltaTimeMS()
 {
     return (float)appClock.delta;
+}
+
+float ClockGetFPS()
+{
+    return 1 / ClockGetDeltaTime(appClock);
 }

@@ -8,8 +8,8 @@ void ClockInitialize();
 void ClockTick();
 /// Returns the ammount of seconds passed since last update
 float ClockGetDeltaTime();
-float ClockGetFPS();
 /// Returns the ammount of milliseconds passed since last update
 float ClockGetDeltaTimeMS();
+float ClockGetFPS();
 
 #endif

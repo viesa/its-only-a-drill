@@ -8,12 +8,12 @@ ifeq ($(detected_OS), Windows)
 APP_C		:= app_client.exe
 APP_S		:= app_server.exe
 LIB_LOC 	:= -LC:\libarys\Chaos_SDL\lib
-INC_LOC 	:= -IC:\libarys\Chaos_SDL\include
+INC_LOC 	:= -IC:\libarys\Chaos_SDL\include -Iinclude/audio -Iinclude/core -Iinclude/env -Iinclude/etc -Iinclude/file_io -Iinclude/net -Iinclude/UI
 else
 APP_C		:= app_client.out
 APP_S		:= app_server.out
 LIB_LOC 	:= -L/usr/lib/x86_64-linux-gnu
-INC_LOC 	:=
+INC_LOC 	:= -Iinclude/audio -Iinclude/core -Iinclude/env -Iinclude/etc -Iinclude/file_io -Iinclude/net -Iinclude/UI
 endif
 
 # CC
@@ -23,7 +23,7 @@ ENTRY_S 	:= Main_Server.c
 
 # Source files
 SRCDIR  	:= ./include
-ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/core/*.c $(SRCDIR)/net/*.c $(SRCDIR)/math/*.c)
+ALL_SRCS	:= $(wildcard $(SRCDIR)/*.c $(SRCDIR)/audio/*.c $(SRCDIR)/core/*.c  $(SRCDIR)/env/*.c $(SRCDIR)/etc/*.c $(SRCDIR)/file_io/*.c $(SRCDIR)/net/*.c $(SRCDIR)/UI/*.c)
 SRCS_C		:= $(filter-out $(SRCDIR)/AppServer.c, $(ALL_SRCS))
 SRCS_S		:= $(filter-out $(SRCDIR)/AppClient.c, $(ALL_SRCS))
 

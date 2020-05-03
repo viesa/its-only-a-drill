@@ -1,6 +1,6 @@
-#include "include/core/Dependencies.h"
-#include "include/core/AppClient.h"
-#include "include/core/Event.h"
+#include "Dependencies.h"
+#include "Event.h"
+#include "include/AppClient.h"
 
 void InitSDL();
 void QuitSDL();

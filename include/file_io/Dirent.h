@@ -8,6 +8,12 @@
  */
 #ifndef DIRENT_H
 #define DIRENT_H
+#ifdef __linux__
+#include <dirent.h>
+#endif
+#ifdef __APPLE__
+#include <dirent.h>
+#endif
 #ifdef _WIN32
 /* Hide warnings about unreferenced local functions */
 #if defined(__clang__)

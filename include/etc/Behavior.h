@@ -3,7 +3,7 @@
 
 #include "Dependencies.h"
 #include "EntityManager.h"
-#include "../math/Vec2.h"
+#include "Vec2.h"
 #include "Library.h"
 #include "Weapon.h"
 

@@ -1,9 +1,9 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "../core/Dependencies.h"
-#include "../core/Vector.h"
-#include "../Player.h"
+#include "Dependencies.h"
+#include "Vector.h"
+#include "Player.h"
 #include "Packager.h"
 
 #define CLIENT_INBUFFER ClientGetInBufferArray()

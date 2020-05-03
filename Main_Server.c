@@ -1,4 +1,4 @@
-#include "include/core/AppServer.h"
+#include "include/AppServer.h"
 
 void InitSDL();
 void QuitSDL();
@@ -14,7 +14,6 @@ int main()
 
     AppServer *app = AppServerCreate(&isRunning);
 
-    printf("Server running...\n");
     while (isRunning)
     {
         ClockTick();

@@ -30,7 +30,7 @@
 
     Ex.
     #include <stdio.h>
-    #include "core/Camera.h"
+    #include "Camera.h"
     
 
 ---- Abstrakta datatyper:
@@ -116,7 +116,7 @@ hanterar vi det genom att skriva ut i terminalen.
 Använd "core/Log.h" !
 
 Ex.
-#include "core/Log.h"
+#include "Log.h"
 
 int result = SDLNet_Init();
 if(result == -1)

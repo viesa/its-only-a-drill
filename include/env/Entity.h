@@ -6,9 +6,9 @@
 #include "Camera.h"
 #include "Clock.h"
 #include "Library.h"
-#include "../Items.h"
-#include "../math/Vec2.h"
+#include "Vec2.h"
 #include "Library.h"
+#include "Items.h"
 
 #define MAX_DRAWABLES 3
 

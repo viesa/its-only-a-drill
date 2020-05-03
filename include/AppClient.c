@@ -1,15 +1,4 @@
-#include "core/AppClient.h"
-#include "Items.h"
-#include "Player.h"
-#include "Map.h"
-#include "MapList.h"
-#include "core/Behavior.h"
-#include "core/Weapon.h"
-#include "core/Score.h"
-#include "core/Inventory.h"
-#include "core/Keybinding.h"
-
-#define MaxEntities 5
+#include "AppClient.h"
 
 struct AppClient
 {

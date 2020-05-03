@@ -5,8 +5,8 @@
 #include "Clock.h"
 #include "EntityManager.h"
 #include "State.h"
-#include "../net/Server.h"
-#include "../net/JoinableSesssion.h"
+#include "Server.h"
+#include "JoinableSesssion.h"
 
 typedef struct AppServer AppServer;
 

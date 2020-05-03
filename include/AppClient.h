@@ -12,11 +12,15 @@
 #include "Menu.h"
 #include "Sound.h"
 #include "Music.h"
-#include "State.h"
-#include "EntityManager.h"
 #include "Cursor.h"
-#include "../net/Client.h"
-#include "../net/ClientManager.h"
+#include "Items.h"
+#include "Player.h"
+#include "Map.h"
+#include "MapList.h"
+#include "Behavior.h"
+#include "Weapon.h"
+#include "Inventory.h"
+#include "Keybinding.h"
 
 typedef struct AppClient AppClient;
 

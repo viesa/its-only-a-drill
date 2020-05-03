@@ -4,8 +4,8 @@
 #include "Dependencies.h"
 #include "Camera.h"
 #include "Graphics.h"
-#include "../Items.h"
-#include "../Player.h"
+#include "Items.h"
+#include "Player.h"
 #include "Entity.h"
 
 //Draws the inventory

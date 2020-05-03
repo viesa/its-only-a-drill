@@ -1,8 +1,8 @@
 #ifndef NETPLAYER_H
 #define NETPLAYER_H
 
-#include "../core/Dependencies.h"
-#include "../core/Entity.h"
+#include "Dependencies.h"
+#include "Entity.h"
 
 typedef struct NetPlayer
 {

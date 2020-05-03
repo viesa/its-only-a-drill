@@ -19,8 +19,6 @@
 
 #include "Macros.h"
 #include "Log.h"
-#include "Library.h"
-#include "../math/Vec2.h"
 
 #define MALLOC(type) (type *)SDL_malloc(sizeof(type))
 #define MALLOC_N(type, n) (type *)SDL_malloc(sizeof(type) * (n))

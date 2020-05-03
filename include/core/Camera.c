@@ -66,15 +66,3 @@ Vec2 CameraGetPos(Camera *camera)
 {
     return camera->m_position;
 }
-
-// Vec2 CameraRemoveRotation(Camera *camera, Vec2 vector)
-// {
-//     float oldX = vector.x;
-//     vector.x = vector.x * cos(camera->m_centerRotation) - vector.y * sin(camera->m_centerRotation);
-//     vector.y = oldX * sin(camera->m_centerRotation) + vector.y * cos(camera->m_centerRotation);
-
-//     return vector;
-
-//     //x' = x * cos(theta) - y * sin(theta)
-//     //y' = x * sin(theta) + y * cos(theta)
-// }
