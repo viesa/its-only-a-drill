@@ -453,7 +453,7 @@ void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
                 int r = rand() % SERVER_SESSIONS[i].playersP->size;
                 SERVER_SESSIONS[i].host = SessionGetPlayers(&SERVER_SESSIONS[i])[r];
                 // Notifes new host that they are host
-                ServerTCPSend(PT_HostAssign, &SERVER_SESSIONS[i].host->id, sizeof(int), packet.sender);
+                ServerTCPSend(PT_HostAssign, NULL, 0, *SERVER_SESSIONS[i].host);
             }
             break;
         }
