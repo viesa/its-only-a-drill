@@ -63,6 +63,7 @@
                 "packager.h": "c",
                 "netplayer.h": "c",
                 "session.h": "c",
-                "font.h": "c"
+                "font.h": "c",
+                "xutility": "c"
         }
 }
