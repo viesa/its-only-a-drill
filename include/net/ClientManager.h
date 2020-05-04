@@ -29,6 +29,7 @@ void ClientManagerDrawConnectedPlayers(Camera *camera);
 // Handles different kind of packets
 void ClientManagerHandleTextPacket(ParsedPacket packet);
 void ClientManagerHandleConnectPacket(ParsedPacket packet);
+void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet);
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet);
 void ClientManagerHandleNewPlayerPacket(ParsedPacket packet);
 void ClientManagerHandleDelPlayerPacket(ParsedPacket packet);
@@ -41,6 +42,7 @@ void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);
+void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

@@ -8,8 +8,7 @@ int main()
     InitSDL();
 
     SDL_bool isRunning = SDL_TRUE;
-    // Has to be the first
-    ServerInitialize();
+
     ClockInitialize();
 
     AppServer *app = AppServerCreate(&isRunning);
@@ -21,8 +20,6 @@ int main()
     }
 
     AppServerDestroy(app);
-    //Has to be the last
-    ServerUninitialize();
 
     QuitSDL();
 

@@ -69,7 +69,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item)
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
-            if (i != *index)
+            if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
                 RayScan(i, makeDestination, point, item, itemFalloff);
         }
     }

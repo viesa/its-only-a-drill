@@ -26,6 +26,8 @@ void AppServerDrawTitle(AppServer *app);
 void AppServerDrawCLI(AppServer *app);
 void AppServerClearTerminal(AppServer *app);
 
+Session *ServerGetSessionByID(int sessionID);
+
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
 void AppServerHandleConnectPacket(ParsedPacket packet);
@@ -37,5 +39,5 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet);
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet);
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet);
-
+void AppServerHandlePlayerHitPacket(ParsedPacket packet);
 #endif
