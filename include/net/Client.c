@@ -13,7 +13,7 @@ void ClientInitialize()
     const char *ip = "127.0.0.1";
     Uint16 port = 1337;
 #else
-    const char *ip = "85.226.160.126"; //drill.pierrelf.com port 1337
+    const char *ip = "drill.pierrelf.com"; //drill.pierrelf.com port 1337
     Uint16 port = 1337;
 #endif
 
