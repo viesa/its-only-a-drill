@@ -6,6 +6,7 @@
 #include "Lobby.h"
 #include "State.h"
 #include "Map.h"
+#include "Notification.h"
 
 #define CLIENTMANAGER_PLAYERS ClientManagerGetPlayersArray()
 #define CLIENTMANAGER_JOINLIST ClientManagerGetJoinListArray()

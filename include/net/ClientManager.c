@@ -103,6 +103,7 @@ void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet)
 {
     MenuStateSet(MS_Name);
     SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
+    Notify("Username taken", 1.0f, NT_ERROR);
 }
 
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
@@ -111,6 +112,7 @@ void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
     if (id == 0)
     {
         ClientDisconnect();
+        Notify("Connection closed", 1.0f, NT_ERROR);
     }
 }
 

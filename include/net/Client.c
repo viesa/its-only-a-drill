@@ -43,6 +43,7 @@ void ClientUpdate()
                 ClientStart();
                 ConStateSet(CON_Online);
                 client.connectTimer = 0.0f;
+                Notify("Connection reestablished", 1.0f, NT_INFO);
             }
             client.connectTimer = 0.0f;
         }

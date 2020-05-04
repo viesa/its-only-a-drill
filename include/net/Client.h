@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Packager.h"
 #include "State.h"
+#include "Notification.h"
 
 #define CLIENT_INBUFFER ClientGetInBufferArray()
 
