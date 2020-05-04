@@ -44,6 +44,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
+    NotifyInitialize(app->font);
+
     LobbyInitialize();
     ClientInitialize();
     ClientManagerInitialize();
@@ -52,7 +54,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 
     for (int i = 1; i < 10; i++)
     {
-        EntityIndexP npc = EntityManagerAdd(ET_Woman, Vec2Create(100.0f * i, 0.0f));
+        EntityIndexP npc = EntityManagerAdd(ET_Woman, Vec2Create(100.0f * i + 300.0f, 0.0f));
         ENTITY_ARRAY[*npc].isNPC = SDL_TRUE;
     }
     ENTITY_ARRAY[*app->player.entity].entityState = EntityPlayer;
@@ -72,6 +74,10 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 }
 void AppClientDestroy(AppClient *app)
 {
+    if (lobby.sessionID != -1)
+    {
+        ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+    }
     ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
@@ -103,6 +109,7 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
+    ClientUpdate();
     ClientManagerUpdate();
 
     switch (GameStateGet())
@@ -206,7 +213,6 @@ void AppClientUpdate(AppClient *app)
             ENTITY_ARRAY[2].desiredPoint.y = 180;
             ENTITY_ARRAY[2].entityState = Nutral;
         }
-
         //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
         PlayerUpdate(&app->player, app->camera);
 
@@ -271,4 +277,5 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
+    NotifierUpdate();
 }

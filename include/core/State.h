@@ -6,7 +6,7 @@ typedef enum GameState
     GS_Menu,
     GS_Playing,
     GS_None,
-    GS_NStates
+    GS_Count
 } GameState;
 
 typedef enum MenuState
@@ -24,8 +24,16 @@ typedef enum MenuState
     MS_KEYBINDING,
     MS_CustomMap,
     MS_None,
-    MS_NStates
+    MS_Count
 } MenuState;
+
+typedef enum ConState
+{
+    CON_Offline,
+    CON_Online,
+    CON_None,
+    CON_Count
+} ConState;
 
 // Used only on server
 typedef enum CLIState
@@ -42,10 +50,12 @@ void StateInitialize();
 
 GameState GameStateGet();
 MenuState MenuStateGet();
+ConState ConStateGet();
 CLIState CLIStateGet();
 
 void GameStateSet(GameState newState);
 void MenuStateSet(MenuState newState);
+void ConStateSet(ConState newState);
 void CLIStateSet(CLIState newState);
 
 #endif

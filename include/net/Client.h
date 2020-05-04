@@ -5,6 +5,8 @@
 #include "Vector.h"
 #include "Player.h"
 #include "Packager.h"
+#include "State.h"
+#include "Notification.h"
 
 #define CLIENT_INBUFFER ClientGetInBufferArray()
 
@@ -26,12 +28,20 @@ struct
     SDL_Thread *listenThread;
 
     char name[MAX_PLAYERNAME_SIZE];
+    SDL_bool hasSentName;
 
+    float connectTimer;
 } client;
 
 void ClientInitialize();
 void ClientUninitialize();
 
+void ClientUpdate();
+
+// Connets client to server
+int ClientConnect();
+// Disconnects client to server
+int ClientDisconnect();
 // Sets which player the client should pair up with
 void ClientSetPlayer(Player *player);
 // Marks client as active and sends out threads

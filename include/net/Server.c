@@ -37,7 +37,7 @@ void ServerInitialize()
         return;
     }
     // Add UDP-socket to socket set
-    if (SDLNet_TCP_AddSocket(server.socketSet, server.tcpSocket) == -1)
+    if (SDLNet_UDP_AddSocket(server.socketSet, server.udpSocket) == -1)
     {
         log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
         return;
@@ -61,7 +61,8 @@ void ServerInitialize()
 
 void ServerUninitialize()
 {
-    ServerUDPBroadcast(PT_Disconnect, NULL, 0);
+    int id = 0;
+    ServerTCPBroadcast(PT_Disconnect, &id, sizeof(int));
     SDLNet_UDP_DelSocket(server.socketSet, server.udpSocket);
     SDLNet_UDP_Unbind(server.udpSocket, 0);
     SDLNet_UDP_Close(server.udpSocket);

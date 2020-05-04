@@ -69,13 +69,38 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item)
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
-            if (i != *index)
-                RayScan(i, makeDestination, point, item, itemFalloff);
+            if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
+                RayScanSingelplayer(i, makeDestination, point, item, itemFalloff);
         }
     }
 }
 
 void RayScan(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir)
+{
+    if (ENTITY_ARRAY[index].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
+    {
+        int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
+        tmpPosX = Destination.x;
+        tmpPosY = Destination.y;
+        tmpPointX = point.x + (rand() % 20 - 10) / item->Stats.accuracy;
+        tmpPointY = point.y + (rand() % 20 - 10) / item->Stats.accuracy;
+        if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[index].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+        { // reduce accuracy
+            //ENTITY_ARRAY[index].health -= item->Stats.Damage;
+            Data sendData;
+            sendData.id = ENTITY_ARRAY[index].id;
+            sendData.damage = item->Stats.Damage;
+
+            ClientTCPSend(15, &sendData, sizeof(int) * 2);
+
+            ENTITY_ARRAY[index].Force.x += ForceDir.x;
+            ENTITY_ARRAY[index].Force.y += ForceDir.y;
+            log_debug("Sent packet entity = %d damage = %d", sendData.id, sendData.damage);
+            log_info("entity index = %d, id = %d, health = %d\n", index, ENTITY_ARRAY[index].id, ENTITY_ARRAY[index].health);
+        }
+    }
+}
+void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir)
 {
     if (ENTITY_ARRAY[index].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
     {

@@ -29,6 +29,9 @@ void ClientManagerUpdate()
         case PT_Connect:
             ClientManagerHandleConnectPacket(nextPacket);
             break;
+        case PT_DuplicateName:
+            ClientManagerHandleDuplicateNamePacket(nextPacket);
+            break;
         case PT_Disconnect:
             ClientManagerHandleDisconnectPacket(nextPacket);
             break;
@@ -61,6 +64,10 @@ void ClientManagerUpdate()
             break;
         case PT_FetchLobby:
             ClientManagerHandleFetchLobbyPacket(nextPacket);
+            break;
+        case PT_CloseAllSessions:
+            ClientManagerHandleCloseAllSessionsPacket(nextPacket);
+            break;
         default:
             break;
         }
@@ -92,9 +99,21 @@ void ClientManagerHandleConnectPacket(ParsedPacket packet)
     client.receivedPlayerID = SDL_TRUE;
 }
 
+void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet)
+{
+    MenuStateSet(MS_Name);
+    SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
+    Notify("Username taken", 1.0f, NT_ERROR);
+}
+
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
 {
-    // Server quit
+    int id = *(int *)packet.data;
+    if (id == 0)
+    {
+        ClientDisconnect();
+        Notify("Connection closed", 1.0f, NT_ERROR);
+    }
 }
 
 void ClientManagerHandleNewPlayerPacket(ParsedPacket packet)
@@ -243,17 +262,33 @@ void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
 
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 {
-    char *allMembers = (char *)packet.data;
-
-    int nLobbyMembers = packet.size / 20;
-
-    VectorClear(lobby.names);
-    for (int i = 0; i < nLobbyMembers; i++)
+    if (lobby.sessionID != -1)
     {
-        LobbyName name = {0};
-        strcpy(name.data, allMembers + i * 20);
-        VectorPushBack(lobby.names, &name);
+        char *allMembers = (char *)packet.data;
+
+        int nLobbyMembers = packet.size / 20;
+
+        VectorClear(lobby.names);
+        for (int i = 0; i < nLobbyMembers; i++)
+        {
+            LobbyName name = {0};
+            strcpy(name.data, allMembers + i * 20);
+            VectorPushBack(lobby.names, &name);
+        }
     }
+}
+
+void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
+{
+    lobby.sessionID = -1;
+    GameStateSet(GS_Menu);
+    MenuState menuState = MenuStateGet();
+    if (menuState == MS_None ||
+        menuState == MS_JoinLobby ||
+        menuState == MS_HostLobby ||
+        menuState == MS_WaitingForLobby ||
+        menuState == MS_Lobby)
+        MenuStateSet(MS_MainMenu);
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()
