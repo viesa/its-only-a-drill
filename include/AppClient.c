@@ -44,6 +44,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
+    NotifyInitialize(app->font);
+
     LobbyInitialize();
     ClientInitialize();
     ClientManagerInitialize();
@@ -275,4 +277,5 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
+    NotifierUpdate();
 }

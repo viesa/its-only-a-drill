@@ -17,13 +17,13 @@ typedef enum ActionCode
     INVENTORY = 8
 } ActionCode;
 
-typedef struct Keybinding 
+typedef struct Keybinding
 {
     SDL_Scancode KeyArray[BINDINGS];
-}Keybinding;
+} Keybinding;
 
-Keybinding *KeybindingCreate(); 
+Keybinding *KeybindingCreate();
 void KeybindingChange(ActionCode action, SDL_Scancode key, Keybinding *bindings);
-void KeybindingFree(Keybinding *bindings); 
+void KeybindingFree(Keybinding *bindings);
 
 #endif
