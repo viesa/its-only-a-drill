@@ -25,6 +25,9 @@ void ClientInitialize()
 void ClientUninitialize()
 {
     ClientDisconnect();
+    VectorDestroy(client.inBuffer);
+    SDL_DestroyMutex(client.inBufferMutex);
+    SDLNet_FreeSocketSet(client.socketSet);
     client.isInitialized = SDL_FALSE;
 }
 
@@ -37,6 +40,7 @@ void ClientUpdate()
         {
             if (ClientConnect())
             {
+                ClientStart();
                 ConStateSet(CON_Online);
                 client.connectTimer = 0.0f;
             }
@@ -112,20 +116,25 @@ int ClientDisconnect()
 {
     assert("Attempting to disconnect client without client initialization" && client.isInitialized);
 
+    if (client.isActive)
+    {
+        ClientStop();
+    }
+
     ClientTCPSend(PT_Disconnect, NULL, 0);
     SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
     SDLNet_UDP_Close(client.udpSocket);
     SDLNet_TCP_DelSocket(client.socketSet, client.server.socket);
     SDLNet_TCP_Close(client.server.socket);
-    SDLNet_FreeSocketSet(client.socketSet);
 
     for (size_t i = 0; i < client.inBuffer->size; i++)
     {
         ParsedPacketDestroy(&CLIENT_INBUFFER[i]);
     }
-    VectorDestroy(client.inBuffer);
+    VectorClear(client.inBuffer);
     SDL_UnlockMutex(client.inBufferMutex);
-    SDL_DestroyMutex(client.inBufferMutex);
+
+    ConStateSet(CON_Offline);
 
     return 1;
 }

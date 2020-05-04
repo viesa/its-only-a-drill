@@ -110,10 +110,7 @@ void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
     int id = *(int *)packet.data;
     if (id == 0)
     {
-        ConStateSet(CON_Offline);
-        VectorClear(client.inBuffer);
-        SDLNet_TCP_Close(client.server.socket);
-        SDLNet_UDP_Close(client.udpSocket);
+        ClientDisconnect();
     }
 }
 
@@ -283,7 +280,13 @@ void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 {
     lobby.sessionID = -1;
     GameStateSet(GS_Menu);
-    MenuStateSet(MS_MainMenu);
+    MenuState menuState = MenuStateGet();
+    if (menuState == MS_None ||
+        menuState == MS_JoinLobby ||
+        menuState == MS_HostLobby ||
+        menuState == MS_WaitingForLobby ||
+        menuState == MS_Lobby)
+        MenuStateSet(MS_MainMenu);
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()

@@ -62,7 +62,7 @@ void ServerInitialize()
 void ServerUninitialize()
 {
     int id = 0;
-    ServerUDPBroadcast(PT_Disconnect, &id, sizeof(int));
+    ServerTCPBroadcast(PT_Disconnect, &id, sizeof(int));
     SDLNet_UDP_DelSocket(server.socketSet, server.udpSocket);
     SDLNet_UDP_Unbind(server.udpSocket, 0);
     SDLNet_UDP_Close(server.udpSocket);
