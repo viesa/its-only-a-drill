@@ -40,17 +40,13 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i)
     }
     else
     {
-        if (Vec2Len(*enemyToPlayer) < aggravationRadius)
-        {
-            ENTITY_ARRAY[*i].entityState = Fight;
-        }
-
         if (ENTITY_ARRAY[*i].health < 100)
         {
-            if (ENTITY_ARRAY[*i].entityState != Fight)
-            {
-                ENTITY_ARRAY[*i].entityState = Aggressive;
-            }
+            ENTITY_ARRAY[*i].entityState = Aggressive;
+        }
+        if (Vec2Len(*enemyToPlayer) <= aggravationRadius)
+        {
+            ENTITY_ARRAY[*i].entityState = Fight;
         }
     }
 }
@@ -65,8 +61,6 @@ void BehaviorMoveEntity(MovingPattern *pattern)
 
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        // if (ENTITY_ARRAY[i].entityState != EntityDead)
-        // {
         if (ENTITY_ARRAY[i].type == ET_Player)
         {
             tmp = i;
@@ -104,7 +98,7 @@ void BehaviorMoveEntity(MovingPattern *pattern)
             }
             case Fight:
             {
-                if (ENTITY_ARRAY[i].type == ET_Woman)
+                if (ENTITY_ARRAY[i].isNPC == 1)
                 {
                     entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1]);
                 }
@@ -114,7 +108,7 @@ void BehaviorMoveEntity(MovingPattern *pattern)
                 }
                 if (Vec2Len(enemyToPlayer) > aggravationRadius)
                 {
-                    ENTITY_ARRAY[i].entityState = Nutral;
+                    ENTITY_ARRAY[i].entityState = Aggressive;
                 }
                 break;
             }
@@ -130,7 +124,7 @@ void BehaviorMoveEntity(MovingPattern *pattern)
                 if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
                 {
                     ENTITY_ARRAY[i].desiredPoint = Vec2Add(pattern->point[ENTITY_ARRAY[i].indexPoint], enemyPosition);
-                    if (ENTITY_ARRAY[i].indexPoint == 9)
+                    if (ENTITY_ARRAY[i].indexPoint >= 9)
                     {
                         ENTITY_ARRAY[i].indexPoint = 0;
                     }
@@ -147,7 +141,6 @@ void BehaviorMoveEntity(MovingPattern *pattern)
             }
         }
     }
-    // }
 }
 
 Entity BehaviorMoveToPoint(Entity entity, float x, float y)
