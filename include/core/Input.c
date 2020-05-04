@@ -152,3 +152,21 @@ void InputPortalBackspace()
         input.textLen--;
     return;
 }
+
+SDL_Scancode InputLastKeyDown(SDL_Scancode normal)
+{
+    for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+        {
+            if (input.keymap[i])
+            {
+                if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)) 
+                {
+                }
+                else 
+                {
+                    return (SDL_Scancode)i;
+                }
+            }
+        }
+    return normal;
+}

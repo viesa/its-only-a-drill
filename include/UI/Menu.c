@@ -2,17 +2,19 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font)
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
     menu->font = font;
     menu->loadingBar = LoadingBarCreate(menu->gfx);
+    menu->bindings = bindings;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
+    menu->keybindingstate = 0;
     menu->fetchSessionsTimer = 2.0f;
     menu->fetchSessionsTimer = 0.5f;
 
@@ -99,6 +101,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
         break;
     case MS_FPS:
         MenuUpdateFPS(menu, fpsManager);
+        break;
+        case MS_KEYBINDING:
+        MenuUpdateKeybinding(menu);
         break;
     case MS_CustomMap:
         MenuUpdateCustomMap(menu, mapList);
@@ -388,12 +393,13 @@ void MenuUpdateLobby(Menu *menu)
 void MenuUpdateOptions(Menu *menu)
 {
     //Determine menu options
-    int optionLength = 5;
-    char options[5][100] = {
+    int optionLength = 6;
+    char options[6][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
+        {"SET Keybinding"},
         {"Back"}};
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -438,9 +444,14 @@ void MenuUpdateOptions(Menu *menu)
         }
         case 4:
         {
+           MenuStateSet(MS_KEYBINDING);
+           break;
+        }
+        case 5:
+        {
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
-            break;
+            break; 
         }
         }
     }
@@ -560,6 +571,110 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
     MenuDraw(menu, options, optionLength);
 }
 
+
+void MenuUpdateKeybinding(Menu *menu)
+{
+    //Determine menu options
+    int optionLength = 10;
+    char options[10][100] = {
+        {"Move Up"},
+        {"Move Left"},
+        {"Move Right"},
+        {"Move Down"},
+        {"Pickup"},
+        {"Drop"},
+        {"Shoot"},
+        {"Reload"},
+        {"Inventory"},
+        {"Back"}};
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)) 
+    {   
+        menu->keybindingstate = 1;   
+    }
+    
+        if(menu->keybindingstate == 1) 
+        {
+            if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)) 
+            {
+
+            }
+            else 
+            {
+                menu->indexChanged = SDL_TRUE;
+                switch (menu->activeIndex)
+                {
+                    case 0:
+                    {
+                        KeybindingChange(MOVE_UP, InputLastKeyDown(menu->bindings->KeyArray[MOVE_UP]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 1:
+                    {
+                        KeybindingChange(MOVE_LEFT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_LEFT]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 2:
+                    {
+                        KeybindingChange(MOVE_RIGHT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_RIGHT]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 3:
+                    {
+                        KeybindingChange(MOVE_DOWN, InputLastKeyDown(menu->bindings->KeyArray[MOVE_DOWN]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 4:
+                    {
+                        KeybindingChange(PICKUP, InputLastKeyDown(menu->bindings->KeyArray[PICKUP]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 5:
+                    {
+                        KeybindingChange(DROP, InputLastKeyDown(menu->bindings->KeyArray[DROP]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 6:
+                    {
+                        KeybindingChange(SHOOT, InputLastKeyDown(menu->bindings->KeyArray[SHOOT]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 7:
+                    {
+                        KeybindingChange(RELOAD, InputLastKeyDown(menu->bindings->KeyArray[RELOAD]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        break;
+                    }
+                    case 8:
+                    {
+                        KeybindingChange(INVENTORY, InputLastKeyDown(menu->bindings->KeyArray[INVENTORY]), menu->bindings);
+                        menu->keybindingstate = 0;
+                        
+                        break;
+                    }
+                    case 9:
+                    {
+                        menu->keybindingstate = 0;
+                        menu->activeIndex = 0;
+                        MenuStateSet(MS_Options);
+                        break;
+                    }
+                }
+            }
+        }       
+    MenuDraw(menu, options, optionLength);
+}
+
 void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
 {
     //Determine menu options
@@ -634,6 +749,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     case MS_Lobby:
     case MS_Resolution:
     case MS_FPS:
+    case MS_KEYBINDING:
     case MS_CustomMap:
     {
         //Update 3d color

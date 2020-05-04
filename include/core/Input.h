@@ -2,6 +2,7 @@
 #define INPUT_H
 
 #include "Dependencies.h"
+#include "Keybinding.h"
 
 #include "Vec2.h"
 
@@ -52,6 +53,9 @@ SDL_bool InputIsMousePressed(const MouseCode code);
 SDL_bool InputIsMouseReleased(const MouseCode code);
 /// Returns the last captured mouse position
 Vec2 InputLastMousePos();
+
+/// Reruens the last pressed key
+SDL_Scancode InputLastKeyDown(SDL_Scancode normal);
 
 void InputTypePortal(char charPush);
 char *InputGetPortalContent();

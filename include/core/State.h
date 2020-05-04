@@ -21,6 +21,7 @@ typedef enum MenuState
     MS_Options,
     MS_Resolution,
     MS_FPS,
+    MS_KEYBINDING,
     MS_CustomMap,
     MS_None,
     MS_NStates
