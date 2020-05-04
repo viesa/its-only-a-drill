@@ -114,7 +114,7 @@ void VectorEraseElement(Vector *vector, void *element)
 {
     for (size_t i = 0; i < vector->size; i++)
     {
-        if (!SDL_memcmp(&((char *)vector->data)[i], element, vector->elementSize))
+        if (!SDL_memcmp((char *)vector->data + i * vector->elementSize, element, vector->elementSize))
         {
             VectorErase(vector, i);
             return;
