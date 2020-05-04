@@ -8,6 +8,50 @@ void ClientInitialize()
     client.isActive = SDL_FALSE;
     client.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
     client.inBufferMutex = SDL_CreateMutex();
+    SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
+    client.connectTimer = 0.0f;
+    client.isInitialized = SDL_TRUE;
+
+    if (ClientConnect())
+    {
+        ConStateSet(CON_Online);
+    }
+    else
+    {
+        ConStateSet(CON_Offline);
+    }
+}
+
+void ClientUninitialize()
+{
+    ClientDisconnect();
+    client.isInitialized = SDL_FALSE;
+}
+
+void ClientUpdate()
+{
+    if (ConStateGet() == CON_Offline)
+    {
+        const int wait = 5.0f;
+        if (client.connectTimer >= wait)
+        {
+            if (ClientConnect())
+            {
+                ConStateSet(CON_Online);
+                client.connectTimer = 0.0f;
+            }
+            client.connectTimer = 0.0f;
+        }
+        else
+        {
+            client.connectTimer += ClockGetDeltaTime();
+        }
+    }
+}
+
+int ClientConnect()
+{
+    assert("Attempting to connect client without client initialization" && client.isInitialized);
 
 #ifdef LOCAL_SERVER
     const char *ip = "127.0.0.1";
@@ -22,30 +66,52 @@ void ClientInitialize()
     if (SDLNet_ResolveHost(&serverIP, ip, port) == -1)
     {
         log_error("Failed to resolve host: (%s:%d): %s", ip, port, SDLNet_GetError());
-        return;
+        return 0;
     }
 
+    // Open UDP-socket on random port
+    if (!(client.udpSocket = SDLNet_UDP_Open(0)))
+    {
+        log_error("Failed to open port (UDP) (%s:%d)): %s", ip, port, SDLNet_GetError());
+        return 0;
+    }
     // Open TCP-socket
     TCPsocket tcpSocket;
     if (!(tcpSocket = SDLNet_TCP_Open(&serverIP)))
     {
         log_error("Failed to open port (TCP) (%s:%d)): %s", ip, port, SDLNet_GetError());
-        // This will be dealt with later...
-        //return;
+        return 0;
     }
     client.server = NetPlayerCreate(tcpSocket, 0);
+
+    // Add TCP-socket to socket set
+    if (SDLNet_UDP_AddSocket(client.socketSet, client.udpSocket) == -1)
+    {
+        log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
+        return 0;
+    }
     // Add TCP-socket to socket set
     if (SDLNet_TCP_AddSocket(client.socketSet, client.server.socket) == -1)
     {
         log_error("Failed to add socket to socket set (TCP): %s", SDLNet_GetError());
-        return;
+        // Clean up the successful UDP-socket
+        SDLNet_UDP_Close(client.udpSocket);
+        SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
+        return 0;
     }
 
-    client.isInitialized = SDL_TRUE;
+    if (!strlen(client.name) == 0)
+    {
+        ClientTCPSend(PT_Connect, client.name, strlen(client.name));
+    }
+
+    return 1;
 }
 
-void ClientUninitialize()
+int ClientDisconnect()
 {
+    assert("Attempting to disconnect client without client initialization" && client.isInitialized);
+
     ClientTCPSend(PT_Disconnect, NULL, 0);
     SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
     SDLNet_UDP_Close(client.udpSocket);
@@ -60,7 +126,8 @@ void ClientUninitialize()
     VectorDestroy(client.inBuffer);
     SDL_UnlockMutex(client.inBufferMutex);
     SDL_DestroyMutex(client.inBufferMutex);
-    client.isInitialized = SDL_FALSE;
+
+    return 1;
 }
 
 void ClientSetPlayer(Player *player)

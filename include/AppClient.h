@@ -21,6 +21,7 @@
 #include "Weapon.h"
 #include "Inventory.h"
 #include "Keybinding.h"
+#include "Notification.h"
 
 typedef struct AppClient AppClient;
 

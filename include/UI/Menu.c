@@ -316,16 +316,32 @@ void MenuUpdateJoinLobby(Menu *menu)
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
         }
+        else
+        {
+            int sessionID = CLIENTMANAGER_JOINLIST[menu->activeIndex].sessionID;
+            ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
+            MenuStateSet(MS_WaitingForLobby);
+            lobby.sessionID = sessionID;
+        }
     }
     MenuDraw(menu, options, optionLength);
 }
 
 void MenuUpdateWaitingForLobby(Menu *menu)
 {
-    //Determine menu options
+    //Add appropriate amount of ., fill with space after for equal text width at all times.
     int optionLength = 1;
     char options[1][100] = {
-        {"Waiting for lobby"}};
+        {"Loading lobby"}};
+
+    for (int i = 0; i < (int)floor(menu->loopCount / 2); i++)
+    {
+        strcat(options[0], ".");
+    }
+    for (int i = (int)floor(menu->loopCount / 2); i < 3; i++)
+    {
+        strcat(options[0], " ");
+    }
 
     menu->activeIndex = 0;
 

@@ -44,6 +44,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
 
+    NotifyInitialize(app->font);
+
     LobbyInitialize();
     ClientInitialize();
     ClientManagerInitialize();
@@ -72,6 +74,10 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 }
 void AppClientDestroy(AppClient *app)
 {
+    if (lobby.sessionID != -1)
+    {
+        ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+    }
     ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
@@ -103,6 +109,7 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
+    ClientUpdate();
     ClientManagerUpdate();
 
     switch (GameStateGet())
@@ -270,4 +277,5 @@ void AppClientDraw(AppClient *app)
     default:
         break;
     }
+    NotifierUpdate();
 }
