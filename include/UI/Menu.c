@@ -316,6 +316,13 @@ void MenuUpdateJoinLobby(Menu *menu)
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
         }
+        else
+        {
+            int sessionID = CLIENTMANAGER_JOINLIST[menu->activeIndex].sessionID;
+            ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
+            MenuStateSet(MS_WaitingForLobby);
+            lobby.sessionID = sessionID;
+        }
     }
     MenuDraw(menu, options, optionLength);
 }

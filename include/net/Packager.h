@@ -16,6 +16,7 @@ typedef enum PacketType
 {
     PT_Text,             // When plain text is to be sent
     PT_Connect,          // When client connects to server, recieve their name sends out ID
+    PT_DuplicateName,    // When client has a duplicate name
     PT_Disconnect,       // When client or server disconnectes
     PT_NewPlayer,        // When server broadcasts a new player join,
                          // or when server updates a new client with current players
@@ -29,7 +30,9 @@ typedef enum PacketType
     PT_HostAssign,       // When the host notfies the ID of the host
     PT_FetchSessions,    // When client asks server what sessions exists
     PT_FetchLobby,       // When client asks server which players are in given lobby
+    PT_PlayerHit,        // When a player is getting shot [0] = id of shot player, [1] = damage
     PT_None,
+    PT_CloseAllSessions,
     PT_Count
 } PacketType;
 

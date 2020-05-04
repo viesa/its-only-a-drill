@@ -72,6 +72,10 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 }
 void AppClientDestroy(AppClient *app)
 {
+    if (lobby.sessionID != -1)
+    {
+        ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+    }
     ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
@@ -103,6 +107,7 @@ void AppClientRun(AppClient *app)
 
 void AppClientUpdate(AppClient *app)
 {
+    ClientUpdate();
     ClientManagerUpdate();
 
     switch (GameStateGet())
