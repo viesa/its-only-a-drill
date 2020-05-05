@@ -220,6 +220,10 @@ void AppClientUpdate(AppClient *app)
             ENTITY_ARRAY[2].desiredPoint.y = 180;
             ENTITY_ARRAY[2].entityState = Nutral;
         }
+        if (InputIsKeyPressed(SDL_SCANCODE_O))
+        {
+            log_debug("Player health = %d", ENTITY_ARRAY[*app->player.entity].health);
+        }
         //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
         PlayerUpdate(&app->player, app->camera);
 

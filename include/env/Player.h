@@ -11,17 +11,19 @@
 
 typedef struct Player
 {
-    EntityIndexP entity;
+    EntityIndexP entity; // player barrows a entity for the player to contole
     Anim leg;
     Anim body;
     Vec2 aimFollow;
     Vec2 forward;
 } Player;
 
+//creates a player and a entity
 Player PlayerCreate(Camera *camera);
-void PlayerDestroy(Player *player);
 
+// updates player logic like movement and camera position
 void PlayerUpdate(Player *player, Camera *camera);
+// draws the player on the canves
 void PlayerDraw(Player *player, Camera *camera);
 
 #endif

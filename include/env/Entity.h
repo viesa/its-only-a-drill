@@ -78,13 +78,16 @@ typedef struct Entity
 ///\param type: an entity preset
 Entity EntityCreate(Vec2 position, EntityType type, int id);
 
+// makes entity ready to be send over the internet
 CompressedEntity EntityCompress(Entity *entity);
-
+// handels the data over server transfer
 Entity EntityDecompress(CompressedEntity *cEntity);
 
 void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity);
 
+// draws the entity on the screen relativ to the camera
 void EntityDraw(Entity *entity, Camera *camera);
+// draws the entity on the screen with index
 void EntityDrawIndex(EntityIndexP index, Camera *camera);
 
 // calculates the net forces after friction and collision
