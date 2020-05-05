@@ -12,7 +12,7 @@ typedef enum FontSheet
     TTF_Antilles_L,
     TTF_Antilles_XL,
     TTF_Antilles_XXL,
-    TTF_Robot_Crush,
+    // TTF_Robot_Crush, Används inte och skapar därför seg-fault när du freear
     TTF_Arial,
     TTF_Count
 } FontSheet;

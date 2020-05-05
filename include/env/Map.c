@@ -36,7 +36,8 @@ void MapInitialize()
 
 void MapUninitialize()
 {
-    EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
+    if (map.contents)
+        EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
 
     FREE(map.contents);
     map.contents = NULL;
