@@ -2,7 +2,7 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
@@ -18,6 +18,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
     menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
+    menu->audio = audio;
 
     // SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect src = {0, 0, 3413, 1920};
@@ -28,6 +29,10 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
     TransitionInitalize(menu->gfx, menu->font);
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
+
+    menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
+
+
     return menu;
 }
 
@@ -72,6 +77,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
     if (menu->lastIndex != menu->activeIndex)
     {
         menu->indexChanged = SDL_TRUE;
+        SoundPlay(&menu->MenuStep,0);
     }
     else
     {

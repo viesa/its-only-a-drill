@@ -59,6 +59,16 @@ Audio *AudioCreate()
         log_warn("Could not load notification.wav");
     ret->m_chunks[SF_Notification] = notification;
 
+    Mix_Chunk *menupress = Mix_LoadWAV("assets/sound/Menu_Press.wav");
+    if (!menupress)
+        log_warn("Could not load Menu_Press.wav");
+    ret->m_chunks[SF_MenuPress] = menupress;
+
+    Mix_Chunk *menustep = Mix_LoadWAV("assets/sound/Menu_Step.wav");
+    if (!menustep)
+        log_warn("Could not load Menu_Step.wav");
+    ret->m_chunks[SF_MenuStep] = menustep;
+
     //-------------------------------------------------
     //------------------ Music files ------------------
     //-------------------------------------------------
