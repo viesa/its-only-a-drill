@@ -63,7 +63,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     ScoreIncrement(100, 0);
 
     app->groundListItems = GroundListCreate();
-    ENTITY_ARRAY[*app->player.entity].inventory = InventoryCreate();
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
@@ -220,6 +219,10 @@ void AppClientUpdate(AppClient *app)
             ENTITY_ARRAY[2].desiredPoint.y = 180;
             ENTITY_ARRAY[2].entityState = Nutral;
         }
+        if (InputIsKeyPressed(SDL_SCANCODE_O))
+        {
+            log_debug("Player health = %d", ENTITY_ARRAY[*app->player.entity].health);
+        }
         //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
         PlayerUpdate(&app->player, app->camera);
 
@@ -241,9 +244,7 @@ void AppClientDraw(AppClient *app)
     {
         switch (MenuStateGet())
         {
-        case MS_JoinLobby:
         case MS_HostLobby:
-        case MS_WaitingForLobby:
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
             MapDraw(app->camera);
@@ -277,7 +278,7 @@ void AppClientDraw(AppClient *app)
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }
 
-        InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
+        // InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
 
         break;
     }

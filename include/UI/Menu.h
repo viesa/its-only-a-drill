@@ -28,6 +28,7 @@ typedef struct Menu
     Font *font;
     Drawable mainMenuDbl;
     float mainMenuDblDelta;
+    int mainMenuDblDir;
     Drawable lobbyHostDbl;
     Drawable lobbyNormalDbl;
     LoadingBar *loadingBar;

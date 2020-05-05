@@ -19,6 +19,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
     menu->audio = audio;
+    menu->mainMenuDblDir = 1.0f;
 
     // SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect src = {0, 0, 3413, 1920};
@@ -38,12 +39,17 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
 
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
 {
-    menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime();
+    menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
-    if (menu->mainMenuDbl.src.x + menu->mainMenuDbl.src.w > 5760)
+    if (menu->mainMenuDbl.src.x + menu->mainMenuDbl.src.w > 5760 && menu->mainMenuDblDir == 1)
+    {
+        menu->mainMenuDbl.src.x = 5760 - menu->mainMenuDbl.src.w;
+        menu->mainMenuDblDir = -1;
+    }
+    else if (menu->mainMenuDbl.src.x < 0 && menu->mainMenuDblDir == -1)
     {
         menu->mainMenuDbl.src.x = 0;
-        menu->mainMenuDblDelta = 0.0f;
+        menu->mainMenuDblDir = 1;
     }
 
     if (menu->loopCount < 2 * PI)
@@ -214,16 +220,30 @@ void MenuUpdateMainMenu(Menu *menu)
         {
         case 0:
         {
-            MenuStateSet(MS_JoinLobby);
-            menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+            if (ConStateGet() == CON_Online)
+            {
+                MenuStateSet(MS_JoinLobby);
+                menu->activeIndex = 0;
+                menu->indexChanged = SDL_TRUE;
+            }
+            else
+            {
+                Notify("You are not connected", 1.0f, NT_WARN);
+            }
             break;
         }
         case 1:
         {
-            MenuStateSet(MS_HostLobby);
-            menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+            if (ConStateGet() == CON_Online)
+            {
+                MenuStateSet(MS_HostLobby);
+                menu->activeIndex = 0;
+                menu->indexChanged = SDL_TRUE;
+            }
+            else
+            {
+                Notify("You are not connected", 1.0f, NT_WARN);
+            }
             break;
         }
         case 2:
@@ -290,6 +310,7 @@ void MenuUpdateInGameMenu(Menu *menu)
         }
         case 2:
         {
+            MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
             break;
         }
@@ -532,7 +553,14 @@ void MenuUpdateOptions(Menu *menu)
         case 5:
         {
             menu->activeIndex = 0;
-            MenuStateSet(MS_MainMenu);
+            if (clientManager.inGame)
+            {
+                MenuStateSet(MS_InGameMenu);
+            }
+            else
+            {
+                MenuStateSet(MS_MainMenu);
+            }
             break;
         }
         }
@@ -813,9 +841,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     MenuState current = MenuStateGet();
     if (current != MS_CustomMap &&
         current != MS_Splash &&
-        current != MS_HostLobby &&
-        current != MS_JoinLobby &&
-        clientManager.inGame == SDL_FALSE)
+        current != MS_HostLobby)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }
@@ -824,6 +850,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     {
     case MS_Options:
     case MS_MainMenu:
+    case MS_InGameMenu:
     case MS_JoinLobby:
     case MS_HostLobby:
     case MS_WaitingForLobby:
