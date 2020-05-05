@@ -13,7 +13,7 @@ void ServerInitialize()
     server.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
     server.inBufferMutex = SDL_CreateMutex();
     server.isInitialized = SDL_FALSE;
-    server.isActive = SDL_FALSE;
+    server.isListening = SDL_FALSE;
     server.sessions = VectorCreate(sizeof(Session), 5);
     server.sessionBitmap = VectorCreate(sizeof(SDL_bool), 100);
     for (size_t i = 0; i < server.sessionBitmap->capacity; i++)
@@ -95,19 +95,19 @@ void ServerUninitialize()
     server.isInitialized = SDL_FALSE;
 }
 
-void ServerStart()
+void ServerStartListening()
 {
     assert("Attempting to start server without server initialization" && server.isInitialized);
 
-    server.isActive = SDL_TRUE;
+    server.isListening = SDL_TRUE;
     server.listenThread = SDL_CreateThread((SDL_ThreadFunction)ServerListenToClients, "Server Listen Thread", NULL);
 }
 
-void ServerStop()
+void ServerStopListening()
 {
     assert("Attempting to stop server without server initialization" && server.isInitialized);
 
-    server.isActive = SDL_FALSE;
+    server.isListening = SDL_FALSE;
     SDL_WaitThread(server.listenThread, NULL);
 }
 
@@ -299,7 +299,7 @@ void ServerListenToClients()
     assert("Attempting to start listener thread on server without server initialization" && server.isInitialized);
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
-    while (server.isActive)
+    while (server.isListening)
     {
         int nReadySockets = SDLNet_CheckSockets(server.socketSet, 20);
         if (!nReadySockets)

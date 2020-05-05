@@ -1,25 +1,23 @@
 #include "Client.h"
 
-void ClientInitialize()
+void ClientInitialize(Player *player)
 {
+    client.player = player;
     client.socketSet = SDLNet_AllocSocketSet(2);
-    client.player = NULL;
     client.isInitialized = SDL_FALSE;
-    client.isActive = SDL_FALSE;
+    client.isListening = SDL_FALSE;
     client.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
     client.inBufferMutex = SDL_CreateMutex();
     SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
     client.connectTimer = 0.0f;
+    client.connectMutex = SDL_CreateMutex();
+
+    // Start with assuming we are offline
+    ConStateSet(CON_Offline);
+
     client.isInitialized = SDL_TRUE;
 
-    if (ClientConnect())
-    {
-        ConStateSet(CON_Online);
-    }
-    else
-    {
-        ConStateSet(CON_Offline);
-    }
+    ClientTryConnect();
 }
 
 void ClientUninitialize()
@@ -28,6 +26,7 @@ void ClientUninitialize()
     VectorDestroy(client.inBuffer);
     SDL_DestroyMutex(client.inBufferMutex);
     SDLNet_FreeSocketSet(client.socketSet);
+    SDL_DestroyMutex(client.connectMutex);
     client.isInitialized = SDL_FALSE;
 }
 
@@ -38,13 +37,7 @@ void ClientUpdate()
         const int wait = 5.0f;
         if (client.connectTimer >= wait)
         {
-            if (ClientConnect())
-            {
-                ClientStart();
-                ConStateSet(CON_Online);
-                client.connectTimer = 0.0f;
-                Notify("Connection reestablished", 1.0f, NT_INFO);
-            }
+            ClientTryConnect();
             client.connectTimer = 0.0f;
         }
         else
@@ -54,9 +47,21 @@ void ClientUpdate()
     }
 }
 
-int ClientConnect()
+void ClientTryConnect()
 {
     assert("Attempting to connect client without client initialization" && client.isInitialized);
+    SDL_Thread *worker = SDL_CreateThread((SDL_ThreadFunction)ClientConnectThreadFn, "Server Connector", NULL);
+    SDL_DetachThread(worker);
+}
+
+void ClientConnectThreadFn()
+{
+    SDL_LockMutex(client.connectMutex);
+    if (ConStateGet() == CON_Online)
+    {
+        SDL_UnlockMutex(client.connectMutex);
+        return;
+    }
 
 #ifdef LOCAL_SERVER
     const char *ip = "127.0.0.1";
@@ -71,21 +76,24 @@ int ClientConnect()
     if (SDLNet_ResolveHost(&serverIP, ip, port) == -1)
     {
         log_error("Failed to resolve host: (%s:%d): %s", ip, port, SDLNet_GetError());
-        return 0;
+        SDL_UnlockMutex(client.connectMutex);
+        return;
     }
 
     // Open UDP-socket on random port
     if (!(client.udpSocket = SDLNet_UDP_Open(0)))
     {
         log_error("Failed to open port (UDP) (%s:%d)): %s", ip, port, SDLNet_GetError());
-        return 0;
+        SDL_UnlockMutex(client.connectMutex);
+        return;
     }
     // Open TCP-socket
     TCPsocket tcpSocket;
     if (!(tcpSocket = SDLNet_TCP_Open(&serverIP)))
     {
         log_error("Failed to open port (TCP) (%s:%d)): %s", ip, port, SDLNet_GetError());
-        return 0;
+        SDL_UnlockMutex(client.connectMutex);
+        return;
     }
     client.server = NetPlayerCreate(tcpSocket, 0);
 
@@ -93,16 +101,22 @@ int ClientConnect()
     if (SDLNet_UDP_AddSocket(client.socketSet, client.udpSocket) == -1)
     {
         log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
-        return 0;
+        // Clean up the successful TCP-socket
+        SDLNet_TCP_Close(tcpSocket);
+        SDLNet_UDP_Close(client.udpSocket);
+        SDL_UnlockMutex(client.connectMutex);
+        return;
     }
     // Add TCP-socket to socket set
     if (SDLNet_TCP_AddSocket(client.socketSet, client.server.socket) == -1)
     {
         log_error("Failed to add socket to socket set (TCP): %s", SDLNet_GetError());
         // Clean up the successful UDP-socket
+        SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);
         SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
-        return 0;
+        SDL_UnlockMutex(client.connectMutex);
+        return;
     }
 
     if (!strlen(client.name) == 0)
@@ -110,16 +124,21 @@ int ClientConnect()
         ClientTCPSend(PT_Connect, client.name, strlen(client.name));
     }
 
-    return 1;
+    ClientStartListening();
+
+    ConStateSet(CON_Online);
+    Notify("Connection established", 1.0f, NT_INFO);
+
+    SDL_UnlockMutex(client.connectMutex);
 }
 
 int ClientDisconnect()
 {
     assert("Attempting to disconnect client without client initialization" && client.isInitialized);
 
-    if (client.isActive)
+    if (client.isListening)
     {
-        ClientStop();
+        ClientStopListening();
     }
 
     ClientTCPSend(PT_Disconnect, NULL, 0);
@@ -140,23 +159,17 @@ int ClientDisconnect()
     return 1;
 }
 
-void ClientSetPlayer(Player *player)
-{
-    client.player = player;
-}
-
-void ClientStart()
+void ClientStartListening()
 {
     assert("Attempting to start client without client initialization" && client.isInitialized);
-    assert("Attempting to start client without player set" && client.player != NULL);
 
-    client.isActive = SDL_TRUE;
+    client.isListening = SDL_TRUE;
     client.listenThread = SDL_CreateThread((SDL_ThreadFunction)ClientListenToServer, "Server Listen Thread", NULL);
 }
 
-void ClientStop()
+void ClientStopListening()
 {
-    client.isActive = SDL_FALSE;
+    client.isListening = SDL_FALSE;
     SDL_WaitThread(client.listenThread, NULL);
 }
 
@@ -166,7 +179,6 @@ int ClientUDPSend(PacketType type, void *data, size_t size)
         return 0;
 
     assert("Attempting to send UDP-packet without client initialization" && client.isInitialized);
-    assert("Attempting to send UDP-packet without player set" && client.player != NULL);
 
     UDPpacket *outgoing = UDPPacketCreate(type, ENTITY_ARRAY[*client.player->entity].id, data, size);
     outgoing->address.host = client.server.ip->host;
@@ -204,7 +216,6 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
     if (!client.server.socket)
         return 0;
     assert("Attempting to send TCP-packet without client initialization" && client.isInitialized);
-    assert("Attempting to send TCP-packet without player set" && client.player != NULL);
 
     if (!client.server.socket)
     {
@@ -260,10 +271,9 @@ int ClientTCPOut(TCPpacket *packet)
 void ClientListenToServer()
 {
     assert("Attempting to start client listener without client initialization" && client.isInitialized);
-    assert("Attempting to start client listener without player set" && client.player != NULL);
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
-    while (client.isActive)
+    while (client.isListening)
     {
         int nReadySockets = SDLNet_CheckSockets(client.socketSet, 20);
         if (!nReadySockets)

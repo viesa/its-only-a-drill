@@ -47,10 +47,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     NotifyInitialize(app->font);
 
     LobbyInitialize();
-    ClientInitialize();
+    ClientInitialize(&app->player);
     ClientManagerInitialize();
-    ClientSetPlayer(&app->player);
-    ClientStart();
 
     for (int i = 1; i < 10; i++)
     {
@@ -78,7 +76,6 @@ void AppClientDestroy(AppClient *app)
     {
         ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
     }
-    ClientStop();
     ClientManagerUninitialize();
     ClientUninitialize();
     LobbyUninitialize();

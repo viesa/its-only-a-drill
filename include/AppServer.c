@@ -14,7 +14,7 @@ AppServer *AppServerCreate(SDL_bool *isRunning)
 
     AppServer *app = MALLOC(AppServer);
     ServerInitialize();
-    ServerStart();
+    ServerStartListening();
     app->isRunning = isRunning;
     app->displayTimer = 0.0f;
     app->cliWorker = SDL_CreateThread((SDL_ThreadFunction)AppServerUpdateCLI, "CLI Update", app);
@@ -24,7 +24,7 @@ AppServer *AppServerCreate(SDL_bool *isRunning)
 void AppServerDestroy(AppServer *app)
 {
     ServerTCPBroadcast(PT_CloseAllSessions, NULL, 0);
-    ServerStop();
+    ServerStopListening();
     ServerUninitialize();
     EntityManagerUninitalize();
     if (app->cliWorker)
@@ -93,7 +93,7 @@ void AppServerHandleAllPackets(AppServer *app)
 void AppServerUpdateCLI(AppServer *app)
 {
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
-    while (server.isActive)
+    while (server.isListening)
     {
         AppServerDrawCLI(app);
 
@@ -520,7 +520,7 @@ void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
     {
         NetPlayer *p = SessionGetPlayers(&SERVER_SESSIONS[sessionIndex])[i];
         char *name = p->name;
-        int bytesToCopy = min(strlen(name), nameSize);
+        int bytesToCopy = __min(strlen(name), nameSize);
         SDL_memcpy(allMembers + i * nameSize, name, bytesToCopy);
     }
 

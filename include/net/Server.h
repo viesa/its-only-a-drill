@@ -32,7 +32,7 @@ struct
     Vector *inBuffer;
     SDL_mutex *inBufferMutex;
 
-    SDL_bool isActive;
+    SDL_bool isListening;
     SDL_bool isInitialized;
 
     SDL_Thread *listenThread;
@@ -44,10 +44,10 @@ struct
 void ServerInitialize();
 // Destroys the server (udp_close(), unbind, sdlnet close)
 void ServerUninitialize();
-// Marks server as active and sends out threads
-void ServerStart();
-// Marks server as inactive and collects threads
-void ServerStop();
+// Marks server as listening and sends out listener thread
+void ServerStartListening();
+// Marks server as not listening and collects listener thread
+void ServerStopListening();
 // Broadcast UDP-packet to connected clients
 void ServerUDPBroadcast(PacketType type, void *data, int size);
 // Broadcast UDP-packet to connected clients on the given session

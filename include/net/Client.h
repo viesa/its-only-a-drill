@@ -21,7 +21,7 @@ struct
     Vector *inBuffer;
     SDL_mutex *inBufferMutex;
 
-    SDL_bool isActive;
+    SDL_bool isListening;
     SDL_bool isInitialized;
     SDL_bool receivedPlayerID;
 
@@ -31,23 +31,25 @@ struct
     SDL_bool hasSentName;
 
     float connectTimer;
+    SDL_mutex *connectMutex;
 } client;
 
-void ClientInitialize();
+///\param player: which player the client should pair up with
+void ClientInitialize(Player *player);
 void ClientUninitialize();
 
 void ClientUpdate();
 
-// Connets client to server
-int ClientConnect();
+// Connects client to server
+void ClientTryConnect();
+// Thread function to connect to server without interupt, used by "ClientTryConnect()"
+void ClientConnectThreadFn();
 // Disconnects client to server
 int ClientDisconnect();
-// Sets which player the client should pair up with
-void ClientSetPlayer(Player *player);
-// Marks client as active and sends out threads
-void ClientStart();
-// Marks client as inactive and collects threads
-void ClientStop();
+// Marks client as listening and sends out listener thread
+void ClientStartListening();
+// Marks client as not listening and collects listener thread
+void ClientStopListening();
 // Sends a UDP-packet to the server
 int ClientUDPSend(PacketType type, void *data, size_t size);
 // Final step before UDP-packet leaving the client
