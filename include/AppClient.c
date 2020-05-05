@@ -39,7 +39,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
-    app->menu = MenuCreate(app->gfx, app->font, app->bindings);
+    app->menu = MenuCreate(app->gfx, app->font, app->bindings, app->audio);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
