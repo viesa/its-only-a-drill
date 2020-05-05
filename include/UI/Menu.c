@@ -18,6 +18,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
     menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
+    menu->mainMenuDblDir = 1.0f;
 
     // SDL_Rect src = {0, 0, 1919, 942};
     SDL_Rect src = {0, 0, 3413, 1920};
@@ -33,12 +34,17 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
 
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
 {
-    menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime();
+    menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
-    if (menu->mainMenuDbl.src.x + menu->mainMenuDbl.src.w > 5760)
+    if (menu->mainMenuDbl.src.x + menu->mainMenuDbl.src.w > 5760 && menu->mainMenuDblDir == 1)
+    {
+        menu->mainMenuDbl.src.x = 5760 - menu->mainMenuDbl.src.w;
+        menu->mainMenuDblDir = -1;
+    }
+    else if (menu->mainMenuDbl.src.x < 0 && menu->mainMenuDblDir == -1)
     {
         menu->mainMenuDbl.src.x = 0;
-        menu->mainMenuDblDelta = 0.0f;
+        menu->mainMenuDblDir = 1;
     }
 
     if (menu->loopCount < 2 * PI)
