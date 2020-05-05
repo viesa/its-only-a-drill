@@ -133,7 +133,7 @@ Vec2 InputLastMousePos()
 
 void InputTypePortal(char charPush)
 {
-    if (input.textLen > 10)
+    if (input.textLen > 12)
         return;
     input.text[input.textLen] = charPush;
     input.textLen++;
@@ -156,17 +156,17 @@ void InputPortalBackspace()
 SDL_Scancode InputLastKeyDown(SDL_Scancode normal)
 {
     for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+    {
+        if (input.keymap[i])
         {
-            if (input.keymap[i])
+            if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
             {
-                if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)) 
-                {
-                }
-                else 
-                {
-                    return (SDL_Scancode)i;
-                }
+            }
+            else
+            {
+                return (SDL_Scancode)i;
             }
         }
+    }
     return normal;
 }
