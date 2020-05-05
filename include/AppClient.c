@@ -63,7 +63,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     ScoreIncrement(100, 0);
 
     app->groundListItems = GroundListCreate();
-    ENTITY_ARRAY[*app->player.entity].inventory = InventoryCreate();
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
@@ -277,7 +276,7 @@ void AppClientDraw(AppClient *app)
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }
 
-        InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
+        // InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
 
         break;
     }

@@ -64,6 +64,7 @@
                 "netplayer.h": "c",
                 "session.h": "c",
                 "font.h": "c",
-                "xutility": "c"
+                "xutility": "c",
+                "entity.h": "c"
         }
 }
