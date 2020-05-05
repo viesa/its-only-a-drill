@@ -31,7 +31,7 @@ void CursorChange(CursorType type)
         break;
     case CT_Crossair:
         cursorSurface = SDL_LoadBMP("assets/cursors/crosshair.bmp");
-        U_CURSOR.sdl_cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+        U_CURSOR.sdl_cursor = SDL_CreateColorCursor(cursorSurface, 15, 15);
         break;
     default:
         break;

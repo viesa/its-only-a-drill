@@ -509,7 +509,7 @@ void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
     {
         NetPlayer *p = SessionGetPlayers(session)[i];
         char *name = p->name;
-        int bytesToCopy = __min(strlen(name), nameSize);
+        int bytesToCopy = SDL_min(strlen(name), nameSize);
         SDL_memcpy(allMembers + i * nameSize, name, bytesToCopy);
     }
 

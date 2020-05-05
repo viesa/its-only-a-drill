@@ -46,6 +46,7 @@ void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
+void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

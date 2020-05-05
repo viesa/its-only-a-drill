@@ -101,8 +101,9 @@ void AppClientDestroy(AppClient *app)
 void AppClientRun(AppClient *app)
 {
     WindowClear(app->gfx->window);
-    AppClientUpdate(app);
     AppClientDraw(app);
+    AppClientUpdate(app);
+    // AppClientDraw(app);
     WindowPresent(app->gfx->window);
 }
 
@@ -207,12 +208,12 @@ void AppClientUpdate(AppClient *app)
             // if there is ammo in ur weapon shoot
             if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
             {
-                playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
+                playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->gfx->window->renderer);
             }
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
 
-        BehaviorMoveEntity(app->movingPattern);
+        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera);
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[2].desiredPoint.x = 180;
