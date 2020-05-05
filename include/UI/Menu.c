@@ -209,7 +209,7 @@ void MenuUpdateMainMenu(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         switch (menu->activeIndex)
         {
         case 0:
@@ -218,7 +218,6 @@ void MenuUpdateMainMenu(Menu *menu)
             {
                 MenuStateSet(MS_JoinLobby);
                 menu->activeIndex = 0;
-                menu->indexChanged = SDL_TRUE;
             }
             else
             {
@@ -232,7 +231,6 @@ void MenuUpdateMainMenu(Menu *menu)
             {
                 MenuStateSet(MS_HostLobby);
                 menu->activeIndex = 0;
-                menu->indexChanged = SDL_TRUE;
             }
             else
             {
@@ -244,14 +242,14 @@ void MenuUpdateMainMenu(Menu *menu)
         {
             MenuStateSet(MS_CustomMap);
             menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+
             break;
         }
         case 3:
         {
             MenuStateSet(MS_Options);
             menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+
             break;
         }
         case 4:
@@ -284,7 +282,7 @@ void MenuUpdateInGameMenu(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         switch (menu->activeIndex)
         {
         case 0:
@@ -292,14 +290,14 @@ void MenuUpdateInGameMenu(Menu *menu)
             MenuStateSet(MS_None);
             GameStateSet(GS_Playing);
             menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+
             break;
         }
         case 1:
         {
             MenuStateSet(MS_Options);
             menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+
             break;
         }
         case 2:
@@ -339,7 +337,7 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
     {
         if (menu->activeIndex == optionLength - 1)
         {
-            menu->indexChanged = SDL_TRUE;
+
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
         }
@@ -349,7 +347,7 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
             LoadedFile lfile = LoadedFileCreate(entry->filename);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
-            menu->indexChanged = SDL_TRUE;
+
             menu->activeIndex = 0;
             MenuStateSet(MS_WaitingForLobby);
         }
@@ -394,7 +392,7 @@ void MenuUpdateJoinLobby(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         if (menu->activeIndex == optionLength - 1)
         {
             menu->activeIndex = 0;
@@ -468,7 +466,7 @@ void MenuUpdateLobby(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         if (menu->activeIndex == optionLength - 1 - (int)lobby.isHost)
         {
             menu->activeIndex = 0;
@@ -504,7 +502,7 @@ void MenuUpdateOptions(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         switch (menu->activeIndex)
         {
         case 0: //toggle fullscreen
@@ -578,7 +576,7 @@ void MenuUpdateResolution(Menu *menu)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         int width = -1;
         int height = -1;
         switch (menu->activeIndex)
@@ -635,7 +633,7 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        menu->indexChanged = SDL_TRUE;
+
         switch (menu->activeIndex)
         {
         case 0:
@@ -706,7 +704,7 @@ void MenuUpdateKeybinding(Menu *menu)
         }
         else
         {
-            menu->indexChanged = SDL_TRUE;
+
             switch (menu->activeIndex)
             {
             case 0:
@@ -803,7 +801,6 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
         if (menu->activeIndex == optionLength - 1)
         {
 
-            menu->indexChanged = SDL_TRUE;
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
         }
