@@ -18,8 +18,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 5000;
-        i.Stats.cooldownMS = 750.0f;
+        i.Stats.falloff = 1000;
+        i.Stats.cooldownMS = 500.0f;
         i.Stats.currentTime = 10.0f;
         break;
     case ItemMetalSword:
@@ -32,8 +32,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 500;
-        i.Stats.cooldownMS = 750.0f;
+        i.Stats.falloff = 200;
+        i.Stats.cooldownMS = 250.0f;
         i.Stats.currentTime = 10.0f;
         break;
     case ItemEmpty:

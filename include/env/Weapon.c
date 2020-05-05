@@ -9,7 +9,7 @@ void weaponUpdate(Item *item)
 
     // reserved for bullet update
 }
-void playerShoot(EntityIndexP index, Camera *camera, Item *item)
+void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *renderer)
 {
 #ifdef WEAPON_DEBIG
     log_debug("current cooldown %f", item->Stats.currentTime);
@@ -31,6 +31,8 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item)
         point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
         point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
+        DrawLineOnCanvas(renderer, point.x - cameraPos.x, point.y - cameraPos.y, mousePos.x - cameraPos.x, mousePos.y - cameraPos.y);
+
         // push back
         ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
@@ -43,7 +45,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item)
     }
 }
 
-void entityShoot(int *index, Vec2 Desierdpoint, Item *item)
+void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *renderer, Camera *camera)
 {
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
     if (item->Stats.currentTime <= 0)
@@ -64,6 +66,8 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item)
         point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
         point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
+        Vec2 cameraPos = CameraGetPos(camera);
+        DrawLineOnCanvas(renderer, point.x - cameraPos.x, point.y - cameraPos.y, makeDestination.x - cameraPos.x, makeDestination.y - cameraPos.y);
         // push back
         ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
@@ -117,7 +121,11 @@ void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *ite
         }
     }
 }
-
+void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2)
+{
+    SDL_SetRenderDrawColor(renderer, 255, 50, 50, 150);
+    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+}
 // void bullet(int index, Vec2 Destination, SDL_Point point, Item item, Vec2 Direction)
 // {
 //     // to create offset so you don't shoot your self
