@@ -244,9 +244,7 @@ void AppClientDraw(AppClient *app)
     {
         switch (MenuStateGet())
         {
-        case MS_JoinLobby:
         case MS_HostLobby:
-        case MS_WaitingForLobby:
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
             MapDraw(app->camera);

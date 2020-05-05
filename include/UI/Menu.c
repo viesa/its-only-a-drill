@@ -214,16 +214,30 @@ void MenuUpdateMainMenu(Menu *menu)
         {
         case 0:
         {
-            MenuStateSet(MS_JoinLobby);
-            menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+            if (ConStateGet() == CON_Online)
+            {
+                MenuStateSet(MS_JoinLobby);
+                menu->activeIndex = 0;
+                menu->indexChanged = SDL_TRUE;
+            }
+            else
+            {
+                Notify("You are not connected", 1.0f, NT_WARN);
+            }
             break;
         }
         case 1:
         {
-            MenuStateSet(MS_HostLobby);
-            menu->activeIndex = 0;
-            menu->indexChanged = SDL_TRUE;
+            if (ConStateGet() == CON_Online)
+            {
+                MenuStateSet(MS_HostLobby);
+                menu->activeIndex = 0;
+                menu->indexChanged = SDL_TRUE;
+            }
+            else
+            {
+                Notify("You are not connected", 1.0f, NT_WARN);
+            }
             break;
         }
         case 2:
@@ -290,6 +304,7 @@ void MenuUpdateInGameMenu(Menu *menu)
         }
         case 2:
         {
+            MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
             break;
         }
@@ -532,7 +547,14 @@ void MenuUpdateOptions(Menu *menu)
         case 5:
         {
             menu->activeIndex = 0;
-            MenuStateSet(MS_MainMenu);
+            if (clientManager.inGame)
+            {
+                MenuStateSet(MS_InGameMenu);
+            }
+            else
+            {
+                MenuStateSet(MS_MainMenu);
+            }
             break;
         }
         }
@@ -813,9 +835,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     MenuState current = MenuStateGet();
     if (current != MS_CustomMap &&
         current != MS_Splash &&
-        current != MS_HostLobby &&
-        current != MS_JoinLobby &&
-        clientManager.inGame == SDL_FALSE)
+        current != MS_HostLobby)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }
@@ -824,6 +844,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     {
     case MS_Options:
     case MS_MainMenu:
+    case MS_InGameMenu:
     case MS_JoinLobby:
     case MS_HostLobby:
     case MS_WaitingForLobby:

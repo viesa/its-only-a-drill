@@ -368,41 +368,42 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
         senderP->sessionID = -1;
     }
 
-    for (size_t i = 0; i < server.sessions->size; i++)
+    // Find correct session that client wants to join
+    Session *session = ServerGetSessionByID(sessionID);
+    if (!session)
     {
-        // Find correct session that client wants to join
-        if (SERVER_SESSIONS[i].id == sessionID)
+        // If invalid session was sent, pretend it was full
+        ServerTCPSend(PT_FullSession, NULL, 0, packet.sender);
+        return;
+    }
+
+    // Checks if there is room for player in the new session
+    if (session->playersP->size < session->mapMaxPlayers)
+    {
+        if (session->host == NULL)
         {
-            Session *session = &SERVER_SESSIONS[i];
-            // Checks if there is room for player in the new session
-            if (session->playersP->size < session->mapMaxPlayers)
-            {
-                if (session->host == NULL)
-                {
-                    // If there is no host, you are host
-                    session->host = senderP;
-                }
-                if (senderP->id == session->host->id)
-                {
-                    // Notifies client that they are host
-                    ServerTCPSend(PT_HostAssign, NULL, 0, packet.sender);
-                }
-                // Makes sure client isn't already in this session somehow
-                if (VectorFind(session->playersP, &senderP) == session->playersP->size)
-                {
-                    // Adds new player to session
-                    VectorPushBack(session->playersP, &senderP);
-                }
-                senderP->sessionID = sessionID;
-                // Sends the session's map to client
-                ServerTCPSend(PT_JoinSession, session->rawMap, session->rawMapDataSize, packet.sender);
-            }
-            // If there is no room for client, send back FullSesssion packet
-            else
-            {
-                ServerTCPSend(PT_FullSession, NULL, 0, packet.sender);
-            }
+            // If there is no host, you are host
+            session->host = senderP;
         }
+        if (senderP->id == session->host->id)
+        {
+            // Notifies client that they are host
+            ServerTCPSend(PT_HostAssign, NULL, 0, packet.sender);
+        }
+        // Makes sure client isn't already in this session somehow
+        if (VectorFind(session->playersP, &senderP) == session->playersP->size)
+        {
+            // Adds new player to session
+            VectorPushBack(session->playersP, &senderP);
+        }
+        senderP->sessionID = sessionID;
+        // Sends the session's map to client
+        ServerTCPSend(PT_JoinSession, session->rawMap, session->rawMapDataSize, packet.sender);
+    }
+    // If there is no room for client, send back FullSesssion packet
+    else
+    {
+        ServerTCPSend(PT_FullSession, NULL, 0, packet.sender);
     }
 }
 
