@@ -17,8 +17,10 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
     menu->keybindingstate = 0;
     menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
+    menu->mainMenuDblDelta = 0.0f;
 
-    SDL_Rect src = {0, 0, 1919, 942};
+    // SDL_Rect src = {0, 0, 1919, 942};
+    SDL_Rect src = {0, 0, 3413, 1920};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
     menu->lobbyNormalDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
@@ -31,6 +33,14 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
 
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
 {
+    menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime();
+    menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
+    if (menu->mainMenuDbl.src.x + menu->mainMenuDbl.src.w > 5760)
+    {
+        menu->mainMenuDbl.src.x = 0;
+        menu->mainMenuDblDelta = 0.0f;
+    }
+
     if (menu->loopCount < 2 * PI)
     {
         menu->loopCount += .1f;
