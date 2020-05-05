@@ -10,6 +10,7 @@ Player PlayerCreate(Camera *camera)
     ret.body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
     ret.aimFollow = Vec2Create(0.0f, 0.0f);
     ret.forward = Vec2Create(1.0f, 0.0f);
+    ENTITY_ARRAY[*ret.entity].inventory = InventoryCreate();
     return ret;
 }
 
