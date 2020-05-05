@@ -14,12 +14,30 @@ Player PlayerCreate(Camera *camera)
     return ret;
 }
 
-void PlayerDestroy(Player *player)
-{
-}
-
 void PlayerUpdate(Player *player, Camera *camera)
 {
+    // camera
+    Vec2 mousePos = InputLastMousePos();
+    Vec2 cameraPos = CameraGetPos(camera);
+    Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*player->entity].drawables[0].dst), cameraPos);
+
+    Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
+
+    player->forward = Vec2Unit(playerToMouse);
+    Vec2 aim = Vec2MulL(player->forward, RADIUS);
+
+    player->aimFollow = Vec2Add(aim, ENTITY_ARRAY[*player->entity].position);
+
+    float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), player->forward));
+    float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
+    EntityRotateAll(player->entity, degrees);
+
+    // Movment
+    ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(SDL_SCANCODE_S) || InputIsKeyDown(SDL_SCANCODE_DOWN)) -
+                                                    (InputIsKeyDown(SDL_SCANCODE_W) || InputIsKeyDown(SDL_SCANCODE_UP)));
+    ENTITY_ARRAY[*player->entity].Force.x += 500 * ((InputIsKeyDown(SDL_SCANCODE_D) || InputIsKeyDown(SDL_SCANCODE_RIGHT)) -
+                                                    (InputIsKeyDown(SDL_SCANCODE_A) || InputIsKeyDown(SDL_SCANCODE_LEFT)));
+    // animation
     AnimUpdate(&player->leg, ClockGetDeltaTime());
     AnimUpdate(&player->body, ClockGetDeltaTime());
     if (!InputIsKeyDown(SDL_SCANCODE_A) &&
@@ -44,26 +62,6 @@ void PlayerUpdate(Player *player, Camera *camera)
 
     AnimApplyToDrawable(&player->leg, &ENTITY_ARRAY[*player->entity].drawables[0], 1.5f);
     AnimApplyToDrawable(&player->body, &ENTITY_ARRAY[*player->entity].drawables[1], 1.5f);
-
-    Vec2 mousePos = InputLastMousePos();
-    Vec2 cameraPos = CameraGetPos(camera);
-    Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*player->entity].drawables[0].dst), cameraPos);
-
-    Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
-
-    player->forward = Vec2Unit(playerToMouse);
-    Vec2 aim = Vec2MulL(player->forward, RADIUS);
-
-    player->aimFollow = Vec2Add(aim, ENTITY_ARRAY[*player->entity].position);
-
-    float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), player->forward));
-    float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
-    EntityRotateAll(player->entity, degrees);
-
-    ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(SDL_SCANCODE_S) || InputIsKeyDown(SDL_SCANCODE_DOWN)) -
-                                                    (InputIsKeyDown(SDL_SCANCODE_W) || InputIsKeyDown(SDL_SCANCODE_UP)));
-    ENTITY_ARRAY[*player->entity].Force.x += 500 * ((InputIsKeyDown(SDL_SCANCODE_D) || InputIsKeyDown(SDL_SCANCODE_RIGHT)) -
-                                                    (InputIsKeyDown(SDL_SCANCODE_A) || InputIsKeyDown(SDL_SCANCODE_LEFT)));
 }
 
 void PlayerDraw(Player *player, Camera *camera)
