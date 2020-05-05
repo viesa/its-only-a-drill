@@ -1,3 +1,4 @@
+#include "Macros.h"
 #include "include/AppServer.h"
 
 void InitSDL();

@@ -1,3 +1,4 @@
+#include "Macros.h"
 #include "Dependencies.h"
 #include "Event.h"
 #include "include/AppClient.h"
