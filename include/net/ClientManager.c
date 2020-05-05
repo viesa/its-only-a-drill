@@ -65,6 +65,9 @@ void ClientManagerUpdate()
         case PT_FetchLobby:
             ClientManagerHandleFetchLobbyPacket(nextPacket);
             break;
+        case PT_PlayerHit:
+            ClientManagerHandlePlayerHitPacket(nextPacket);
+            break;
         case PT_CloseAllSessions:
             ClientManagerHandleCloseAllSessionsPacket(nextPacket);
             break;
@@ -276,6 +279,13 @@ void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
             VectorPushBack(lobby.names, &name);
         }
     }
+}
+
+void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet)
+{
+    int send = *(int *)Packet.data;
+
+    ENTITY_ARRAY[*client.player->entity].health -= send;
 }
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)

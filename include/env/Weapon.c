@@ -96,7 +96,6 @@ void RayScan(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Forc
             ENTITY_ARRAY[index].Force.x += ForceDir.x;
             ENTITY_ARRAY[index].Force.y += ForceDir.y;
             log_debug("Sent packet entity = %d damage = %d", sendData.id, sendData.damage);
-            log_info("entity index = %d, id = %d, health = %d\n", index, ENTITY_ARRAY[index].id, ENTITY_ARRAY[index].health);
         }
     }
 }
