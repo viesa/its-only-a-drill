@@ -1,4 +1,5 @@
 #include "State.h"
+#include "Menu.h"
 
 struct State
 {
@@ -6,6 +7,8 @@ struct State
     MenuState menuState;
     ConState conState;
     CLIState CLIState;
+
+    Menu *menu;
 } state;
 
 void StateInitialize()
@@ -14,6 +17,8 @@ void StateInitialize()
     state.menuState = MS_None;
     state.conState = CON_None;
     state.CLIState = CS_None;
+
+    state.menu = NULL;
 }
 
 GameState GameStateGet()
@@ -43,6 +48,11 @@ void GameStateSet(GameState newState)
 
 void MenuStateSet(MenuState newState)
 {
+    if (state.menu)
+    {
+        state.menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
+        state.menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
+    }
     state.menuState = newState;
 }
 
@@ -54,4 +64,9 @@ void ConStateSet(ConState newState)
 void CLIStateSet(CLIState newState)
 {
     state.CLIState = newState;
+}
+
+void StateSetMenu(void *menu)
+{
+    state.menu = (Menu *)menu;
 }

@@ -15,6 +15,9 @@
 #include "ClientManager.h"
 #include "Lobby.h"
 
+#define FETCH_SESSIONS_INTERVAL (2.0f)
+#define FETCH_LOBBY_INTERVAL (0.5f)
+
 typedef struct Menu
 {
     Graphics *gfx;
