@@ -16,6 +16,8 @@ struct
     Vector *players;
     // A vector of structs, JoinableSession
     Vector *joinList;
+    SDL_bool inLobby; // both of these cannot be true at once
+    SDL_bool inGame;  // :)
 } clientManager;
 
 // Creates the client manager
@@ -38,8 +40,8 @@ void ClientManagerHandleEntityPacket(ParsedPacket packet);
 void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet);
 void ClientManagerHandleCreateSessionPacket(ParsedPacket packet);
 void ClientManagerHandleJoinSessionPacket(ParsedPacket packet);
-void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet);
 void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
+void ClientManagerHandleStartSessionPacket(ParsedPacket packet);
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);

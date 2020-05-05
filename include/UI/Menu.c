@@ -81,6 +81,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
     case MS_MainMenu:
         MenuUpdateMainMenu(menu);
         break;
+    case MS_InGameMenu:
+        MenuUpdateInGameMenu(menu);
+        break;
     case MS_JoinLobby:
         MenuUpdateJoinLobby(menu);
         break;
@@ -236,6 +239,52 @@ void MenuUpdateMainMenu(Menu *menu)
     MenuDraw(menu, options, optionLength);
 }
 
+void MenuUpdateInGameMenu(Menu *menu)
+{
+    //Determine menu options
+    int optionLength = 3;
+    char options[3][100] = {
+        {"Resume"},
+        {"Options"},
+        {"Disconnect"}};
+
+    // makes it loop
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        menu->indexChanged = SDL_TRUE;
+        switch (menu->activeIndex)
+        {
+        case 0:
+        {
+            MenuStateSet(MS_None);
+            GameStateSet(GS_Playing);
+            menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
+            break;
+        }
+        case 1:
+        {
+            MenuStateSet(MS_Options);
+            menu->activeIndex = 0;
+            menu->indexChanged = SDL_TRUE;
+            break;
+        }
+        case 2:
+        {
+            ClientTCPSend(PT_LeaveSession, NULL, 0);
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    MenuDraw(menu, options, optionLength);
+}
+
 void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
 {
     //Determine menu options
@@ -325,7 +374,6 @@ void MenuUpdateJoinLobby(Menu *menu)
             int sessionID = CLIENTMANAGER_JOINLIST[menu->activeIndex].sessionID;
             ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
             MenuStateSet(MS_WaitingForLobby);
-            lobby.sessionID = sessionID;
         }
     }
     MenuDraw(menu, options, optionLength);
@@ -361,7 +409,7 @@ void MenuUpdateLobby(Menu *menu)
     if (menu->fetchLobbyTimer >= FETCH_LOBBY_INTERVAL)
     {
         menu->fetchLobbyTimer -= FETCH_LOBBY_INTERVAL;
-        ClientTCPSend(PT_FetchLobby, &lobby.sessionID, sizeof(int));
+        ClientTCPSend(PT_FetchLobby, NULL, 0);
     }
     else
     {
@@ -394,10 +442,14 @@ void MenuUpdateLobby(Menu *menu)
         {
             menu->activeIndex = 0;
             MenuStateSet(MS_MainMenu);
-            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+            ClientTCPSend(PT_LeaveSession, NULL, 0);
             VectorClear(lobby.names);
-            lobby.sessionID = -1;
             lobby.isHost = SDL_FALSE;
+        }
+        if (lobby.isHost && menu->activeIndex == optionLength - 1)
+        {
+            // Start the session
+            ClientTCPSend(PT_StartSession, NULL, 0);
         }
     }
 
@@ -746,7 +798,8 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     if (current != MS_CustomMap &&
         current != MS_Splash &&
         current != MS_HostLobby &&
-        current != MS_JoinLobby)
+        current != MS_JoinLobby &&
+        clientManager.inGame == SDL_FALSE)
     {
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
     }

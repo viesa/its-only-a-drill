@@ -12,7 +12,6 @@ typedef struct LobbyName
 
 struct Lobby
 {
-    int sessionID;
     // Vector of LobbyName
     Vector *names;
     SDL_bool isHost;

@@ -435,6 +435,7 @@ int ServerTryAcceptTCPSocket()
     {
         SDLNet_TCP_AddSocket(server.socketSet, newClient);
         NetPlayer newPlayer = NetPlayerCreate(newClient, ServerGetID());
+        newPlayer.entity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, newPlayer.id);
         ServerTCPSend(PT_Connect, &newPlayer.id, sizeof(int), newPlayer);
         VectorPushBack(server.players, &newPlayer);
 #ifdef SERVER_DEBUG
@@ -589,6 +590,21 @@ int ServerGetID()
     log_warn("No available ID's!");
 #endif
     return -1;
+}
+
+NetPlayer *ServerNetPlayerToPointer(NetPlayer player)
+{
+    for (size_t i = 0; i < server.players->size; i++)
+    {
+        if (!SDL_memcmp(&SERVER_PLAYERS[i], &player, sizeof(NetPlayer)))
+        {
+            return &SERVER_PLAYERS[i];
+        }
+    }
+#ifdef APPSERVER_DEBUG
+    log_warn("Could not find pointer to NetPlayer specified");
+#endif
+    return NULL;
 }
 
 void ServerFreeID(int id)

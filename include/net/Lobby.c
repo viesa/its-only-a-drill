@@ -2,7 +2,6 @@
 
 void LobbyInitialize()
 {
-    lobby.sessionID = -1;
     lobby.names = VectorCreate(sizeof(LobbyName), 10);
     lobby.isHost = SDL_FALSE;
 }

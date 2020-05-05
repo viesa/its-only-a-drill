@@ -45,6 +45,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
 void MenuUpdateMainMenu(Menu *menu);
+void MenuUpdateInGameMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
 void MenuUpdateHostLobby(Menu *menu, MapList *mapList);
 void MenuUpdateWaitingForLobby(Menu *menu);

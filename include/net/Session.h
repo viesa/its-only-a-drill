@@ -16,6 +16,7 @@ typedef struct Session
     size_t rawMapDataSize;
     char *mapName;
     int mapMaxPlayers;
+    SDL_bool inGame;
 } Session;
 
 Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size);

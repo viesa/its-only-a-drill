@@ -17,6 +17,7 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
     badSession.id = -1;
 
     Session session;
+    session.inGame = SDL_FALSE;
     session.id = id;
     session.host = host;
     session.playersP = VectorCreate(sizeof(NetPlayer *), 10);

@@ -85,6 +85,9 @@ int ServerTryReceiveTCPPacket(NetPlayer player);
 void ServerRemoveClient(NetPlayer player);
 // Returns lowest free unique ID
 int ServerGetID();
+// Find a netplayer in servers array of netplayers
+///\return: Returns a pointer to matching player, NULL if not found
+NetPlayer *ServerNetPlayerToPointer(NetPlayer player);
 // Marks the id as non-taken
 void ServerFreeID(int id);
 // Returns lowest free unique session ID

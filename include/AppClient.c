@@ -74,9 +74,9 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 }
 void AppClientDestroy(AppClient *app)
 {
-    if (lobby.sessionID != -1)
+    if (clientManager.inLobby || clientManager.inGame)
     {
-        ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
+        ClientTCPSend(PT_LeaveSession, NULL, 0);
     }
     ClientManagerUninitialize();
     ClientUninitialize();
@@ -135,7 +135,14 @@ void AppClientUpdate(AppClient *app)
         if (InputIsKeyPressed(SDL_SCANCODE_ESCAPE))
         {
             GameStateSet(GS_Menu);
-            MenuStateSet(MS_MainMenu);
+            if (clientManager.inGame == SDL_TRUE)
+            {
+                MenuStateSet(MS_InGameMenu);
+            }
+            else
+            {
+                MenuStateSet(MS_MainMenu);
+            }
             break;
         }
         CameraUpdate(app->camera);

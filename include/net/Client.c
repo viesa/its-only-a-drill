@@ -75,7 +75,9 @@ void ClientConnectThreadFn()
     // Resolve host to retrieve SDL IPaddress pointing to server
     if (SDLNet_ResolveHost(&serverIP, ip, port) == -1)
     {
+#ifdef CLIENT_DEBUG
         log_error("Failed to resolve host: (%s:%d): %s", ip, port, SDLNet_GetError());
+#endif
         SDL_UnlockMutex(client.connectMutex);
         return;
     }
@@ -83,7 +85,9 @@ void ClientConnectThreadFn()
     // Open UDP-socket on random port
     if (!(client.udpSocket = SDLNet_UDP_Open(0)))
     {
+#ifdef CLIENT_DEBUG
         log_error("Failed to open port (UDP) (%s:%d)): %s", ip, port, SDLNet_GetError());
+#endif
         SDL_UnlockMutex(client.connectMutex);
         return;
     }
@@ -91,7 +95,9 @@ void ClientConnectThreadFn()
     TCPsocket tcpSocket;
     if (!(tcpSocket = SDLNet_TCP_Open(&serverIP)))
     {
+#ifdef CLIENT_DEBUG
         log_error("Failed to open port (TCP) (%s:%d)): %s", ip, port, SDLNet_GetError());
+#endif
         SDL_UnlockMutex(client.connectMutex);
         return;
     }
@@ -100,7 +106,9 @@ void ClientConnectThreadFn()
     // Add TCP-socket to socket set
     if (SDLNet_UDP_AddSocket(client.socketSet, client.udpSocket) == -1)
     {
+#ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
+#endif
         // Clean up the successful TCP-socket
         SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);
@@ -110,7 +118,9 @@ void ClientConnectThreadFn()
     // Add TCP-socket to socket set
     if (SDLNet_TCP_AddSocket(client.socketSet, client.server.socket) == -1)
     {
+#ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (TCP): %s", SDLNet_GetError());
+#endif
         // Clean up the successful UDP-socket
         SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);

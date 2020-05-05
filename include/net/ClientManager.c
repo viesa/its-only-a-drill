@@ -4,6 +4,8 @@ void ClientManagerInitialize()
 {
     clientManager.players = VectorCreate(sizeof(EntityIndexP), 100);
     clientManager.joinList = VectorCreate(sizeof(JoinableSession), 5);
+    clientManager.inLobby = SDL_FALSE;
+    clientManager.inGame = SDL_FALSE;
 }
 
 void ClientManagerUninitialize()
@@ -50,11 +52,11 @@ void ClientManagerUpdate()
         case PT_JoinSession:
             ClientManagerHandleJoinSessionPacket(nextPacket);
             break;
-        case PT_LeaveSession:
-            ClientManagerHandleLeaveSessionPacket(nextPacket);
-            break;
         case PT_FullSession:
             ClientManagerHandleFullSessionPacket(nextPacket);
+            break;
+        case PT_StartSession:
+            ClientManagerHandleStartSessionPacket(nextPacket);
             break;
         case PT_HostAssign:
             ClientManagerHandleHostAssignPacket(nextPacket);
@@ -182,9 +184,6 @@ void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
         // If session was created successfully, attempt to join the session with sessionID
         ClientTCPSend(PT_JoinSession, &sessionID, sizeof(int));
         MenuStateSet(MS_WaitingForLobby);
-        // Assume you are accepted into the session
-        // This is will be set to -1 if it wasn't possible to join the session
-        lobby.sessionID = sessionID;
     }
 }
 
@@ -198,8 +197,7 @@ void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
         {
             // Failed to create a JSON-mapdata from incoming data
             MenuStateSet(MS_MainMenu);
-            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
-            lobby.sessionID = -1;
+            ClientTCPSend(PT_LeaveSession, NULL, 0);
             return;
         }
         int result = MapGenerateNew(mapData);
@@ -208,11 +206,11 @@ void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
             // Failed to create a map from JSON-data
             JSONDestroy(mapData);
             MenuStateSet(MS_MainMenu);
-            ClientTCPSend(PT_LeaveSession, &lobby.sessionID, sizeof(int));
-            lobby.sessionID = -1;
+            ClientTCPSend(PT_LeaveSession, NULL, 0);
             return;
         }
         MenuStateSet(MS_Lobby);
+        clientManager.inLobby = SDL_TRUE;
     }
 }
 
@@ -221,37 +219,37 @@ void ClientManagerHandleFullSessionPacket(ParsedPacket packet)
     if (MenuStateGet() == MS_WaitingForLobby)
     {
         MenuStateSet(MS_JoinLobby);
-        lobby.sessionID = -1;
     }
 }
 
-void ClientManagerHandleLeaveSessionPacket(ParsedPacket packet)
+void ClientManagerHandleStartSessionPacket(ParsedPacket packet)
 {
+    if (MenuStateGet() != MS_Lobby)
+        return;
+    ENTITY_ARRAY[*client.player->entity] = *(Entity *)packet.data;
+    MenuStateSet(MS_None);
+    GameStateSet(GS_Playing);
+    clientManager.inGame = SDL_TRUE;
+    clientManager.inLobby = SDL_FALSE;
 }
 
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
 {
-    lobby.isHost = SDL_TRUE;
+    if (clientManager.inLobby)
+        lobby.isHost = SDL_TRUE;
 }
 
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
 {
+    // Clear joinList of old joinable sessions
+    VectorClear(clientManager.joinList);
+
     // If no session exists, add spcecial element to joinList
     if (!packet.size)
-    {
-        JoinableSession empty;
-        strcpy(empty.name, "No session avaiable");
-        empty.maxPlayers = -1;
-        empty.currentPlayers = -1;
-        empty.sessionID = -1;
-        VectorPushBack(clientManager.joinList, &empty);
-    }
+        return;
 
     JoinableSession *fetched = (JoinableSession *)packet.data;
     int nSessions = packet.size / sizeof(JoinableSession);
-
-    // Clear joinList of old joinable sessions
-    VectorClear(clientManager.joinList);
 
     // Add all joinable sessions to joinList
     for (int i = 0; i < nSessions; i++)
@@ -262,7 +260,7 @@ void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
 
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 {
-    if (lobby.sessionID != -1)
+    if (clientManager.inLobby)
     {
         char *allMembers = (char *)packet.data;
 
@@ -280,7 +278,8 @@ void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 {
-    lobby.sessionID = -1;
+    clientManager.inLobby = SDL_FALSE;
+    clientManager.inGame = SDL_FALSE;
     GameStateSet(GS_Menu);
     MenuState menuState = MenuStateGet();
     if (menuState == MS_None ||

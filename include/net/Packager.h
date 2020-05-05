@@ -30,6 +30,7 @@ typedef enum PacketType
     PT_HostAssign,       // When the host notfies the ID of the host
     PT_FetchSessions,    // When client asks server what sessions exists
     PT_FetchLobby,       // When client asks server which players are in given lobby
+    PT_StartSession,     // When host starts the session from the lobby, server returns the entity of the player
     PT_PlayerHit,        // When a player is getting shot [0] = id of shot player, [1] = damage
     PT_None,
     PT_CloseAllSessions,
