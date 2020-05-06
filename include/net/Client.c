@@ -154,10 +154,16 @@ int ClientDisconnect()
     }
 
     ClientTCPSend(PT_Disconnect, NULL, 0);
-    SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
-    SDLNet_UDP_Close(client.udpSocket);
-    SDLNet_TCP_DelSocket(client.socketSet, client.server.socket);
-    SDLNet_TCP_Close(client.server.socket);
+    if (client.udpSocket)
+    {
+        SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
+        SDLNet_UDP_Close(client.udpSocket);
+    }
+    if (client.server.socket)
+    {
+        SDLNet_TCP_DelSocket(client.socketSet, client.server.socket);
+        SDLNet_TCP_Close(client.server.socket);
+    }
 
     for (size_t i = 0; i < client.inBuffer->size; i++)
     {
