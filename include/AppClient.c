@@ -116,7 +116,9 @@ void AppClientUpdate(AppClient *app)
     case GS_Menu:
     {
         CursorChange(CT_Normal);
+#ifndef WIN_DEBUG
         MapListUpdate(&app->mapList);
+#endif
         switch (MenuStateGet())
         {
         case MS_CustomMap:
