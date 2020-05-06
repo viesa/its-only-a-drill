@@ -65,6 +65,7 @@
                 "session.h": "c",
                 "font.h": "c",
                 "xutility": "c",
-                "entity.h": "c"
+                "entity.h": "c",
+                "typeinfo": "c"
         }
 }

@@ -32,7 +32,7 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     LoadingBarShow(menu->loadingBar);
 
     menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
-    menu->MenuTheme = MusicCreate(menu->audio,MF_MainMusic);
+    menu->MenuTheme = MusicCreate(menu->audio, MF_MainMusic);
     menu->themecheck = 0;
 
     return menu;
@@ -84,7 +84,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
     if (menu->lastIndex != menu->activeIndex)
     {
         menu->indexChanged = SDL_TRUE;
-        SoundPlay(&menu->MenuStep,0);
+        SoundPlay(&menu->MenuStep, 0);
     }
     else
     {
@@ -174,6 +174,7 @@ void MenuUpdateSplash(Menu *menu)
     {
         if (InputIsAnyKeyDown())
         {
+            InputClearPortalContent();
             MenuStateSet(MS_Name);
         }
 
@@ -199,12 +200,11 @@ void MenuUpdateSplash(Menu *menu)
     LoadingBarUpdate(menu->loadingBar);
     LoadingBarAdd(menu->loadingBar, ClockGetFPS() * 4 / 100);
 
-    if(menu->themecheck == 0) 
+    if (menu->themecheck == 0)
     {
         MusicPlay(&menu->MenuTheme, 1);
         menu->themecheck++;
     }
-
 }
 
 void MenuUpdateMainMenu(Menu *menu)

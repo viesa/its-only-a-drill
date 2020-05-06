@@ -137,7 +137,7 @@ void InputTypePortal(char charPush)
         return;
     input.text[input.textLen] = charPush;
     input.textLen++;
-    input.text[input.textLen] = ' ';
+    input.text[input.textLen] = '\0';
 }
 
 char *InputGetPortalContent()
@@ -145,9 +145,18 @@ char *InputGetPortalContent()
     return input.text;
 }
 
+void InputClearPortalContent()
+{
+    input.textLen = 0;
+    for (int i = 0; i < 12; i++)
+    {
+        input.text[i] = '\0';
+    }
+}
+
 void InputPortalBackspace()
 {
-    input.text[input.textLen - 1] = ' ';
+    input.text[input.textLen - 1] = '\0';
     if (input.textLen > 1)
         input.textLen--;
     return;
