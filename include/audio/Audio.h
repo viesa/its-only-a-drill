@@ -23,6 +23,7 @@ typedef enum SoundFile
 typedef enum MusicFile
 {
     MF_Test,
+    MF_MainMusic,
     MF_Count
 } MusicFile;
 
