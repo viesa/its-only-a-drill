@@ -19,9 +19,9 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
     Session session;
     session.inGame = SDL_FALSE;
     session.id = id;
-    session.host = host;
-    session.playersP = VectorCreate(sizeof(NetPlayer *), 10);
-    VectorPushBack(session.playersP, &session.host);
+    session.hostID = host->id;
+    session.playerIDs = VectorCreate(sizeof(int), 10);
+    VectorPushBack(session.playerIDs, &session.hostID);
     session.rawMap = MALLOC_N(char, size);
     ALLOC_ERROR_CHECK(session.rawMap);
     session.rawMapDataSize = size;
@@ -91,7 +91,7 @@ void SessionDestroy(Session *session)
     FREE(session->mapName);
 }
 
-NetPlayer **SessionGetPlayers(Session *session)
+int *SessionGetPlayerIDs(Session *session)
 {
-    return (NetPlayer **)session->playersP->data;
+    return (int *)session->playerIDs->data;
 }

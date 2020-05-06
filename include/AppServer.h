@@ -26,11 +26,10 @@ void AppServerDrawTitle(AppServer *app);
 void AppServerDrawCLI(AppServer *app);
 void AppServerClearTerminal(AppServer *app);
 
-Session *ServerGetSessionByID(int sessionID);
-
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
 void AppServerHandleConnectPacket(ParsedPacket packet);
+void AppServerHandleUDPRespondIPPacket(ParsedPacket packet);
 void AppServerHandleDisconnectPacket(ParsedPacket packet);
 void AppServerHandleEntityPacket(ParsedPacket packet);
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet);

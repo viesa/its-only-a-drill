@@ -117,7 +117,7 @@ void ServerUDPBroadcast(PacketType type, void *data, int size)
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
     for (int i = 0; i < server.players->size; i++)
     {
-        packet->address = *SERVER_PLAYERS[i].ip;
+        packet->address = SERVER_PLAYERS[i].udpRespondIP;
         ServerUDPOut(packet);
     }
     UDPPacketDestroy(packet);
@@ -126,10 +126,12 @@ void ServerUDPBroadcastSession(PacketType type, Session *session, void *data, in
 {
     // Creates a UDP-packet to send. ID of server is 0
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
-    NetPlayer **netplayers = SessionGetPlayers(session);
+    int *playerIDs = SessionGetPlayerIDs(session);
     for (int i = 0; i < server.sessions->size; i++)
     {
-        packet->address = *netplayers[i]->ip;
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+
+        packet->address = to->udpRespondIP;
         ServerUDPOut(packet);
     }
     UDPPacketDestroy(packet);
@@ -143,7 +145,7 @@ void ServerUDPBroadcastExclusive(PacketType type, void *data, int size, NetPlaye
         if (SERVER_PLAYERS[i].id == exclusive.id)
             continue;
 
-        packet->address = *SERVER_PLAYERS[i].ip;
+        packet->address = SERVER_PLAYERS[i].udpRespondIP;
         ServerUDPOut(packet);
     }
     UDPPacketDestroy(packet);
@@ -152,13 +154,15 @@ void ServerUDPBroadcastExclusiveSession(PacketType type, Session *session, void 
 {
     // Creates a UDP-packet to send. ID of server is 0
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
-    NetPlayer **netplayers = SessionGetPlayers(session);
-    for (int i = 0; i < session->playersP->size; i++)
+    int *playerIDs = SessionGetPlayerIDs(session);
+    for (int i = 0; i < session->playerIDs->size; i++)
     {
-        if (netplayers[i]->id == exclusive.id)
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+
+        if (to->id == exclusive.id)
             continue;
 
-        packet->address = *netplayers[i]->ip;
+        packet->address = to->udpRespondIP;
         ServerUDPOut(packet);
     }
     UDPPacketDestroy(packet);
@@ -167,7 +171,7 @@ void ServerUDPSend(PacketType type, void *data, int size, NetPlayer player)
 {
     // Creates a UDP-packet to send. ID of server is 0
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
-    packet->address = *player.ip;
+    packet->address = player.udpRespondIP;
     ServerUDPOut(packet);
     UDPPacketDestroy(packet);
 }
@@ -175,6 +179,9 @@ void ServerUDPSend(PacketType type, void *data, int size, NetPlayer player)
 void ServerUDPOut(UDPpacket *packet)
 {
     assert("Attempting to send packet without server initialization" && server.isInitialized);
+
+    if (packet->address.host == 0 || packet->address.port == 0)
+        return;
 
     if (!SDLNet_UDP_Send(server.udpSocket, -1, packet))
     {
@@ -209,12 +216,15 @@ void ServerTCPBroadcast(PacketType type, void *data, int size)
 
 void ServerTCPBroadcastSession(PacketType type, Session *session, void *data, int size)
 {
+
     // Creates a TCP-packet to send. ID of server is 0
     TCPpacket *packet = TCPPacketCreate(type, 0, data, size);
-    NetPlayer **netplayers = SessionGetPlayers(session);
-    for (int i = 0; i < session->playersP->size; i++)
+    int *playerIDs = SessionGetPlayerIDs(session);
+    for (int i = 0; i < session->playerIDs->size; i++)
     {
-        packet->address = netplayers[i]->socket;
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+
+        packet->address = to->socket;
         ServerTCPOut(packet);
     }
     TCPPacketDestroy(packet);
@@ -238,13 +248,15 @@ void ServerTCPBroadcastExclusiveSession(PacketType type, Session *session, void 
 {
     // Creates a TCP-packet to send. ID of server is 0
     TCPpacket *packet = TCPPacketCreate(type, 0, data, size);
-    NetPlayer **netplayers = SessionGetPlayers(session);
-    for (int i = 0; i < session->playersP->size; i++)
+    int *playerIDs = SessionGetPlayerIDs(session);
+    for (int i = 0; i < session->playerIDs->size; i++)
     {
-        if (netplayers[i]->id == exclusive.id)
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+
+        if (to->id == exclusive.id)
             continue;
 
-        packet->address = netplayers[i]->socket;
+        packet->address = to->socket;
         ServerTCPOut(packet);
     }
     TCPPacketDestroy(packet);
@@ -348,6 +360,7 @@ int ServerTryReceiveUDPPacket()
     UDPpacket *incoming = SDLNet_AllocPacket(MAX_MSGLEN);
 
     int result = SDLNet_UDP_Recv(server.udpSocket, incoming);
+
     if (result == -1)
     {
 #ifdef SERVER_DEBUG
@@ -391,6 +404,9 @@ int ServerTryReceiveUDPPacket()
             }
             if (sender != NULL)
             {
+                // Update the respond address
+                sender->udpRespondIP = incoming->address;
+
                 ParsedPacket parsedPacket = ParsedPacketCreate(type, incoming->data, incoming->len, *sender);
                 SDL_LockMutex(server.inBufferMutex);
                 VectorPushBack(server.inBuffer, &parsedPacket);
@@ -541,15 +557,8 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
 
 void ServerRemoveClient(NetPlayer player)
 {
-    int index = -1;
-    for (int i = 0; i < server.players->size; i++)
-    {
-        if (!SDL_memcmp(&SERVER_PLAYERS[i], &player, sizeof(NetPlayer)))
-        {
-            index = i;
-            break;
-        }
-    }
+    // If player doesnt acutally exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(player.id);
 
     // Try to disconnect and clean up ot make sure client is not still in memory
     // Even if no corrent ID was found
@@ -561,11 +570,13 @@ void ServerRemoveClient(NetPlayer player)
 
     // If NetPlayer was not found in current players,
     // it was already deleted -> Return
-    if (index == -1)
+    if (!senderP)
+    {
         return;
+    }
 
-    // Remove client from player-list before broadcasting
-    VectorErase(server.players, index);
+    // Remove client from player-list
+    VectorEraseElement(server.players, senderP);
 
     ServerFreeID(player.id);
 }
@@ -591,21 +602,6 @@ int ServerGetID()
     log_warn("No available ID's!");
 #endif
     return -1;
-}
-
-NetPlayer *ServerNetPlayerToPointer(NetPlayer player)
-{
-    for (size_t i = 0; i < server.players->size; i++)
-    {
-        if (!SDL_memcmp(&SERVER_PLAYERS[i], &player, sizeof(NetPlayer)))
-        {
-            return &SERVER_PLAYERS[i];
-        }
-    }
-#ifdef APPSERVER_DEBUG
-    log_warn("Could not find pointer to NetPlayer specified");
-#endif
-    return NULL;
 }
 
 void ServerFreeID(int id)
@@ -634,6 +630,79 @@ void ServerFreeSessionID(int id)
 {
     if (id >= 0 || id < server.sessionBitmap->capacity)
         SERVER_SESSIONBITMAP[id] = SDL_FALSE;
+}
+
+Session *ServerGetSessionByID(int sessionID)
+{
+    for (size_t i = 0; i < server.sessions->size; i++)
+    {
+        if (SERVER_SESSIONS[i].id == sessionID)
+        {
+            return &SERVER_SESSIONS[i];
+        }
+    }
+#ifdef APPSERVER_DEBUG
+    log_warn("Could not find pointer to Session specified");
+#endif
+    return NULL;
+}
+
+NetPlayer *ServerGetPlayerByID(int id)
+{
+    for (size_t i = 0; i < server.players->size; i++)
+    {
+        if (SERVER_PLAYERS[i].id == id)
+        {
+            return &SERVER_PLAYERS[i];
+        }
+    }
+#ifdef APPSERVER_DEBUG
+    log_warn("Could not find pointer to NetPlayer specified");
+#endif
+    return NULL;
+}
+
+NetPlayer *ServerGetPlayerByNetPlayer(NetPlayer player)
+{
+    for (size_t i = 0; i < server.players->size; i++)
+    {
+        if (!SDL_memcmp(&SERVER_PLAYERS[i], &player, sizeof(NetPlayer)))
+        {
+            return &SERVER_PLAYERS[i];
+        }
+    }
+#ifdef APPSERVER_DEBUG
+    log_warn("Could not find pointer to NetPlayer specified");
+#endif
+    return NULL;
+}
+
+void ServerRemovePlayerFromSession(Session *session, int playerID)
+{
+    // Remove leaving player from session
+    VectorEraseElement(session->playerIDs, &playerID);
+
+    // If number of players in session is 0, remove session
+    if (session->playerIDs->size == 0)
+    {
+        VectorEraseElement(server.sessions, session);
+    }
+    // Check if leaving player was host
+    else if (session->hostID == playerID)
+    {
+        // Randomize new host
+        int r = rand() % session->playerIDs->size;
+        session->hostID = SessionGetPlayerIDs(session)[r];
+        // Notifes new host that they are host
+        ServerTCPSend(PT_HostAssign, NULL, 0, *ServerGetPlayerByID(session->hostID));
+    }
+
+    // Notify everyone else in session that the client left
+    if (playerID != -1)
+        ServerTCPBroadcastSession(PT_DelPlayer, session, &playerID, sizeof(int));
+
+    // Sets the sessionID of player to -1, so that they can join a new session
+    ServerGetPlayerByID(playerID)->sessionID = -1;
 }
 
 ParsedPacket *ServerGetInBufferArray()

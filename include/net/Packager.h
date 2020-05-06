@@ -16,6 +16,7 @@ typedef enum PacketType
 {
     PT_Text,             // When plain text is to be sent
     PT_Connect,          // When client connects to server, recieve their name sends out ID
+    PT_UDPRespondIP,     // When client want to notify server which IP-address to asssign it's outgoing UDP-packets with
     PT_DuplicateName,    // When client has a duplicate name
     PT_Disconnect,       // When client or server disconnectes
     PT_NewPlayer,        // When server broadcasts a new player join,
@@ -32,8 +33,8 @@ typedef enum PacketType
     PT_FetchLobby,       // When client asks server which players are in given lobby
     PT_StartSession,     // When host starts the session from the lobby, server returns the entity of the player
     PT_PlayerHit,        // When a player is getting shot [0] = id of shot player, [1] = damage
-    PT_None,
     PT_CloseAllSessions,
+    PT_None,
     PT_Count
 } PacketType;
 

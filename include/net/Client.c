@@ -98,6 +98,8 @@ void ClientConnectThreadFn()
 #ifdef CLIENT_DEBUG
         log_error("Failed to open port (TCP) (%s:%d)): %s", ip, port, SDLNet_GetError());
 #endif
+        // Clean up
+        SDLNet_UDP_Close(client.udpSocket);
         SDL_UnlockMutex(client.connectMutex);
         return;
     }
@@ -109,7 +111,7 @@ void ClientConnectThreadFn()
 #ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
 #endif
-        // Clean up the successful TCP-socket
+        // Clean up
         SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);
         SDL_UnlockMutex(client.connectMutex);
@@ -121,7 +123,7 @@ void ClientConnectThreadFn()
 #ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (TCP): %s", SDLNet_GetError());
 #endif
-        // Clean up the successful UDP-socket
+        // Clean up
         SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);
         SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
@@ -375,7 +377,6 @@ int ClientTryReceiveUDPPacket()
 
 int ClientTryReceiveTCPPacket()
 {
-
     char header[TCP_HEADER_SIZE] = {0};
     // First receive the header to know how big the packet is
     int headerReceived = 0;
@@ -387,7 +388,7 @@ int ClientTryReceiveTCPPacket()
         if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
-            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
 #endif
             return 0;
         }
@@ -417,7 +418,7 @@ int ClientTryReceiveTCPPacket()
         if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
-            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", player.ip->host, player.ip->port);
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
 #endif
             FREE(buffer);
             return 0;

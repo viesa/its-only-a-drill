@@ -9,6 +9,9 @@ typedef struct NetPlayer
     TCPsocket socket;
     // A pointer to the IPaddress of specified NetPlayer's TCP-socket
     IPaddress *ip;
+    // An IP address to assign outgoing UDP-packets
+    // This IP is set once a UDP-packet is received and the sender data can be extracted
+    IPaddress udpRespondIP;
     int id;
     int sessionID;
     // Only used to store the player's entity on server side

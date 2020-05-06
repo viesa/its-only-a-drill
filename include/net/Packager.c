@@ -22,8 +22,8 @@ UDPpacket *UDPPacketCreate(PacketType type, int id, void *data, size_t size)
     const int totalLength = NET_TYPE_SIZE + NET_ID_SIZE + size;
     UDPpacket *packet = SDLNet_AllocPacket(totalLength);
 
-    char itoa_typeBuffer[NET_TYPE_SIZE];
-    char itoa_idBuffer[NET_ID_SIZE];
+    char itoa_typeBuffer[NET_TYPE_SIZE] = {0};
+    char itoa_idBuffer[NET_ID_SIZE] = {0};
     SDL_itoa((int)type, itoa_typeBuffer, 10);
     SDL_itoa((int)id, itoa_idBuffer, 10);
     SDL_memcpy(packet->data, itoa_typeBuffer, NET_TYPE_SIZE);
@@ -45,7 +45,7 @@ void UDPPacketRemoveTypeAndID(UDPpacket *packet)
     const int toRemove = NET_TYPE_SIZE + NET_ID_SIZE;
     SDL_memmove(packet->data, packet->data + toRemove, packet->len - toRemove);
     packet->len -= toRemove;
-    SDLNet_ResizePacket(packet, packet->len);
+    SDL_memset(packet->data + packet->len, 0, toRemove);
 }
 
 TCPpacket *TCPPacketCreate(PacketType type, int id, void *data, size_t size)

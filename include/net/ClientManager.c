@@ -102,6 +102,9 @@ void ClientManagerHandleConnectPacket(ParsedPacket packet)
     int ID = *(int *)packet.data;
     ENTITY_ARRAY[*client.player->entity].id = ID;
     client.receivedPlayerID = SDL_TRUE;
+
+    // Sends a empty packet to signal the server which IP to respond with
+    ClientUDPSend(PT_None, NULL, 0);
 }
 
 void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet)
@@ -123,10 +126,10 @@ void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
 
 void ClientManagerHandleNewPlayerPacket(ParsedPacket packet)
 {
-    int id = *(int *)packet.data;
+    Entity *entity = (Entity *)packet.data;
 
-    EntityIndexP newEntity = EntityManagerAdd(ET_Player, Vec2Create(0.0f, 0.0f));
-    ENTITY_ARRAY[*newEntity].id = id;
+    EntityIndexP newEntity = EntityManagerAddNoConfig();
+    ENTITY_ARRAY[*newEntity] = *entity;
     VectorPushBack(clientManager.players, &newEntity);
 }
 
@@ -163,11 +166,12 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity cEntity = *(CompressedEntity *)packet.data;
 
-    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
+    for (int i = 0; i < clientManager.players->size; i++)
     {
-        if (ENTITY_ARRAY[i].id == cEntity.id) //entity exists
+        Entity *entity = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
+        if (entity->id == cEntity.id) //entity exists
         {
-            EntityAddCompressed(&ENTITY_ARRAY[i], &cEntity);
+            EntityAddCompressed(entity, &cEntity);
             return;
         }
     }

@@ -41,10 +41,12 @@ typedef enum entityState
 
 typedef struct CompressedEntity
 {
+    int id;
     EntityType type;
     Vec2 position;
+    Drawable drawables[MAX_DRAWABLES];
+    int nDrawables;
     int health;
-    int id;
 } CompressedEntity;
 typedef struct Entity
 {
@@ -52,7 +54,7 @@ typedef struct Entity
 
     SDL_bool isNPC;
 
-    int id; // currently unused
+    int id;
     Drawable drawables[MAX_DRAWABLES];
     int nDrawables;
 

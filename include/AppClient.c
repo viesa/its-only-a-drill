@@ -229,6 +229,10 @@ void AppClientUpdate(AppClient *app)
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate();
 
+        // Sends player to server
+        CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[*app->player.entity]);
+        ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
+
         break;
     }
     default:
@@ -278,7 +282,7 @@ void AppClientDraw(AppClient *app)
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }
 
-        // InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
+        InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
 
         break;
     }

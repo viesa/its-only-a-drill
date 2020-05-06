@@ -66,27 +66,33 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
 CompressedEntity EntityCompress(Entity *entity)
 {
     CompressedEntity cEntity;
-    cEntity.health = entity->health;
     cEntity.id = entity->id;
-    cEntity.position = entity->position;
     cEntity.type = entity->type;
+    cEntity.position = entity->position;
+    SDL_memcpy(&cEntity.drawables, &entity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
+    cEntity.nDrawables = entity->nDrawables;
+    cEntity.health = entity->health;
     return cEntity;
 }
 Entity EntityDecompress(CompressedEntity *cEntity)
 {
     Entity entity;
-    entity.health = cEntity->health;
     entity.id = cEntity->id;
-    entity.position = cEntity->position;
     entity.type = cEntity->type;
+    entity.position = cEntity->position;
+    SDL_memcpy(&entity.drawables, &cEntity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
+    entity.nDrawables = cEntity->nDrawables;
+    entity.health = cEntity->health;
     return entity;
 }
 void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity)
 {
-    entity->health = cEntity->health;
     entity->id = cEntity->id;
-    entity->position = cEntity->position;
     entity->type = cEntity->type;
+    entity->position = cEntity->position;
+    SDL_memcpy(&entity->drawables, &cEntity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
+    entity->nDrawables = cEntity->nDrawables;
+    entity->health = cEntity->health;
 }
 
 void EntityDraw(Entity *entity, Camera *camera)

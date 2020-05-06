@@ -9,9 +9,9 @@
 typedef struct Session
 {
     int id;
-    NetPlayer *host;
-    // Pointers to players in server
-    Vector *playersP;
+    int hostID;
+    // Vector of Player IDs
+    Vector *playerIDs;
     char *rawMap;
     size_t rawMapDataSize;
     char *mapName;
@@ -22,6 +22,6 @@ typedef struct Session
 Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size);
 void SessionDestroy(Session *session);
 
-NetPlayer **SessionGetPlayers(Session *session);
+int *SessionGetPlayerIDs(Session *session);
 
 #endif

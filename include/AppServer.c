@@ -52,6 +52,9 @@ void AppServerHandleAllPackets(AppServer *app)
         case PT_Connect:
             AppServerHandleConnectPacket(nextPacket);
             break;
+        case PT_UDPRespondIP:
+            AppServerHandleUDPRespondIPPacket(nextPacket);
+            break;
         case PT_Disconnect:
             AppServerHandleDisconnectPacket(nextPacket);
             break;
@@ -203,7 +206,7 @@ void AppServerDrawCLI(AppServer *app)
         for (int i = 0; i < server.sessions->size; i++)
         {
             Session *session = &SERVER_SESSIONS[i];
-            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapName, session->playersP->size, session->mapMaxPlayers);
+            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapName, session->playerIDs->size, session->mapMaxPlayers);
         }
         if (server.sessions->size > 0)
             printf("\n");
@@ -235,20 +238,11 @@ void AppServerClearTerminal(AppServer *app)
     system("cls");
 #endif
 }
-Session *ServerGetSessionByID(int sessionID)
-{
-    for (size_t i = 0; i < server.sessions->size; i++)
-    {
-        if (SERVER_SESSIONS[i].id == sessionID)
-        {
-            return &SERVER_SESSIONS[i];
-        }
-    }
-    return NULL;
-}
 
 void AppServerHandleTextPacket(ParsedPacket packet)
 {
+    // Print whatever came in
+    printf("Received text-packet: %s", (char *)packet.data);
 }
 
 void AppServerHandleConnectPacket(ParsedPacket packet)
@@ -261,8 +255,18 @@ void AppServerHandleConnectPacket(ParsedPacket packet)
             return;
         }
     }
-    NetPlayer *playerP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *playerP = ServerGetPlayerByID(packet.sender.id);
     strcpy(playerP->name, packet.data);
+}
+
+void AppServerHandleUDPRespondIPPacket(ParsedPacket packet)
+{
+    // If player doesnt acutally exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+    IPaddress ip = *(IPaddress *)packet.data;
+    senderP->udpRespondIP = ip;
 }
 
 void AppServerHandleDisconnectPacket(ParsedPacket packet)
@@ -299,29 +303,24 @@ void AppServerHandleEntityPacket(ParsedPacket packet)
 
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet)
 {
+    // If player doesnt acutally exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+    if (senderP->sessionID < 0)
+        return;
+
     CompressedEntity incomingCEntity = *(CompressedEntity *)packet.data;
 
-    for (int i = 0; i < server.players->size; i++)
-    {
-        if (SERVER_PLAYERS[i].entity.id == packet.sender.entity.id)
-        {
-            ServerUDPBroadcastExclusive(PT_CompressedEntity, &incomingCEntity, sizeof(CompressedEntity), packet.sender);
-            return;
-        }
-    }
-
-    // THIS SHOULD NEVER HAPPEN
-#ifdef SERVERMANAGER_DEBUG
-    log_warn("Received an compressed entity that did not correspond to any player");
-#endif
+    ServerUDPBroadcastExclusiveSession(PT_CompressedEntity, ServerGetSessionByID(senderP->sessionID), &incomingCEntity, sizeof(CompressedEntity), packet.sender);
 }
 
 void AppServerHandleCreateSessionPacket(ParsedPacket packet)
 {
     char *rawMap = (char *)packet.data;
 
-    // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    // If player doesn't acutally exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
 
@@ -329,7 +328,7 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet)
 
     Session session = SessionCreate(sessionID, senderP, rawMap, packet.size);
     // If session ID is -1, something bad happened when it was created
-    if (session.id == -1)
+    if (session.id < 0)
     {
         int badSessionID = -1;
         ServerTCPSend(PT_CreateSession, &badSessionID, sizeof(int), packet.sender);
@@ -349,12 +348,12 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
     if (sessionID < 0)
         return;
     // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
 
     // Check if player is already in another session, if so, disconnect it from the other session
-    if (senderP->sessionID != -1)
+    if (senderP->sessionID >= 0)
     {
         for (size_t i = 0; i < server.sessions->size; i++)
         {
@@ -362,7 +361,7 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
             if (SERVER_SESSIONS[i].id == senderP->sessionID)
             {
                 // Erase client from that session
-                VectorEraseElement(SERVER_SESSIONS[i].playersP, senderP);
+                ServerRemovePlayerFromSession(&SERVER_SESSIONS[i], senderP->id);
             }
         }
         senderP->sessionID = -1;
@@ -378,23 +377,23 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
     }
 
     // Checks if there is room for player in the new session
-    if (session->playersP->size < session->mapMaxPlayers)
+    if (session->playerIDs->size < session->mapMaxPlayers)
     {
-        if (session->host == NULL)
+        if (session->hostID < 0)
         {
             // If there is no host, you are host
-            session->host = senderP;
+            session->hostID = senderP->id;
         }
-        if (senderP->id == session->host->id)
+        if (senderP->id == session->hostID)
         {
             // Notifies client that they are host
             ServerTCPSend(PT_HostAssign, NULL, 0, packet.sender);
         }
         // Makes sure client isn't already in this session somehow
-        if (VectorFind(session->playersP, &senderP) == session->playersP->size)
+        if (VectorFind(session->playerIDs, &senderP->id) == session->playerIDs->size)
         {
             // Adds new player to session
-            VectorPushBack(session->playersP, &senderP);
+            VectorPushBack(session->playerIDs, &senderP->id);
         }
         senderP->sessionID = sessionID;
         // Sends the session's map to client
@@ -410,24 +409,35 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
 void AppServerHandleStartSessionPacket(ParsedPacket packet)
 {
     // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
-    if (senderP->sessionID == -1)
+    if (senderP->sessionID < 0)
         return;
 
     // Make sure player is actually host over the session
     Session *session = ServerGetSessionByID(senderP->sessionID);
-    if (senderP != session->host)
+    if (senderP->id != session->hostID)
         return;
 
     Vec2 base = Vec2Create(1000.0f, 1000.0f);
-    for (int i = 0; i < session->playersP->size; i++)
+    int *playerIDs = SessionGetPlayerIDs(session);
+    for (int i = 0; i < session->playerIDs->size; i++)
     {
-        NetPlayer *to = SessionGetPlayers(session)[i];
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
         Entity *entity = &to->entity;
         entity->position = Vec2AddL(base, rand() % 500);
+        // Notify client that the session started, and provide client with his entity
         ServerTCPSend(PT_StartSession, entity, sizeof(Entity), *to);
+        for (int j = 0; j < session->playerIDs->size; j++)
+        {
+            // Notify the client about every other players, and provide client with their entites
+            if (playerIDs[j] != to->id)
+            {
+                Entity *outgoing = &ServerGetPlayerByID(playerIDs[j])->entity;
+                ServerTCPSend(PT_NewPlayer, outgoing, sizeof(Entity), *to);
+            }
+        }
     }
     session->inGame = SDL_TRUE;
 }
@@ -435,34 +445,15 @@ void AppServerHandleStartSessionPacket(ParsedPacket packet)
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
 {
     // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
-        return;
-    if (senderP->sessionID == -1)
         return;
 
     Session *session = ServerGetSessionByID(senderP->sessionID);
+    if (!session)
+        return;
 
-    // Remove leaving player from session
-    VectorEraseElement(session->playersP, &senderP);
-
-    // If number of players in session is 0, remove session
-    if (session->playersP->size == 0)
-    {
-        VectorEraseElement(server.sessions, session);
-    }
-    // Check if leaving player was host
-    else if (session->host->id == packet.sender.id)
-    {
-        // Randomize new host
-        int r = rand() % session->playersP->size;
-        session->host = SessionGetPlayers(session)[r];
-        // Notifes new host that they are host
-        ServerTCPSend(PT_HostAssign, NULL, 0, *session->host);
-    }
-
-    // Sets the sessionID of player to -1, so that they can join a new session
-    senderP->sessionID = -1;
+    ServerRemovePlayerFromSession(session, senderP->id);
 }
 
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
@@ -484,7 +475,7 @@ void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
             strcpy(outgoing[i].name, current->mapName);
         }
         outgoing[i].maxPlayers = current->mapMaxPlayers;
-        outgoing[i].currentPlayers = current->playersP->size;
+        outgoing[i].currentPlayers = current->playerIDs->size;
         outgoing[i].sessionID = current->id;
     }
     ServerTCPSend(PT_FetchSessions, outgoing, sizeof(outgoing), packet.sender);
@@ -493,23 +484,23 @@ void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
 {
     // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
-    if (senderP->sessionID == -1)
+    if (senderP->sessionID < 0)
         return;
 
     Session *session = ServerGetSessionByID(senderP->sessionID);
 
-    const int nSessionMemebers = session->playersP->size;
+    const int nSessionMemebers = session->playerIDs->size;
     const int nameSize = 20;
     const int arrSize = nSessionMemebers * nameSize;
     char allMembers[arrSize];
     SDL_memset(allMembers, 0, arrSize);
     for (int i = 0; i < nSessionMemebers; i++)
     {
-        NetPlayer *p = SessionGetPlayers(session)[i];
-        char *name = p->name;
+        NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+        char *name = player->name;
         int bytesToCopy = SDL_min(strlen(name), nameSize);
         SDL_memcpy(allMembers + i * nameSize, name, bytesToCopy);
     }
@@ -520,10 +511,10 @@ void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
 void AppServerHandlePlayerHitPacket(ParsedPacket packet)
 {
     // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerNetPlayerToPointer(packet.sender);
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
-    if (senderP->sessionID == -1)
+    if (senderP->sessionID < 0)
         return;
 
     struct
@@ -537,16 +528,9 @@ void AppServerHandlePlayerHitPacket(ParsedPacket packet)
     Session *session = ServerGetSessionByID(senderP->sessionID);
     if (!session)
         return;
-    NetPlayer **sessionPlayers = SessionGetPlayers(session);
 
-    NetPlayer *target = NULL;
-    for (int i = 0; i < session->playersP->size; i++)
-    {
-        if (sessionPlayers[i]->id == data.id)
-        {
-            target = sessionPlayers[i];
-        }
-    }
+    NetPlayer *target = ServerGetPlayerByID(data.id);
+
     if (target)
         ServerTCPSend(PT_PlayerHit, &data.damage, sizeof(int), *target);
 }

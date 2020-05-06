@@ -85,15 +85,22 @@ int ServerTryReceiveTCPPacket(NetPlayer player);
 void ServerRemoveClient(NetPlayer player);
 // Returns lowest free unique ID
 int ServerGetID();
-// Find a netplayer in servers array of netplayers
-///\return: Returns a pointer to matching player, NULL if not found
-NetPlayer *ServerNetPlayerToPointer(NetPlayer player);
 // Marks the id as non-taken
 void ServerFreeID(int id);
 // Returns lowest free unique session ID
 int ServerGetSessionID();
 // Marks the session id as non-taken
 void ServerFreeSessionID(int id);
+///\return: A pointer to matching session, NULL if not found
+Session *ServerGetSessionByID(int sessionID);
+// Find a netplayer in servers array of netplayers
+///\return: A pointer to matching player, NULL if not found
+NetPlayer *ServerGetPlayerByID(int id);
+// Find a netplayer in servers array of netplayers
+///\return: A pointer to matching player, NULL if not found
+NetPlayer *ServerGetPlayerByNetPlayer(NetPlayer player);
+// Removes a player from given session, notfies players and remove the session if necessary
+void ServerRemovePlayerFromSession(Session *session, int playerID);
 
 ParsedPacket *ServerGetInBufferArray();
 NetPlayer *ServerGetPlayerArray();
