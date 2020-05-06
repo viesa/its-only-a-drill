@@ -14,6 +14,8 @@ typedef enum SoundFile
     SF_Knife,
     SF_Bomp,
     SF_Notification,
+    SF_MenuPress,
+    SF_MenuStep,
     SF_Count
 } SoundFile;
 

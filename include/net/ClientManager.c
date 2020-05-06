@@ -234,12 +234,13 @@ void ClientManagerHandleStartSessionPacket(ParsedPacket packet)
     GameStateSet(GS_Playing);
     clientManager.inGame = SDL_TRUE;
     clientManager.inLobby = SDL_FALSE;
+    VectorClear(lobby.names);
+    lobby.isHost = SDL_FALSE;
 }
 
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
 {
-    if (clientManager.inLobby)
-        lobby.isHost = SDL_TRUE;
+    lobby.isHost = SDL_TRUE;
 }
 
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)

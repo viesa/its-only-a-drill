@@ -14,6 +14,9 @@
 #include "Map.h"
 #include "ClientManager.h"
 #include "Lobby.h"
+#include "Music.h"
+#include "Audio.h"
+#include "Sound.h"
 
 #define FETCH_SESSIONS_INTERVAL (2.0f)
 #define FETCH_LOBBY_INTERVAL (0.5f)
@@ -25,6 +28,7 @@ typedef struct Menu
     Font *font;
     Drawable mainMenuDbl;
     float mainMenuDblDelta;
+    int mainMenuDblDir;
     Drawable lobbyHostDbl;
     Drawable lobbyNormalDbl;
     LoadingBar *loadingBar;
@@ -38,10 +42,12 @@ typedef struct Menu
     SDL_bool indexChanged;
     float fetchSessionsTimer;
     float fetchLobbyTimer;
+    Audio *audio;
+    Sound MenuStep;
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings);
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio);
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);

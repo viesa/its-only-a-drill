@@ -39,7 +39,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
-    app->menu = MenuCreate(app->gfx, app->font, app->bindings);
+    app->menu = MenuCreate(app->gfx, app->font, app->bindings, app->audio);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
@@ -63,7 +63,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     ScoreIncrement(100, 0);
 
     app->groundListItems = GroundListCreate();
-    ENTITY_ARRAY[*app->player.entity].inventory = InventoryCreate();
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
@@ -220,6 +219,10 @@ void AppClientUpdate(AppClient *app)
             ENTITY_ARRAY[2].desiredPoint.y = 180;
             ENTITY_ARRAY[2].entityState = Nutral;
         }
+        if (InputIsKeyPressed(SDL_SCANCODE_O))
+        {
+            log_debug("Player health = %d", ENTITY_ARRAY[*app->player.entity].health);
+        }
         //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
         PlayerUpdate(&app->player, app->camera);
 
@@ -241,9 +244,7 @@ void AppClientDraw(AppClient *app)
     {
         switch (MenuStateGet())
         {
-        case MS_JoinLobby:
         case MS_HostLobby:
-        case MS_WaitingForLobby:
         case MS_CustomMap:
             CameraSetFollow(app->camera, &app->middleOfMap);
             MapDraw(app->camera);
@@ -277,7 +278,7 @@ void AppClientDraw(AppClient *app)
             InventoryDisplay(app->gfx, &ENTITY_ARRAY[*app->player.entity].inventory);
         }
 
-        InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
+        // InventoryDisplayEquiped(app->camera, &ENTITY_ARRAY[*app->player.entity].inventory, ENTITY_ARRAY[*app->player.entity].position);
 
         break;
     }
