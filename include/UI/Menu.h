@@ -44,6 +44,8 @@ typedef struct Menu
     float fetchLobbyTimer;
     Audio *audio;
     Sound MenuStep;
+    Music MenuTheme;
+    int themecheck;
 } Menu;
 
 // Creates menu
