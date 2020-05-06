@@ -116,6 +116,9 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             case EntityDead:
             {
                 // make mortal
+                ENTITY_ARRAY[i].drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){ENTITY_ARRAY[i].position.x, ENTITY_ARRAY[i].position.y, 77, 63}, SS_Character_Prisoner);
+                //ENTITY_ARRAY[i].isNPC = 0;
+                ENTITY_ARRAY[i].isCollider = 0;
                 break;
             }
             case Aggressive:
