@@ -5,6 +5,9 @@
 #define PACKAGER_DEBUG_RAWINOUT
 #endif
 
+// If defined, mapList will only import maps on start
+// #define WIN_DEBUG
+
 // #define ANY_DEBUG
 
 #ifdef ANY_DEBUG
