@@ -31,7 +31,7 @@ void pathFree(MovingPattern *enemyP)
     SDL_free(enemyP);
 }
 
-void switchStateLogic(Vec2 *enemyToPlayer, int *i)
+void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player)
 {
 
     if (ENTITY_ARRAY[*i].health <= 0)
@@ -46,27 +46,27 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i)
         }
         if (Vec2Len(*enemyToPlayer) <= aggravationRadius)
         {
-            ENTITY_ARRAY[*i].entityState = Fight;
+            if (ENTITY_ARRAY[*player].entityState != EntityDead)
+            {
+                ENTITY_ARRAY[*i].entityState = Fight;
+            } else
+            {
+                ENTITY_ARRAY[*i].entityState = Nutral;
+            }
         }
     }
 }
 
-void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *camera)
+void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *camera, EntityIndexP player)
 {
-    int tmp = 0;
-
     SDL_Rect boxDP;
 
     Vec2 enemyPosition, enemyToPlayer, playerPosition;
 
+    playerPosition = RectMid(ENTITY_ARRAY[*player].drawables[*player].dst);
+
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (ENTITY_ARRAY[i].type == ET_Player)
-        {
-            tmp = i;
-            playerPosition = RectMid(ENTITY_ARRAY[tmp].drawables[tmp].dst);
-        }
-
         if (ENTITY_ARRAY[i].isNPC) // if there is an entity and npc = non playable charecter
         {
             boxDP = (SDL_Rect){(int)ENTITY_ARRAY[i].desiredPoint.x - boxSize, (int)ENTITY_ARRAY[i].desiredPoint.y - boxSize, boxSize, boxSize};
@@ -74,7 +74,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
             enemyToPlayer = Vec2Sub(playerPosition, enemyPosition);
 
-            switchStateLogic(&enemyToPlayer, &i);
+            switchStateLogic(&enemyToPlayer, &i, player);
 
             switch (ENTITY_ARRAY[i].entityState)
             {
@@ -98,11 +98,15 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             }
             case Fight:
             {
+                if (ENTITY_ARRAY[*player].entityState == EntityDead)
+                {
+                    ENTITY_ARRAY[i].entityState = Nutral;
+                }
                 if (ENTITY_ARRAY[i].isNPC == 1)
                 {
                     entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], renderer, camera);
                 }
-                if (ENTITY_ARRAY[tmp].health < 0)
+                if (ENTITY_ARRAY[*player].health < 0)
                 {
                     ENTITY_ARRAY[i].entityState = Nutral;
                 }

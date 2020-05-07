@@ -13,7 +13,7 @@ typedef struct MovingPattern
 } MovingPattern;
 
 // BehaviorMoveEntity is the update funktion for the NPC(non playable charecter) logic
-void BehaviorMoveEntity(MovingPattern *Pattern, SDL_Renderer *renderer, Camera *camera);
+void BehaviorMoveEntity(MovingPattern *Pattern, SDL_Renderer *renderer, Camera *camera, EntityIndexP player);
 // gives the entity a defined speed to the given point
 Entity BehaviorMoveToPoint(Entity entity, float x, float y);
 // creates the current path that entitys can use
@@ -21,6 +21,6 @@ MovingPattern *behaviorPathsCreate();
 // removes it form memory
 void pathFree(MovingPattern *enemyP);
 // the logic for how enemys changes states
-void switchStateLogic(Vec2 *enemyToPlayer, int *i);
+void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player);
 
 #endif

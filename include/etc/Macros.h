@@ -16,7 +16,7 @@
 // #define APP_DEBUG
 // #define APP_DEBUG_STRICT
 
-// // #define CLIENT_DEBUG
+// #define CLIENT_DEBUG
 // #define CLIENT_IO
 // #define SERVER_DEBUG
 // #define PACKAGER_DEBUG_RAWINOUT
@@ -26,6 +26,7 @@
 
 //#define ENTITY_DEBUG
 //#define WEAPON_DEBIG
+//#define PLAYER_RESPAWN
 
 // #define VECTOR_DEBUG
 // #define VECTOR_DEBUG_STRICT

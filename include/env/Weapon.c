@@ -46,7 +46,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
 }
 
 void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *renderer, Camera *camera)
-{
+{    
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
     if (item->Stats.currentTime <= 0)
     {

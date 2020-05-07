@@ -204,17 +204,21 @@ void AppClientUpdate(AppClient *app)
         }
 
         Entity *ePlayer = &ENTITY_ARRAY[*app->player.entity];
-        if (InputIsMousePressed(BUTTON_LEFT))
+        if (InputIsMousePressed(app->bindings->KeyArray[BUTTON_LEFT]))
         { // always the item on hand is in the last place in the inventory list
             // if there is ammo in ur weapon shoot
-            if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
+            if (ePlayer->entityState == EntityPlayer) // if player isn't dead
             {
-                playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->gfx->window->renderer);
+                if (ePlayer->inventory.contents[ePlayer->inventory.top - 1].Stats.ammo > 0)
+                {
+                    playerShoot(app->player.entity, app->camera, &ePlayer->inventory.contents[ePlayer->inventory.top - 1], app->gfx->window->renderer);
+                }
             }
         }
         weaponUpdate(&ePlayer->inventory.contents[ePlayer->inventory.top - 1]);
 
-        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera);
+        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera, app->player.entity);
+
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
             ENTITY_ARRAY[2].desiredPoint.x = 180;
@@ -225,7 +229,7 @@ void AppClientUpdate(AppClient *app)
         {
             log_debug("Player health = %d", ENTITY_ARRAY[*app->player.entity].health);
         }
-        //PlayerUpdate(&app->player, &app->entityManager.entities[0],   app->camera);
+
         PlayerUpdate(&app->player, app->camera);
 
         // EntityUpdate most be after input, playerupdate
