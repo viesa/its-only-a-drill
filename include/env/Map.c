@@ -43,9 +43,10 @@ void MapUninitialize()
 
 int MapGenerateNew(JSON *mapData)
 {
-    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
     json_value *json_helper;
-
+#ifdef MAP_DEBUG
+    char *filepath = mapData->originalFilename;
+#endif
     bufferMap.info = MapInfoCreateFromJSON(mapData);
     if (bufferMap.info.uid == -1)
     {
@@ -68,7 +69,7 @@ int MapGenerateNew(JSON *mapData)
 
     if (entitiesStart->u.array.length != bufferMap.n)
     {
-#ifdef MAPINFO_DEBUG
+#ifdef MAP_DEBUG
         log_warn("Layers number does not match actual array size");
 #endif
 
@@ -83,7 +84,7 @@ int MapGenerateNew(JSON *mapData)
     int numLoadedEntites = LoadAllEnties(mapData, entitiesStart, &bufferMap.contents);
     if (numLoadedEntites != bufferMap.n)
     {
-#ifdef MAPINFO_DEBUG
+#ifdef MAP_DEBUG
         log_warn("Failed to load in entities");
 #endif
         if (numLoadedEntites)
@@ -144,12 +145,12 @@ unsigned int MapGetContnetSize()
 
 json_value *MapTryFind(JSON *mapData, json_value *start, json_type type, char *data, int size)
 {
-    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
 
     json_value *json_helper;
     if (!(json_helper = JSONFind(mapData, start, type, data, size)))
     {
 #ifdef MAPINFO_DEBUG
+        char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
         log_warn("Could not load mapData for %s: %s", filepath, data);
 #endif
     }

@@ -32,6 +32,8 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     LoadingBarShow(menu->loadingBar);
 
     menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
+    menu->MenuTheme = MusicCreate(menu->audio, MF_MainMusic);
+    menu->themecheck = 0;
 
     return menu;
 }
@@ -172,6 +174,7 @@ void MenuUpdateSplash(Menu *menu)
     {
         if (InputIsAnyKeyDown())
         {
+            InputClearPortalContent();
             MenuStateSet(MS_Name);
         }
 
@@ -196,6 +199,12 @@ void MenuUpdateSplash(Menu *menu)
     TransitionDraw();
     LoadingBarUpdate(menu->loadingBar);
     LoadingBarAdd(menu->loadingBar, ClockGetFPS() * 4 / 100);
+
+    if (menu->themecheck == 0)
+    {
+        MusicPlay(&menu->MenuTheme, 1);
+        menu->themecheck++;
+    }
 }
 
 void MenuUpdateMainMenu(Menu *menu)
@@ -812,6 +821,8 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
         {
             MenuStateSet(MS_None);
             GameStateSet(GS_Playing);
+            MusicStop(&menu->MenuTheme);
+            MusicDestroy(&menu->MenuTheme);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)

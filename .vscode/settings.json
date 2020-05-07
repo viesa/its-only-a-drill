@@ -66,6 +66,7 @@
                 "font.h": "c",
                 "xutility": "c",
                 "entity.h": "c",
-                "map.h": "c"
+                "map.h": "c",
+                "typeinfo": "c"
         }
 }

@@ -24,7 +24,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
 // skickar datan över nätet
 void RayScan(int index, Vec2 makeDestination, SDL_Point point, Item *item, Vec2 ForceDir);
 // hanterar datan i funktionen
-void RayScanSingelplayer(int index, Vec2 makeDestination, SDL_Point point, Item *item, Vec2 ForceDir);
+void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir);
 // ritar linjen hur skotet åkte
 void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2);
 // skapar en projektil *unsused/not updated

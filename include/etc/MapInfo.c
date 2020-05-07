@@ -23,7 +23,9 @@ MapInfo MapInfoCreateFromJSON(JSON *mapData)
 
     json_value *json_mapInfo;
     json_value *json_helper;
-    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
+#ifdef MAPINFO_DEBUG
+    char *filepath = mapData->originalFilename;
+#endif
 
     // Find mapinfo JSON-object
     char *to_find[6] =
@@ -105,12 +107,12 @@ MapInfo MapInfoCreateFromJSON(JSON *mapData)
 
 json_value *MapInfoTryFind(JSON *mapData, json_value *start, json_type type, char *data, int size)
 {
-    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
 
     json_value *json_helper;
     if (!(json_helper = JSONFind(mapData, start, type, data, size)))
     {
 #ifdef MAPINFO_DEBUG
+        char *filepath = mapData->originalFilename;
         log_warn("Could not load mapInfo for %s: %s", filepath, data);
 #endif
     }
