@@ -1,17 +1,16 @@
 #include "Sound.h"
 
-Sound SoundCreate(Audio *audio, SoundFile soundFile)
+Sound SoundCreate(SoundFile soundFile)
 {
     Sound ret;
-    ret.m_audio = audio;
-    ret.m_chunk = AudioGetSound(audio, soundFile);
-    ret.m_channel = AudioGenChannel(audio);
+    ret.m_chunk = AudioGetSound(soundFile);
+    ret.m_channel = AudioGenChannel();
     ret.m_isPlaying = SDL_FALSE;
     return ret;
 }
 void SoundDestroy(Sound *sound)
 {
-    AudioFreeChannel(sound->m_audio, sound->m_channel);
+    AudioFreeChannel(sound->m_channel);
 }
 
 void SoundPlay(Sound *sound, int loops)

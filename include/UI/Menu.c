@@ -2,7 +2,7 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
@@ -18,7 +18,6 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
-    menu->audio = audio;
     menu->mainMenuDblDir = 1.0f;
 
     // SDL_Rect src = {0, 0, 1919, 942};
@@ -31,8 +30,8 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
 
-    menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
-    menu->MenuTheme = MusicCreate(menu->audio, MF_MainMusic);
+    menu->MenuStep = SoundCreate(SF_MenuStep);
+    menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->themecheck = 0;
 
     return menu;
