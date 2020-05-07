@@ -6,13 +6,12 @@
 
 typedef struct Music
 {
-    Audio *m_audio;
     Mix_Music *m_music;
 
     SDL_bool m_isPlaying;
 } Music;
 
-Music MusicCreate(Audio *audio, MusicFile musicFile);
+Music MusicCreate(MusicFile musicFile);
 void MusicDestroy(Music *music);
 
 /// \param loops: if loops == -1, player forever

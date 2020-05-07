@@ -1,10 +1,9 @@
 #include "Music.h"
 
-Music MusicCreate(Audio *audio, MusicFile musicFile)
+Music MusicCreate(MusicFile musicFile)
 {
     Music ret;
-    ret.m_audio = audio;
-    ret.m_music = AudioGetMusic(audio, musicFile);
+    ret.m_music = AudioGetMusic(musicFile);
     ret.m_isPlaying = SDL_FALSE;
     return ret;
 }

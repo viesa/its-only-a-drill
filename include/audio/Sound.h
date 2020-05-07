@@ -7,14 +7,13 @@
 
 typedef struct Sound
 {
-    Audio *m_audio;
     Mix_Chunk *m_chunk;
     int m_channel;
 
     SDL_bool m_isPlaying;
 } Sound;
 
-Sound SoundCreate(Audio *audio, SoundFile soundFile);
+Sound SoundCreate(SoundFile soundFile);
 void SoundDestroy(Sound *sound);
 
 /// \param loops: if loops == -1, player forever

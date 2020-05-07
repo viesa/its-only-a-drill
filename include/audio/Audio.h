@@ -27,19 +27,17 @@ typedef enum MusicFile
     MF_Count
 } MusicFile;
 
-typedef struct Audio Audio;
-
-Audio *AudioCreate();
-void AudioDestroy(Audio *audio);
+void AudioInitialize();
+void AudioUninitialize();
 
 /// Returns a pre-loaded soundfile (.wav)
-Mix_Chunk *AudioGetSound(Audio *audio, SoundFile soundFile);
+Mix_Chunk *AudioGetSound(SoundFile soundFile);
 /// Returns a pre-loaded musicfile (.mp3)
-Mix_Music *AudioGetMusic(Audio *audio, MusicFile musicFile);
+Mix_Music *AudioGetMusic(MusicFile musicFile);
 
 /// Generates a channel for a sound to play on
-int AudioGenChannel(Audio *audio);
+int AudioGenChannel();
 /// Free a channel when it is no longer used
-void AudioFreeChannel(Audio *audio, int channel);
+void AudioFreeChannel(int channel);
 
 #endif

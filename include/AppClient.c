@@ -5,7 +5,6 @@ struct AppClient
     SDL_bool *running;
 
     Graphics *gfx;
-    Audio *audio;
     Font *font;
     Gui *gui;
     Camera *camera;
@@ -29,17 +28,17 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     EntityManagerInitialize();
     StateInitialize();
     MapInitialize();
+    AudioInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->fpsManager = fpsManager;
     app->gfx = GraphicsCreate();
-    app->audio = AudioCreate();
     app->font = FontCreate(app->gfx);
     app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
-    app->menu = MenuCreate(app->gfx, app->font, app->bindings, app->audio);
+    app->menu = MenuCreate(app->gfx, app->font, app->bindings);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
@@ -80,9 +79,9 @@ void AppClientDestroy(AppClient *app)
     ClientManagerUninitialize();
     ClientUninitialize();
     LobbyUninitialize();
+    AudioUninitialize();
 
     GraphicsDestroy(app->gfx);
-    AudioDestroy(app->audio);
     CameraDestroy(app->camera);
     pathFree(app->movingPattern);
 
