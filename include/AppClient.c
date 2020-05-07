@@ -19,7 +19,7 @@ struct AppClient
 
     Player player; // player == entity 0
 
-    MapList mapList;
+    MapList *mapList;
 };
 
 AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
@@ -117,7 +117,7 @@ void AppClientUpdate(AppClient *app)
     {
         CursorChange(CT_Normal);
 #ifndef WIN_DEBUG
-        MapListUpdate(&app->mapList);
+        MapListUpdate(app->mapList);
 #endif
         switch (MenuStateGet())
         {
@@ -264,7 +264,7 @@ void AppClientDraw(AppClient *app)
         default:
             break;
         }
-        MenuUpdate(app->menu, app->fpsManager, &app->mapList);
+        MenuUpdate(app->menu, app->fpsManager, app->mapList);
         break;
     }
     case GS_Playing:

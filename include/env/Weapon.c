@@ -25,7 +25,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
         Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
         Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item->Stats.falloff);
         mousePos.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.x;
-        mousePos.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.y;
+        mousePos.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2)) + itemFalloff.y;
 
         SDL_Point point;
         point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
@@ -37,6 +37,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
         ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
+
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
             if (i != *index)
@@ -74,7 +75,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
             if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
-                RayScanSingelplayer(i, makeDestination, point, item, itemFalloff);
+                RayScan(i, makeDestination, point, item, itemFalloff);
         }
     }
 }

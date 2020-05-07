@@ -79,6 +79,11 @@ Audio *AudioCreate()
         log_warn("Could not load test.mp3");
     ret->m_music[MF_Test] = testMusic;*/
 
+    Mix_Music *mainMusic = Mix_LoadMUS("assets/music/Omega Spectrum - Spectrum.mp3");
+    if (!mainMusic)
+        log_warn("Could not load test.mp3");
+    ret->m_music[MF_MainMusic] = mainMusic;
+
     for (int i = 0; i < N_CHANNELS; i++)
         ret->m_availableChannels[i] = SDL_TRUE;
     return ret;

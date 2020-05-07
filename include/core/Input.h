@@ -59,5 +59,6 @@ SDL_Scancode InputLastKeyDown(SDL_Scancode normal);
 
 void InputTypePortal(char charPush);
 char *InputGetPortalContent();
+void InputClearPortalContent();
 void InputPortalBackspace();
 #endif

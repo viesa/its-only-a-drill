@@ -1,5 +1,7 @@
 #include "Vector.h"
 
+#include "Library.h"
+
 Vector *VectorCreate(size_t elementSize, size_t initialReservedSize)
 {
     Vector *vector = MALLOC(Vector);
@@ -21,15 +23,22 @@ Vector *VectorCreate(size_t elementSize, size_t initialReservedSize)
 
 void VectorDestroy(Vector *vector)
 {
-    if (vector->data)
-        SDL_free(vector->data);
-    if (vector->data)
-        SDL_free(vector);
+    if (vector)
+        FREE(vector->data);
+    FREE(vector);
 }
 
 VectorP VectorSecureDataPointer(Vector *vector)
 {
     return (VectorP)vector->dataP;
+}
+
+void VectorResize(Vector *vector, size_t newSize)
+{
+    vector->capacity = newSize;
+    vector->data = SDL_realloc(vector->data, vector->capacity * vector->elementSize);
+    ALLOC_ERROR_CHECK(vector->data);
+    vector->dataP = &vector->data;
 }
 
 void VectorPushBack(Vector *vector, void *element)
@@ -153,4 +162,13 @@ size_t VectorFind(Vector *vector, void *element)
     }
     // If element was not found, return index = size
     return vector->size;
+}
+
+void VectorCopy(Vector *dst, Vector *src)
+{
+    assert("Trying to copy vectors of different type" && dst->elementSize == src->elementSize);
+
+    SDL_memset(dst->data, 0, dst->capacity);
+    VectorResize(dst, src->capacity);
+    SDL_memcpy(dst, src, src->capacity);
 }

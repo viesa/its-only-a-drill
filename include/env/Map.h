@@ -4,6 +4,8 @@
 #include "Dependencies.h"
 #include "EntityManager.h"
 #include "JSON.h"
+#include "MapInfo.h"
+#include "SpawnPoint.h"
 
 void MapInitialize();
 void MapUninitialize();

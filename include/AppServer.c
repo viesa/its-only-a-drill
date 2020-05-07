@@ -206,7 +206,7 @@ void AppServerDrawCLI(AppServer *app)
         for (int i = 0; i < server.sessions->size; i++)
         {
             Session *session = &SERVER_SESSIONS[i];
-            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapName, session->playerIDs->size, session->mapMaxPlayers);
+            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapInfo.name, session->playerIDs->size, session->mapInfo.maxPlayers);
         }
         if (server.sessions->size > 0)
             printf("\n");
@@ -377,7 +377,7 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
     }
 
     // Checks if there is room for player in the new session
-    if (session->playerIDs->size < session->mapMaxPlayers)
+    if (session->playerIDs->size < session->mapInfo.maxPlayers)
     {
         if (session->hostID < 0)
         {
@@ -420,18 +420,28 @@ void AppServerHandleStartSessionPacket(ParsedPacket packet)
     if (senderP->id != session->hostID)
         return;
 
-    Vec2 base = Vec2Create(1000.0f, 1000.0f);
     int *playerIDs = SessionGetPlayerIDs(session);
+    // Notify client that the session started, and provide client with his entity
     for (int i = 0; i < session->playerIDs->size; i++)
     {
         NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
         Entity *entity = &to->entity;
-        entity->position = Vec2AddL(base, rand() % 500);
-        // Notify client that the session started, and provide client with his entity
+        if (i < session->mapInfo.playerSpawns->size)
+        {
+            entity->position = MapInfoGetPlayerSpawns(&session->mapInfo)[i].position;
+        }
+        else
+        {
+            entity->position = Vec2Create(0.0f, 0.0f);
+        }
         ServerTCPSend(PT_StartSession, entity, sizeof(Entity), *to);
+    }
+    // Notify the client about every other players, and provide client with their entites
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
         for (int j = 0; j < session->playerIDs->size; j++)
         {
-            // Notify the client about every other players, and provide client with their entites
             if (playerIDs[j] != to->id)
             {
                 Entity *outgoing = &ServerGetPlayerByID(playerIDs[j])->entity;
@@ -465,16 +475,16 @@ void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
     {
         Session *current = &SERVER_SESSIONS[i];
         SDL_memset(outgoing[i].name, 0, 20);
-        if (strlen(current->mapName) > 16)
+        if (strlen(current->mapInfo.name) > 16)
         {
-            SDL_memcpy(outgoing[i].name, current->mapName, 16);
+            SDL_memcpy(outgoing[i].name, current->mapInfo.name, 16);
             strcpy(outgoing[i].name + 16, "...");
         }
         else
         {
-            strcpy(outgoing[i].name, current->mapName);
+            strcpy(outgoing[i].name, current->mapInfo.name);
         }
-        outgoing[i].maxPlayers = current->mapMaxPlayers;
+        outgoing[i].maxPlayers = current->mapInfo.maxPlayers;
         outgoing[i].currentPlayers = current->playerIDs->size;
         outgoing[i].sessionID = current->id;
     }

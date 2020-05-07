@@ -1,3 +1,5 @@
+#define __USE_MINGW_ANSI_STDIO 1
+
 // #define SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
 
 #ifdef SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
@@ -21,6 +23,10 @@
 // #define SERVER_DEBUG
 // #define PACKAGER_DEBUG_RAWINOUT
 
+// #define MAP_DEBUG
+// #define MAPINFO_DEBUG
+// #define MAPLIST_DEBUG
+
 #define WINDOW_DEBUG
 // #define GRAPHICS_DEBUG
 
@@ -36,4 +42,4 @@
 //#define frictionReal
 
 // If defined, client will connect with 127.0.0.1
-// #define LOCAL_SERVER
+#define LOCAL_SERVER

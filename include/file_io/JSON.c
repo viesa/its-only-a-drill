@@ -1,5 +1,6 @@
 #include "JSON.h"
 
+static void process_value_find(json_value *value, json_type type, void *data, int size, json_value **result);
 static void process_value(json_value *value, int depth);
 
 JSON *JSONCreate(char *filename)
@@ -22,6 +23,10 @@ JSON *JSONCreate(char *filename)
         return NULL;
     }
 
+    json->originalFilename = MALLOC_N(char, strlen(filename));
+    ALLOC_ERROR_CHECK(json->originalFilename);
+    strcpy(json->originalFilename, filename);
+
     return json;
 }
 
@@ -40,6 +45,11 @@ JSON *JSONCreateFromArray(char *loadedfile, size_t size)
         return NULL;
     }
 
+    char *substitute = "Unknown";
+    json->originalFilename = MALLOC_N(char, strlen(substitute));
+    ALLOC_ERROR_CHECK(json->originalFilename);
+    strcpy(json->originalFilename, substitute);
+
     return json;
 }
 
@@ -47,7 +57,10 @@ void JSONDestroy(JSON *json)
 {
     json_value_free(json->value);
     if (json)
+    {
         FREE(json->file_contents);
+        FREE(json->originalFilename);
+    }
     FREE(json);
 }
 
@@ -81,6 +94,90 @@ json_value *JSONGetValue(JSON *json, uint32_t indices[], uint32_t n)
             return NULL;
     }
     return ret;
+}
+
+json_value *JSONFind(JSON *json, json_value *start, json_type type, void *data, int size)
+{
+    if (!start)
+    {
+        start = json->value;
+    }
+    json_value *ret = NULL;
+    process_value_find(start, type, data, size, &ret);
+    return ret;
+}
+
+// Helper functions for finding objects
+static void process_object_find(json_value *value, json_type type, void *data, int size, json_value **result)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    int length = value->u.object.length;
+    for (int i = 0; i < length; i++)
+    {
+        if (type == value->u.object.values[i].value->type &&
+            value->u.object.values[i].name_length == size &&
+            !SDL_memcmp(value->u.object.values[i].name, data, size))
+        {
+            *result = value->u.object.values[i].value;
+            return;
+        }
+        process_value_find(value->u.object.values[i].value, type, data, size, result);
+        if (*result != NULL)
+            return;
+    }
+}
+
+static void process_array_find(json_value *value, json_type type, void *data, int size, json_value **result)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    int length = value->u.array.length;
+    for (int i = 0; i < length; i++)
+    {
+        process_value_find(value->u.array.values[i], type, data, size, result);
+        if (*result != NULL)
+            return;
+    }
+}
+
+static void process_value_find(json_value *value, json_type type, void *data, int size, json_value **result)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+
+    switch (value->type)
+    {
+    case json_none:
+    {
+        break;
+    }
+    case json_object:
+    {
+        process_object_find(value, type, data, size, result);
+        break;
+    }
+    case json_array:
+    {
+        if (type == value->type &&
+            size == sizeof(int) &&
+            *(int *)data == value->u.array.length)
+        {
+            *result = value;
+            return;
+        }
+        process_array_find(value, type, data, size, result);
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 // ------- HELPER FUNCTIONS FOR PRINTING --------

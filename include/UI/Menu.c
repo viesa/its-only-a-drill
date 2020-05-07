@@ -32,7 +32,8 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     LoadingBarShow(menu->loadingBar);
 
     menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
-
+    menu->MenuTheme = MusicCreate(menu->audio, MF_MainMusic);
+    menu->themecheck = 0;
 
     return menu;
 }
@@ -83,7 +84,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
     if (menu->lastIndex != menu->activeIndex)
     {
         menu->indexChanged = SDL_TRUE;
-        SoundPlay(&menu->MenuStep,0);
+        SoundPlay(&menu->MenuStep, 0);
     }
     else
     {
@@ -173,6 +174,7 @@ void MenuUpdateSplash(Menu *menu)
     {
         if (InputIsAnyKeyDown())
         {
+            InputClearPortalContent();
             MenuStateSet(MS_Name);
         }
 
@@ -197,6 +199,12 @@ void MenuUpdateSplash(Menu *menu)
     TransitionDraw();
     LoadingBarUpdate(menu->loadingBar);
     LoadingBarAdd(menu->loadingBar, ClockGetFPS() * 4 / 100);
+
+    if (menu->themecheck == 0)
+    {
+        MusicPlay(&menu->MenuTheme, 1);
+        menu->themecheck++;
+    }
 }
 
 void MenuUpdateMainMenu(Menu *menu)
@@ -323,16 +331,16 @@ void MenuUpdateInGameMenu(Menu *menu)
 void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
 {
     //Determine menu options
-    int optionLength = mapList->nMaps + 1;
+    int optionLength = MapListGetNumMaps(mapList) + 1;
     char options[optionLength][100];
     for (int i = 0; i < optionLength; i++)
         for (int j = 0; j < 100; j++)
             options[i][j] = 0;
 
-    for (int i = 0, j = 0; j < mapList->nMaps; i++, j++)
+    for (int i = 0, j = 0; j < MapListGetNumMaps(mapList); i++, j++)
     {
-        MapListEntry *entry = &mapList->allMaps[j];
-        sprintf(options[i], "%s [Players: %d]", entry->name, (int)entry->maxPlayers);
+        MapInfo mapInfo = MapListGetMaps(mapList)[j];
+        sprintf(options[i], "%s [Players: %d]", mapInfo.name, mapInfo.maxPlayers);
     }
     strcpy(options[optionLength - 1], "Back");
 
@@ -349,8 +357,8 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
         }
         else
         {
-            MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
-            LoadedFile lfile = LoadedFileCreate(entry->filename);
+            MapInfo mapInfo = MapListGetMaps(mapList)[menu->activeIndex];
+            LoadedFile lfile = LoadedFileCreate(mapInfo.filename);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
 
@@ -360,9 +368,8 @@ void MenuUpdateHostLobby(Menu *menu, MapList *mapList)
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
     {
-
-        MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
-        JSON *mapdata = JSONCreate(entry->filename);
+        MapInfo mapInfo = MapListGetMaps(mapList)[menu->activeIndex];
+        JSON *mapdata = JSONCreate(mapInfo.filename);
         MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
     }
@@ -784,17 +791,17 @@ void MenuUpdateKeybinding(Menu *menu)
 void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
 {
     //Determine menu options
-    int optionLength = mapList->nMaps + 1;
+    int optionLength = MapListGetNumMaps(mapList) + 1;
     char options[optionLength][100];
     for (int i = 0; i < optionLength; i++)
         for (int j = 0; j < 100; j++)
             options[i][j] = 0;
 
-    for (int i = 0, j = 0; j < mapList->nMaps; i++, j++)
+    for (int i = 0, j = 0; j < MapListGetNumMaps(mapList); i++, j++)
     {
-        MapListEntry *entry = &mapList->allMaps[j];
+        MapInfo mapInfo = MapListGetMaps(mapList)[j];
         char buffer[100] = {0};
-        sprintf(buffer, "%s [Diff: %d, MaxPl: %d]", entry->name, entry->difficulty, entry->maxPlayers);
+        sprintf(buffer, "%s [MaxPl: %d]", mapInfo.name, mapInfo.maxPlayers);
         strcpy(options[i], buffer);
     }
     strcpy(options[optionLength - 1], "Back");
@@ -814,13 +821,14 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
         {
             MenuStateSet(MS_None);
             GameStateSet(GS_Playing);
+            MusicStop(&menu->MenuTheme);
+            MusicDestroy(&menu->MenuTheme);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
     {
-
-        MapListEntry *entry = &mapList->allMaps[menu->activeIndex];
-        JSON *mapdata = JSONCreate(entry->filename);
+        MapInfo mapInfo = MapListGetMaps(mapList)[menu->activeIndex];
+        JSON *mapdata = JSONCreate(mapInfo.filename);
         MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
     }

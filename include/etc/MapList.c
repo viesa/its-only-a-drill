@@ -1,28 +1,43 @@
 #include "MapList.h"
 
-// For map parsing purposes
-#define MAIN_LENGTH 3
-#define MAPINFO_LENGTH 4
-#define LIST_LENGTH 10
-#define SRC_LENGTH 4
-#define MAPINFO_INDEX 0
-#define LAYER_INDEX 1
-#define LIST_INDEX 2
-#define SRC_INDEX 9
-#define MAPINFO_STRING_INDEX 1
-
-MapList MapListCreate(char *directory)
+typedef struct MapList
 {
-    MapList mapList;
-    mapList.nMaps = 0;
-    strcpy(mapList.directory, directory);
-    mapList.lastUpdate = 1.0f;
-    MapListUpdate(&mapList);
+    char directory[20];
+    // Vector of mapInfo-structs, NOT the map-entities
+    Vector *allMaps;
+    float lastUpdate;
+} MapList;
+
+MapList *MapListCreate(char *directory)
+{
+    MapList *mapList = MALLOC(MapList);
+    ALLOC_ERROR_CHECK(mapList);
+
+    if (strlen(directory) > 20)
+    {
+#ifdef MAPLIST_DEBUG
+        log_error("Directory string size too big for mapList");
+#endif
+        return NULL;
+    }
+    strcpy(mapList->directory, directory);
+    mapList->allMaps = VectorCreate(sizeof(MapInfo), 5);
+    mapList->lastUpdate = 1.0f;
+    MapListUpdate(mapList);
     return mapList;
 }
 void MapListDestroy(MapList *mapList)
 {
-    SDL_free(mapList->directory);
+    for (int i = 0; i < mapList->allMaps->size; i++)
+    {
+        MapInfoDestroy(&MapListGetMaps(mapList)[i]);
+    }
+    if (mapList)
+    {
+        FREE(mapList->directory);
+        VectorDestroy(mapList->allMaps);
+    }
+    FREE(mapList);
 }
 
 void MapListUpdate(MapList *mapList)
@@ -39,81 +54,41 @@ void MapListUpdate(MapList *mapList)
     d = opendir(mapList->directory);
     if (d)
     {
-        mapList->nMaps = 0;
-
+        VectorClear(mapList->allMaps);
         for (int i = 0; (dir = readdir(d)) != NULL; i++)
-            if (mapList->nMaps < MAX_MAPS && strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
+        {
+            // Skip "." and ".." if they appear
+            if (strcmp(dir->d_name, ".") && strcmp(dir->d_name, ".."))
             {
-                //Load in mapinfo from mapfile
                 size_t bytes = (strlen(mapList->directory) + 1 + strlen(dir->d_name));
+
+                // Create a fullpath to the file to be loaded
                 char *fullpath = CALLOC(bytes, char);
                 ALLOC_ERROR_CHECK(fullpath);
-                strcat(fullpath, mapList->directory);
-                strcat(fullpath, "/");
-                strcat(fullpath, dir->d_name);
-                JSON *_new = JSONCreate(fullpath);
+                sprintf(fullpath, "%s%c%s", mapList->directory, '/', dir->d_name);
 
-                if (_new == NULL ||
-                    _new->value->type != json_object ||
-                    _new->value->u.object.length != MAIN_LENGTH)
+                MapInfo mapInfo = MapInfoCreate(fullpath);
+                if (mapInfo.uid != -1)
                 {
-                    log_error("Could not load mapinfo from mapfile: JSON-data was badly formatted (Main)");
-                    continue;
+                    VectorPushBack(mapList->allMaps, &mapInfo);
                 }
-
-                json_value *mapInfo = JSONGetValue(_new, (uint32_t[]){0}, 1);
-
-                if (mapInfo == NULL ||
-                    mapInfo->type != json_object ||
-                    mapInfo->u.object.length != MAPINFO_LENGTH)
-                {
-                    log_error("Could not load mapinfo from mapfile: JSON-data was badly formatted (MapInfo)");
-                    continue;
-                }
-
-                SDL_bool badLoad = SDL_FALSE;
-                json_object_entry *mapInfoEntries = mapInfo->u.object.values;
-                for (uint32_t i = 0; i < MAPINFO_LENGTH; i++)
-                {
-                    if (i == MAPINFO_STRING_INDEX)
-                    {
-                        if (mapInfoEntries[i].value->type != json_string)
-                        {
-                            badLoad = SDL_TRUE;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (mapInfoEntries[i].value->type != json_integer)
-                        {
-                            badLoad = SDL_TRUE;
-                            break;
-                        }
-                    }
-                }
-                if (badLoad)
-                {
-                    log_error("Could not load mapinfo from mapfile: JSON-data was badly formatted (MapInfo)");
-                    continue;
-                }
-                //---------------
-
-                // Push-back this map
-                MapListEntry *_new_entry = &mapList->allMaps[mapList->nMaps++];
-                _new_entry->uid = mapInfoEntries[0].value->u.integer;
-                strcpy(_new_entry->name, mapInfoEntries[1].value->u.string.ptr);
-                strcpy(_new_entry->filename, fullpath);
-                _new_entry->difficulty = mapInfoEntries[2].value->u.integer;
-                _new_entry->maxPlayers = mapInfoEntries[3].value->u.integer;
-                // -------------------
 
                 // Clean up
                 SDL_free(fullpath);
-                JSONDestroy(_new);
-                // --------
             }
-    }
-    if (d)
+        }
+
+        // Only attempt to close "d" if it was opened
         closedir(d);
+    }
+}
+
+MapInfo *MapListGetMaps(MapList *mapList)
+{
+    return (MapInfo *)mapList->allMaps->data;
+}
+
+size_t MapListGetNumMaps(MapList *mapList)
+{
+    return mapList->allMaps->size;
 }
