@@ -9,6 +9,7 @@ typedef struct JSON
 {
     json_char *file_contents;
     json_value *value;
+    char *originalFilename;
 } JSON;
 
 /// Returns NULL if failed to load JSON-file
@@ -26,5 +27,7 @@ void JSONPrint(JSON *json);
 ///     returns early (NULL) if index not found in JSON-object
 /// \param n: number of elements in previous parameter
 json_value *JSONGetValue(JSON *json, uint32_t indices[], uint32_t n);
+
+json_value *JSONFind(JSON *json, json_value *start, json_type type, void *data, int size);
 
 #endif

@@ -14,8 +14,7 @@ typedef struct Session
     Vector *playerIDs;
     char *rawMap;
     size_t rawMapDataSize;
-    char *mapName;
-    int mapMaxPlayers;
+    MapInfo mapInfo;
     SDL_bool inGame;
 } Session;
 

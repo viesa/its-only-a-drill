@@ -2,226 +2,124 @@
 
 #include "Library.h"
 
-// For map parsing purposes
-#define MAIN_LENGTH 3
-#define MAPINFO_LENGTH 4
-#define LIST_LENGTH 10
-#define SRC_LENGTH 4
-#define MAPINFO_INDEX 0
-#define LAYER_INDEX 1
-#define LIST_INDEX 2
-#define SRC_INDEX 9
-#define MAPINFO_STRING_INDEX 1
+// Wrapper around JSONFind() to print message if fail
+json_value *MapTryFind(JSON *mapData, json_value *start, json_type type, char *data, int size);
+int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **destination);
 
 struct
 {
+    MapInfo info;
     EntityIndexP *contents;
-    unsigned int n;
-    int uid;
+    int n;
 } map;
 
 struct
 {
+    MapInfo info;
     EntityIndexP *contents;
-    unsigned int n;
-    int uid;
+    int n;
 } bufferMap;
 
 void MapInitialize()
 {
+    map.info = (MapInfo){0};
     map.contents = NULL;
     map.n = 0;
-    map.uid = 0;
+    bufferMap.info = (MapInfo){0};
+    bufferMap.contents = NULL;
+    bufferMap.n = 0;
 }
 
 void MapUninitialize()
 {
+    MapInfoDestroy(&map.info);
     if (map.contents)
         EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
-
     FREE(map.contents);
+    map.info = (MapInfo){0};
     map.contents = NULL;
     map.n = 0;
-    map.uid = 0;
 }
 
-int MapGenerateNew(JSON *mapdata)
+int MapGenerateNew(JSON *mapData)
 {
-    if (mapdata == NULL ||
-        mapdata->value->type != json_object ||
-        mapdata->value->u.object.length != MAIN_LENGTH)
+    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
+    json_value *json_helper;
+
+    bufferMap.info = MapInfoCreateFromJSON(mapData);
+    if (bufferMap.info.uid == -1)
     {
-        log_error("Could not create map from mapfile: JSON-data was badly formatted (Main)");
+#ifdef MAP_DEBUG
+        log_warn("Failed to load map %s: Bad mapInfo", filepath);
+#endif
         return 0;
     }
 
-    json_value *mapInfo = JSONGetValue(mapdata, (uint32_t[]){MAPINFO_INDEX}, 1);
-    if (mapInfo == NULL ||
-        mapInfo->type != json_object ||
-        mapInfo->u.object.length != MAPINFO_LENGTH)
+    if (!(json_helper = MapTryFind(mapData, NULL, json_integer, "layers", 6)))
+        return 0;
+    bufferMap.n = json_helper->u.integer;
+
+    if (!(json_helper = MapTryFind(mapData, NULL, json_array, (char *)&bufferMap.n, sizeof(int))))
     {
-        log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
+        bufferMap.info.uid = -1;
         return 0;
     }
-    SDL_bool badLoad = SDL_FALSE;
-    json_object_entry *mapInfoEntries = mapInfo->u.object.values;
-    for (uint32_t i = 0; i < MAPINFO_LENGTH; i++)
-    {
-        if (i == MAPINFO_STRING_INDEX)
-        {
-            if (mapInfoEntries[i].value->type != json_string)
-            {
-                badLoad = SDL_TRUE;
-                break;
-            }
-        }
-        else
-        {
-            if (mapInfoEntries[i].value->type != json_integer)
-            {
-                badLoad = SDL_TRUE;
-                break;
-            }
-        }
-    }
-    if (badLoad)
-    {
-        log_error("Could not create map from mapfile: JSON-data was badly formatted (MapInfo)");
-        return 0;
-    }
+    json_value *entitiesStart = json_helper;
 
-    // Fetch mad uid
-    bufferMap.uid = mapInfoEntries[0].value->u.integer;
-
-    // If new map has same ID as the old, it is regarded as the same map
-    if (bufferMap.uid == map.uid)
+    if (entitiesStart->u.array.length != bufferMap.n)
     {
-        bufferMap.uid = 0;
-        // Return 1 here, because we didn't "fail"
-        return 1;
-    }
+#ifdef MAPINFO_DEBUG
+        log_warn("Layers number does not match actual array size");
+#endif
 
-    json_value *layers = JSONGetValue(mapdata, (uint32_t[]){LAYER_INDEX}, 1);
-    if (layers == NULL ||
-        layers->type != json_integer ||
-        layers->u.integer != JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX}, 1)->u.array.length)
-    {
-        log_error("Could not create map from mapfile: JSON-data was badly formatted (Layers)");
+        bufferMap.info.uid = -1;
         return 0;
     }
 
     // Load in all entities
-    bufferMap.n = layers->u.integer;
     bufferMap.contents = MALLOC_N(EntityIndexP, bufferMap.n);
+    ALLOC_ERROR_CHECK(bufferMap.contents);
 
-    for (uint32_t i = 0; i < bufferMap.n; i++)
+    int numLoadedEntites = LoadAllEnties(mapData, entitiesStart, &bufferMap.contents);
+    if (numLoadedEntites != bufferMap.n)
     {
-        json_value *current = JSONGetValue(mapdata, (uint32_t[]){LIST_INDEX, i}, 2);
-        if (current == NULL ||
-            current->type != json_object ||
-            current->u.object.length != LIST_LENGTH)
-        {
-            log_error("Could not create map from mapfile: JSON-data was badly formatted (List)");
-            FREE(bufferMap.contents);
-            bufferMap.n = 0;
-            return 0;
-        }
-
-        json_object_entry *entries = current->u.object.values;
-
-        // Sanity check for all the value types in the JSON-file
-        for (uint32_t i = 0; i < LIST_LENGTH; i++)
-            if (i == MAPINFO_INDEX)
-            {
-                if (entries[i].value->type != json_string)
-                {
-                    badLoad = SDL_TRUE;
-                    break;
-                }
-            }
-            else if (i == SRC_INDEX)
-            {
-                for (uint32_t j = 0; j < 4; j++)
-                {
-                    if (entries[i].value->u.object.values[j].value->type != json_integer)
-                    {
-                        badLoad = SDL_TRUE;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                if (entries[i].value->type != json_integer)
-                {
-                    badLoad = SDL_TRUE;
-                    break;
-                }
-            }
-        if (badLoad)
-        {
-            log_error("Could not create map from mapfile: JSON-data was badly formatted (LIST CONTENTS)");
-            FREE(bufferMap.contents);
-            bufferMap.n = 0;
-            return 0;
-        }
-        //----------------------------------------------------
-
-        if (entries[SRC_INDEX].value->type != json_object ||
-            entries[SRC_INDEX].value->u.object.length != SRC_LENGTH)
-        {
-            log_error("Could not create map from mapfile: JSON-data was badly formatted (SRC)");
-            FREE(bufferMap.contents);
-            bufferMap.n = 0;
-            return 0;
-        }
-
-        char *type_str = entries[0].value->u.string.ptr;
-        EntityType type;
-        if (!strcmp(type_str, "player"))
-            type = ET_PlayerSpawn;
-        else
-            type = ET_MapObject;
-
-        Vec2 position = Vec2Create((float)entries[2].value->u.integer, (float)entries[3].value->u.integer);
-        int width = entries[4].value->u.integer;
-        int height = entries[5].value->u.integer;
-        float mass = (float)entries[6].value->u.integer;
-        SDL_bool collider = (SDL_bool)entries[7].value->u.integer;
-        int rotation = entries[8].value->u.integer;
-
-        int src_x = entries[SRC_INDEX].value->u.object.values[0].value->u.integer;
-        int src_y = entries[SRC_INDEX].value->u.object.values[1].value->u.integer;
-        int src_w = entries[SRC_INDEX].value->u.object.values[2].value->u.integer;
-        int src_h = entries[SRC_INDEX].value->u.object.values[3].value->u.integer;
-
-        SDL_Rect dst = {(int)position.x, (int)position.y, width, height};
-        SDL_Rect src = {src_x, src_y, src_w, src_h};
-
-        EntityIndexP index = EntityManagerAdd(type, position);
-        ENTITY_ARRAY[*index].drawables[0].dst = dst;
-        ENTITY_ARRAY[*index].drawables[0].src = src;
-        ENTITY_ARRAY[*index].drawables[0].rot = rotation;
-        ENTITY_ARRAY[*index].drawables[0].rot_anchor = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
-        ENTITY_ARRAY[*index].mass = mass;
-        ENTITY_ARRAY[*index].isCollider = collider;
-        ENTITY_ARRAY[*index].hitboxIndex = 0;
-        ENTITY_ARRAY[*index].nDrawables = 1;
-
-        bufferMap.contents[i] = index;
+#ifdef MAPINFO_DEBUG
+        log_warn("Failed to load in entities");
+#endif
+        if (numLoadedEntites)
+            EntityManagerRemoveRange(*bufferMap.contents[0], *bufferMap.contents[numLoadedEntites - 1] + 1);
+        FREE(bufferMap.contents);
+        bufferMap.info.uid = -1;
+        return 0;
     }
-    if (map.n)
+
+    // If old map exist, delete it before copying in bufferMap
+    if (map.contents && map.n > 0)
     {
         EntityManagerRemoveRange(*map.contents[0], *map.contents[map.n - 1] + 1);
         FREE(map.contents);
     }
+
+    // Copy bufferMap into map
+    map.info = MapInfoCreateFromJSON(mapData);
+    if (map.info.uid == -1)
+    {
+#ifdef MAP_DEBUG
+        log_warn("Failed to load map %s: Bad mapInfo", filepath);
+#endif
+        return 0;
+    }
     map.contents = MALLOC_N(EntityIndexP, bufferMap.n);
     SDL_memcpy(map.contents, bufferMap.contents, sizeof(EntityIndexP) * bufferMap.n);
     map.n = bufferMap.n;
-    map.uid = bufferMap.uid;
+
+    // Clear bufferMap
+    VectorClear(bufferMap.info.playerSpawns);
+    VectorClear(bufferMap.info.enemySpawns);
+    bufferMap.info = (MapInfo){0};
     FREE(bufferMap.contents);
     bufferMap.n = 0;
-    bufferMap.uid = 0;
+
     return 1;
 }
 
@@ -242,4 +140,110 @@ EntityIndexP *MapGetContents()
 unsigned int MapGetContnetSize()
 {
     return map.n;
+}
+
+json_value *MapTryFind(JSON *mapData, json_value *start, json_type type, char *data, int size)
+{
+    char *filepath = mapData->originalFilename ? mapData->originalFilename : "Unknown";
+
+    json_value *json_helper;
+    if (!(json_helper = JSONFind(mapData, start, type, data, size)))
+    {
+#ifdef MAPINFO_DEBUG
+        log_warn("Could not load mapData for %s: %s", filepath, data);
+#endif
+    }
+    return json_helper;
+}
+
+int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **destination)
+{
+    json_value *json_helper;
+    int numEnttiesLoaded = 0;
+    int loops = bufferMap.n;
+    for (int i = 0; i < loops; i++)
+    {
+        char *type_str = NULL;
+        int x, y, w, h, m, c, r;
+        SDL_Rect src = {0};
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_string, "type", 4)))
+            return numEnttiesLoaded;
+        type_str = json_helper->u.string.ptr;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "x", 1)))
+            return numEnttiesLoaded;
+        x = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "y", 1)))
+            return numEnttiesLoaded;
+        y = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "w", 1)))
+            return numEnttiesLoaded;
+        w = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "h", 1)))
+            return numEnttiesLoaded;
+        h = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "m", 1)))
+            return numEnttiesLoaded;
+        m = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "c", 1)))
+            return numEnttiesLoaded;
+        c = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_integer, "r", 1)))
+            return numEnttiesLoaded;
+        r = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, entitiesStart->u.array.values[i], json_object, "src", 3)))
+            return numEnttiesLoaded;
+        json_value *json_src = json_helper;
+
+        if (!(json_helper = MapTryFind(mapData, json_src, json_integer, "x", 1)))
+            return numEnttiesLoaded;
+        src.x = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, json_src, json_integer, "y", 1)))
+            return numEnttiesLoaded;
+        src.y = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, json_src, json_integer, "w", 1)))
+            return numEnttiesLoaded;
+        src.w = json_helper->u.integer;
+
+        if (!(json_helper = MapTryFind(mapData, json_src, json_integer, "h", 1)))
+            return numEnttiesLoaded;
+        src.h = json_helper->u.integer;
+
+        EntityType type;
+        if (strcmp(type_str, "player_spawn") && strcmp(type_str, "enemy_spawn"))
+        {
+            type = ET_MapObject;
+        }
+        else
+        {
+            bufferMap.n--;
+            continue;
+        }
+
+        SDL_Rect dst = {x, y, w, h};
+
+        EntityIndexP index = EntityManagerAdd(type, Vec2Create(x, y));
+        ENTITY_ARRAY[*index].drawables[0].dst = dst;
+        ENTITY_ARRAY[*index].drawables[0].src = src;
+        ENTITY_ARRAY[*index].drawables[0].rot = r;
+        ENTITY_ARRAY[*index].drawables[0].rot_anchor = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+        ENTITY_ARRAY[*index].nDrawables = 1;
+        ENTITY_ARRAY[*index].mass = m;
+        ENTITY_ARRAY[*index].isCollider = (SDL_bool)c;
+        ENTITY_ARRAY[*index].hitboxIndex = 0;
+
+        bufferMap.contents[numEnttiesLoaded] = index;
+        numEnttiesLoaded++;
+    }
+    return numEnttiesLoaded;
 }
