@@ -23,10 +23,9 @@ Vector *VectorCreate(size_t elementSize, size_t initialReservedSize)
 
 void VectorDestroy(Vector *vector)
 {
-    if (vector->data)
-        SDL_free(vector->data);
-    if (vector->data)
-        SDL_free(vector);
+    if (vector)
+        FREE(vector->data);
+    FREE(vector);
 }
 
 VectorP VectorSecureDataPointer(Vector *vector)

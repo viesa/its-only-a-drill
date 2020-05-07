@@ -117,7 +117,7 @@ int MapGenerateNew(JSON *mapData)
     // Clear bufferMap
     VectorClear(bufferMap.info.playerSpawns);
     VectorClear(bufferMap.info.enemySpawns);
-    bufferMap.info = (MapInfo){0};
+    bufferMap.info.uid = -1;
     FREE(bufferMap.contents);
     bufferMap.n = 0;
 
