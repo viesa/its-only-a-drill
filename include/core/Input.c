@@ -157,7 +157,7 @@ void InputClearPortalContent()
 void InputPortalBackspace()
 {
     input.text[input.textLen - 1] = '\0';
-    if (input.textLen > 1)
+    if (input.textLen > 0)
         input.textLen--;
     return;
 }
