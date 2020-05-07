@@ -26,4 +26,7 @@ MapInfo MapInfoCreateFromJSON(JSON *mapdata);
 
 void MapInfoDestroy(MapInfo *mapInfo);
 
+SpawnPoint *MapInfoGetPlayerSpawns(MapInfo *mapInfo);
+SpawnPoint *MapInfoGetEnemySpawns(MapInfo *mapInfo);
+
 #endif

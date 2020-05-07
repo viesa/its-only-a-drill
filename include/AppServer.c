@@ -420,18 +420,28 @@ void AppServerHandleStartSessionPacket(ParsedPacket packet)
     if (senderP->id != session->hostID)
         return;
 
-    Vec2 base = Vec2Create(1000.0f, 1000.0f);
     int *playerIDs = SessionGetPlayerIDs(session);
+    // Notify client that the session started, and provide client with his entity
     for (int i = 0; i < session->playerIDs->size; i++)
     {
         NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
         Entity *entity = &to->entity;
-        entity->position = Vec2AddL(base, rand() % 500);
-        // Notify client that the session started, and provide client with his entity
+        if (i < session->mapInfo.playerSpawns->size)
+        {
+            entity->position = MapInfoGetPlayerSpawns(&session->mapInfo)[i].position;
+        }
+        else
+        {
+            entity->position = Vec2Create(0.0f, 0.0f);
+        }
         ServerTCPSend(PT_StartSession, entity, sizeof(Entity), *to);
+    }
+    // Notify the client about every other players, and provide client with their entites
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
         for (int j = 0; j < session->playerIDs->size; j++)
         {
-            // Notify the client about every other players, and provide client with their entites
             if (playerIDs[j] != to->id)
             {
                 Entity *outgoing = &ServerGetPlayerByID(playerIDs[j])->entity;

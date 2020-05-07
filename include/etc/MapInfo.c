@@ -147,8 +147,8 @@ int LoadAllSpawnPoints(MapInfo *mapInfo, JSON *mapData, json_value *entitiesStar
         }
         else if (!strcmp(type_str, "enemy_spawn"))
         {
-            SpawnPoint spawnPoint = SpawnPointCreate(Vec2Create(x, y), mapInfo->playerSpawns->size);
-            VectorPushBack(mapInfo->playerSpawns, &spawnPoint);
+            SpawnPoint spawnPoint = SpawnPointCreate(Vec2Create(x, y), mapInfo->enemySpawns->size);
+            VectorPushBack(mapInfo->enemySpawns, &spawnPoint);
             continue;
         }
     }
@@ -159,4 +159,14 @@ void MapInfoDestroy(MapInfo *mapInfo)
 {
     VectorDestroy(mapInfo->playerSpawns);
     VectorDestroy(mapInfo->enemySpawns);
+}
+
+SpawnPoint *MapInfoGetPlayerSpawns(MapInfo *mapInfo)
+{
+    return (SpawnPoint *)mapInfo->playerSpawns->data;
+}
+
+SpawnPoint *MapInfoGetEnemySpawns(MapInfo *mapInfo)
+{
+    return (SpawnPoint *)mapInfo->enemySpawns->data;
 }
