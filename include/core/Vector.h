@@ -21,6 +21,8 @@ void VectorDestroy(Vector *vector);
 
 VectorP VectorSecureDataPointer(Vector *vector);
 
+void VectorResize(Vector *vector, size_t newSize);
+
 void VectorPushBack(Vector *vector, void *element);
 void VectorPopBack(Vector *vector);
 
@@ -30,5 +32,7 @@ void VectorEraseElement(Vector *vector, void *element);
 void VectorClear(Vector *vector);
 
 size_t VectorFind(Vector *vector, void *element);
+
+void VectorCopy(Vector *dst, Vector *src);
 
 #endif
