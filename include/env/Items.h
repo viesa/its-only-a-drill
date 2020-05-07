@@ -3,6 +3,7 @@
 
 #include "Dependencies.h"
 #include "Camera.h"
+#include "Sound.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 
@@ -36,6 +37,8 @@ typedef struct Item
     int picked;
     WeaponStats Stats;
     int equiped;
+    Sound itemAction;
+    Sound itemReload;
 } Item;
 
 ////Lista med items som ligger i invemtory

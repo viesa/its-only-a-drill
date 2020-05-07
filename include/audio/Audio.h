@@ -16,6 +16,14 @@ typedef enum SoundFile
     SF_Notification,
     SF_MenuPress,
     SF_MenuStep,
+    SF_PistolShoot,
+    SF_M4A1Shoot,
+    SF_ShotgunShoot,
+    SF_SniperShoot,
+    SF_ReloadMag,
+    SF_ReloadShotgun,
+    SF_SwordSwing,
+    SF_Nothing,
     SF_Count
 } SoundFile;
 
