@@ -56,7 +56,20 @@ void ClientTryConnect()
 
 void ClientConnectThreadFn()
 {
-    SDL_LockMutex(client.connectMutex);
+    int status = SDL_TryLockMutex(client.connectMutex);
+    if (status == SDL_MUTEX_TIMEDOUT)
+    {
+        // Another thread is already trying to connect
+        return;
+    }
+    else if (status != 0)
+    {
+#ifdef CLIENT_DEBUG
+        log_error("Failed to lock connection mutex");
+#endif
+        return;
+    }
+
     if (ConStateGet() == CON_Online)
     {
         SDL_UnlockMutex(client.connectMutex);
@@ -232,16 +245,14 @@ int ClientUDPOut(UDPpacket *packet)
 int ClientTCPSend(PacketType type, void *data, size_t size)
 {
     if (!client.server.socket)
-        return 0;
-    assert("Attempting to send TCP-packet without client initialization" && client.isInitialized);
-
-    if (!client.server.socket)
     {
 #ifdef CLIENT_DEBUG
         log_warn("Attempted to send a package to server without being connected to it");
 #endif
         return 0;
     }
+    assert("Attempting to send TCP-packet without client initialization" && client.isInitialized);
+
     int id = ENTITY_ARRAY[*client.player->entity].id;
     TCPpacket *outgoing = TCPPacketCreate(type, id, data, size);
     outgoing->address = client.server.socket;
@@ -301,7 +312,7 @@ void ClientListenToServer()
         }
         else if (nReadySockets)
         {
-            // Check if the socket ready was TCP-socket -> New connection incoming
+            // Check if the socket ready was TCP-socket
             if (SDLNet_SocketReady(client.server.socket))
             {
                 ClientTryReceiveTCPPacket();

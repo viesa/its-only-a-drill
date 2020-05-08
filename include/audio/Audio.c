@@ -67,6 +67,46 @@ void AudioInitialize()
         log_warn("Could not load Menu_Step.wav");
     audio.m_chunks[SF_MenuStep] = menustep;
 
+    Mix_Chunk *pistolshoot = Mix_LoadWAV("assets/sound/9MM.wav");
+    if (!pistolshoot)
+        log_warn("Could not load 9MM.wav");
+    audio.m_chunks[SF_PistolShoot] = pistolshoot;
+
+    Mix_Chunk *m4a1shoot = Mix_LoadWAV("assets/sound/M4A1.wav");
+    if (!m4a1shoot)
+        log_warn("Could not load M4A1.wav");
+    audio.m_chunks[SF_M4A1Shoot] = m4a1shoot;
+
+    Mix_Chunk *shotgunshoot = Mix_LoadWAV("assets/sound/SHOTGUN.wav");
+    if (!shotgunshoot)
+        log_warn("Could not load SHOTGUN.wav");
+    audio.m_chunks[SF_ShotgunShoot] = shotgunshoot;
+
+    Mix_Chunk *snipershoot = Mix_LoadWAV("assets/sound/SNIPER.wav");
+    if (!snipershoot)
+        log_warn("Could not load SNIPER.wav");
+    audio.m_chunks[SF_SniperShoot] = snipershoot;
+
+    Mix_Chunk *reloadmag = Mix_LoadWAV("assets/sound/RELOAD_General_Clip.wav");
+    if (!reloadmag)
+        log_warn("Could not load RELOAD_General_Clip.wav");
+    audio.m_chunks[SF_ReloadMag] = reloadmag;
+
+    Mix_Chunk *reloadshotgun = Mix_LoadWAV("assets/sound/SHOTGUN_Reload.wav");
+    if (!reloadshotgun)
+        log_warn("Could not load SHOTGUN_Reload.wav");
+    audio.m_chunks[SF_ReloadShotgun] = reloadshotgun;
+
+    Mix_Chunk *swordswing = Mix_LoadWAV("assets/sound/SWORD.wav");
+    if (!swordswing)
+        log_warn("Could not load SWORD.wav");
+    audio.m_chunks[SF_SwordSwing] = swordswing;
+
+    Mix_Chunk *nothing = Mix_LoadWAV("assets/sound/NOTHING.wav");
+    if (!nothing)
+        log_warn("Could not load NOTHING.wav");
+    audio.m_chunks[SF_Nothing] = nothing;
+
     //-------------------------------------------------
     //------------------ Music files ------------------
     //-------------------------------------------------

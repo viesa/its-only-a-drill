@@ -17,6 +17,7 @@ typedef struct Player
     Vec2 aimFollow;
     Vec2 forward;
     int respawnTimer;
+    InventoryListItems inventory;
 } Player;
 
 //creates a player and a entity
