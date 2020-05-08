@@ -1,6 +1,6 @@
 #define __USE_MINGW_ANSI_STDIO 1
 
-// #define SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
+#define SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
 
 #ifdef SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
 #define WINDOW_DEBUG
@@ -41,4 +41,4 @@
 //#define frictionReal
 
 // If defined, client will connect with 127.0.0.1
-#define LOCAL_SERVER
+// #define LOCAL_SERVER
