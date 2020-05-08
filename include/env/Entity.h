@@ -31,7 +31,7 @@ typedef enum EntityType
 typedef enum entityState
 {
     Passive,
-    Nutral,
+    Neutral,
     Fight,
     Aggressive,
     EntityDead,

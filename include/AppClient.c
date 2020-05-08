@@ -218,7 +218,7 @@ void AppClientUpdate(AppClient *app)
         {
             ENTITY_ARRAY[2].desiredPoint.x = 180;
             ENTITY_ARRAY[2].desiredPoint.y = 180;
-            ENTITY_ARRAY[2].entityState = Nutral;
+            ENTITY_ARRAY[2].entityState = Neutral;
         }
         if (InputIsKeyPressed(SDL_SCANCODE_O))
         {

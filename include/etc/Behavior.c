@@ -83,7 +83,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
                 // unused
                 break;
             }
-            case Nutral:
+            case Neutral:
             {
                 ENTITY_ARRAY[i] = BehaviorMoveToPoint(ENTITY_ARRAY[i], ENTITY_ARRAY[i].desiredPoint.x, ENTITY_ARRAY[i].desiredPoint.y);
                 if (SDL_HasIntersection(&ENTITY_ARRAY[i].drawables[0].dst, &boxDP))
@@ -104,7 +104,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
                 }
                 if (ENTITY_ARRAY[tmp].health < 0)
                 {
-                    ENTITY_ARRAY[i].entityState = Nutral;
+                    ENTITY_ARRAY[i].entityState = Neutral;
                 }
                 if (Vec2Len(enemyToPlayer) > aggravationRadius)
                 {
