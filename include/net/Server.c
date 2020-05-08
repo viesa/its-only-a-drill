@@ -452,7 +452,6 @@ int ServerTryAcceptTCPSocket()
         SDLNet_TCP_AddSocket(server.socketSet, newClient);
         NetPlayer newPlayer = NetPlayerCreate(newClient, ServerGetID());
         newPlayer.entity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, newPlayer.id);
-        newPlayer.entity.inventory = InventoryCreate();
         ServerTCPSend(PT_Connect, &newPlayer.id, sizeof(int), newPlayer);
         VectorPushBack(server.players, &newPlayer);
 #ifdef SERVER_DEBUG

@@ -49,7 +49,7 @@ void EntityManagerUpdateMovement()
             ENTITY_ARRAY[i].id >= 10000)
         {
             CompressedEntity ent = EntityCompress(&ENTITY_ARRAY[i]);
-            ClientTCPSend(PT_CompressedEntity, &ent, sizeof(CompressedEntity));
+            ClientUDPSend(PT_CompressedEntity, &ent, sizeof(CompressedEntity));
         }
 #ifdef ENTITY_DEBUG
         if (i == 0)

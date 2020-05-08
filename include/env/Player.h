@@ -16,6 +16,7 @@ typedef struct Player
     Anim body;
     Vec2 aimFollow;
     Vec2 forward;
+    InventoryListItems inventory;
 } Player;
 
 //creates a player and a entity

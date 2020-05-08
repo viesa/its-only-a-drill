@@ -100,7 +100,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             {
                 if (ENTITY_ARRAY[i].isNPC == 1)
                 {
-                    entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], renderer, camera);
+                    // entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], renderer, camera);
                 }
                 if (ENTITY_ARRAY[tmp].health < 0)
                 {

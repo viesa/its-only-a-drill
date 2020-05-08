@@ -72,8 +72,6 @@ typedef struct Entity
     EntityState entityState;
     Vec2 desiredPoint;
     int indexPoint;
-
-    InventoryListItems inventory;
 } Entity;
 
 ///Creates a entity
