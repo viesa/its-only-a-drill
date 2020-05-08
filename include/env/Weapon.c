@@ -75,7 +75,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
             if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
-                RayScan(i, makeDestination, point, item, itemFalloff);
+                RayScanSingelplayer(i, makeDestination, point, item, itemFalloff);
         }
     }
 }
