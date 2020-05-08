@@ -51,7 +51,7 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player)
                 ENTITY_ARRAY[*i].entityState = Fight;
             } else
             {
-                ENTITY_ARRAY[*i].entityState = Nutral;
+                ENTITY_ARRAY[*i].entityState = Neutral;
             }
         }
     }
@@ -100,7 +100,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             {
                 if (ENTITY_ARRAY[*player].entityState == EntityDead)
                 {
-                    ENTITY_ARRAY[i].entityState = Nutral;
+                    ENTITY_ARRAY[i].entityState = Neutral;
                 }
                 if (ENTITY_ARRAY[i].isNPC == 1)
                 {
