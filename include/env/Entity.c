@@ -66,32 +66,31 @@ CompressedEntity EntityCompress(Entity *entity)
 {
     CompressedEntity cEntity;
     cEntity.id = entity->id;
-    cEntity.type = entity->type;
-    cEntity.position = entity->position;
-    SDL_memcpy(&cEntity.drawables, &entity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
-    cEntity.nDrawables = entity->nDrawables;
     cEntity.health = entity->health;
+    cEntity.position = entity->position;
+    for (int i = 0; i < MAX_DRAWABLES; i++)
+        cEntity.src[i] = entity->drawables[i].src;
     return cEntity;
 }
+
 Entity EntityDecompress(CompressedEntity *cEntity)
 {
     Entity entity;
     entity.id = cEntity->id;
-    entity.type = cEntity->type;
-    entity.position = cEntity->position;
-    SDL_memcpy(&entity.drawables, &cEntity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
-    entity.nDrawables = cEntity->nDrawables;
     entity.health = cEntity->health;
+    entity.position = cEntity->position;
+    for (int i = 0; i < MAX_DRAWABLES; i++)
+        entity.drawables[i].src = cEntity->src[i];
     return entity;
 }
+
 void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity)
 {
     entity->id = cEntity->id;
-    entity->type = cEntity->type;
-    entity->position = cEntity->position;
-    SDL_memcpy(&entity->drawables, &cEntity->drawables, sizeof(Drawable) * MAX_DRAWABLES);
-    entity->nDrawables = cEntity->nDrawables;
     entity->health = cEntity->health;
+    entity->position = cEntity->position;
+    for (int i = 0; i < MAX_DRAWABLES; i++)
+        entity->drawables[i].src = cEntity->src[i];
 }
 
 void EntityDraw(Entity *entity, Camera *camera)

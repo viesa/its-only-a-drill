@@ -42,12 +42,11 @@ typedef enum entityState
 typedef struct CompressedEntity
 {
     int id;
-    EntityType type;
-    Vec2 position;
-    Drawable drawables[MAX_DRAWABLES];
-    int nDrawables;
     int health;
+    Vec2 position;
+    SDL_Rect src[MAX_DRAWABLES];
 } CompressedEntity;
+
 typedef struct Entity
 {
     EntityType type;
