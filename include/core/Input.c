@@ -133,6 +133,8 @@ Vec2 InputLastMousePos()
 
 void InputTypePortal(char charPush)
 {
+    if (charPush < 32 && charPush > 126)
+        return;
     if (input.textLen > 12)
         return;
     input.text[input.textLen] = charPush;
