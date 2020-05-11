@@ -15,6 +15,13 @@
             "h": 16
         },
         {
+            "name": "weapon1_spawn",
+            "x": 496,
+            "y": 144,
+            "w": 16,
+            "h": 16
+        },
+        {
             "name": "wall_vertical",
             "x": 368,
             "y": 96,
