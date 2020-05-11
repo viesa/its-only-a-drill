@@ -28,6 +28,7 @@ typedef enum PacketType
     PT_JoinSession,      // When client wants to join a lobby
     PT_LeaveSession,     // When client notifies the server it is leaving the session
     PT_FullSession,      // When the server notifies the client the session is full
+    PT_ChangeSkin,       // When the client changes skins in the lobby
     PT_HostAssign,       // When the host notfies the ID of the host
     PT_FetchSessions,    // When client asks server what sessions exists
     PT_FetchLobby,       // When client asks server which players are in given lobby

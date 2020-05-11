@@ -16,7 +16,12 @@ Graphics *GraphicsCreate()
     gfx->m_allTextures[SS_Legacy] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tilemap.png");
     gfx->m_allTextures[SS_Tiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_tiles.png");
     gfx->m_allTextures[SS_Characters] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_characters.png");
-    gfx->m_allTextures[SS_Character_Prisoner] = GraphicsLoadTexture(gfx, "docs/spritesheets/character_prisoner.png");
+    gfx->m_allTextures[SS_Character_Prisoner] = GraphicsLoadTexture(gfx, "docs/spritesheets/Prisoner.png");
+    gfx->m_allTextures[SS_Character_ChernobylWorker] = GraphicsLoadTexture(gfx, "docs/spritesheets/ChernobylWorker.png");
+    gfx->m_allTextures[SS_Character_IronMan] = GraphicsLoadTexture(gfx, "docs/spritesheets/IronMan.png");
+    gfx->m_allTextures[SS_Character_iDubbbz] = GraphicsLoadTexture(gfx, "docs/spritesheets/iDubbbz.png");
+    gfx->m_allTextures[SS_Character_OldMan] = GraphicsLoadTexture(gfx, "docs/spritesheets/OldMan.png");
+    gfx->m_allTextures[SS_Character_Sonic] = GraphicsLoadTexture(gfx, "docs/spritesheets/Sonic.png");
     gfx->m_allTextures[SS_Tools] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tools.png");
     gfx->m_allTextures[SS_Weapons] = GraphicsLoadTexture(gfx, "docs/spritesheets/weapons.png");
     gfx->m_allTextures[SS_BackgroundTiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/background-tiles.png");
