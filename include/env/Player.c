@@ -12,6 +12,7 @@ Player PlayerCreate(Camera *camera)
     ret.aimFollow = Vec2Create(0.0f, 0.0f);
     ret.forward = Vec2Create(1.0f, 0.0f);
     ret.inventory = InventoryCreate();
+    ret.score = 0;
     return ret;
 }
 

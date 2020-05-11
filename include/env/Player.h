@@ -18,6 +18,7 @@ typedef struct Player
     Vec2 forward;
     int respawnTimer;
     InventoryListItems inventory;
+    int score;
 } Player;
 
 //creates a player and a entity

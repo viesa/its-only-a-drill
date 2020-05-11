@@ -57,13 +57,13 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player)
     }
 }
 
-void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *camera, EntityIndexP player)
+void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *camera, Player *player)
 {
     SDL_Rect boxDP;
 
     Vec2 enemyPosition, enemyToPlayer, playerPosition;
 
-    playerPosition = RectMid(ENTITY_ARRAY[*player].drawables[*player].dst);
+    playerPosition = RectMid(ENTITY_ARRAY[*player->entity].drawables[*player->entity].dst);
 
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
@@ -74,7 +74,7 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             enemyPosition = RectMid(ENTITY_ARRAY[i].drawables[0].dst);
             enemyToPlayer = Vec2Sub(playerPosition, enemyPosition);
 
-            switchStateLogic(&enemyToPlayer, &i, player);
+            switchStateLogic(&enemyToPlayer, &i, player->entity);
 
             switch (ENTITY_ARRAY[i].entityState)
             {
@@ -98,15 +98,15 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             }
             case Fight:
             {
-                if (ENTITY_ARRAY[*player].entityState == EntityDead)
+                if (ENTITY_ARRAY[*player->entity].entityState == EntityDead)
                 {
                     ENTITY_ARRAY[i].entityState = Neutral;
                 }
                 if (ENTITY_ARRAY[i].isNPC == 1)
                 {
-                    // entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], renderer, camera);
+                    //entityShoot(&i, playerPosition, &ENTITY_ARRAY[i].inventory.contents[ENTITY_ARRAY[i].inventory.top - 1], renderer, camera);
                 }
-                if (ENTITY_ARRAY[*player].health < 0)
+                if (ENTITY_ARRAY[*player->entity].health < 0)
                 {
                     ENTITY_ARRAY[i].entityState = Neutral;
                 }
@@ -120,9 +120,14 @@ void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *
             case EntityDead:
             {
                 // make mortal
-                ENTITY_ARRAY[i].drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){ENTITY_ARRAY[i].position.x, ENTITY_ARRAY[i].position.y, 77, 63}, SS_Character_Prisoner);
-                //ENTITY_ARRAY[i].isNPC = 0;
-                ENTITY_ARRAY[i].isCollider = 0;
+                if (ENTITY_ARRAY[i].isCollider != 0)
+                {
+                    ENTITY_ARRAY[i].drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){ENTITY_ARRAY[i].position.x, ENTITY_ARRAY[i].position.y, 77, 63}, SS_Character_Prisoner);
+                    //ENTITY_ARRAY[i].isNPC = 0;
+                    ENTITY_ARRAY[i].isCollider = 0;
+                    player->score += 100;
+                    log_info("player score is %d", player->score);
+                }
                 break;
             }
             case Aggressive:

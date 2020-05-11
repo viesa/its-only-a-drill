@@ -215,7 +215,7 @@ void AppClientUpdate(AppClient *app)
         }
         weaponUpdate(&app->player.inventory.contents[app->player.inventory.top - 1]);
 
-        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera, app->player.entity);
+        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera, &app->player);
 
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
