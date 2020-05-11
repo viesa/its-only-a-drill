@@ -136,3 +136,11 @@ void AnimApplyToDrawable(Anim *anim, Drawable *drawable, float scale)
     drawable->src = anim->active->src;
     drawable->spriteSheet = anim->active->spriteSheet;
 }
+
+void AnimChangeSpriteSheet(Anim *anim, SpriteSheet spriteSheet)
+{
+    for (int i = 0; i < MAX_FRAMES; i++)
+    {
+        anim->frames[i].spriteSheet = spriteSheet;
+    }
+}

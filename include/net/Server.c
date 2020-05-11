@@ -452,6 +452,13 @@ int ServerTryAcceptTCPSocket()
         SDLNet_TCP_AddSocket(server.socketSet, newClient);
         NetPlayer newPlayer = NetPlayerCreate(newClient, ServerGetID());
         newPlayer.entity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, newPlayer.id);
+        // Default skin is prisoner
+        for (int i = 0; i < MAX_DRAWABLES; i++)
+        {
+            newPlayer.entity.drawables[i].spriteSheet = SS_Character_Prisoner;
+            newPlayer.entity.drawables[i].dst.w = (int)(33.0f * 1.5f);
+            newPlayer.entity.drawables[i].dst.h = (int)(33.0f * 1.5f);
+        }
         ServerTCPSend(PT_Connect, &newPlayer.id, sizeof(int), newPlayer);
         VectorPushBack(server.players, &newPlayer);
 #ifdef SERVER_DEBUG

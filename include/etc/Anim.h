@@ -49,4 +49,6 @@ void AnimRandomFrame(Anim *anim);
 
 void AnimApplyToDrawable(Anim *anim, Drawable *drawable, float scale);
 
+void AnimChangeSpriteSheet(Anim *anim, SpriteSheet spriteSheet);
+
 #endif

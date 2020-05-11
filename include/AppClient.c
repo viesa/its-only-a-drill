@@ -262,7 +262,7 @@ void AppClientDraw(AppClient *app)
         default:
             break;
         }
-        MenuUpdate(app->menu, app->fpsManager, app->mapList);
+        MenuUpdate(app->menu, app->fpsManager, app->mapList, &app->player);
         break;
     }
     case GS_Playing:
