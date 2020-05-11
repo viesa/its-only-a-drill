@@ -27,9 +27,12 @@ void RayScan(int index, Vec2 makeDestination, SDL_Point point, Item *item, Vec2 
 void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir);
 // ritar linjen hur skotet åkte
 void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2);
+void rayMarchingTest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats);
+float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance);
+SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage);
 // skapar en projektil *unsused/not updated
 // void bullet(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Direction);
-
+void DectectIntersectionKeep();
 void weaponUpdate(Item *item);
 
 #endif

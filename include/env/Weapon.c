@@ -2,6 +2,9 @@
 
 #include "Entity.h"
 
+#define unhitable 500
+#define max_steps 10
+
 void weaponUpdate(Item *item)
 {
     // counts the cooldown
@@ -31,18 +34,12 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
         point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
         point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
-        DrawLineOnCanvas(renderer, point.x - cameraPos.x, point.y - cameraPos.y, mousePos.x - cameraPos.x, mousePos.y - cameraPos.y);
-
         // push back
         ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
-        for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
-        {
-            if (i != *index)
-                RayScan(i, mousePos, point, item, itemFalloff);
-        }
+        rayMarchingTest(index, &unitPlayerToMouse, camera, renderer, &item->Stats);
     }
 }
 
@@ -122,6 +119,68 @@ void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *ite
         }
     }
 }
+
+void rayMarchingTest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
+{
+    Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+    Vec2 point;
+    float StepSize = 0.0f, DirectionScale = 0.0f;
+    Vec2 previousPoint = RayOrgin;
+    Vec2 cameraPos = CameraGetPos(camera);
+    float reach = stats->falloff;
+    for (int i = 0; i < max_steps; i++)
+    {
+        point = Vec2Add(previousPoint, Vec2MulL(*direction, StepSize));
+        DirectionScale = maxDistenBeforeColision(point, index, reach);
+        StepSize += DirectionScale;
+        reach -= fabsf(DirectionScale);
+        DrawLineOnCanvas(renderer, RayOrgin.x - cameraPos.x, RayOrgin.y - cameraPos.y, point.x - cameraPos.x, point.y - cameraPos.y);
+        // if testLineWithEntitys is true you hit something, if reach is >0 you hit the max distance, stepsize if the step is too big, DirectionScale you hit something unhitable
+        if (testLineWithEntitys(previousPoint, point, index, &stats->Damage) || reach <= 0 || StepSize > unhitable || DirectionScale <= 0)
+            break;
+        previousPoint = point;
+    }
+}
+
+float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance)
+{
+    Vec2 vector;
+    float VectorLength;
+    float closestObject = maxDistance;
+    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    {
+        if (*index != i || ENTITY_ARRAY[i].isCollider == 1)
+        {
+            vector = Vec2Sub(RectMid(ENTITY_ARRAY[i].drawables[0].dst), point);
+            VectorLength = Vec2Len(vector);
+            closestObject = (closestObject > VectorLength && VectorLength != 0) ? VectorLength : closestObject;
+        }
+    }
+    return closestObject = (closestObject > maxDistance) ? maxDistance : closestObject;
+}
+
+SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage)
+{
+    for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
+    {
+        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *ignoreEntity != i) // take aways this if statment for fun time with map
+        {
+            int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
+            tmpPosX = start.x;
+            tmpPosY = start.y;
+            tmpPointX = end.x;
+            tmpPointY = end.y;
+            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+            { // reduce accuracy
+                ENTITY_ARRAY[i].health -= *damage;
+                log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2)
 {
     SDL_SetRenderDrawColor(renderer, 255, 50, 50, 150);
@@ -133,3 +192,7 @@ void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2)
 //     Vec2 creationWithOffset = Vec2MulL(Direction, 50);
 //     EntityManagerAdd(ET_Bullet, creationWithOffset);
 // }
+
+void DectectIntersectionKeep()
+{
+}
