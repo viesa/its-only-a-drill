@@ -53,6 +53,10 @@ void MenuStateSet(MenuState newState)
         state.menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
         state.menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     }
+    if (newState == MS_Name)
+    {
+        InputClearPortalContent();
+    }
     state.menuState = newState;
 }
 

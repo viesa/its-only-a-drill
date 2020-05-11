@@ -9,7 +9,7 @@
 #endif
 
 // If defined, mapList will only import maps on start
-// #define WIN_DEBUG
+#define WIN_DEBUG
 
 // #define ANY_DEBUG
 

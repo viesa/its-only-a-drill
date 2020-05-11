@@ -165,7 +165,7 @@ void MenuUpdateName(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         strcpy(client.name, InputGetPortalContent());
-        ClientTCPSend(PT_Connect, client.name, strlen(client.name));
+        ClientTCPSend(PT_Connect, client.name, strlen(client.name) + 1);
         MenuStateSet(MS_MainMenu);
     }
 }
@@ -212,11 +212,12 @@ void MenuUpdateSplash(Menu *menu)
 void MenuUpdateMainMenu(Menu *menu)
 {
     //Determine menu options
-    int optionLength = 6;
-    char options[6][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
+        {"Change name"},
         {"Change skin"},
         {"Options"},
         {"Exit"}};
@@ -263,17 +264,23 @@ void MenuUpdateMainMenu(Menu *menu)
         }
         case 3:
         {
-            MenuStateSet(MS_Skin);
+            MenuStateSet(MS_Name);
             menu->activeIndex = 0;
             break;
         }
         case 4:
         {
-            MenuStateSet(MS_Options);
+            MenuStateSet(MS_Skin);
             menu->activeIndex = 0;
             break;
         }
         case 5:
+        {
+            MenuStateSet(MS_Options);
+            menu->activeIndex = 0;
+            break;
+        }
+        case 6:
         {
             SDL_Event quit;
             quit.type = SDL_QUIT;
