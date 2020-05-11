@@ -2,7 +2,7 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings)
 {
     Menu *menu = MALLOC(Menu);
     menu->gfx = gfx;
@@ -18,7 +18,6 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
-    menu->audio = audio;
     menu->mainMenuDblDir = 1.0f;
 
     // SDL_Rect src = {0, 0, 1919, 942};
@@ -31,14 +30,14 @@ Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio)
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
 
-    menu->MenuStep = SoundCreate(menu->audio, SF_MenuStep);
-    menu->MenuTheme = MusicCreate(menu->audio, MF_MainMusic);
+    menu->MenuStep = SoundCreate(SF_MenuStep);
+    menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->themecheck = 0;
 
     return menu;
 }
 
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Player *player)
 {
     menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
@@ -134,6 +133,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList)
     case MS_CustomMap:
         MenuUpdateCustomMap(menu, mapList);
         break;
+    case MS_Skin:
+        MenuUpdateSkin(menu, player);
+        break;
     default:
         break;
     }
@@ -163,7 +165,7 @@ void MenuUpdateName(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
         strcpy(client.name, InputGetPortalContent());
-        ClientTCPSend(PT_Connect, client.name, strlen(client.name));
+        ClientTCPSend(PT_Connect, client.name, strlen(client.name) + 1);
         MenuStateSet(MS_MainMenu);
     }
 }
@@ -210,11 +212,13 @@ void MenuUpdateSplash(Menu *menu)
 void MenuUpdateMainMenu(Menu *menu)
 {
     //Determine menu options
-    int optionLength = 5;
-    char options[5][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
+        {"Change name"},
+        {"Change skin"},
         {"Options"},
         {"Exit"}};
     // makes it loop
@@ -256,17 +260,27 @@ void MenuUpdateMainMenu(Menu *menu)
         {
             MenuStateSet(MS_CustomMap);
             menu->activeIndex = 0;
-
             break;
         }
         case 3:
         {
-            MenuStateSet(MS_Options);
+            MenuStateSet(MS_Name);
             menu->activeIndex = 0;
-
             break;
         }
         case 4:
+        {
+            MenuStateSet(MS_Skin);
+            menu->activeIndex = 0;
+            break;
+        }
+        case 5:
+        {
+            MenuStateSet(MS_Options);
+            menu->activeIndex = 0;
+            break;
+        }
+        case 6:
         {
             SDL_Event quit;
             quit.type = SDL_QUIT;
@@ -318,6 +332,7 @@ void MenuUpdateInGameMenu(Menu *menu)
         {
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
+            clientManager.inGame = SDL_FALSE;
             break;
         }
         default:
@@ -836,6 +851,99 @@ void MenuUpdateCustomMap(Menu *menu, MapList *mapList)
     MenuDraw(menu, options, optionLength);
 }
 
+void MenuUpdateSkin(Menu *menu, Player *player)
+{
+    //Determine menu options
+    int optionLength = 7;
+    char options[7][100] = {
+        {"Prisoner"},
+        {"Chernobyl Worker"},
+        {"Iron Man"},
+        {"iDubbbz"},
+        {"Old man"},
+        {"Sonic"},
+        {"Back"}};
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+
+        switch (menu->activeIndex)
+        {
+        case 0:
+        {
+            SpriteSheet spriteSheet = SS_Character_Prisoner;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 1:
+        {
+            SpriteSheet spriteSheet = SS_Character_ChernobylWorker;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 2:
+        {
+            SpriteSheet spriteSheet = SS_Character_IronMan;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 3:
+        {
+            SpriteSheet spriteSheet = SS_Character_iDubbbz;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 4:
+        {
+            SpriteSheet spriteSheet = SS_Character_OldMan;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 5:
+        {
+            //SET TO WHITE MAN SKIN
+            SpriteSheet spriteSheet = SS_Character_Sonic;
+            ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
+            AnimChangeSpriteSheet(&player->leg, spriteSheet);
+            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        case 6:
+        {
+            menu->activeIndex = 0;
+            MenuStateSet(MS_MainMenu);
+            break;
+        }
+        }
+    }
+    MenuDraw(menu, options, optionLength);
+}
+
 void MenuDraw(Menu *menu, char options[][100], int optionLength)
 {
     //Get windows size
@@ -864,6 +972,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
     case MS_FPS:
     case MS_KEYBINDING:
     case MS_CustomMap:
+    case MS_Skin:
     {
         //Update 3d color
         SDL_Color vitalsColor[10] = {

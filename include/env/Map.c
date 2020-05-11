@@ -162,6 +162,8 @@ int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **desti
     json_value *json_helper;
     int numEnttiesLoaded = 0;
     int loops = bufferMap.n;
+    const int IDOffset = 10000;
+    int nextID = 0;
     for (int i = 0; i < loops; i++)
     {
         char *type_str = NULL;
@@ -234,6 +236,7 @@ int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **desti
         SDL_Rect dst = {x, y, w, h};
 
         EntityIndexP index = EntityManagerAdd(type, Vec2Create(x, y));
+        ENTITY_ARRAY[*index].id = IDOffset + nextID++;
         ENTITY_ARRAY[*index].drawables[0].dst = dst;
         ENTITY_ARRAY[*index].drawables[0].src = src;
         ENTITY_ARRAY[*index].drawables[0].rot = r;

@@ -6,6 +6,7 @@
 
 typedef enum NotificationType
 {
+    NT_GOOD,
     NT_INFO,
     NT_WARN,
     NT_ERROR
@@ -13,9 +14,11 @@ typedef enum NotificationType
 
 typedef struct Notification
 {
+    float totalTime;
     float displayTime;
+    float opacity;
+    int framesDisplayed;
     char text[32];
-    SDL_bool displayed;
     NotificationType nt;
 } Notification;
 

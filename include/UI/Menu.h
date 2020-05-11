@@ -42,15 +42,14 @@ typedef struct Menu
     SDL_bool indexChanged;
     float fetchSessionsTimer;
     float fetchLobbyTimer;
-    Audio *audio;
     Sound MenuStep;
     Music MenuTheme;
     int themecheck;
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings, Audio *audio);
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList);
+Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings);
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Player *player);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
 void MenuUpdateMainMenu(Menu *menu);
@@ -64,6 +63,7 @@ void MenuUpdateResolution(Menu *menu);
 void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
 void MenuUpdateKeybinding(Menu *menu);
 void MenuUpdateCustomMap(Menu *menu, MapList *mapList);
+void MenuUpdateSkin(Menu *menu, Player *player);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);

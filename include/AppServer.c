@@ -76,6 +76,9 @@ void AppServerHandleAllPackets(AppServer *app)
         case PT_StartSession:
             AppServerHandleStartSessionPacket(nextPacket);
             break;
+        case PT_ChangeSkin:
+            AppServerHandleChangeSkinPacket(nextPacket);
+            break;
         case PT_FetchSessions:
             AppServerHandleFetchSessionsPacket(nextPacket);
             break;
@@ -464,6 +467,23 @@ void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
         return;
 
     ServerRemovePlayerFromSession(session, senderP->id);
+}
+
+void AppServerHandleChangeSkinPacket(ParsedPacket packet)
+{
+    // If player doesnt acutally exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+
+    int int_spriteSheet = *(int *)packet.data;
+    if (int_spriteSheet < 1 || int_spriteSheet > SS_Count)
+        return;
+
+    SpriteSheet spriteSheet = (SpriteSheet)int_spriteSheet;
+
+    for (int i = 0; i < MAX_DRAWABLES; i++)
+        senderP->entity.drawables[i].spriteSheet = spriteSheet;
 }
 
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet)

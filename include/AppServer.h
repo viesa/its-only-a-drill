@@ -37,6 +37,7 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet);
 void AppServerHandleJoinSessionPacket(ParsedPacket packet);
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
 void AppServerHandleStartSessionPacket(ParsedPacket packet);
+void AppServerHandleChangeSkinPacket(ParsedPacket packet);
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet);
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet);
 void AppServerHandlePlayerHitPacket(ParsedPacket packet);

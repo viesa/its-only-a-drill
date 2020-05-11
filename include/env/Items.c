@@ -21,6 +21,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.falloff = 1000;
         i.Stats.cooldownMS = 500.0f;
         i.Stats.currentTime = 10.0f;
+        i.itemAction = SoundCreate(SF_SwordSwing);
         break;
     case ItemMetalSword:
         i.drawable = DrawableCreate((SDL_Rect){16, 16, 16, 16}, (SDL_Rect){50, 50, 30, 30}, SS_Weapons);
@@ -35,6 +36,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.falloff = 200;
         i.Stats.cooldownMS = 250.0f;
         i.Stats.currentTime = 10.0f;
+        i.itemAction = SoundCreate(SF_SwordSwing);
         break;
     case ItemEmpty:
         i.picked = 1;
@@ -56,6 +58,8 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.equiped = 0;
         i.Stats.cooldownMS = 0.0f;
         i.Stats.currentTime = 0.0f;
+        i.itemAction = SoundCreate(SF_Nothing);
+        i.itemReload = SoundCreate(SF_Nothing);
         break;
     }
     return i;

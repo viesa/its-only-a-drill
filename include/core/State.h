@@ -24,6 +24,7 @@ typedef enum MenuState
     MS_FPS,
     MS_KEYBINDING,
     MS_CustomMap,
+    MS_Skin,
     MS_None,
     MS_Count
 } MenuState;

@@ -15,6 +15,27 @@
             "h": 16
         },
         {
+            "name": "weapon1_spawn",
+            "x": 496,
+            "y": 144,
+            "w": 16,
+            "h": 16
+        },
+        {
+            "name": "door_horizontal",
+            "x": 193,
+            "y": 192,
+            "w": 16,
+            "h": 4
+        },
+        {
+            "name": "door_vertical",
+            "x": 194,
+            "y": 180,
+            "w": 4,
+            "h": 16
+        },
+        {
             "name": "wall_vertical",
             "x": 368,
             "y": 96,

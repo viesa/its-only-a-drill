@@ -31,7 +31,7 @@ typedef enum EntityType
 typedef enum entityState
 {
     Passive,
-    Nutral,
+    Neutral,
     Fight,
     Aggressive,
     EntityDead,
@@ -42,12 +42,11 @@ typedef enum entityState
 typedef struct CompressedEntity
 {
     int id;
-    EntityType type;
-    Vec2 position;
-    Drawable drawables[MAX_DRAWABLES];
-    int nDrawables;
     int health;
+    Vec2 position;
+    SDL_Rect src[MAX_DRAWABLES];
 } CompressedEntity;
+
 typedef struct Entity
 {
     EntityType type;
@@ -72,8 +71,6 @@ typedef struct Entity
     EntityState entityState;
     Vec2 desiredPoint;
     int indexPoint;
-
-    InventoryListItems inventory;
 } Entity;
 
 ///Creates a entity
