@@ -10,6 +10,8 @@
 
 #define CLIENT_INBUFFER ClientGetInBufferArray()
 
+#define SERVER_TIMEOUT 3.0f
+
 struct
 {
     Player *player;

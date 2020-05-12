@@ -29,8 +29,20 @@ void ClientManagerUpdate();
 // Draws the entire network situation for this client
 void ClientManagerDrawConnectedPlayers(Camera *camera);
 
+// Adds deltatime to the server timeout timer
+void ClientManagerUpdateServerTimeoutTimer();
+// Disconnect from server if it hasn't replied to 'alive' packets before time-out
+void ClientManagerDisconnectFromTimeoutServer();
+// Sends 'alive' packets to server, updating its time-out timer
+void ClientManagerPingServer();
+// Handles all state changes from leaving a session
+// Menustate, Gamestate, inGame etc.
+void ClientManagerLeaveSessionLocally();
+
 // Handles different kind of packets
 void ClientManagerHandleTextPacket(ParsedPacket packet);
+void ClientManagerHandleAreYouAlivePacket(ParsedPacket packet);
+void ClientManagerHandleIAmAlivePacket(ParsedPacket packet);
 void ClientManagerHandleConnectPacket(ParsedPacket packet);
 void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet);
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet);

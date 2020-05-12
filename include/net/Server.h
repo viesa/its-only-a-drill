@@ -17,6 +17,8 @@
 
 #define TRAFFIC_BUFFER_SIZE 5000
 
+#define CLIENT_TIMEOUT 3.0f
+
 struct
 {
     UDPsocket udpSocket;

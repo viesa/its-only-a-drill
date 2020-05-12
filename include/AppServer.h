@@ -26,8 +26,17 @@ void AppServerDrawTitle(AppServer *app);
 void AppServerDrawCLI(AppServer *app);
 void AppServerClearTerminal(AppServer *app);
 
+// Adds deltatime to every client timeout timer
+void AppServerUpdateTimeoutTimers(AppServer *app);
+// Kicks all clients that hasn't replied to 'alive' packets before time-out
+void AppServerKickTimeoutClients(AppServer *app);
+// Sends 'alive' packets to all clients, updating their time-out timer
+void AppServerPingClients(AppServer *app);
+
 // Handles different kind of packets
 void AppServerHandleTextPacket(ParsedPacket packet);
+void AppServerHandleAreYouAlivePacket(ParsedPacket packet);
+void AppServerHandleIAmAlivePacket(ParsedPacket packet);
 void AppServerHandleConnectPacket(ParsedPacket packet);
 void AppServerHandleUDPRespondIPPacket(ParsedPacket packet);
 void AppServerHandleDisconnectPacket(ParsedPacket packet);

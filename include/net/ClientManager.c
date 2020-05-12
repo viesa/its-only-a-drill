@@ -18,6 +18,10 @@ void ClientManagerUninitialize()
 
 void ClientManagerUpdate()
 {
+    ClientManagerUpdateServerTimeoutTimer();
+    ClientManagerDisconnectFromTimeoutServer();
+    ClientManagerPingServer();
+
     SDL_LockMutex(client.inBufferMutex);
     for (size_t i = 0; i < client.inBuffer->size; i++)
     {
@@ -27,6 +31,12 @@ void ClientManagerUpdate()
         {
         case PT_Text:
             ClientManagerHandleTextPacket(nextPacket);
+            break;
+        case PT_AreYouAlive:
+            ClientManagerHandleAreYouAlivePacket(nextPacket);
+            break;
+        case PT_IAmAlive:
+            ClientManagerHandleIAmAlivePacket(nextPacket);
             break;
         case PT_Connect:
             ClientManagerHandleConnectPacket(nextPacket);
@@ -93,14 +103,70 @@ void ClientManagerDrawConnectedPlayers(Camera *camera)
     }
 }
 
+void ClientManagerUpdateServerTimeoutTimer()
+{
+    if (ConStateGet() == CON_Online && client.server.waitingForAliveReply)
+    {
+        client.server.timeoutTimer += ClockGetDeltaTime();
+    }
+}
+
+void ClientManagerDisconnectFromTimeoutServer()
+{
+    if (ConStateGet() == CON_Online && client.server.timeoutTimer > SERVER_TIMEOUT)
+    {
+#ifdef CLIENTMANAGER_DEBUG
+        log_info("Disconnected from server Reason: Timeout");
+#endif
+        ClientDisconnect();
+        ClientManagerLeaveSessionLocally();
+        Notify("Connection closed", 1.0f, NT_ERROR);
+    }
+}
+
+void ClientManagerPingServer()
+{
+    if (ConStateGet() == CON_Online && !client.server.waitingForAliveReply)
+    {
+        ClientTCPSend(PT_AreYouAlive, NULL, 0);
+        client.server.waitingForAliveReply = SDL_TRUE;
+    }
+}
+
+void ClientManagerLeaveSessionLocally()
+{
+    clientManager.inLobby = SDL_FALSE;
+    clientManager.inGame = SDL_FALSE;
+    GameStateSet(GS_Menu);
+    MenuState menuState = MenuStateGet();
+    if (menuState == MS_None ||
+        menuState == MS_JoinLobby ||
+        menuState == MS_HostLobby ||
+        menuState == MS_WaitingForLobby ||
+        menuState == MS_Lobby)
+        MenuStateSet(MS_MainMenu);
+}
+
 void ClientManagerHandleTextPacket(ParsedPacket packet)
 {
+    // Maybe we can print it? O.O
+}
+
+void ClientManagerHandleAreYouAlivePacket(ParsedPacket packet)
+{
+    ClientTCPSend(PT_IAmAlive, NULL, 0);
+}
+
+void ClientManagerHandleIAmAlivePacket(ParsedPacket packet)
+{
+    client.server.timeoutTimer = 0.0f;
+    client.server.waitingForAliveReply = SDL_FALSE;
 }
 
 void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
-    int ID = *(int *)packet.data;
-    ENTITY_ARRAY[*client.player->entity].id = ID;
+    int id = *(int *)packet.data;
+    ENTITY_ARRAY[*client.player->entity].id = id;
     client.receivedPlayerID = SDL_TRUE;
 
     // Sends a empty packet to signal the server which IP to respond with
@@ -116,12 +182,8 @@ void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet)
 
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet)
 {
-    int id = *(int *)packet.data;
-    if (id == 0)
-    {
-        ClientDisconnect();
-        Notify("Connection closed", 1.0f, NT_ERROR);
-    }
+    ClientDisconnect();
+    Notify("Connection closed", 1.0f, NT_ERROR);
 }
 
 void ClientManagerHandleNewPlayerPacket(ParsedPacket packet)
@@ -293,16 +355,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet)
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 {
-    clientManager.inLobby = SDL_FALSE;
-    clientManager.inGame = SDL_FALSE;
-    GameStateSet(GS_Menu);
-    MenuState menuState = MenuStateGet();
-    if (menuState == MS_None ||
-        menuState == MS_JoinLobby ||
-        menuState == MS_HostLobby ||
-        menuState == MS_WaitingForLobby ||
-        menuState == MS_Lobby)
-        MenuStateSet(MS_MainMenu);
+    ClientManagerLeaveSessionLocally();
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()

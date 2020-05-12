@@ -15,6 +15,8 @@
 typedef enum PacketType
 {
     PT_Text,             // When plain text is to be sent
+    PT_AreYouAlive,      // When client or server want to check if the other one is still replying/connected
+    PT_IAmAlive,         // When the client or server want to confirm that he is is replying/connected
     PT_Connect,          // When client connects to server, recieve their name sends out ID
     PT_UDPRespondIP,     // When client want to notify server which IP-address to asssign it's outgoing UDP-packets with
     PT_DuplicateName,    // When client has a duplicate name

@@ -35,6 +35,9 @@ void AppServerDestroy(AppServer *app)
 void AppServerGo(AppServer *app)
 {
     AppServerHandleAllPackets(app);
+    AppServerUpdateTimeoutTimers(app);
+    AppServerKickTimeoutClients(app);
+    AppServerPingClients(app);
 }
 
 void AppServerHandleAllPackets(AppServer *app)
@@ -48,6 +51,12 @@ void AppServerHandleAllPackets(AppServer *app)
         {
         case PT_Text:
             AppServerHandleTextPacket(nextPacket);
+            break;
+        case PT_AreYouAlive:
+            AppServerHandleAreYouAlivePacket(nextPacket);
+            break;
+        case PT_IAmAlive:
+            AppServerHandleIAmAlivePacket(nextPacket);
             break;
         case PT_Connect:
             AppServerHandleConnectPacket(nextPacket);
@@ -242,10 +251,64 @@ void AppServerClearTerminal(AppServer *app)
 #endif
 }
 
+void AppServerUpdateTimeoutTimers(AppServer *app)
+{
+    for (int i = 0; i < server.players->size; i++)
+    {
+        if (SERVER_PLAYERS[i].waitingForAliveReply)
+            SERVER_PLAYERS[i].timeoutTimer += ClockGetDeltaTime();
+    }
+}
+
+void AppServerKickTimeoutClients(AppServer *app)
+{
+    for (int i = 0; i < server.players->size; i++)
+    {
+        if (SERVER_PLAYERS[i].timeoutTimer > CLIENT_TIMEOUT)
+        {
+#ifdef APPSERVER_DEBUG
+            log_info("Disconnected player: %s Reason: Timeout", SERVER_PLAYERS[i].name);
+#endif
+            ServerRemoveClient(SERVER_PLAYERS[i]);
+        }
+    }
+}
+
+void AppServerPingClients(AppServer *app)
+{
+    for (int i = 0; i < server.players->size; i++)
+    {
+        if (!SERVER_PLAYERS[i].waitingForAliveReply)
+        {
+            ServerTCPSend(PT_AreYouAlive, NULL, 0, SERVER_PLAYERS[i]);
+            SERVER_PLAYERS[i].waitingForAliveReply = SDL_TRUE;
+        }
+    }
+}
+
 void AppServerHandleTextPacket(ParsedPacket packet)
 {
     // Print whatever came in
     printf("Received text-packet: %s", (char *)packet.data);
+}
+
+void AppServerHandleAreYouAlivePacket(ParsedPacket packet)
+{
+    // If player doesnt actually exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+    ServerTCPSend(PT_IAmAlive, NULL, 0, packet.sender);
+}
+
+void AppServerHandleIAmAlivePacket(ParsedPacket packet)
+{
+    // If player doesnt actually exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+    senderP->timeoutTimer = 0.0f;
+    senderP->waitingForAliveReply = SDL_FALSE;
 }
 
 void AppServerHandleConnectPacket(ParsedPacket packet)
@@ -264,7 +327,7 @@ void AppServerHandleConnectPacket(ParsedPacket packet)
 
 void AppServerHandleUDPRespondIPPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -274,6 +337,7 @@ void AppServerHandleUDPRespondIPPacket(ParsedPacket packet)
 
 void AppServerHandleDisconnectPacket(ParsedPacket packet)
 {
+    // Try remove the client
     ServerRemoveClient(packet.sender);
 }
 
@@ -306,7 +370,7 @@ void AppServerHandleEntityPacket(ParsedPacket packet)
 
 void AppServerHandleCompressedEntityPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -322,7 +386,7 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet)
 {
     char *rawMap = (char *)packet.data;
 
-    // If player doesn't acutally exist in server player array, discard packet
+    // If player doesn't actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -350,7 +414,7 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
     // Makes sure its a valid session ID, else discard packet
     if (sessionID < 0)
         return;
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -411,7 +475,7 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
 
 void AppServerHandleStartSessionPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -457,7 +521,7 @@ void AppServerHandleStartSessionPacket(ParsedPacket packet)
 
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -471,7 +535,7 @@ void AppServerHandleLeaveSessionPacket(ParsedPacket packet)
 
 void AppServerHandleChangeSkinPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -513,7 +577,7 @@ void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
 
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;
@@ -540,7 +604,7 @@ void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
 
 void AppServerHandlePlayerHitPacket(ParsedPacket packet)
 {
-    // If player doesnt acutally exist in server player array, discard packet
+    // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
     if (!senderP)
         return;

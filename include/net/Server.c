@@ -61,8 +61,7 @@ void ServerInitialize()
 
 void ServerUninitialize()
 {
-    int id = 0;
-    ServerTCPBroadcast(PT_Disconnect, &id, sizeof(int));
+    ServerTCPBroadcast(PT_Disconnect, NULL, 0);
     SDLNet_UDP_DelSocket(server.socketSet, server.udpSocket);
     SDLNet_UDP_Unbind(server.udpSocket, 0);
     SDLNet_UDP_Close(server.udpSocket);
@@ -563,16 +562,19 @@ int ServerTryReceiveTCPPacket(NetPlayer player)
 
 void ServerRemoveClient(NetPlayer player)
 {
-    // If player doesnt acutally exist in server player array, discard packet
-    NetPlayer *senderP = ServerGetPlayerByID(player.id);
-
-    // Try to disconnect and clean up ot make sure client is not still in memory
-    // Even if no corrent ID was found
+    // Try to disconnect and clean up to make sure client is not still in memory
+    // Even if no correspsonding ID was found
     if (player.socket)
     {
+        // Try send disconnect message to client in case it was just a bad connection
+        // So that the client can quickly connect again later
+        ServerTCPSend(PT_Disconnect, NULL, 0, player);
+        // Clean up socket related data to not receive anything more from this client
         SDLNet_TCP_DelSocket(server.socketSet, player.socket);
         SDLNet_TCP_Close(player.socket);
     }
+
+    NetPlayer *senderP = ServerGetPlayerByID(player.id);
 
     // If NetPlayer was not found in current players,
     // it was already deleted -> Return
@@ -581,9 +583,16 @@ void ServerRemoveClient(NetPlayer player)
         return;
     }
 
+    // Try to remove player from any session
+    for (int i = 0; i < server.sessions->size; i++)
+    {
+        ServerRemovePlayerFromSession(&SERVER_SESSIONS[i], senderP->id);
+    }
+
     // Remove client from player-list
     VectorEraseElement(server.players, senderP);
 
+    // Free up the used ID so it can be assigned to someone else
     ServerFreeID(player.id);
 }
 

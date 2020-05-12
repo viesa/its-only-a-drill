@@ -19,6 +19,9 @@ typedef struct NetPlayer
     Entity entity;
 
     char name[MAX_PLAYERNAME_SIZE];
+
+    float timeoutTimer;
+    SDL_bool waitingForAliveReply;
 } NetPlayer;
 
 NetPlayer NetPlayerCreate(TCPsocket socket, int id);

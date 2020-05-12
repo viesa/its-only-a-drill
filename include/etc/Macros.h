@@ -18,6 +18,7 @@
 
 // #define APP_DEBUG
 // #define APP_DEBUG_STRICT
+// #define APPSERVER_DEBUG
 
 // #define CLIENTMANAGER_DEBUG
 // #define CLIENT_DEBUG
@@ -29,7 +30,7 @@
 // #define MAPINFO_DEBUG
 // #define MAPLIST_DEBUG
 
-#define WINDOW_DEBUG
+// #define WINDOW_DEBUG
 // #define GRAPHICS_DEBUG
 
 //#define ENTITY_DEBUG
