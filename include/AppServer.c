@@ -205,7 +205,15 @@ void AppServerDrawCLI(AppServer *app)
     {
         printf("Number of players: %zu\n\n", server.players->size);
         for (int i = 0; i < server.players->size; i++)
-            printf("[ID:%d] %s IP: %d:%d\n", SERVER_PLAYERS[i].id, SERVER_PLAYERS[i].name, SERVER_PLAYERS[i].ip->host, SERVER_PLAYERS[i].ip->port);
+        {
+            NetPlayer *pl = &SERVER_PLAYERS[i];
+            printf("[ID:%d] %s IP:%d:%d ", pl->id, pl->name, pl->ip->host, pl->ip->port);
+            if (pl->sessionID == -1)
+                printf("Session:None ");
+            else
+                printf("Session:%d ", pl->sessionID);
+            printf("Timeout:%.3f\n", pl->timeoutTimer);
+        }
         if (server.players->size > 0)
             printf("\n");
         printf("(R) Reload\n");
@@ -218,7 +226,13 @@ void AppServerDrawCLI(AppServer *app)
         for (int i = 0; i < server.sessions->size; i++)
         {
             Session *session = &SERVER_SESSIONS[i];
-            printf("[ID:%d] %s [%zu/%d]\n", session->id, session->mapInfo.name, session->playerIDs->size, session->mapInfo.maxPlayers);
+            NetPlayer *host = ServerGetPlayerByID(session->hostID);
+            char *name = host ? host->name : "Unknown";
+            printf("[ID:%d] %s [%zu/%d] Host: %s\n", session->id,
+                   session->mapInfo.name,
+                   session->playerIDs->size,
+                   session->mapInfo.maxPlayers,
+                   name);
         }
         if (server.sessions->size > 0)
             printf("\n");
@@ -313,6 +327,14 @@ void AppServerHandleIAmAlivePacket(ParsedPacket packet)
 
 void AppServerHandleConnectPacket(ParsedPacket packet)
 {
+    // If player doesnt actually exist in server player array, discard packet
+    NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
+    if (!senderP)
+        return;
+    // If player tried to change name to same name, do nothing (keep old)
+    if (!strcmp(senderP->name, (char)packet.data))
+        return;
+
     for (size_t i = 0; i < server.players->size; i++)
     {
         if (!strcmp(SERVER_PLAYERS[i].name, (char *)packet.data))
