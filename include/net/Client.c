@@ -92,6 +92,7 @@ void ClientConnectThreadFn()
         log_error("Failed to resolve host: (%s:%d): %s", ip, port, SDLNet_GetError());
 #endif
         SDL_UnlockMutex(client.connectMutex);
+        Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
 
@@ -102,6 +103,7 @@ void ClientConnectThreadFn()
         log_error("Failed to open port (UDP) (%s:%d)): %s", ip, port, SDLNet_GetError());
 #endif
         SDL_UnlockMutex(client.connectMutex);
+        Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
     // Open TCP-socket
@@ -114,6 +116,7 @@ void ClientConnectThreadFn()
         // Clean up
         SDLNet_UDP_Close(client.udpSocket);
         SDL_UnlockMutex(client.connectMutex);
+        Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
     client.server = NetPlayerCreate(tcpSocket, 0);
@@ -128,6 +131,7 @@ void ClientConnectThreadFn()
         SDLNet_TCP_Close(tcpSocket);
         SDLNet_UDP_Close(client.udpSocket);
         SDL_UnlockMutex(client.connectMutex);
+        Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
     // Add TCP-socket to socket set
@@ -141,6 +145,7 @@ void ClientConnectThreadFn()
         SDLNet_UDP_Close(client.udpSocket);
         SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
         SDL_UnlockMutex(client.connectMutex);
+        Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
 
@@ -152,7 +157,7 @@ void ClientConnectThreadFn()
     ClientStartListening();
 
     ConStateSet(CON_Online);
-    Notify("Connection established", 1.0f, NT_INFO);
+    Notify("Connection established", 2.0f, NT_INFO);
 
     SDL_UnlockMutex(client.connectMutex);
 }
