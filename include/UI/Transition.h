@@ -10,7 +10,8 @@ typedef enum TransitionType
 {
     TT_Fade,
     TT_FadeOut,
-    TT_StartMap,
+    TT_MenuToMap,
+    TT_MapToMenu,
     TT_Count
 } TransitionType;
 

@@ -121,7 +121,9 @@ void AppClientUpdate(AppClient *app)
         {
         case MS_CustomMap:
         case MS_HostLobby:
-        case MS_JoinLobby:
+        case MS_Lobby:
+            CameraSetFollowSnap(app->camera, &app->middleOfMap);
+        case MS_InGameMenu:
             CameraUpdate(app->camera);
             break;
         default:
@@ -135,15 +137,7 @@ void AppClientUpdate(AppClient *app)
         if (InputIsKeyPressed(SDL_SCANCODE_ESCAPE))
         {
             GameStateSet(GS_Menu);
-            if (clientManager.inGame == SDL_TRUE)
-            {
-                MenuStateSet(MS_InGameMenu);
-            }
-            else
-            {
-                MenuStateSet(MS_MainMenu);
-            }
-            break;
+            MenuStateSet(MS_InGameMenu);
         }
         CameraUpdate(app->camera);
 
@@ -250,17 +244,7 @@ void AppClientDraw(AppClient *app)
     case GS_Menu:
     {
         MenuUpdate(app->menu, app->fpsManager, &app->player);
-        switch (MenuStateGet())
-        {
-        case MS_HostLobby:
-        case MS_CustomMap:
-        case MS_Lobby:
-            CameraSetFollow(app->camera, &app->middleOfMap);
-            break;
-
-        default:
-            break;
-        }
+        GuiOverlayUpdate(app->gui);
         break;
     }
     case GS_Playing:

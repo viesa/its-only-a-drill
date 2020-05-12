@@ -39,14 +39,23 @@ void CameraUpdate(Camera *camera)
         if (camera->newTarget)
         {
             Vec2 desired = Vec2Create(f->x - (vp->x + vp->w / 2.0f), f->y - (vp->y + vp->h / 2.0f));
-            camera->position = Vec2Add(camera->position, Vec2MulL(Vec2Sub(desired, camera->position), 0.2f));
-            if (Vec2Len(Vec2Add(camera->position, desired)) < 2.0f)
+            Vec2 towards = Vec2MulL(Vec2Sub(desired, camera->position), 0.2f * ClockGetDeltaTime() * 30.0f);
+            if (Vec2Len(towards) < 5.0f)
+            {
+                towards = Vec2MulL(Vec2Unit(towards), 5.0f);
+            }
+            if (Vec2Len(towards) > Vec2Len(Vec2Sub(camera->position, desired)))
+            {
+                towards = Vec2MulL(Vec2Unit(towards), Vec2Len(Vec2Sub(camera->position, desired)));
+            }
+            camera->position = Vec2Add(camera->position, towards);
+            if (Vec2Len(Vec2Sub(camera->position, desired)) < 3.0f)
                 camera->newTarget = SDL_FALSE;
         }
         else
         {
-            p->x = f->x - vp->w / 2.0f;
-            p->y = f->y - vp->h / 2.0f;
+            p->x = f->x - (vp->x + vp->w / 2.0f);
+            p->y = f->y - (vp->y + vp->h / 2.0f);
         }
     }
 }
@@ -82,8 +91,18 @@ void CameraAddRotation(Camera *camera, float ammount)
 
 void CameraSetFollow(Camera *camera, Vec2 *follow)
 {
+    if (camera->follow == follow)
+        return;
     camera->follow = follow;
     camera->newTarget = SDL_TRUE;
+}
+
+void CameraSetFollowSnap(Camera *camera, Vec2 *follow)
+{
+    if (camera->follow == follow)
+        return;
+    camera->follow = follow;
+    camera->newTarget = SDL_FALSE;
 }
 
 void CameraSetViewPort(Camera *camera, SDL_Rect rect)

@@ -58,7 +58,7 @@ void MenuStateSet(MenuState newState)
     {
         InputClearPortalContent();
     }
-    if (newState != MS_None)
+    if (newState != MS_None && newState != MS_InGameMenu)
     {
         int x = state.menu->gfx->window->width / 2;
         int y = state.menu->gfx->window->height / 2;
@@ -67,7 +67,7 @@ void MenuStateSet(MenuState newState)
         CameraSetViewPort(state.menu->camera, (SDL_Rect){x, y, w, h});
         CameraSetScale(state.menu->camera, 0.33f);
     }
-    else
+    else if (newState != MS_InGameMenu)
     {
         int x = 0;
         int y = 0;
@@ -75,6 +75,11 @@ void MenuStateSet(MenuState newState)
         int h = state.menu->gfx->window->height;
         CameraSetViewPort(state.menu->camera, (SDL_Rect){x, y, w, h});
         CameraSetScale(state.menu->camera, 1.0f);
+    }
+    if (state.menuState == MS_None && newState == MS_InGameMenu)
+    {
+        TransitionStart(TT_MapToMenu, 0.30f);
+        state.menu->startedInTransition = SDL_TRUE;
     }
     state.menuState = newState;
 }

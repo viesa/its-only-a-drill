@@ -50,7 +50,8 @@ typedef struct Menu
     int themecheck;
     SDL_Color clr[10];
 
-    SDL_bool startedMapTransistion;
+    SDL_bool startedInTransition;
+    SDL_bool startedOutTransition;
 
     Anim previewLeg;
     Anim previewBody;
@@ -76,7 +77,7 @@ void MenuUpdateKeybinding(Menu *menu);
 void MenuUpdateCustomMap(Menu *menu);
 void MenuUpdateSkin(Menu *menu, Player *player);
 void MenuTitleDraw(Menu *menu, char title[100]);
-void MenuMapPreviewDraw(Menu *menu);
+void MenuDrawPreviewMap(Menu *menu);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);

@@ -4,6 +4,7 @@
 #include "Dependencies.h"
 #include "Vec2.h"
 #include "Graphics.h"
+#include "Clock.h"
 
 typedef struct Camera Camera;
 
@@ -21,7 +22,12 @@ void CameraAddRotation(Camera *camera, float ammount);
 
 /// Specifies which position should always be in
 /// in the middle of the screen
+/// The camera will be animated flying to target
 void CameraSetFollow(Camera *camera, Vec2 *follow);
+/// Specifies which position should always be in
+/// in the middle of the screen
+/// The camera immediately snaps to target
+void CameraSetFollowSnap(Camera *camera, Vec2 *follow);
 
 void CameraSetViewPort(Camera *camera, SDL_Rect rect);
 

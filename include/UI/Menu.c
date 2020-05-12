@@ -20,7 +20,8 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
     menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
     menu->mainMenuDblDelta = 0.0f;
     menu->mainMenuDblDir = 1.0f;
-    menu->startedMapTransistion = SDL_FALSE;
+    menu->startedInTransition = SDL_FALSE;
+    menu->startedOutTransition = SDL_FALSE;
 
     SDL_Rect src = {0, 0, 3413, 1920};
     SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
@@ -175,7 +176,7 @@ void MenuUpdateSplash(Menu *menu)
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
 
         FontDraw3DCustom(menu->font, TTF_Antilles_XXL, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
-        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press the any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
+        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
     }
     //Fade-in animation
     TransitionDraw();
@@ -298,15 +299,18 @@ void MenuUpdateInGameMenu(Menu *menu)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    if (!menu->startedInTransition && !menu->startedOutTransition && (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)))
     {
 
         switch (menu->activeIndex)
         {
         case 0:
         {
-            MenuStateSet(MS_None);
-            GameStateSet(GS_Playing);
+            if (!menu->startedOutTransition)
+            {
+                TransitionStart(TT_MenuToMap, 0.30f);
+                menu->startedOutTransition = SDL_TRUE;
+            }
             break;
         }
         case 1:
@@ -325,56 +329,34 @@ void MenuUpdateInGameMenu(Menu *menu)
             break;
         }
     }
+
     MenuDraw(menu, options, optionLength);
+
     MenuTitleDraw(menu, "Quick Menu");
 
-    int x = menu->gfx->window->width / 2 - 50;
-    int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
-    int w = menu->gfx->window->width / 3 + 100;
-    int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
-    SDL_Rect mapBackgroundRect = {x, y, w, h};
-    if (menu->startedMapTransistion)
-    {
-        int x_t = (int)TransitionGetSaveSlot(1) - 50;
-        int y_t = (int)TransitionGetSaveSlot(2) - -50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
-        int w_t = (int)TransitionGetSaveSlot(3) + 100;
-        int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
-        GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)});
-    }
-    else
-    {
-        GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200});
-    }
+    MenuDrawPreviewMap(menu);
 
-    MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-
-    if (!menu->startedMapTransistion)
-    {
-        char maxPlayers[20];
-        sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
-        FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
-                   x + (w / 2) - FontGetSize(menu->font, FontGetDynamicSizing(menu->font), maxPlayers).w / 2,
-                   y + 20,
-                   FAL_L, 0, 1, F3D_TL, 10, menu->clr);
-    }
     MapDraw(menu->camera);
 
-    if (menu->startedMapTransistion && TransitionIsDone())
+    if (menu->startedInTransition && TransitionIsDone())
+    {
+        menu->startedInTransition = SDL_FALSE;
+    }
+    else if (menu->startedOutTransition && TransitionIsDone())
     {
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
-        MusicStop(&menu->MenuTheme);
-        menu->startedMapTransistion = SDL_FALSE;
+        menu->startedOutTransition = SDL_FALSE;
     }
-    else if (menu->startedMapTransistion && !TransitionIsDone())
+    else if ((menu->startedInTransition || menu->startedOutTransition) && !TransitionIsDone())
     {
-        TransitionDraw();
         CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
         int x = (int)TransitionGetSaveSlot(1);
         int y = (int)TransitionGetSaveSlot(2);
         int w = (int)TransitionGetSaveSlot(3);
         int h = (int)TransitionGetSaveSlot(4);
         CameraSetViewPort(menu->camera, (SDL_Rect){x, y, w, h});
+        TransitionDraw();
     }
 }
 
@@ -425,17 +407,17 @@ void MenuUpdateHostLobby(Menu *menu)
 
     if (menu->activeIndex != optionLength - 1)
     {
-        MenuMapPreviewDraw(menu);
+        MenuDrawPreviewMap(menu);
     }
 
-    if (menu->startedMapTransistion && TransitionIsDone())
+    if (menu->startedOutTransition && TransitionIsDone())
     {
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
         MusicStop(&menu->MenuTheme);
-        menu->startedMapTransistion = SDL_FALSE;
+        menu->startedOutTransition = SDL_FALSE;
     }
-    else if (menu->startedMapTransistion && !TransitionIsDone())
+    else if (menu->startedOutTransition && !TransitionIsDone())
     {
         TransitionDraw();
         CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
@@ -959,7 +941,7 @@ void MenuUpdateCustomMap(Menu *menu)
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    if (!menu->startedOutTransition && (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN)))
     {
         if (menu->activeIndex == optionLength - 1)
         {
@@ -967,10 +949,10 @@ void MenuUpdateCustomMap(Menu *menu)
         }
         else
         {
-            if (!menu->startedMapTransistion)
+            if (!menu->startedOutTransition)
             {
-                TransitionStart(TT_StartMap, 0.25f);
-                menu->startedMapTransistion = SDL_TRUE;
+                TransitionStart(TT_MenuToMap, 0.25f);
+                menu->startedOutTransition = SDL_TRUE;
             }
         }
     }
@@ -986,17 +968,19 @@ void MenuUpdateCustomMap(Menu *menu)
 
     if (menu->activeIndex != optionLength - 1)
     {
-        MenuMapPreviewDraw(menu);
+        MenuDrawPreviewMap(menu);
     }
 
-    if (menu->startedMapTransistion && TransitionIsDone())
+    if (menu->startedOutTransition && TransitionIsDone())
     {
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
         MusicStop(&menu->MenuTheme);
-        menu->startedMapTransistion = SDL_FALSE;
+        menu->startedOutTransition = SDL_FALSE;
+        // To make in-game menu work properly
+        clientManager.inGame = SDL_TRUE;
     }
-    else if (menu->startedMapTransistion && !TransitionIsDone())
+    else if (menu->startedOutTransition && !TransitionIsDone())
     {
         TransitionDraw();
         CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
@@ -1076,7 +1060,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
 
     menu->previewLeg.active->dst.x = menu->font->gfx->window->width - h - 100;
     menu->previewLeg.active->dst.y = (menu->font->gfx->window->height - h) / 2;
-    menu->previewBody.active->dst.x = menu->font->gfx->window->width - h;
+    menu->previewBody.active->dst.x = menu->font->gfx->window->width - h - 100;
     menu->previewBody.active->dst.y = (menu->font->gfx->window->height - h) / 2;
 
     menu->previewLeg.active->dst.w = h;
@@ -1162,9 +1146,12 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         }
         }
     }
-
     MenuDraw(menu, options, optionLength);
     MenuTitleDraw(menu, "Choose skin");
+
+    // If you are heading out, don't draw the character again as it will be a "dirty frame"
+    if (MenuStateGet() == MS_MainMenu)
+        return;
 
     if (menu->activeIndex == optionLength - 1)
         return;
@@ -1177,17 +1164,17 @@ void MenuTitleDraw(Menu *menu, char title[100])
     FontDraw3DCustom(menu->font, TTF_Antilles_XXL, title, menu->gfx->window->width / 20, 25, FAL_L, 0, cos(menu->loopCount) * 3, sin(menu->loopCount) * 3, 10, menu->clr);
 }
 
-void MenuMapPreviewDraw(Menu *menu)
+void MenuDrawPreviewMap(Menu *menu)
 {
     int x = menu->gfx->window->width / 2 - 50;
     int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
     int w = menu->gfx->window->width / 3 + 100;
     int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
     SDL_Rect mapBackgroundRect = {x, y, w, h};
-    if (menu->startedMapTransistion)
+    if (menu->startedOutTransition || menu->startedInTransition)
     {
         int x_t = (int)TransitionGetSaveSlot(1) - 50;
-        int y_t = (int)TransitionGetSaveSlot(2) - -50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
+        int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
         int w_t = (int)TransitionGetSaveSlot(3) + 100;
         int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
         GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)});
@@ -1199,7 +1186,7 @@ void MenuMapPreviewDraw(Menu *menu)
 
     MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
 
-    if (!menu->startedMapTransistion)
+    if (!menu->startedOutTransition && !menu->startedInTransition)
     {
         char maxPlayers[20];
         sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
