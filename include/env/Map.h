@@ -17,4 +17,6 @@ void MapDraw(Camera *camera);
 EntityIndexP *MapGetContents();
 unsigned int MapGetContnetSize();
 
+MapInfo MapGetInfo();
+
 #endif

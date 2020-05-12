@@ -8,9 +8,9 @@
 
 typedef enum TransitionType
 {
-    TT_Swoosh,
     TT_Fade,
     TT_FadeOut,
+    TT_StartMap,
     TT_Count
 } TransitionType;
 
@@ -21,4 +21,9 @@ void TransitionDraw();
 void TransitionStart(TransitionType type, float duration);
 void TransitionStop();
 void TransitionPause();
+
+SDL_bool TransitionIsDone();
+
+float TransitionGetSaveSlot(int index);
+
 #endif

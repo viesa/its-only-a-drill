@@ -38,7 +38,8 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->gui = GuiCreate(app->font);
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
-    app->menu = MenuCreate(app->gfx, app->font, app->bindings);
+    app->mapList = MapListCreate("maps");
+    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
@@ -65,8 +66,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
-
-    app->mapList = MapListCreate("maps");
 
     return app;
 }
@@ -250,19 +249,18 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
+        MenuUpdate(app->menu, app->fpsManager, &app->player);
         switch (MenuStateGet())
         {
         case MS_HostLobby:
         case MS_CustomMap:
-            CameraSetFollow(app->camera, &app->middleOfMap);
-            MapDraw(app->camera);
-            break;
         case MS_Lobby:
+            CameraSetFollow(app->camera, &app->middleOfMap);
+            break;
 
         default:
             break;
         }
-        MenuUpdate(app->menu, app->fpsManager, app->mapList, &app->player);
         break;
     }
     case GS_Playing:

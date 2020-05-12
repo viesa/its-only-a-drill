@@ -28,6 +28,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
 
     switch (align)
     {
+    case FAL_MENUSIDE:
     case FAL_L:
         break;
     case FAL_C:
@@ -35,6 +36,8 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
         break;
     case FAL_R:
         alignOffsetX = drawSize.w;
+        break;
+    default:
         break;
     }
 
@@ -50,9 +53,15 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
     SDL_Rect dstrect = {x - alignOffsetX, y, texW, texH};
 
-    SDL_RenderCopy(font->gfx->window->renderer, texture, NULL, &dstrect);
+    if (align == FAL_MENUSIDE)
+    {
+        SDL_RenderCopyEx(font->gfx->window->renderer, texture, NULL, &dstrect, -30, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
+    }
+    else
+    {
+        SDL_RenderCopy(font->gfx->window->renderer, texture, NULL, &dstrect);
+    }
 
-    //SDL_RenderCopyEx(GraphicsGetRenderer(font->gfx), texture, NULL, &dstrect, 90, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
     SDL_DestroyTexture(texture);
 }
 

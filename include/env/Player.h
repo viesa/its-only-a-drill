@@ -11,7 +11,7 @@
 
 typedef struct Player
 {
-    EntityIndexP entity; // player barrows a entity for the player to contole
+    EntityIndexP entity; // Players borrows an entity to control
     Anim leg;
     Anim body;
     Vec2 aimFollow;

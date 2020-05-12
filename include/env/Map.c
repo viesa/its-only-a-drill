@@ -143,6 +143,11 @@ unsigned int MapGetContnetSize()
     return map.n;
 }
 
+MapInfo MapGetInfo()
+{
+    return map.info;
+}
+
 json_value *MapTryFind(JSON *mapData, json_value *start, json_type type, char *data, int size)
 {
 

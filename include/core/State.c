@@ -48,6 +48,7 @@ void GameStateSet(GameState newState)
 
 void MenuStateSet(MenuState newState)
 {
+    state.menu->activeIndex = 0;
     if (state.menu)
     {
         state.menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
@@ -56,6 +57,24 @@ void MenuStateSet(MenuState newState)
     if (newState == MS_Name)
     {
         InputClearPortalContent();
+    }
+    if (newState != MS_None)
+    {
+        int x = state.menu->gfx->window->width / 2;
+        int y = state.menu->gfx->window->height / 2;
+        int w = state.menu->gfx->window->width / 3;
+        int h = state.menu->gfx->window->height / 3;
+        CameraSetViewPort(state.menu->camera, (SDL_Rect){x, y, w, h});
+        CameraSetScale(state.menu->camera, 0.33f);
+    }
+    else
+    {
+        int x = 0;
+        int y = 0;
+        int w = state.menu->gfx->window->width;
+        int h = state.menu->gfx->window->height;
+        CameraSetViewPort(state.menu->camera, (SDL_Rect){x, y, w, h});
+        CameraSetScale(state.menu->camera, 1.0f);
     }
     state.menuState = newState;
 }

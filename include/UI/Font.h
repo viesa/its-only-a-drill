@@ -23,7 +23,8 @@ typedef enum FontAlign
 {
     FAL_L,
     FAL_C,
-    FAL_R
+    FAL_R,
+    FAL_MENUSIDE
 } FontAlign;
 
 // Font 3d drawing direction.

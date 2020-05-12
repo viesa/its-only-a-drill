@@ -17,6 +17,8 @@
 #include "Music.h"
 #include "Audio.h"
 #include "Sound.h"
+#include "Anim.h"
+#include "Transition.h"
 
 #define FETCH_SESSIONS_INTERVAL (2.0f)
 #define FETCH_LOBBY_INTERVAL (0.5f)
@@ -24,6 +26,7 @@
 typedef struct Menu
 {
     Graphics *gfx;
+    Camera *camera;
 
     Font *font;
     Drawable mainMenuDbl;
@@ -45,25 +48,35 @@ typedef struct Menu
     Sound MenuStep;
     Music MenuTheme;
     int themecheck;
+    SDL_Color clr[10];
+
+    SDL_bool startedMapTransistion;
+
+    Anim previewLeg;
+    Anim previewBody;
+
+    MapList *mapList;
 } Menu;
 
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Font *font, Keybinding *bindings);
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, MapList *mapList, Player *player);
+Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings, MapList *mapList);
+void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
 void MenuUpdateMainMenu(Menu *menu);
 void MenuUpdateInGameMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
-void MenuUpdateHostLobby(Menu *menu, MapList *mapList);
+void MenuUpdateHostLobby(Menu *menu);
 void MenuUpdateWaitingForLobby(Menu *menu);
 void MenuUpdateLobby(Menu *menu);
 void MenuUpdateOptions(Menu *menu);
 void MenuUpdateResolution(Menu *menu);
 void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
 void MenuUpdateKeybinding(Menu *menu);
-void MenuUpdateCustomMap(Menu *menu, MapList *mapList);
+void MenuUpdateCustomMap(Menu *menu);
 void MenuUpdateSkin(Menu *menu, Player *player);
+void MenuTitleDraw(Menu *menu, char title[100]);
+void MenuMapPreviewDraw(Menu *menu);
 void MenuDraw(Menu *menu, char options[][100], int optionLength);
 
 void MenuDestroy(Menu *menu);

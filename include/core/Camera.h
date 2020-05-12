@@ -23,6 +23,10 @@ void CameraAddRotation(Camera *camera, float ammount);
 /// in the middle of the screen
 void CameraSetFollow(Camera *camera, Vec2 *follow);
 
+void CameraSetViewPort(Camera *camera, SDL_Rect rect);
+
 Vec2 CameraGetPos(Camera *camera);
+
+void CameraSetScale(Camera *camera, float scale);
 
 #endif
