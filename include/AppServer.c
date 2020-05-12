@@ -332,7 +332,7 @@ void AppServerHandleConnectPacket(ParsedPacket packet)
     if (!senderP)
         return;
     // If player tried to change name to same name, do nothing (keep old)
-    if (!strcmp(senderP->name, (char)packet.data))
+    if (!strcmp(senderP->name, (char *)packet.data))
         return;
 
     for (size_t i = 0; i < server.players->size; i++)
