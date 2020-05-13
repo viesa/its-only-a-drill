@@ -67,6 +67,7 @@
                 "xutility": "c",
                 "entity.h": "c",
                 "map.h": "c",
-                "typeinfo": "c"
+                "typeinfo": "c",
+                "notification.h": "c"
         }
 }
