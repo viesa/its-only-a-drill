@@ -245,6 +245,11 @@ void AppClientDraw(AppClient *app)
     {
         MenuUpdate(app->menu, app->fpsManager, &app->player);
         GuiOverlayUpdate(app->gui);
+        if (MenuStateGet() == MS_InGameMenu)
+        {
+            PlayerDraw(&app->player, app->camera);
+            ClientManagerDrawConnectedPlayers(app->camera);
+        }
         break;
     }
     case GS_Playing:
