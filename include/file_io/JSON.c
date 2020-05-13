@@ -8,13 +8,14 @@ JSON *JSONCreate(char *filename)
 
     JSON *json = MALLOC(JSON);
 
-    LoadedFile lfile = LoadedFileCreate(filename);
-
+    FileIO lfile = FileIOCreate(filename);
+    if (!FileIORead(&lfile))
+        return NULL;
     json->file_contents = MALLOC_N(json_char, lfile.size);
     memcpy(json->file_contents, lfile.contents, lfile.size);
     json->value = json_parse(json->file_contents, lfile.size);
 
-    LoadedFileDestroy(&lfile);
+    FileIODestroy(lfile);
 
     if (json->value == NULL)
     {

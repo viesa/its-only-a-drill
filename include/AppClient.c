@@ -67,6 +67,15 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
+    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
+    if (settings.resolutionH != 1) // found settings file
+    {
+        *app->bindings = settings.keys;
+        WindowSetSize(app->gfx->window, settings.resolutionW, settings.resolutionH);
+        for (size_t i = 0; i < ENTITY_ARRAY[*app->player.entity].nDrawables; i++)
+            ENTITY_ARRAY[*app->player.entity].drawables[i].spriteSheet = (SpriteSheet)settings.skin;
+    }
+    SettingsDestroy(&settings);
     return app;
 }
 void AppClientDestroy(AppClient *app)

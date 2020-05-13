@@ -123,7 +123,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu);
+        MenuUpdateMainMenu(menu, player);
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu(menu);
@@ -208,17 +208,18 @@ void MenuUpdateName(Menu *menu)
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu)
+void MenuUpdateMainMenu(Menu *menu, Player *player)
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 8;
+    char options[8][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
         {"Change name"},
         {"Change skin"},
         {"Options"},
+        {"Save options"},
         {"Exit"}};
     // makes it loop
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -274,6 +275,14 @@ void MenuUpdateMainMenu(Menu *menu)
             break;
         }
         case 6:
+        {
+            Settings settings = SettingsCreate((int)ENTITY_ARRAY[*player->entity].drawables[0].spriteSheet,
+                                               menu->gfx->window->width,
+                                               menu->gfx->window->height, *menu->bindings);
+            SettingsSave(settings);
+            break;
+        }
+        case 7:
         {
             SDL_Event quit;
             quit.type = SDL_QUIT;
@@ -388,7 +397,7 @@ void MenuUpdateHostLobby(Menu *menu)
         else
         {
             MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-            LoadedFile lfile = LoadedFileCreate(mapInfo.filename);
+            FileIO lfile = FileIOCreate(mapInfo.filename);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
 

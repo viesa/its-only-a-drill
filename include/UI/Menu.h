@@ -19,6 +19,7 @@
 #include "Sound.h"
 #include "Anim.h"
 #include "Transition.h"
+#include "Settings.h"
 
 #define FETCH_SESSIONS_INTERVAL (2.0f)
 #define FETCH_LOBBY_INTERVAL (0.5f)
@@ -64,7 +65,7 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
-void MenuUpdateMainMenu(Menu *menu);
+void MenuUpdateMainMenu(Menu *menu, Player *player);
 void MenuUpdateInGameMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
 void MenuUpdateHostLobby(Menu *menu);
