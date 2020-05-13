@@ -71,23 +71,16 @@ void TransitionDraw()
     }
     case TT_FadeOut:
     {
-        float step = 255.0f / (trans.duration / dt);
-        if (trans.elapsed < 1)
-            trans.state = 0;
-        else
-            trans.state = 1;
+        float start = 255.0f;
 
-        switch (trans.state)
-        {
-        case 0:
-            break;
-        case 1:
-            trans.saveSlots[0] -= step;
-            break;
+        float to = 0.0f;
 
-        default:
-            break;
-        }
+        float total = to - start;
+
+        float sinMultiplier = (sinf(trans.elapsed / trans.duration * PI + 3.0f * PI / 2.0f) + 1.0f) / 2.0f;
+        sinMultiplier *= sinMultiplier;
+
+        trans.saveSlots[0] = start + total * sinMultiplier;
         trans.saveSlots[0] = Clamp(trans.saveSlots[0], 0, 255);
 
         GraphicsDrawGradientX(trans.gfx, (SDL_Rect){0, 0, trans.gfx->window->width, trans.gfx->window->height}, (SDL_Color){0, 0, 0, trans.saveSlots[0]}, (SDL_Color){0, 0, 0, trans.saveSlots[0]});
