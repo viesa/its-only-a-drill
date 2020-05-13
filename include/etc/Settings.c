@@ -17,7 +17,7 @@ void SettingsSave(Settings settings)
     file.contents = (char *)MALLOC(Settings);
     SDL_memcpy(file.contents, &settings, sizeof(Settings));
     FileIOWriteBinary(&file);
-    FileIODestroy(file);
+    FileIODestroy(&file);
 }
 Settings SettingsGetFromFile(char path[])
 {
@@ -26,11 +26,11 @@ Settings SettingsGetFromFile(char path[])
     FileIO file = FileIOCreate(path);
     if (!FileIOReadBinary(&file))
     {
-        FileIODestroy(file);
+        FileIODestroy(&file);
         return settings;
     }
     settings = *(Settings *)file.contents;
-    FileIODestroy(file);
+    FileIODestroy(&file);
     return settings;
 }
 void SettingsDestroy(Settings *settings)

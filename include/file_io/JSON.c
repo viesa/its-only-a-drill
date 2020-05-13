@@ -15,7 +15,7 @@ JSON *JSONCreate(char *filename)
     memcpy(json->file_contents, lfile.contents, lfile.size);
     json->value = json_parse(json->file_contents, lfile.size);
 
-    FileIODestroy(lfile);
+    FileIODestroy(&lfile);
 
     if (json->value == NULL)
     {

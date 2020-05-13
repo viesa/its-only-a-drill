@@ -16,7 +16,9 @@ SDL_bool FileIOWriteBinary(FileIO *file)
     f = fopen(file->path, "wb");
     if (!f)
     {
-        log_error("fopen error");
+#ifdef FILEIO_DEBUG
+        log_error("fopen error: %s", file->path);
+#endif
         return SDL_FALSE;
     }
     fwrite(file->contents, file->size, 1, f);
@@ -29,7 +31,9 @@ SDL_bool FileIOWrite(FileIO *file)
     f = fopen(file->path, "w");
     if (!f)
     {
-        log_error("fopen error");
+#ifdef FILEIO_DEBUG
+        log_error("fopen error: %s", file->path);
+#endif
         return SDL_FALSE;
     }
     fprintf(f, "%s", (char *)file->contents);
@@ -46,9 +50,12 @@ SDL_bool FileIOReadBinary(FileIO *file)
         fseek(f, 0, SEEK_END);
         length = ftell(f);
         fseek(f, 0, SEEK_SET);
-        file->contents = SDL_malloc(length);
+        file->contents = MALLOC_N(char, length);
         if (file->contents)
         {
+#ifdef FILEIO_DEBUG
+            log_error("Malloc error: %s", file->path);
+#endif
             fread(file->contents, 1, length, f);
         }
         file->size = length;
@@ -56,7 +63,9 @@ SDL_bool FileIOReadBinary(FileIO *file)
         return SDL_TRUE;
     }
     file->size = length;
-    log_warn("FileIO couldnt read the file");
+#ifdef FILEIO_DEBUG
+    log_warn("FileIO could not read the file %s", file->path);
+#endif
     return SDL_FALSE;
 }
 SDL_bool FileIORead(FileIO *file)
@@ -69,20 +78,25 @@ SDL_bool FileIORead(FileIO *file)
         fseek(f, 0, SEEK_END);
         length = ftell(f);
         fseek(f, 0, SEEK_SET);
-        file->contents = (char *)malloc(length);
+        file->contents = MALLOC_N(char, length);
         if (file->contents)
         {
+#ifdef FILEIO_DEBUG
+            log_error("Malloc error: %s", file->path);
+#endif
             fread(file->contents, 1, length, f);
         }
         file->size = length;
         fclose(f);
         return SDL_TRUE;
     }
-    log_error("FileIO error reading file");
+#ifdef FILEIO_DEBUG
+    log_error("FileIO error reading file: %s", file->path);
+#endif
     return SDL_FALSE;
 }
-void FileIODestroy(FileIO lfile)
+void FileIODestroy(FileIO *lfile)
 {
-    FREE(lfile.contents);
-    FREE(lfile.path);
+    FREE(lfile->contents);
+    FREE(lfile->path);
 }

@@ -15,6 +15,6 @@ SDL_bool FileIOWrite(FileIO *file);
 SDL_bool FileIOWriteBinary(FileIO *file);
 SDL_bool FileIORead(FileIO *file);
 SDL_bool FileIOReadBinary(FileIO *file);
-void FileIODestroy(FileIO file);
+void FileIODestroy(FileIO *file);
 
 #endif
