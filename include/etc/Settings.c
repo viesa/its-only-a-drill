@@ -1,5 +1,5 @@
 #include "Settings.h"
-Settings SettingsCreate(int skin, int resolutionW, int resolutionH, Keybinding keys)
+Settings SettingsCreate(int skin, int resolutionW, int resolutionH, Keybinding keys, SDL_bool isFullscreen, SDL_bool vsync, size_t fps)
 {
     Settings settings;
 
@@ -9,6 +9,11 @@ Settings SettingsCreate(int skin, int resolutionW, int resolutionH, Keybinding k
     settings.skin = skin;
     settings.keys = keys;
 
+    settings.isFullscreen = isFullscreen;
+
+    settings.vsync = vsync;
+
+    settings.fps = fps;
     return settings;
 }
 void SettingsSave(Settings settings)

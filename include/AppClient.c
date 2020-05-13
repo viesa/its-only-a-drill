@@ -67,15 +67,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
-    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
-    if (settings.resolutionH != 1) // found settings file
-    {
-        *app->bindings = settings.keys;
-        WindowSetSize(app->gfx->window, settings.resolutionW, settings.resolutionH);
-        for (size_t i = 0; i < ENTITY_ARRAY[*app->player.entity].nDrawables; i++)
-            ENTITY_ARRAY[*app->player.entity].drawables[i].spriteSheet = (SpriteSheet)settings.skin;
-    }
-    SettingsDestroy(&settings);
+    AppClientUpdateSettings(app);
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -290,4 +282,24 @@ void AppClientDraw(AppClient *app)
         break;
     }
     NotifierUpdate();
+}
+void AppClientUpdateSettings(AppClient *app)
+{
+    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
+    if (settings.resolutionH != 1) // found settings file
+    {
+        *app->bindings = settings.keys; //keys
+
+        WindowSetSize(app->gfx->window, settings.resolutionW, settings.resolutionH); //resolution
+
+        for (size_t i = 0; i < ENTITY_ARRAY[*app->player.entity].nDrawables; i++)
+            ENTITY_ARRAY[*app->player.entity].drawables[i].spriteSheet = (SpriteSheet)settings.skin; // skin
+
+        WindowSetFullscreen(app->gfx->window, settings.isFullscreen); // fullscreen
+
+        WindowSetVSync(app->gfx->window, settings.vsync); // vsync
+
+        app->fpsManager->desiredFPS = settings.fps; // fps
+    }
+    SettingsDestroy(&settings);
 }

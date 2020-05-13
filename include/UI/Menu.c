@@ -123,7 +123,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, player);
+        MenuUpdateMainMenu(menu, player, fpsManager);
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu(menu);
@@ -208,7 +208,7 @@ void MenuUpdateName(Menu *menu)
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu, Player *player)
+void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
 {
     //Determine menu options
     int optionLength = 8;
@@ -278,7 +278,10 @@ void MenuUpdateMainMenu(Menu *menu, Player *player)
         {
             Settings settings = SettingsCreate((int)ENTITY_ARRAY[*player->entity].drawables[0].spriteSheet,
                                                menu->gfx->window->width,
-                                               menu->gfx->window->height, *menu->bindings);
+                                               menu->gfx->window->height, *menu->bindings,
+                                               menu->gfx->window->isFullscreen,
+                                               menu->gfx->window->vsyncEnabled,
+                                               fps->desiredFPS);
             SettingsSave(settings);
             break;
         }
