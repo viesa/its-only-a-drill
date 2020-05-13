@@ -45,6 +45,8 @@ typedef struct CompressedEntity
     int health;
     Vec2 position;
     SDL_Rect src[MAX_DRAWABLES];
+    float rot[MAX_DRAWABLES];
+    Vec2 rot_anchor[MAX_DRAWABLES];
 } CompressedEntity;
 
 typedef struct Entity

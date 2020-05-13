@@ -69,7 +69,11 @@ CompressedEntity EntityCompress(Entity *entity)
     cEntity.health = entity->health;
     cEntity.position = entity->position;
     for (int i = 0; i < MAX_DRAWABLES; i++)
+    {
         cEntity.src[i] = entity->drawables[i].src;
+        cEntity.rot[i] = entity->drawables[i].rot;
+        cEntity.rot_anchor[i] = entity->drawables[i].rot_anchor;
+    }
     return cEntity;
 }
 
@@ -80,7 +84,11 @@ Entity EntityDecompress(CompressedEntity *cEntity)
     entity.health = cEntity->health;
     entity.position = cEntity->position;
     for (int i = 0; i < MAX_DRAWABLES; i++)
+    {
         entity.drawables[i].src = cEntity->src[i];
+        entity.drawables[i].rot = cEntity->rot[i];
+        entity.drawables[i].rot_anchor = cEntity->rot_anchor[i];
+    }
     return entity;
 }
 
@@ -90,7 +98,11 @@ void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity)
     entity->health = cEntity->health;
     entity->position = cEntity->position;
     for (int i = 0; i < MAX_DRAWABLES; i++)
+    {
         entity->drawables[i].src = cEntity->src[i];
+        entity->drawables[i].rot = cEntity->rot[i];
+        entity->drawables[i].rot_anchor = cEntity->rot_anchor[i];
+    }
 }
 
 void EntityDraw(Entity *entity, Camera *camera)
