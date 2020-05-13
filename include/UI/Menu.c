@@ -638,6 +638,24 @@ void MenuUpdateOptions(Menu *menu)
         {"SET Keybinding"},
         {"Back"}};
 
+    if (menu->gfx->window->isFullscreen)
+    {
+        sprintf(options[0], "Exit fullscreen");
+    }
+    else
+    {
+        sprintf(options[0], "Enter fullscreen");
+    }
+
+    if (menu->gfx->window->vsyncEnabled)
+    {
+        sprintf(options[2], "vSync on");
+    }
+    else
+    {
+        sprintf(options[2], "vSync off");
+    }
+
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
@@ -654,6 +672,10 @@ void MenuUpdateOptions(Menu *menu)
             else
             {
                 WindowSetFullscreen(menu->gfx->window, SDL_TRUE);
+                SDL_DisplayMode displaymode;
+                SDL_GetCurrentDisplayMode(0, &displaymode);
+                menu->gfx->window->width = displaymode.w;
+                menu->gfx->window->height = displaymode.h;
             }
             break;
         case 1: //set resolution
