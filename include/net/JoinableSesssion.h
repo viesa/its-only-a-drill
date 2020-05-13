@@ -4,6 +4,7 @@
 typedef struct JoinableSession
 {
     char name[20];
+    char hostname[20];
     int sessionID;
     int currentPlayers;
     int maxPlayers;

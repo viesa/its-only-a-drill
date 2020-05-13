@@ -464,6 +464,13 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
         ServerTCPSend(PT_FullSession, NULL, 0, packet.sender);
         return;
     }
+    if (session->inGame)
+    {
+        // If session was already started, pretend it was full
+        // This could be a new packet, but honestly who cares :)
+        ServerTCPSend(PT_FullSession, NULL, 0, packet.sender);
+        return;
+    }
 
     // Checks if there is room for player in the new session
     if (session->playerIDs->size < session->mapInfo.maxPlayers)
@@ -575,26 +582,42 @@ void AppServerHandleChangeSkinPacket(ParsedPacket packet)
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
 {
     int nSessions = server.sessions->size;
+    // Reserve for possible max ammout of data
+    // Actual number is allSesssions - nStartedSessions
     JoinableSession outgoing[nSessions];
+    SDL_memset(outgoing, 0, sizeof(outgoing));
 
+    int j = 0;
     for (int i = 0; i < nSessions; i++)
     {
         Session *current = &SERVER_SESSIONS[i];
-        SDL_memset(outgoing[i].name, 0, 20);
-        if (strlen(current->mapInfo.name) > 16)
+        // Make sure session is not started
+        if (!current->inGame)
         {
-            SDL_memcpy(outgoing[i].name, current->mapInfo.name, 16);
-            strcpy(outgoing[i].name + 16, "...");
+            // Make sure host is valid
+            NetPlayer *pHost = ServerGetPlayerByID(current->hostID);
+            if (pHost)
+            {
+                SDL_memset(outgoing[j].name, 0, 20);
+                SDL_memset(outgoing[j].hostname, 0, 20);
+                if (strlen(current->mapInfo.name) > 16)
+                {
+                    SDL_memcpy(outgoing[j].name, current->mapInfo.name, 16);
+                    strcpy(outgoing[j].name + 16, "...");
+                }
+                else
+                {
+                    strcpy(outgoing[j].name, current->mapInfo.name);
+                }
+                strcpy(outgoing[j].hostname, pHost->name);
+                outgoing[j].maxPlayers = current->mapInfo.maxPlayers;
+                outgoing[j].currentPlayers = current->playerIDs->size;
+                outgoing[j].sessionID = current->id;
+                j++;
+            }
         }
-        else
-        {
-            strcpy(outgoing[i].name, current->mapInfo.name);
-        }
-        outgoing[i].maxPlayers = current->mapInfo.maxPlayers;
-        outgoing[i].currentPlayers = current->playerIDs->size;
-        outgoing[i].sessionID = current->id;
     }
-    ServerTCPSend(PT_FetchSessions, outgoing, sizeof(outgoing), packet.sender);
+    ServerTCPSend(PT_FetchSessions, outgoing, sizeof(JoinableSession) * j, packet.sender);
 }
 
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet)
