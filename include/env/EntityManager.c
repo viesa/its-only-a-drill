@@ -39,10 +39,6 @@ void EntityManagerUpdateMovement()
         ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
         // carculate Net_force so friction & collision & the other forces is handle before
         EntityCalculateNetForces(&ENTITY_ARRAY[i]);
-        if (ENTITY_ARRAY[i].type = ET_Player)
-        {
-            log_debug("Players current force X:%f Y:%f", ENTITY_ARRAY[i].Force.x, ENTITY_ARRAY[i].Force.y);
-        }
 
         // update new position
         ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
@@ -84,14 +80,11 @@ void EntityManagerOnCollision()
 
                             Vec2 ResultDistance = Vec2Sub(DominantCenter, RecessiveCenter);
                             Vec2 direction = Vec2Unit(ResultDistance);
-                            float HarassersForce = Vec2Len(ENTITY_ARRAY[Dominant].Force);
-                            Vec2 forceVector = Vec2MulL(direction, HarassersForce);
 
-                            // ENTITY_ARRAY[Recessive].Force.x -= cos(forceVector.x / 100) * 1000;
-                            // ENTITY_ARRAY[Recessive].Force.y -= cos(forceVector.y / 100) * 1000;
+                            //keept for transfer of energy
+                            //float HarassersForce = Vec2Len(ENTITY_ARRAY[Dominant].Force);
+                            //Vec2 forceVector = Vec2MulL(direction, HarassersForce);
 
-                            // ENTITY_ARRAY[Dominant].Force.x -= forceVector.x / forceVector.x;
-                            // ENTITY_ARRAY[Dominant].Force.y -= forceVector.y / forceVector.y;
                             float massRatioBasedOnDominant = ENTITY_ARRAY[Dominant].mass / (ENTITY_ARRAY[Dominant].mass + ENTITY_ARRAY[Recessive].mass);
                             if (massRatioBasedOnDominant >= 0.05f && massRatioBasedOnDominant != 0.5f)
                             {
