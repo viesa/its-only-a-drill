@@ -68,6 +68,7 @@
                 "entity.h": "c",
                 "map.h": "c",
                 "typeinfo": "c",
-                "notification.h": "c"
+                "notification.h": "c",
+                "cmath": "c"
         }
 }
