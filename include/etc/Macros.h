@@ -30,11 +30,12 @@
 // #define MAPINFO_DEBUG
 // #define MAPLIST_DEBUG
 
-// #define WINDOW_DEBUG
+#define WINDOW_DEBUG
 // #define GRAPHICS_DEBUG
 
 //#define ENTITY_DEBUG
 //#define WEAPON_DEBIG
+//#define Debug_Weapon_GetHitInfo
 //#define PLAYER_RESPAWN
 
 // #define VECTOR_DEBUG
