@@ -26,17 +26,10 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
 
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
         Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
-        Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item->Stats.falloff);
-        mousePos.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.x;
-        mousePos.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2)) + itemFalloff.y;
-
-        SDL_Point point;
-        point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
-        point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
         // push back
-        ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
-        ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
+        ENTITY_ARRAY[*index].Force.x -= item->Stats.falloff;
+        ENTITY_ARRAY[*index].Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
         RayScanClosest(index, &unitPlayerToMouse, camera, renderer, &item->Stats);
