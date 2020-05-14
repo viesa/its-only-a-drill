@@ -49,7 +49,8 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player)
             if (ENTITY_ARRAY[*player].entityState != EntityDead)
             {
                 ENTITY_ARRAY[*i].entityState = Fight;
-            } else
+            }
+            else
             {
                 ENTITY_ARRAY[*i].entityState = Neutral;
             }
@@ -57,7 +58,7 @@ void switchStateLogic(Vec2 *enemyToPlayer, int *i, EntityIndexP player)
     }
 }
 
-void BehaviorMoveEntity(MovingPattern *pattern, SDL_Renderer *renderer, Camera *camera, Player *player)
+void BehaviorMoveEntity(MovingPattern *pattern, Camera *camera, Player *player)
 {
     SDL_Rect boxDP;
 

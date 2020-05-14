@@ -145,8 +145,7 @@ void EntityRotateAll(EntityIndexP index, float degrees)
 {
     for (int i = 0; i < ENTITY_ARRAY[*index].nDrawables; i++)
     {
-        SDL_Rect dstMid = {0, 0, ENTITY_ARRAY[*index].drawables[i].dst.w, ENTITY_ARRAY[*index].drawables[i].dst.w};
-        ENTITY_ARRAY[*index].drawables[i].rot_anchor = RectMid(dstMid);
+        ENTITY_ARRAY[*index].drawables[i].rot_anchor = Vec2Create(0.5f, 0.5f);
         ENTITY_ARRAY[*index].drawables[i].rot = degrees;
     }
 }
