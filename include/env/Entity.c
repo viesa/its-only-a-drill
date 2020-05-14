@@ -15,7 +15,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     {
     case ET_Woman:
         entity.Friction = 7.7f;
-        entity.mass = 50.0f;
+        entity.mass = 96.0f;
         entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
         entity.hitboxIndex = 0;
         entity.nDrawables = 1;
@@ -40,7 +40,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
 
     case ET_Player:
         entity.Friction = 9.7f;
-        entity.mass = 50.0f;
+        entity.mass = 96.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
         entity.drawables[0] = DrawableCreateDefaultConfig();
@@ -111,8 +111,8 @@ void EntityDrawIndex(EntityIndexP index, Camera *camera)
 void EntityCalculateNetForces(Entity *entity)
 {
     // first get momentum
-    float ComputedFormula = powf((1.0f + (2.0f / entity->mass)), entity->mass) / 8 + 0.059f;
-    entity->Velocity = Vec2DivL(entity->Force, ComputedFormula);
+    float ComputedFormula = 1 - entity->mass / 4096.0f;
+    entity->Velocity = Vec2MulL(entity->Velocity, ComputedFormula);
 
 // compute friendly
 #ifndef frictionReal
