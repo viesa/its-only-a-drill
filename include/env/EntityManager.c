@@ -45,7 +45,7 @@ void EntityManagerUpdateMovement()
         // update new position
         ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
         ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime();
-        if ((ENTITY_ARRAY[i].Velocity.x != 0 || ENTITY_ARRAY[i].Velocity.y != 0) &&
+        if ((ENTITY_ARRAY[i].Velocity.x != 0 && ENTITY_ARRAY[i].Velocity.y != 0) &&
             ENTITY_ARRAY[i].id >= 10000)
         {
             CompressedEntity ent = EntityCompress(&ENTITY_ARRAY[i]);

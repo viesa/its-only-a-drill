@@ -401,6 +401,7 @@ void MenuUpdateHostLobby(Menu *menu)
         {
             MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
             FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
 
