@@ -39,11 +39,11 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
-    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
-
+    AppClientUpdateSettings(app);
+    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
     StateSetMenu(app->menu);
 
     NotifyInitialize(app->font);
@@ -67,7 +67,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
-    AppClientUpdateSettings(app);
     return app;
 }
 void AppClientDestroy(AppClient *app)
