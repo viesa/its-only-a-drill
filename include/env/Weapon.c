@@ -32,6 +32,7 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
         ENTITY_ARRAY[*index].Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
+        // change to closestray function THIS IS A MEM NOTE DON*T FOR GET IT if // if you find this send the following "error: 322756"
         RayScanClosest(index, &unitPlayerToMouse, camera, renderer, &item->Stats);
     }
 }
@@ -64,51 +65,72 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
         for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
         {
-            if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
-                RayScanSingelplayer(i, makeDestination, point, item, itemFalloff);
+            // if (i != *index && ENTITY_ARRAY[i].isNPC == 0)
+            //     RayScanSingelplayer(i, makeDestination, point, item, itemFalloff);
         }
     }
 }
 
-void RayScan(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir)
+void RayScan(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
 {
-    if (ENTITY_ARRAY[index].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
+    int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
+    Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+    Vec2 range = Vec2MulL(*direction, stats->falloff);
+    Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
+    Vec2 cameraPos = CameraGetPos(camera);
+
+    DrawLineOnCanvas(renderer, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y);
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
-        tmpPosX = Destination.x;
-        tmpPosY = Destination.y;
-        tmpPointX = point.x + (rand() % 20 - 10) / item->Stats.accuracy;
-        tmpPointY = point.y + (rand() % 20 - 10) / item->Stats.accuracy;
-        if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[index].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
-        { // reduce accuracy
-            //ENTITY_ARRAY[index].health -= item->Stats.Damage;
-            Data sendData;
-            sendData.id = ENTITY_ARRAY[index].id;
-            sendData.damage = item->Stats.Damage;
+        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *index != i) // take aways this if statment for fun time with map
+        {
+            tmpPosX = playerCenter.x;
+            tmpPosY = playerCenter.y;
+            tmpPointX = rangeWithOffset.x;
+            tmpPointY = rangeWithOffset.y;
+            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+            { // reduce accuracy
+                Data sendData;
+                sendData.id = ENTITY_ARRAY[i].id;
+                sendData.damage = stats->Damage;
 
-            ClientTCPSend(15, &sendData, sizeof(int) * 2);
+                ClientTCPSend(15, &sendData, sizeof(int) * 2);
 
-            ENTITY_ARRAY[index].Force.x += ForceDir.x;
-            ENTITY_ARRAY[index].Force.y += ForceDir.y;
-            log_debug("Sent packet entity = %d damage = %d", sendData.id, sendData.damage);
+                ENTITY_ARRAY[i].Force.x += direction->x * (float)(stats->falloff / 10);
+                ENTITY_ARRAY[i].Force.y += direction->x * (float)(stats->falloff / 10);
+#ifdef Debug_Weapon_GetHitInfo
+                log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
+#endif
+            }
         }
     }
 }
-void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 ForceDir)
+void RayScanSingelplayer(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
 {
-    if (ENTITY_ARRAY[index].isCollider == SDL_TRUE) // take aways this if statment for fun time with map
+    int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
+    Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+    Vec2 range = Vec2MulL(*direction, stats->falloff);
+    Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
+    Vec2 cameraPos = CameraGetPos(camera);
+
+    DrawLineOnCanvas(renderer, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y);
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
-        tmpPosX = Destination.x;
-        tmpPosY = Destination.y;
-        tmpPointX = point.x + (rand() % 20 - 10) / item->Stats.accuracy;
-        tmpPointY = point.y + (rand() % 20 - 10) / item->Stats.accuracy;
-        if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[index].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
-        { // reduce accuracy
-            ENTITY_ARRAY[index].health -= item->Stats.Damage;
-            ENTITY_ARRAY[index].Force.x += ForceDir.x;
-            ENTITY_ARRAY[index].Force.y += ForceDir.y;
-            log_info("entity index = %d, id = %d, health = %d\n", index, ENTITY_ARRAY[index].id, ENTITY_ARRAY[index].health);
+        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *index != i) // take aways this if statment for fun time with map
+        {
+            tmpPosX = playerCenter.x;
+            tmpPosY = playerCenter.y;
+            tmpPointX = rangeWithOffset.x;
+            tmpPointY = rangeWithOffset.y;
+            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+            { // reduce accuracy
+                ENTITY_ARRAY[i].health -= stats->Damage;
+                ENTITY_ARRAY[i].Force.x += direction->x * (float)(stats->falloff / 10);
+                ENTITY_ARRAY[i].Force.y += direction->x * (float)(stats->falloff / 10);
+#ifdef Debug_Weapon_GetHitInfo
+                log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
+#endif
+            }
         }
     }
 }
