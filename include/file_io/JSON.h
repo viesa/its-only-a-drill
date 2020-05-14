@@ -3,7 +3,7 @@
 
 #include "Dependencies.h"
 #include "JSONParser.h"
-#include "LoadedFile.h"
+#include "FileIO.h"
 
 typedef struct JSON
 {

@@ -21,6 +21,12 @@ MapInfo MapInfoCreateFromJSON(JSON *mapData)
     // This is returned if mapdata sucessfully loaded and was parsed
     MapInfo mapInfo;
 
+    // Check if JSON is valid
+    if (!mapData)
+    {
+        return badInfo;
+    }
+
     json_value *json_mapInfo;
     json_value *json_helper;
 #ifdef MAPINFO_DEBUG
@@ -157,8 +163,11 @@ int LoadAllSpawnPoints(MapInfo *mapInfo, JSON *mapData, json_value *entitiesStar
 
 void MapInfoDestroy(MapInfo *mapInfo)
 {
-    VectorDestroy(mapInfo->playerSpawns);
-    VectorDestroy(mapInfo->enemySpawns);
+    if (mapInfo->uid != -1)
+    {
+        VectorDestroy(mapInfo->playerSpawns);
+        VectorDestroy(mapInfo->enemySpawns);
+    }
 }
 
 SpawnPoint *MapInfoGetPlayerSpawns(MapInfo *mapInfo)

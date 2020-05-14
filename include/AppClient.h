@@ -32,5 +32,6 @@ void AppClientRun(AppClient *app);
 
 void AppClientUpdate(AppClient *app);
 void AppClientDraw(AppClient *app);
+void AppClientUpdateSettings(AppClient *app);
 
 #endif

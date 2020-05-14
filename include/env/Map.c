@@ -138,7 +138,7 @@ EntityIndexP *MapGetContents()
     return map.contents;
 }
 
-unsigned int MapGetContnetSize()
+unsigned int MapGetContentSize()
 {
     return map.n;
 }

@@ -134,6 +134,7 @@ FontSheet FontGetDynamicSizing(Font *font)
     //Screen resolutions:
     //640x480: XS     307 200
     //1280x720: S     921 600
+    // small 1080:  1 830 000
     //1920x1080: M  2 073 600
     //1920x1200: L  2 304 000
     //2560x1440: XL 3 686 400
@@ -148,11 +149,11 @@ FontSheet FontGetDynamicSizing(Font *font)
     int h = font->gfx->window->height;
     int px = w * h;
 
-    if (px > 3500000)
+    if (px > 3800000)
         return TTF_Antilles_XL;
     if (px > 2500000)
         return TTF_Antilles_L;
-    if (px > 1500000)
+    if (px > 1850000)
         return TTF_Antilles_M;
     if (px > 500000)
         return TTF_Antilles_S;

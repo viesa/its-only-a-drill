@@ -20,6 +20,11 @@ Gui *GuiCreate(Font *font)
     return gui;
 }
 
+void GuiDestroy(Gui *gui)
+{
+    SDL_free(gui);
+}
+
 void GuiOverlayUpdate(Gui *gui)
 {
     //Draw scanlines
@@ -92,8 +97,11 @@ void GuiUpdate(Gui *gui)
     //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
     //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
-#ifdef ANY_DEBUG
-    // Disp. FPS
+    GuiOverlayUpdate(gui);
+}
+
+void GuiDrawFPS(Gui *gui)
+{
     if (!gui->loopCount % 5)
     {
         gui->fps = (int)ClockGetFPS();
@@ -101,11 +109,4 @@ void GuiUpdate(Gui *gui)
     char fps[10];
     sprintf(fps, "%d", gui->fps);
     FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
-#endif
-    GuiOverlayUpdate(gui);
-}
-
-void GuiDestroy(Gui *gui)
-{
-    SDL_free(gui);
 }

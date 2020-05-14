@@ -41,6 +41,10 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
 
     menu->mapList = mapList;
 
+    menu->volumeMaster = 1;
+    menu->volumeSFX = 64;
+    menu->volumeMusic = 64;
+
     return menu;
 }
 
@@ -113,6 +117,13 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
     }
     menu->lastIndex = menu->activeIndex;
 
+    //actually do some shit with the volumes?
+    AudioSetSFX(menu->volumeSFX);
+    AudioSetMusic(menu->volumeMusic);
+
+    //MASTER LAST
+    AudioSetMaster(menu->volumeMaster);
+
     //Decides what shall be drawn on top
     switch (MenuStateGet())
     {
@@ -123,7 +134,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu);
+        MenuUpdateMainMenu(menu, player, fpsManager);
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu(menu);
@@ -151,6 +162,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         break;
     case MS_KEYBINDING:
         MenuUpdateKeybinding(menu);
+        break;
+    case MS_Audio:
+        MenuUpdateAudio(menu);
         break;
     case MS_CustomMap:
         MenuUpdateCustomMap(menu);
@@ -208,17 +222,18 @@ void MenuUpdateName(Menu *menu)
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu)
+void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 8;
+    char options[8][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
         {"Change name"},
         {"Change skin"},
         {"Options"},
+        {"Save options"},
         {"Exit"}};
     // makes it loop
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -274,6 +289,17 @@ void MenuUpdateMainMenu(Menu *menu)
             break;
         }
         case 6:
+        {
+            Settings settings = SettingsCreate((int)ENTITY_ARRAY[*player->entity].drawables[0].spriteSheet,
+                                               menu->gfx->window->width,
+                                               menu->gfx->window->height, *menu->bindings,
+                                               menu->gfx->window->isFullscreen,
+                                               menu->gfx->window->vsyncEnabled,
+                                               fps->desiredFPS);
+            SettingsSave(settings);
+            break;
+        }
+        case 7:
         {
             SDL_Event quit;
             quit.type = SDL_QUIT;
@@ -388,7 +414,8 @@ void MenuUpdateHostLobby(Menu *menu)
         else
         {
             MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-            LoadedFile lfile = LoadedFileCreate(mapInfo.filename);
+            FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
 
@@ -629,14 +656,33 @@ void MenuUpdateLobby(Menu *menu)
 void MenuUpdateOptions(Menu *menu)
 {
     //Determine menu options
-    int optionLength = 6;
-    char options[6][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
+        {"Audio optiions"},
         {"Back"}};
+
+    if (menu->gfx->window->isFullscreen)
+    {
+        sprintf(options[0], "Exit fullscreen");
+    }
+    else
+    {
+        sprintf(options[0], "Enter fullscreen");
+    }
+
+    if (menu->gfx->window->vsyncEnabled)
+    {
+        sprintf(options[2], "vSync on");
+    }
+    else
+    {
+        sprintf(options[2], "vSync off");
+    }
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
@@ -654,6 +700,10 @@ void MenuUpdateOptions(Menu *menu)
             else
             {
                 WindowSetFullscreen(menu->gfx->window, SDL_TRUE);
+                SDL_DisplayMode displaymode;
+                SDL_GetCurrentDisplayMode(0, &displaymode);
+                menu->gfx->window->width = displaymode.w;
+                menu->gfx->window->height = displaymode.h;
             }
             break;
         case 1: //set resolution
@@ -685,6 +735,11 @@ void MenuUpdateOptions(Menu *menu)
         }
         case 5:
         {
+            MenuStateSet(MS_Audio);
+            break;
+        }
+        case 6:
+        {
 
             if (clientManager.inGame)
             {
@@ -698,6 +753,7 @@ void MenuUpdateOptions(Menu *menu)
         }
         }
     }
+
     MenuDraw(menu, options, optionLength);
     MenuTitleDraw(menu, "Options");
 }
@@ -920,6 +976,96 @@ void MenuUpdateKeybinding(Menu *menu)
     }
     MenuDraw(menu, options, optionLength);
     MenuTitleDraw(menu, "Keybindings");
+}
+
+void MenuUpdateAudio(Menu *menu)
+{
+    int step = 4;
+
+    // VOLUME SETTINGS
+    // VOLUME CHANNELS: MUSIC, SFX
+    // VOLUME PROPERTIES: 0-128 (Uint8 format)
+    //
+    // MASTER VOLUME: MULTIPLIER
+
+    //Determine menu options
+    int optionLength = 4;
+    char options[4][100] = {
+        {"Master"},
+        {"SFX"},
+        {"Music"},
+        {"Back"}};
+
+    sprintf(options[0], "Master: %d%%", (int)(menu->volumeMaster * 100));
+    sprintf(options[1], "SFX: %u/64", menu->volumeSFX);
+    sprintf(options[2], "Music: %u/64", menu->volumeMusic);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_A) || InputIsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0:
+            menu->volumeMaster -= .1;
+            break;
+        case 1:
+            menu->volumeSFX -= step;
+            ;
+            break;
+        case 2:
+            menu->volumeMusic -= step;
+            break;
+        }
+    }
+
+    if (InputIsKeyPressed(SDL_SCANCODE_D) || InputIsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0:
+            menu->volumeMaster += .1;
+            break;
+        case 1:
+            menu->volumeSFX += step;
+            break;
+        case 2:
+            menu->volumeMusic += step;
+            break;
+        }
+    }
+
+    // Loop back
+    if (menu->volumeMaster < 0)
+        menu->volumeMaster = 0;
+    if (menu->volumeMaster > 2)
+        menu->volumeMaster = 2;
+
+    if (menu->volumeMusic > 128)
+        menu->volumeMusic = 0;
+    if (menu->volumeSFX > 128)
+        menu->volumeSFX = 0;
+
+    if (menu->volumeMusic > 64)
+        menu->volumeMusic = 64;
+    if (menu->volumeSFX > 64)
+        menu->volumeSFX = 64;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        switch (menu->activeIndex)
+        {
+        case 3:
+        {
+            MenuStateSet(MS_Options);
+            break;
+        }
+        }
+    }
+
+    MenuDraw(menu, options, optionLength);
+    MenuTitleDraw(menu, "Audio options");
 }
 
 void MenuUpdateCustomMap(Menu *menu)

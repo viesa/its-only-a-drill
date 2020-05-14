@@ -44,6 +44,7 @@ void GraphicsDestroy(Graphics *gfx)
 void GraphicsDraw(Graphics *gfx, Drawable drawable)
 {
     SDL_Point rot_point = (SDL_Point){(int)drawable.rot_anchor.x, (int)drawable.rot_anchor.y};
+    drawable.spriteSheet %= SS_Count;
     SDL_RenderCopyEx(gfx->window->renderer,
                      gfx->m_allTextures[drawable.spriteSheet],
                      &drawable.src,

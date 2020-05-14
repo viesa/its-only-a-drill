@@ -39,11 +39,11 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
-    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
     app->player = PlayerCreate(app->camera);
     app->movingPattern = behaviorPathsCreate();
     app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
-
+    AppClientUpdateSettings(app);
+    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
     StateSetMenu(app->menu);
 
     NotifyInitialize(app->font);
@@ -245,6 +245,11 @@ void AppClientDraw(AppClient *app)
     {
         MenuUpdate(app->menu, app->fpsManager, &app->player);
         GuiOverlayUpdate(app->gui);
+        if (MenuStateGet() == MS_InGameMenu)
+        {
+            PlayerDraw(&app->player, app->camera);
+            ClientManagerDrawConnectedPlayers(app->camera);
+        }
         break;
     }
     case GS_Playing:
@@ -276,4 +281,28 @@ void AppClientDraw(AppClient *app)
         break;
     }
     NotifierUpdate();
+
+#ifdef ANY_DEBUG
+    GuiDrawFPS(app->gui);
+#endif
+}
+void AppClientUpdateSettings(AppClient *app)
+{
+    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
+    if (settings.resolutionH != 1) // found settings file
+    {
+        *app->bindings = settings.keys; //keys
+
+        WindowSetSize(app->gfx->window, settings.resolutionW, settings.resolutionH); //resolution
+
+        for (size_t i = 0; i < ENTITY_ARRAY[*app->player.entity].nDrawables; i++)
+            ENTITY_ARRAY[*app->player.entity].drawables[i].spriteSheet = (SpriteSheet)settings.skin; // skin
+
+        WindowSetFullscreen(app->gfx->window, settings.isFullscreen); // fullscreen
+
+        WindowSetVSync(app->gfx->window, settings.vsync); // vsync
+
+        app->fpsManager->desiredFPS = settings.fps; // fps
+    }
+    SettingsDestroy(&settings);
 }
