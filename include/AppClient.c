@@ -281,6 +281,10 @@ void AppClientDraw(AppClient *app)
         break;
     }
     NotifierUpdate();
+
+#ifdef ANY_DEBUG
+    GuiDrawFPS(app->gui);
+#endif
 }
 void AppClientUpdateSettings(AppClient *app)
 {

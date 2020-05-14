@@ -28,8 +28,10 @@ typedef enum GuiWindow
 } GuiWindow;
 
 Gui *GuiCreate(Font *font);
+void GuiDestroy(Gui *gui);
+
 void GuiUpdate(Gui *gui);
 void GuiOverlayUpdate(Gui *gui);
-void GuiDestroy(Gui *gui);
+void GuiDrawFPS(Gui *gui);
 
 #endif
