@@ -15,7 +15,7 @@ int MapGenerateNew(JSON *mapdata);
 void MapDraw(Camera *camera);
 
 EntityIndexP *MapGetContents();
-unsigned int MapGetContnetSize();
+unsigned int MapGetContentSize();
 
 MapInfo MapGetInfo();
 

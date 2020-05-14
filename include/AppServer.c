@@ -228,7 +228,8 @@ void AppServerDrawCLI(AppServer *app)
             Session *session = &SERVER_SESSIONS[i];
             NetPlayer *host = ServerGetPlayerByID(session->hostID);
             char *name = host ? host->name : "Unknown";
-            printf("[ID:%d] %s [%zu/%d] Host: %s\n", session->id,
+            printf("[ID:%d] %s [%zu/%d] Host: %s\n",
+                   session->id,
                    session->mapInfo.name,
                    session->playerIDs->size,
                    session->mapInfo.maxPlayers,
