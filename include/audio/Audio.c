@@ -158,3 +158,25 @@ void AudioFreeChannel(int channel)
 {
     audio.m_availableChannels[channel] = SDL_TRUE;
 }
+
+void AudioSetMaster(double multiplier)
+{
+    for (int i = 0; i < SF_Count; i++)
+    {
+        audio.m_chunks[i]->volume *= multiplier;
+    }
+
+    Mix_VolumeMusic(Mix_VolumeMusic(-1) * multiplier);
+}
+void AudioSetSFX(Uint8 volume)
+{
+    for (int i = 0; i < SF_Count; i++)
+    {
+        audio.m_chunks[i]->volume = volume;
+    }
+}
+
+void AudioSetMusic(Uint8 volume)
+{
+    Mix_VolumeMusic(volume);
+}
