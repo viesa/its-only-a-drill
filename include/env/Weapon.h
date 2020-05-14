@@ -36,7 +36,7 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
 // casts a ray and changes data on closest hit
 void RayScanClosest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats);
 // skapar en projektil *unsused/not updated
-// void bullet(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Direction);4
+// void bullet(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Direction);
 
 // draws a color with a preset color (red currently)
 void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2);

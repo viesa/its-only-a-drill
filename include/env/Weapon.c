@@ -141,9 +141,7 @@ void RayScanClosest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Ren
     float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
-    Vec2 rangeWithOffset;
-    rangeWithOffset.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + range.x;
-    rangeWithOffset.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2)) + range.y;
+    Vec2 rangeWithOffset = Vec2AddL(playerCenter, range);
     Vec2 cameraPos = CameraGetPos(camera);
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
