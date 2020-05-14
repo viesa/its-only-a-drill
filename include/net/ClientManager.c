@@ -231,7 +231,16 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
     for (int i = 0; i < clientManager.players->size; i++)
     {
         Entity *entity = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
-        if (entity->id == cEntity.id) //entity exists
+        if (entity->id == cEntity.id)
+        {
+            EntityAddCompressed(entity, &cEntity);
+            return;
+        }
+    }
+    for (int i = 0; i < MapGetContentSize(); i++)
+    {
+        Entity *entity = &ENTITY_ARRAY[*MapGetContents()[i]];
+        if (entity->id == cEntity.id)
         {
             EntityAddCompressed(entity, &cEntity);
             return;

@@ -57,3 +57,5 @@ lib/
 sdl2-config
 Makefile
 .vscode/settings.json
+
+settings.bin
