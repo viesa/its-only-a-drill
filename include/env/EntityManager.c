@@ -1,6 +1,7 @@
 #include "EntityManager.h"
 #include "Client.h"
 #define MAX_ENTITY_INDICES 10000
+#define energy_lost 0.1f
 
 struct
 {
@@ -34,13 +35,10 @@ void EntityManagerUpdateMovement()
 {
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
+        // velocity
+        ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
         // carculate Net_force so friction & collision & the other forces is handle before
         EntityCalculateNetForces(&ENTITY_ARRAY[i]);
-
-        // Garante stop Cause float
-        ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
-        ENTITY_ARRAY[i].Velocity.x = (fabs(ENTITY_ARRAY[i].Velocity.x) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.x;
-        ENTITY_ARRAY[i].Velocity.y = (fabs(ENTITY_ARRAY[i].Velocity.y) < 7.8f) ? 0 : ENTITY_ARRAY[i].Velocity.y;
 
         // update new position
         ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
@@ -51,22 +49,6 @@ void EntityManagerUpdateMovement()
             CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[i]);
             ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
         }
-#ifdef ENTITY_DEBUG
-        if (i == 0)
-        {
-            log_debug("CurrentEntity:");
-            log_debug("position x: %f", ENTITY_ARRAY[i].position.x);
-            log_debug("position y: %f", ENTITY_ARRAY[i].position.y);
-            log_debug("Force x: %f", ENTITY_ARRAY[i].Force.x);
-            log_debug("Force y: %f", ENTITY_ARRAY[i].Force.y);
-            log_debug("Acceleration x: %f", ENTITY_ARRAY[i].Acceleration.x);
-            log_debug("Acceleration y: %f", ENTITY_ARRAY[i].Acceleration.y);
-            log_debug("Velocity x: %f", ENTITY_ARRAY[i].Velocity.x);
-            log_debug("Velocity y: %f", ENTITY_ARRAY[i].Velocity.y);
-            log_debug("Friction: %f", ENTITY_ARRAY[i].Friction);
-            log_debug("mass: %f", ENTITY_ARRAY[i].mass);
-        }
-#endif
     }
 }
 
@@ -96,18 +78,22 @@ void EntityManagerOnCollision()
                             RecessiveCenter.x = (float)rHitbox->x + (float)rHitbox->w / 2.0f;
                             RecessiveCenter.y = (float)rHitbox->y + (float)rHitbox->h / 2.0f;
 
-                            Vec2 ResultDistance; // Calculating distance
-                            ResultDistance.x = DominantCenter.x - RecessiveCenter.x;
-                            ResultDistance.y = DominantCenter.y - RecessiveCenter.y;
+                            Vec2 ResultDistance = Vec2Sub(DominantCenter, RecessiveCenter);
+                            // Vec2 direction = Vec2Unit(ResultDistance);
 
-                            ENTITY_ARRAY[Recessive].position.x -= ResultDistance.x / 17.0f;
-                            ENTITY_ARRAY[Recessive].position.y -= ResultDistance.y / 17.0f;
+                            //keept for transfer of energy
+                            //float HarassersForce = Vec2Len(ENTITY_ARRAY[Dominant].Force);
+                            //Vec2 forceVector = Vec2MulL(direction, HarassersForce);
 
-                            ENTITY_ARRAY[Recessive].Force.x -= ResultDistance.x;
-                            ENTITY_ARRAY[Recessive].Force.y -= ResultDistance.y;
+                            float massRatioBasedOnDominant = ENTITY_ARRAY[Dominant].mass / (ENTITY_ARRAY[Dominant].mass + ENTITY_ARRAY[Recessive].mass);
+                            if (massRatioBasedOnDominant >= 0.05f && massRatioBasedOnDominant != 0.5f)
+                            {
+                                ENTITY_ARRAY[Recessive].position.x -= (ResultDistance.x * massRatioBasedOnDominant) / 17.0f;
+                                ENTITY_ARRAY[Recessive].position.y -= (ResultDistance.y * massRatioBasedOnDominant) / 17.0f;
 
-                            ENTITY_ARRAY[Dominant].Force.x += ResultDistance.x;
-                            ENTITY_ARRAY[Dominant].Force.y += ResultDistance.y;
+                                ENTITY_ARRAY[Dominant].position.x += (ResultDistance.x * (1 - massRatioBasedOnDominant)) / 17.0f;
+                                ENTITY_ARRAY[Dominant].position.y += (ResultDistance.y * (1 - massRatioBasedOnDominant)) / 17.0f;
+                            }
                         }
                     }
                 }

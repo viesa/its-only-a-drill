@@ -35,6 +35,7 @@
 
 //#define ENTITY_DEBUG
 //#define WEAPON_DEBIG
+//#define Debug_Weapon_GetHitInfo
 //#define PLAYER_RESPAWN
 
 // #define VECTOR_DEBUG

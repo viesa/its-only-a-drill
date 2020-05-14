@@ -29,6 +29,7 @@ void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *ite
 void rayMarchingTest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats);
 float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance);
 SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage);
+void RayScanClosest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats);
 // skapar en projektil *unsused/not updated
 // void bullet(int index, Vec2 Destination, SDL_Point point, Item *item, Vec2 Direction);
 void DectectIntersectionKeep();

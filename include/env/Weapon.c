@@ -26,20 +26,13 @@ void playerShoot(Graphics *gfx, EntityIndexP index, Camera *camera, Item *item)
 
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
         Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
-        Vec2 itemFalloff = Vec2MulL(unitPlayerToMouse, item->Stats.falloff);
-        mousePos.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + itemFalloff.x;
-        mousePos.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2)) + itemFalloff.y;
-
-        SDL_Point point;
-        point.x = ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2);
-        point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
         // push back
-        ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
-        ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
+        ENTITY_ARRAY[*index].Force.x -= item->Stats.falloff;
+        ENTITY_ARRAY[*index].Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
-        rayMarchingTest(gfx, index, &unitPlayerToMouse, camera, &item->Stats);
+        RayScanClosest(gfx, index, &unitPlayerToMouse, camera, &item->Stats);
     }
 }
 
@@ -120,6 +113,54 @@ void RayScanSingelplayer(int index, Vec2 Destination, SDL_Point point, Item *ite
     }
 }
 
+void RayScanClosest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
+{
+    int tmpPosX, tmpPosY, tmpPointX, tmpPointY, closestEntity = 0, endPointX, endPointY;
+    float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
+    Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+    Vec2 range = Vec2MulL(*direction, stats->falloff);
+    Vec2 rangeWithOffset;
+    rangeWithOffset.x = (float)(ENTITY_ARRAY[*index].drawables[0].dst.x + (ENTITY_ARRAY[*index].drawables[0].dst.w / 2)) + range.x;
+    rangeWithOffset.y = (float)(ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2)) + range.y;
+    Vec2 cameraPos = CameraGetPos(camera);
+    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
+    {
+        if (*index != i && ENTITY_ARRAY[i].isCollider == 1)
+        {
+            tmpPointX = playerCenter.x;
+            tmpPointY = playerCenter.y;
+            tmpPosX = rangeWithOffset.x;
+            tmpPosY = rangeWithOffset.y;
+            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
+            { // reduce accuracy
+                tmpPosX = ENTITY_ARRAY[i].drawables[0].dst.x - tmpPointX;
+                tmpPosY = ENTITY_ARRAY[i].drawables[0].dst.y - tmpPointY;
+                testLenght = sqrt(pow(tmpPosX, 2) + pow(tmpPosX, 2));
+                if (testLenght < closestLenght)
+                {
+                    closestEntity = i;
+                    endPointX = tmpPointX;
+                    endPointY = tmpPointY;
+                }
+            }
+        }
+    }
+    if (closestEntity <= 0)
+    {
+        GraphicsDrawLine(gfx, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, (int)rangeWithOffset.x - cameraPos.x, (int)rangeWithOffset.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
+    }
+    else
+    {
+        GraphicsDrawLine(gfx, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, endPointX - cameraPos.x, endPointY - cameraPos.y, (SDL_Color){255, 50, 50, 150});
+        ENTITY_ARRAY[closestEntity].health -= stats->Damage;
+        ENTITY_ARRAY[closestEntity].Force.x += direction->x * (float)(stats->falloff / 10);
+        ENTITY_ARRAY[closestEntity].Force.y += direction->y * (float)(stats->falloff / 10);
+#ifdef Debug_Weapon_GetHitInfo
+        log_debug("closest entity[%d] health=%d ", closestEntity, ENTITY_ARRAY[closestEntity].health);
+#endif
+    }
+}
+
 void rayMarchingTest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
 {
     Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
@@ -164,7 +205,7 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
 {
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
-        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *ignoreEntity != i) // take aways this if statment for fun time with map
+        if (ENTITY_ARRAY[i].isCollider == 1 && *ignoreEntity != i) // take aways this if statment for fun time with map
         {
             int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
             tmpPosX = start.x;
@@ -174,7 +215,7 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
             if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
             { // reduce accuracy
                 ENTITY_ARRAY[i].health -= *damage;
-                log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
+                log_info("entity index = %d, id = %d, health = %d, Weight = %f isCollider = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health, ENTITY_ARRAY[i].mass, ENTITY_ARRAY[i].isCollider);
                 return 1;
             }
         }
