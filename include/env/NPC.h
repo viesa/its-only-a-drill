@@ -23,7 +23,7 @@ typedef enum NPCState
 NPC *NPCCreate(Vec2 pos, Player *player);
 void NPCDestroy(NPC *npc);
 
-void NPCUpdate(NPC *npc);
+void NPCUpdate(NPC *npc, Camera *camera);
 void NPCDraw(NPC *npc, Camera *camera);
 
 void NPCSetSpriteSheet(NPC *npc, SpriteSheet spriteSheet);

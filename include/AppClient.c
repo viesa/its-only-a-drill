@@ -134,6 +134,7 @@ void AppClientUpdate(AppClient *app)
         }
         CameraUpdate(app->camera);
 
+        NPCManagerUpdate(app->camera);
         PlayerUpdate(app->player, app->camera);
 
         // EntityUpdate most be after input, playerupdate

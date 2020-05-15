@@ -167,7 +167,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         MenuUpdateAudio(menu);
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(menu);
+        MenuUpdateCustomMap(menu, player);
         break;
     case MS_Skin:
         MenuUpdateSkin(menu, player);
@@ -349,6 +349,7 @@ void MenuUpdateInGameMenu(Menu *menu)
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
             clientManager.inGame = SDL_FALSE;
+            NPCManagerClearNPCS();
             break;
         }
         default:
@@ -1069,7 +1070,7 @@ void MenuUpdateAudio(Menu *menu)
     MenuTitleDraw(menu, "Audio options");
 }
 
-void MenuUpdateCustomMap(Menu *menu)
+void MenuUpdateCustomMap(Menu *menu, Player *player)
 {
     //Determine menu options
     int optionLength = MapListGetNumMaps(menu->mapList) + 1;
@@ -1109,6 +1110,9 @@ void MenuUpdateCustomMap(Menu *menu)
         JSON *mapdata = JSONCreate(mapInfo.filename);
         MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
+        for (int i = 0; i < mapInfo.enemySpawns->size; i++)
+            NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
+        PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
     }
 
     MenuDraw(menu, options, optionLength);

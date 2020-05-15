@@ -8,6 +8,7 @@ struct
 
 void NPCManagerInitialize(Player *player)
 {
+    npcManager.player = player;
     npcManager.npcs = VectorCreate(sizeof(NPC *), 10);
 }
 void NPCManagerUninitialize()
@@ -20,12 +21,12 @@ void NPCManagerUninitialize()
     VectorDestroy(npcManager.npcs);
 }
 
-void NPCManagerUpdate()
+void NPCManagerUpdate(Camera *camera)
 {
     for (int i = 0; i < npcManager.npcs->size; i++)
     {
         NPC *npc = ((NPC **)npcManager.npcs->data)[i];
-        NPCUpdate(npc);
+        NPCUpdate(npc, camera);
     }
 }
 void NPCManagerDrawAllNPCS(Camera *camera)
@@ -40,10 +41,10 @@ void NPCManagerDrawAllNPCS(Camera *camera)
 void NPCManagerAddNew(Vec2 pos)
 {
     NPC *_new = NPCCreate(pos, npcManager.player);
-    VectorPushBack(npcManager.npcs, _new);
+    VectorPushBack(npcManager.npcs, &_new);
 }
 
-void NPCManagerResetNPCS()
+void NPCManagerClearNPCS()
 {
     for (int i = 0; i < npcManager.npcs->size; i++)
     {

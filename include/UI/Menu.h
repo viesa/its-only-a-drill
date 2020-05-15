@@ -20,6 +20,7 @@
 #include "Anim.h"
 #include "Transition.h"
 #include "Settings.h"
+#include "NPCManager.h"
 
 #define FETCH_SESSIONS_INTERVAL (2.0f)
 #define FETCH_LOBBY_INTERVAL (0.5f)
@@ -81,7 +82,7 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
 void MenuUpdateKeybinding(Menu *menu);
 void MenuUpdateAudio(Menu *menu);
 
-void MenuUpdateCustomMap(Menu *menu);
+void MenuUpdateCustomMap(Menu *menu, Player *player);
 void MenuUpdateSkin(Menu *menu, Player *player);
 void MenuTitleDraw(Menu *menu, char title[100]);
 void MenuDrawPreviewMap(Menu *menu);
