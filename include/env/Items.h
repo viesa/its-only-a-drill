@@ -4,6 +4,8 @@
 #include "Dependencies.h"
 #include "Camera.h"
 #include "Sound.h"
+#include "Input.h"
+#include "Library.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
 

@@ -41,7 +41,7 @@ void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerP
             //held.postion.x = 300;
             //held.postion.y = 500;
             //GraphicsDraw(gfx,held.drawable);
-            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 20, PlayerPos.y}));
+            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 25, PlayerPos.y}));
         }
     }
 }

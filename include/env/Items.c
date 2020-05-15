@@ -38,6 +38,22 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.currentTime = 10.0f;
         i.itemAction = SoundCreate(SF_SwordSwing);
         break;
+    case Pistol:
+        i.drawable = DrawableCreate((SDL_Rect){0, 0, 260, 90}, (SDL_Rect){25, 25, 25, 15}, SS_Real_Weapons);
+        i.type = Pistol;
+        i.postion = Position;
+        i.picked = 0;
+        i.equiped = 0;
+        i.Stats.accuracy = 1.0f;
+        i.Stats.ammo = 12;
+        i.Stats.captivity = 12;
+        i.Stats.Damage = 50;
+        i.Stats.falloff = 200;
+        i.Stats.cooldownMS = 250.0f;
+        i.Stats.currentTime = 10.0f;
+        i.itemAction = SoundCreate(SF_PistolShoot);
+        i.itemReload = SoundCreate(SF_ReloadMag);
+        break;
     case ItemEmpty:
         i.picked = 1;
         i.type = ItemEmpty;
@@ -98,6 +114,19 @@ void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos)
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
+
+        Vec2 mousePos = InputLastMousePos();
+        Vec2 cameraPos = CameraGetPos(camera);
+        Vec2 playerPos = Vec2Sub(pos, cameraPos);
+
+        Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
+
+        Vec2 forward = Vec2Unit(playerToMouse);
+        
+        float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), forward));
+        float degrees = forward.y > 0.0f ? vecAngle : 360 - vecAngle;
+        item->drawable.rot = degrees;
+        item->drawable.rot_anchor =(Vec2){(item->drawable.src.x / 2),(item->drawable.src.y / 2)};
         CameraDraw(camera, item->drawable);
     }
 }
@@ -147,9 +176,10 @@ GroundListItems GroundListCreate(void)
     GroundListItems ground;
     ground.contents[0] = ItemCreate(ItemWoodenSword, (Vec2){200, 200});
     ground.contents[1] = ItemCreate(ItemMetalSword, (Vec2){200, 400});
-    ground.contents[2] = ItemCreate(ItemWoodenSword, (Vec2){300, 200});
+    ground.contents[4] = ItemCreate(ItemWoodenSword, (Vec2){300, 200});
     ground.contents[3] = ItemCreate(ItemMetalSword, (Vec2){300, 400});
-    ground.top = 4;
+    ground.contents[2] = ItemCreate(Pistol, (Vec2){300,300});
+    ground.top = 5;
     return ground;
 }
 
