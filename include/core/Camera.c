@@ -92,9 +92,13 @@ void CameraDrawLine(Camera *camera, int x1, int y1, int x2, int y2, SDL_Color co
     CameraTransformPoint(camera, &point1);
     CameraTransformPoint(camera, &point2);
 
-    SDL_Rect rect = {point1.x, point1.y, point2.x - point1.x, point2.y - point1.y};
-    if (SDL_HasIntersection(&rect, &camera->viewport))
-        GraphicsDrawLine(camera->gfx, point1.x, point1.y, point2.x, point2.y, color);
+    int x1_t = point1.x;
+    int y1_t = point1.y;
+    int x2_t = point2.x;
+    int y2_t = point2.y;
+
+    if (SDL_IntersectRectAndLine(&camera->viewport, &x1_t, &y1_t, &x2_t, &y2_t))
+        GraphicsDrawLine(camera->gfx, x1_t, y1_t, x2_t, y2_t, color);
 }
 
 void CameraTransformRect(Camera *camera, SDL_Rect *rect)
