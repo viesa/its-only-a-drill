@@ -18,6 +18,7 @@ typedef enum EntityType
 {
     ET_Player,
     ET_Woman,
+    ET_WomanP,
     //Used only by Map.c
     ET_PlayerSpawn,
     //Used only by Map.c

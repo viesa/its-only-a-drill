@@ -24,9 +24,24 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.entityState = Neutral;
 
         enemyPos = RectMid(entity.drawables[0].dst);
-        entity.desiredPoint = Vec2AddL(enemyPos, 200);
+        entity.desiredPoint = Vec2AddL(enemyPos, -50);
         entity.indexPoint = 0;
         break;
+
+    case ET_WomanP:
+        entity.Friction = 7.7f;
+        entity.mass = 96.0f;
+        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
+        entity.hitboxIndex = 0;
+        entity.nDrawables = 1;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
+        entity.entityState = Passive;
+
+        enemyPos = RectMid(entity.drawables[0].dst);
+        entity.desiredPoint = Vec2AddL(enemyPos, -50);
+        entity.indexPoint = 0;
+        break;    
 
     case ET_PlayerSpawn:
         entity.drawables[0].spriteSheet = SS_BackgroundTiles;

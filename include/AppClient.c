@@ -56,6 +56,12 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
         EntityIndexP npc = EntityManagerAdd(ET_Woman, Vec2Create(100.0f * i + 300.0f, 0.0f));
         ENTITY_ARRAY[*npc].isNPC = SDL_TRUE;
     }
+    for (int j = 0; j < 16; j++)
+    {
+        EntityIndexP npc = EntityManagerAdd(ET_WomanP, Vec2Create(-100.0f * j - 300.0f, 0.0f));
+        ENTITY_ARRAY[*npc].isNPC = SDL_TRUE;
+    }
+    
     ENTITY_ARRAY[*app->player.entity].entityState = EntityPlayer;
 
     ScoreCreate(0);
