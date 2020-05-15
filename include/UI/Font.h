@@ -3,7 +3,6 @@
 
 #include "Dependencies.h"
 #include "Graphics.h"
-#include "FontCache.h"
 
 typedef enum FontSheet
 {
@@ -47,7 +46,7 @@ typedef enum Font3dDirection
 typedef struct Font
 {
     Graphics *gfx;
-    FC_Font *fonts[TTF_Count];
+    TTF_Font *fonts[TTF_Count];
 } Font;
 
 Font *FontCreate(Graphics *gfx);
@@ -62,16 +61,10 @@ Font *FontCreate(Graphics *gfx);
 // boxWidth: allows maximum textbox width, enables wrapping.
 // color: color to display text in.
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, SDL_Color color);
+void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
 
-// Get estimated width of text to be printed
-int FontGetWidth(Font *font, FontSheet fontEnum, char text[]);
-
-// Get estimated height of text to be printed
-int FontGetHeight(Font *font, FontSheet fontEnum, char text[]);
-
-// Get max height of font
-int FontGetMaxHeight(Font *font, FontSheet fontEnum);
+// Queries the predicted size of the font to be printed, enabling center and right alignment.
+SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
 
 // Enables 3d text display. Requires a 3d direction.
 // Draws from the furthest-back layer to the first, following the color array.
@@ -89,18 +82,13 @@ int FontGetMaxHeight(Font *font, FontSheet fontEnum);
 // direction: direction of the offset, from the POV of viewing text.
 // layers: length of color[]
 // color[]: array of all colors to be displayed on text layers.
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
+void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
 
-void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
+void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
 
 FontSheet FontGetDynamicSizing(Font *font);
-
-// After changing resolution or toggeling fullscreen I think fonts caches should be cleared
-//      - A smart SDL2-developer
-void FontReload(Font *font);
-
-void FontLoadInAllFonts(Font *font);
-void FontFreeAllFonts(Font *font);
+int FontGetWidth(Font *font, FontSheet fontEnum, char text[]);
+int FontGetHeight(FontSheet fontEnum);
 
 void FontDestroy(Font *font);
 
