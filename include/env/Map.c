@@ -245,7 +245,7 @@ int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **desti
         ENTITY_ARRAY[*index].drawables[0].dst = dst;
         ENTITY_ARRAY[*index].drawables[0].src = src;
         ENTITY_ARRAY[*index].drawables[0].rot = r;
-        ENTITY_ARRAY[*index].drawables[0].rot_anchor = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
+        ENTITY_ARRAY[*index].drawables[0].rot_anchor = Vec2Create(0.5f, 0.5f);
         ENTITY_ARRAY[*index].nDrawables = 1;
         ENTITY_ARRAY[*index].mass = m;
         ENTITY_ARRAY[*index].isCollider = (SDL_bool)c;

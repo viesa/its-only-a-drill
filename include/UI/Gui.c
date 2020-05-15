@@ -77,25 +77,25 @@ void GuiUpdate(Gui *gui)
     char pts[10];
     sprintf(pts, "%ld pts", gui->points);
     SDL_Color vitalsColor[10] = {
-        {gui->loopSwing, 159, 227},
-        {gui->loopSwing, 139, 207},
-        {gui->loopSwing, 119, 187},
-        {gui->loopSwing, 99, 167},
-        {gui->loopSwing, 79, 147},
-        {gui->loopSwing, 59, 127},
-        {gui->loopSwing, 39, 107},
-        {gui->loopSwing, 19, 87},
-        {255 - gui->loopSwing, 180, 184},
-        {255 - gui->loopSwing, 180, 184}};
+        {gui->loopSwing, 159, 227, 255},
+        {gui->loopSwing, 139, 207, 255},
+        {gui->loopSwing, 119, 187, 255},
+        {gui->loopSwing, 99, 167, 255},
+        {gui->loopSwing, 79, 147, 255},
+        {gui->loopSwing, 59, 127, 255},
+        {gui->loopSwing, 39, 107, 255},
+        {gui->loopSwing, 19, 87, 255},
+        {255 - gui->loopSwing, 180, 184, 255},
+        {255 - gui->loopSwing, 180, 184, 255}};
 
-    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FC_ALIGN_RIGHT, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Disp. Objective
     //SDL_Color objColor[2] = {
     //{102 + cos(gui->loopCount) * 5, 16, 9},
     //{239 + sin(gui->loopCount) * 5, 193, 92}};
-    //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
-    //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FAL_C, 0, gui->defaultOffset, F3D_TC, 2, objColor);
+    //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
+    //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
     GuiOverlayUpdate(gui);
 }
@@ -108,5 +108,5 @@ void GuiDrawFPS(Gui *gui)
     }
     char fps[10];
     sprintf(fps, "%d", gui->fps);
-    FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
+    FontDraw(gui->font, TTF_Arial, fps, 5, 5, FC_ALIGN_LEFT, 0, (SDL_Color){255, 255, 255}); //83
 }

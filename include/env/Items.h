@@ -6,6 +6,7 @@
 #include "Sound.h"
 #define MAX_PLYER_ITEMS 10
 #define MAX_GROUND_ITEMS 50
+// to avoid circular dependency
 
 typedef enum ItemType
 {
@@ -27,6 +28,7 @@ typedef struct Weapon
     float cooldownMS;   // in milisecondes
     float currentTime;  // in milisecondes
     float ReloadTimeMS; // in milisecondes
+    void *shootingFunction;
 } WeaponStats;
 
 typedef struct Item

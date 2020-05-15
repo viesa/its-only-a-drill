@@ -12,9 +12,9 @@ void weaponUpdate(Item *item)
 
     // reserved for bullet update
 }
-void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *renderer)
+void playerShoot(Graphics *gfx, EntityIndexP index, Camera *camera, Item *item)
 {
-#ifdef WEAPON_DEBIG
+#ifdef WEAPON_DEBUG
     log_debug("current cooldown %f", item->Stats.currentTime);
 #endif
     if (item->Stats.currentTime <= 0)
@@ -32,18 +32,17 @@ void playerShoot(EntityIndexP index, Camera *camera, Item *item, SDL_Renderer *r
         ENTITY_ARRAY[*index].Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
-        // change to closestray function THIS IS A MEM NOTE DON*T FOR GET IT if // if you find this send the following "error: 322756"
-        RayScanClosest(index, &unitPlayerToMouse, camera, renderer, &item->Stats);
+        RayScanClosest(gfx, index, &unitPlayerToMouse, camera, &item->Stats);
     }
 }
 
-void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *renderer, Camera *camera)
+void entityShoot(Graphics *gfx, int *index, Vec2 Desierdpoint, Item *item, Camera *camera)
 {
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
     if (item->Stats.currentTime <= 0)
     {
         item->Stats.currentTime = item->Stats.cooldownMS;
-#ifdef WEAPON_DEBIG
+#ifdef WEAPON_DEBUG
         log_debug("Entity %d: SHOOT!", *index);
         log_debug("Entity %d: aim at X:%f Y:%f", *index, Desierdpoint.x, Desierdpoint.y);
 #endif
@@ -59,7 +58,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
         point.y = ENTITY_ARRAY[*index].drawables[0].dst.y + (ENTITY_ARRAY[*index].drawables[0].dst.h / 2);
 
         Vec2 cameraPos = CameraGetPos(camera);
-        DrawLineOnCanvas(renderer, point.x - cameraPos.x, point.y - cameraPos.y, makeDestination.x - cameraPos.x, makeDestination.y - cameraPos.y);
+        GraphicsDrawLine(gfx, point.x - cameraPos.x, point.y - cameraPos.y, makeDestination.x - cameraPos.x, makeDestination.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
         // push back
         ENTITY_ARRAY[*index].Force.x -= itemFalloff.x;
         ENTITY_ARRAY[*index].Force.y -= itemFalloff.y;
@@ -71,7 +70,7 @@ void entityShoot(int *index, Vec2 Desierdpoint, Item *item, SDL_Renderer *render
     }
 }
 
-void RayScan(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
+void RayScan(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
@@ -79,7 +78,7 @@ void RayScan(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *
     Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
     Vec2 cameraPos = CameraGetPos(camera);
 
-    DrawLineOnCanvas(renderer, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y);
+    GraphicsDrawLine(gfx, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *index != i) // take aways this if statment for fun time with map
@@ -105,7 +104,7 @@ void RayScan(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *
         }
     }
 }
-void RayScanSingelplayer(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
+void RayScanSingelplayer(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
@@ -113,7 +112,7 @@ void RayScanSingelplayer(EntityIndexP index, Vec2 *direction, Camera *camera, SD
     Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
     Vec2 cameraPos = CameraGetPos(camera);
 
-    DrawLineOnCanvas(renderer, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y);
+    GraphicsDrawLine(gfx, playerCenter.x - cameraPos.x, playerCenter.y - cameraPos.y, rangeWithOffset.x - cameraPos.x, rangeWithOffset.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *index != i) // take aways this if statment for fun time with map
@@ -135,13 +134,13 @@ void RayScanSingelplayer(EntityIndexP index, Vec2 *direction, Camera *camera, SD
     }
 }
 
-void RayScanClosest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
+void RayScanClosest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY, closestEntity = 0, endPointX, endPointY;
     float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
-    Vec2 rangeWithOffset = Vec2AddL(playerCenter, range);
+    Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
     Vec2 cameraPos = CameraGetPos(camera);
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
@@ -167,11 +166,11 @@ void RayScanClosest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Ren
     }
     if (closestEntity <= 0)
     {
-        DrawLineOnCanvas(renderer, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, (int)rangeWithOffset.x - cameraPos.x, (int)rangeWithOffset.y - cameraPos.y);
+        GraphicsDrawLine(gfx, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, (int)rangeWithOffset.x - cameraPos.x, (int)rangeWithOffset.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
     }
     else
     {
-        DrawLineOnCanvas(renderer, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, endPointX - cameraPos.x, endPointY - cameraPos.y);
+        GraphicsDrawLine(gfx, (int)playerCenter.x - cameraPos.x, (int)playerCenter.y - cameraPos.y, endPointX - cameraPos.x, endPointY - cameraPos.y, (SDL_Color){255, 50, 50, 150});
         ENTITY_ARRAY[closestEntity].health -= stats->Damage;
         ENTITY_ARRAY[closestEntity].Force.x += direction->x * (float)(stats->falloff / 10);
         ENTITY_ARRAY[closestEntity].Force.y += direction->y * (float)(stats->falloff / 10);
@@ -181,7 +180,7 @@ void RayScanClosest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Ren
     }
 }
 
-void rayMarchingTest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Renderer *renderer, WeaponStats *stats)
+void rayMarchingTest(Graphics *gfx, EntityIndexP index, Vec2 *direction, Camera *camera, WeaponStats *stats)
 {
     Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*index].drawables[0].dst);
     Vec2 point;
@@ -195,7 +194,8 @@ void rayMarchingTest(EntityIndexP index, Vec2 *direction, Camera *camera, SDL_Re
         DirectionScale = maxDistenBeforeColision(point, index, reach);
         StepSize += DirectionScale;
         reach -= fabsf(DirectionScale);
-        DrawLineOnCanvas(renderer, RayOrgin.x - cameraPos.x, RayOrgin.y - cameraPos.y, point.x - cameraPos.x, point.y - cameraPos.y);
+
+        GraphicsDrawLine(gfx, RayOrgin.x - cameraPos.x, RayOrgin.y - cameraPos.y, point.x - cameraPos.x, point.y - cameraPos.y, (SDL_Color){255, 50, 50, 150});
         // if testLineWithEntitys is true you hit something, if reach is >0 you hit the max distance, stepsize if the step is too big, DirectionScale you hit something unhitable
         if (testLineWithEntitys(previousPoint, point, index, &stats->Damage) || reach <= 0 || StepSize > unhitable || DirectionScale <= 0)
             break;
@@ -234,7 +234,9 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
             if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
             { // reduce accuracy
                 ENTITY_ARRAY[i].health -= *damage;
+#ifdef Debug_Weapon_GetHitInfo
                 log_info("entity index = %d, id = %d, health = %d, Weight = %f isCollider = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health, ENTITY_ARRAY[i].mass, ENTITY_ARRAY[i].isCollider);
+#endif
                 return 1;
             }
         }
@@ -242,11 +244,6 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
     return 0;
 }
 
-void DrawLineOnCanvas(SDL_Renderer *renderer, int x1, int y1, int x2, int y2)
-{
-    SDL_SetRenderDrawColor(renderer, 255, 50, 50, 150);
-    SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
-}
 // void bullet(int index, Vec2 Destination, SDL_Point point, Item item, Vec2 Direction)
 // {
 //     // to create offset so you don't shoot your self

@@ -79,7 +79,7 @@ void EntityManagerOnCollision()
                             RecessiveCenter.y = (float)rHitbox->y + (float)rHitbox->h / 2.0f;
 
                             Vec2 ResultDistance = Vec2Sub(DominantCenter, RecessiveCenter);
-                            Vec2 direction = Vec2Unit(ResultDistance);
+                            // Vec2 direction = Vec2Unit(ResultDistance);
 
                             //keept for transfer of energy
                             //float HarassersForce = Vec2Len(ENTITY_ARRAY[Dominant].Force);

@@ -17,7 +17,6 @@ struct AppClient
     GroundListItems groundListItems;
 
     Player player; // player == entity 0
-
     MapList *mapList;
 };
 
@@ -66,7 +65,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
-
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -202,13 +200,13 @@ void AppClientUpdate(AppClient *app)
             {
                 if (app->player.inventory.contents[app->player.inventory.top - 1].Stats.ammo > 0)
                 {
-                    playerShoot(app->player.entity, app->camera, &app->player.inventory.contents[app->player.inventory.top - 1], app->gfx->window->renderer);
+                    playerShoot(app->gfx, app->player.entity, app->camera, &app->player.inventory.contents[app->player.inventory.top - 1]);
                 }
             }
         }
         weaponUpdate(&app->player.inventory.contents[app->player.inventory.top - 1]);
 
-        BehaviorMoveEntity(app->movingPattern, app->gfx->window->renderer, app->camera, &app->player);
+        BehaviorMoveEntity(app->movingPattern, app->camera, &app->player);
 
         if (InputIsKeyPressed(SDL_SCANCODE_K))
         {
@@ -239,6 +237,7 @@ void AppClientUpdate(AppClient *app)
 
 void AppClientDraw(AppClient *app)
 {
+
     switch (GameStateGet())
     {
     case GS_Menu:
@@ -281,6 +280,9 @@ void AppClientDraw(AppClient *app)
         break;
     }
     NotifierUpdate();
+
+    if (InputIsKeyPressed(SDL_SCANCODE_P))
+        log_info("FPS: %f", ClockGetFPS());
 
 #ifdef ANY_DEBUG
     GuiDrawFPS(app->gui);

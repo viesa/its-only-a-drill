@@ -13,11 +13,13 @@ Window *WindowCreate(const char *title)
     window->height = displaymode.h - 100; // Remove 100 pixels to account for window not being in fullscreen, and compensate for menu bars.
 #endif
 
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
     window->sdl_window = SDL_CreateWindow(title,
                                           SDL_WINDOWPOS_CENTERED,
                                           SDL_WINDOWPOS_CENTERED,
                                           window->width,
-                                          window->height, SDL_WINDOW_SHOWN);
+                                          window->height,
+                                          SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     if (!window->sdl_window)
         log_fatal("Could not create window: %s", SDL_GetError());
 
@@ -32,7 +34,6 @@ Window *WindowCreate(const char *title)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetSwapInterval(1);
 
     WindowSetIcon(window, "assets/window_icon.bmp");
 
@@ -71,30 +72,12 @@ void WindowSetAntiAliasing(Window *window, const int level)
 
 void WindowSetVSync(Window *window, SDL_bool onoff)
 {
-    if (onoff)
-    {
-        SDL_GL_SetSwapInterval(1);
-        window->vsyncEnabled = SDL_TRUE;
-    }
-    else
-    {
-        SDL_GL_SetSwapInterval(0);
-        window->vsyncEnabled = SDL_FALSE;
-    }
+    SDL_GL_SetSwapInterval((window->vsyncEnabled = onoff));
 }
 
 void WindowSetFullscreen(Window *window, SDL_bool onoff)
 {
-    if (onoff)
-    {
-        SDL_SetWindowFullscreen(window->sdl_window, SDL_WINDOW_FULLSCREEN);
-        window->isFullscreen = SDL_TRUE;
-    }
-    else
-    {
-        SDL_SetWindowFullscreen(window->sdl_window, 0);
-        window->isFullscreen = SDL_FALSE;
-    }
+    SDL_SetWindowFullscreen(window->sdl_window, (window->isFullscreen = onoff) ? SDL_WINDOW_FULLSCREEN : 0);
 }
 
 void WindowSetTitle(Window *window, const char *title)
@@ -104,9 +87,7 @@ void WindowSetTitle(Window *window, const char *title)
 
 void WindowSetSize(Window *window, int width, int height)
 {
-    window->width = width;
-    window->height = height;
-    SDL_SetWindowSize(window->sdl_window, window->width, window->height);
+    SDL_SetWindowSize(window->sdl_window, (window->width = width), (window->height = height));
 }
 
 void WindowSetIcon(Window *window, const char *filepath)
