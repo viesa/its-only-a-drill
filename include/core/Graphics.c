@@ -58,12 +58,26 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
 void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color, SDL_bool filled)
 {
     SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.g, color.a);
-    SDL_RenderFillRect(gfx->window->renderer, &rect);
+
+    if (filled)
+    {
+        SDL_RenderFillRect(gfx->window->renderer, &rect);
+    }
+    else
+    {
+        SDL_RenderDrawRect(gfx->window->renderer, &rect);
+    }
 }
 
 void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
 {
     GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
+}
+
+void GraphicsDrawLine(Graphics *gfx, int x1, int y1, int x2, int y2, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLine(gfx->window->renderer, x1, y1, x2, y2);
 }
 
 void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
@@ -117,12 +131,6 @@ void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
         CurB += dB;
         CurA += dA;
     }
-}
-
-void GraphicsDrawLine(Graphics *gfx, int x1, int y1, int x2, int y2, SDL_Color color)
-{
-    SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawLine(gfx->window->renderer, x1, y1, x2, y2);
 }
 
 SDL_Texture *GraphicsLoadTexture(Graphics *gfx, char *path)

@@ -15,6 +15,12 @@ void CameraUpdate(Camera *camera);
 /// \param drawable: if drawable.dst is not within the
 /// camera viewport, it will not be processed further
 void CameraDraw(Camera *camera, Drawable drawable);
+void CameraDrawRect(Camera *camera, SDL_Rect rect, SDL_Color color, SDL_bool filled);
+void CameraDrawPoint(Camera *camera, Vec2 pos, size_t radius);
+void CameraDrawLine(Camera *camera, int x1, int y1, int x2, int y2, SDL_Color color);
+
+void CameraTransformRect(Camera *camera, SDL_Rect *rect);
+void CameraTransformPoint(Camera *camera, Vec2 *point);
 
 /// Return a position to the middle point of the viewport
 Vec2 CameraMiddle(Camera *camera);
