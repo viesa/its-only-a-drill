@@ -14,7 +14,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     {
     case ET_Woman:
         entity.Friction = 7.7f;
-        entity.mass = 96.0f;
+        entity.mass = 100.0f + (float)(rand() % 1000) / 1000.0f;
         entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
         entity.hitboxIndex = 0;
         entity.nDrawables = 1;
@@ -22,9 +22,14 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.isCollider = SDL_TRUE;
         break;
 
-    case ET_PlayerSpawn:
-        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+    case ET_WomanP:
+        entity.Friction = 7.7f;
+        entity.mass = 96.0f;
+        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
         entity.hitboxIndex = 0;
+        entity.nDrawables = 1;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
         break;
 
     case ET_MapObject:

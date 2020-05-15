@@ -1,4 +1,4 @@
-//#define __USE_MINGW_ANSI_STDIO 1
+#define __USE_MINGW_ANSI_STDIO 1
 
 // #define SMALLWINDOW_PUBLICSERVER_RAWPACKAGERLOGS
 
@@ -11,7 +11,7 @@
 // If defined, mapList will only import maps on start
 #define WIN_DEBUG
 
-// #define ANY_DEBUG
+#define ANY_DEBUG
 
 #ifdef ANY_DEBUG
 // #define MAIN_DEBUG
@@ -30,7 +30,7 @@
 // #define MAPINFO_DEBUG
 // #define MAPLIST_DEBUG
 
-#define WINDOW_DEBUG
+// #define WINDOW_DEBUG
 // #define GRAPHICS_DEBUG
 
 //#define ENTITY_DEBUG

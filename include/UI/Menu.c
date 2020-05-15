@@ -189,8 +189,8 @@ void MenuUpdateSplash(Menu *menu)
 
         GraphicsDraw(menu->gfx, menu->mainMenuDbl);
 
-        FontDraw3DCustom(menu->font, TTF_Antilles_XXL, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FC_ALIGN_CENTER, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
-        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FC_ALIGN_CENTER, 0, menu->clr[9]);
+        FontDraw3DCustom(menu->font, TTF_Antilles_XXL, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
     }
     //Fade-in animation
     TransitionDraw();
@@ -211,8 +211,8 @@ void MenuUpdateName(Menu *menu)
     if (InputIsKeyPressed(SDL_SCANCODE_BACKSPACE))
         InputPortalBackspace();
 
-    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FC_ALIGN_CENTER, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
-    FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Type a name, press [Enter] when done.", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FC_ALIGN_CENTER, 0, menu->clr[9]);
+    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+    FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Type a name, press [Enter] when done.", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
 
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
@@ -557,19 +557,19 @@ void MenuUpdateLobby(Menu *menu)
         sprintf(playerList[i], "%s", LOBBY_NAMES[i].data);
     }
 
-    int spacing = 1.5 * FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font));
+    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing(menu->font));
 
     //Draw playerlist
     for (int i = 0; i < playerListLength; i++)
     {
-        int yPos = FontGetMaxHeight(menu->font, TTF_Antilles_XXL) + 50 + spacing * i;
+        int yPos = FontGetHeight(TTF_Antilles_XXL) + 50 + spacing * i;
 
         if (yPos > menu->gfx->window->height - 50 - 2 * spacing)
             continue;
 
         int xPos = menu->gfx->window->width / 20;
 
-        FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), playerList[i], xPos, yPos, FC_ALIGN_LEFT, 0, 1, F3D_TL, 10, menu->clr);
+        FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), playerList[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
     }
 
     ///
@@ -599,17 +599,17 @@ void MenuUpdateLobby(Menu *menu)
         if (i == menu->activeIndex)
         {
             int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
-            int rectHeight = FontGetHeight(menu->font, FontGetDynamicSizing(menu->font), options[i]);
+            int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
 
             SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
             SDL_Color color = {0, 0, 0, 200};
             GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
 
-            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FC_ALIGN_LEFT, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else
         {
-            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FC_ALIGN_LEFT, 0, 1, F3D_TL, 10, menu->clr);
+            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
         }
     }
 
@@ -633,9 +633,9 @@ void MenuUpdateLobby(Menu *menu)
     /// MAP PREVIEW
     ///
     int x = menu->gfx->window->width / 2 - 50;
-    int y = menu->gfx->window->height / 2 - 50 - FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font)) - 20;
+    int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
     int w = menu->gfx->window->width / 3 + 100;
-    int h = menu->gfx->window->height / 3 + 120 + FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font));
+    int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
     SDL_Rect mapBackgroundRect = {x, y, w, h};
     GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
 
@@ -647,7 +647,7 @@ void MenuUpdateLobby(Menu *menu)
     FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
                x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
                y + 20,
-               FC_ALIGN_LEFT, 0, 1, F3D_TL, 10, menu->clr);
+               FAL_L, 0, 1, F3D_TL, 10, menu->clr);
 
     MapDraw(menu->camera);
 
@@ -1301,22 +1301,22 @@ void MenuUpdateSkin(Menu *menu, Player *player)
 
 void MenuTitleDraw(Menu *menu, char title[100])
 {
-    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, title, menu->gfx->window->width / 20, 25, FC_ALIGN_LEFT, 0, cos(menu->loopCount) * 3, sin(menu->loopCount) * 3, 10, menu->clr);
+    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, title, menu->gfx->window->width / 20, 25, FAL_L, 0, cos(menu->loopCount) * 3, sin(menu->loopCount) * 3, 10, menu->clr);
 }
 
 void MenuDrawPreviewMap(Menu *menu)
 {
     int x = menu->gfx->window->width / 2 - 50;
-    int y = menu->gfx->window->height / 2 - 50 - FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font)) - 20;
+    int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
     int w = menu->gfx->window->width / 3 + 100;
-    int h = menu->gfx->window->height / 3 + 120 + FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font));
+    int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
     SDL_Rect mapBackgroundRect = {x, y, w, h};
     if (menu->startedOutTransition || menu->startedInTransition)
     {
         int x_t = (int)TransitionGetSaveSlot(1) - 50;
-        int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font)) - 20;
+        int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
         int w_t = (int)TransitionGetSaveSlot(3) + 100;
-        int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font));
+        int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
         GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)}, SDL_TRUE);
     }
     else
@@ -1333,7 +1333,7 @@ void MenuDrawPreviewMap(Menu *menu)
         FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
                    x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
                    y + 20,
-                   FC_ALIGN_LEFT, 0, 1, F3D_TL, 10, menu->clr);
+                   FAL_L, 0, 1, F3D_TL, 10, menu->clr);
     }
     MapDraw(menu->camera);
 }
@@ -1349,7 +1349,7 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
 
     //Get font spacing
     //*1.5 factor for space between lines
-    int spacing = 1.5 * FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font));
+    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing(menu->font));
 
     //Draw menu options
     for (int i = 0; i < optionLength; i++)
@@ -1358,16 +1358,16 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
         int screenCenterY = menu->gfx->window->height / 2;
         int yPos;
 
-        if (spacing * optionLength > menu->font->gfx->window->height - FontGetMaxHeight(menu->font, TTF_Antilles_XXL) - 50)
+        if (spacing * optionLength > menu->font->gfx->window->height - FontGetHeight(TTF_Antilles_XXL) - 50)
         {
             yPos = screenCenterY - (spacing * menu->activeIndex) + spacing * i;
         }
         else
         {
-            yPos = FontGetMaxHeight(menu->font, TTF_Antilles_XXL) + 50 + spacing * i;
+            yPos = FontGetHeight(TTF_Antilles_XXL) + 50 + spacing * i;
         }
 
-        if (yPos + FontGetMaxHeight(menu->font, FontGetDynamicSizing(menu->font)) < FontGetMaxHeight(menu->font, TTF_Antilles_XXL) + 50)
+        if (yPos + FontGetHeight(FontGetDynamicSizing(menu->font)) < FontGetHeight(TTF_Antilles_XXL) + 50)
             continue;
 
         int xPos = menu->gfx->window->width / 20; //menu->gfx->window->width / 2
@@ -1375,16 +1375,16 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
         if (i == menu->activeIndex)
         {
             int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
-            int rectHeight = FontGetHeight(menu->font, FontGetDynamicSizing(menu->font), options[i]);
+            int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
 
             SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
             SDL_Color color = {0, 0, 0, 200};
             GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
-            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FC_ALIGN_LEFT, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else
         {
-            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FC_ALIGN_LEFT, 0, 1, F3D_TL, 10, menu->clr);
+            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
         }
     }
 }

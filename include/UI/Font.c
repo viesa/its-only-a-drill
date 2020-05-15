@@ -5,33 +5,98 @@ Font *FontCreate(Graphics *gfx)
     Font *font = MALLOC(Font);
     font->gfx = gfx;
 
-    FontLoadInAllFonts(font);
+    //Debug font
+    font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
+
+    //Dynamic sizing fonts
+    font->fonts[TTF_Antilles_XS] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 40);
+    font->fonts[TTF_Antilles_S] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 50);
+    font->fonts[TTF_Antilles_M] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 75);
+    font->fonts[TTF_Antilles_L] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 100);
+    font->fonts[TTF_Antilles_XL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 125);
+    font->fonts[TTF_Antilles_XXL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
 
     return font;
 }
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, SDL_Color color)
+void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color)
 {
-    FC_SetDefaultColor(font->fonts[fontEnum], (color));
-    FC_DrawAlign(font->fonts[fontEnum], font->gfx->window->renderer, x, y, align, text);
+    int alignOffsetX = 0;
+
+    //Calculate destination from alignment
+    SDL_Rect drawSize = FontGetSize(font, fontEnum, text);
+
+    switch (align)
+    {
+    case FAL_MENUSIDE:
+    case FAL_L:
+        break;
+    case FAL_C:
+        alignOffsetX = drawSize.w / 2;
+        break;
+    case FAL_R:
+        alignOffsetX = drawSize.w;
+        break;
+    default:
+        break;
+    }
+
+    if (!boxWidth)
+        boxWidth = drawSize.w;
+
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font->fonts[fontEnum], text, color, boxWidth);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    SDL_FreeSurface(surface);
+
+    int texW = 0;
+    int texH = 0;
+    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+    SDL_Rect dstrect = {x - alignOffsetX, y, texW, texH};
+
+    if (align == FAL_MENUSIDE)
+    {
+        SDL_RenderCopyEx(font->gfx->window->renderer, texture, NULL, &dstrect, -30, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
+    }
+    else
+    {
+        SDL_RenderCopy(font->gfx->window->renderer, texture, NULL, &dstrect);
+    }
+
+    SDL_DestroyTexture(texture);
+}
+
+// FontGetSize
+//
+// Get estimated size of text to be printed. Returned as a SDL_Rect.
+SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
+{
+    SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    int x = 0;
+    int y = 0;
+    int texW = 0;
+    int texH = 0;
+    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+    return (SDL_Rect){x, y, texW, texH};
 }
 
 int FontGetWidth(Font *font, FontSheet fontEnum, char text[])
 {
-    return FC_GetWidth(font->fonts[fontEnum], text);
+    SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    int texW = 0;
+    int texH = 0;
+    SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+    return texW;
 }
 
-int FontGetHeight(Font *font, FontSheet fontEnum, char text[])
-{
-    return FC_GetHeight(font->fonts[fontEnum], text);
-}
-
-int FontGetMaxHeight(Font *font, FontSheet fontEnum)
-{
-    return FontGetHeight(font, fontEnum, "A");
-}
-
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[])
+void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[])
 {
     for (size_t i = 0; i < layers; i++)
     {
@@ -68,7 +133,7 @@ void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, F
     }
 }
 
-void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FC_AlignEnum align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[])
+void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[])
 {
     for (size_t i = 0; i < layers; i++)
     {
@@ -109,45 +174,44 @@ FontSheet FontGetDynamicSizing(Font *font)
     return TTF_Antilles_XS;
 }
 
-void FontReload(Font *font)
+int FontGetHeight(FontSheet fontEnum)
 {
-    FontFreeAllFonts(font);
-    FontLoadInAllFonts(font);
-}
-
-void FontLoadInAllFonts(Font *font)
-{
-    // Initialize all font caches
-    for (int i = 0; i < TTF_Count; i++)
-        font->fonts[i] = FC_CreateFont();
-
-    //Debug font
-    FC_LoadFont(font->fonts[TTF_Arial], font->gfx->window->renderer, "./assets/fonts/arial.ttf", 25, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-
-    //Dynamic sizing fonts
-    FC_LoadFont(font->fonts[TTF_Antilles_XS], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 40, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-    FC_LoadFont(font->fonts[TTF_Antilles_S], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 50, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-    FC_LoadFont(font->fonts[TTF_Antilles_M], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 75, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-    FC_LoadFont(font->fonts[TTF_Antilles_L], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 100, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-    FC_LoadFont(font->fonts[TTF_Antilles_XL], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 125, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-    FC_LoadFont(font->fonts[TTF_Antilles_XXL], font->gfx->window->renderer, "./assets/fonts/antillesoutital.ttf", 175, FC_MakeColor(255, 255, 255, 255), TTF_STYLE_NORMAL);
-
-    // Sets correct spacing between every letter
-    for (int i = 0; i < TTF_Count; i++)
-        FC_SetSpacing(font->fonts[i], -5);
-}
-
-void FontFreeAllFonts(Font *font)
-{
-    for (size_t i = 0; i < TTF_Count; i++)
+    switch (fontEnum)
     {
-        FC_FreeFont(font->fonts[i]);
-        font->fonts[i] = NULL;
+    case TTF_Arial:
+        return 25;
+        break;
+    case TTF_Antilles_XS:
+        return 40;
+        break;
+    case TTF_Antilles_S:
+        return 50;
+        break;
+    case TTF_Antilles_M:
+        return 75;
+        break;
+    case TTF_Antilles_L:
+        return 100;
+        break;
+    case TTF_Antilles_XL:
+        return 125;
+        break;
+    case TTF_Antilles_XXL:
+        return 175;
+        break;
+
+    default:
+        return 0;
+        break;
     }
 }
 
 void FontDestroy(Font *font)
 {
-    FontFreeAllFonts(font);
+    for (size_t i = 0; i < TTF_Count; i++)
+    {
+        TTF_CloseFont(font->fonts[i]);
+    }
+
     SDL_free(font);
 }
