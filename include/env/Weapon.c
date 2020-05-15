@@ -9,8 +9,7 @@ void weaponUpdate(Item *item)
 {
     // counts the cooldown
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
-    if (item->Stats.currentTime <= 0.0f)
-        item->Stats.currentTime = 0.0f;
+    item->Stats.currentTime = (item->Stats.currentTime <= 0.0f) ? -1 : item->Stats.currentTime;
 }
 
 void RayScan(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *stats)

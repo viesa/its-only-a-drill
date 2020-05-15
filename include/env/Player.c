@@ -69,7 +69,10 @@ void PlayerUpdate(Player *player, Camera *camera)
         PlayerAnimationUpdate(player);
         PlayerRotateToCamera(player);
         if (InputIsMousePressed(BUTTON_LEFT))
-            PlayerShoot(player, camera);
+        {
+            if (player->inventory.contents[player->inventory.top - 1].Stats.ammo > 0)
+                PlayerShoot(player, camera);
+        }
     }
     weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
 }
@@ -141,10 +144,10 @@ void PlayerRotateToCamera(Player *player)
 
 void PlayerShoot(Player *player, Camera *camera)
 {
+    Item *item = &player->inventory.contents[player->inventory.top - 1];
 #ifdef PLAYER_DEBUG
     log_debug("current cooldown %f", item->Stats.currentTime);
 #endif
-    Item *item = &player->inventory.contents[player->inventory.top - 1];
     if (item->Stats.currentTime <= 0)
     {
         Entity *entity = PlayerGetEntity(player);
