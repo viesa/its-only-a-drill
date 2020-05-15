@@ -44,7 +44,8 @@ void GraphicsDestroy(Graphics *gfx)
 
 void GraphicsDraw(Graphics *gfx, Drawable drawable)
 {
-    SDL_Point rot_point = (SDL_Point){(int)drawable.rot_anchor.x, (int)drawable.rot_anchor.y};
+    SDL_Point rot_point = (SDL_Point){drawable.rot_anchor.x * (float)drawable.dst.w,
+                                      drawable.rot_anchor.y * (float)drawable.dst.h};
     drawable.spriteSheet %= SS_Count;
     SDL_RenderCopyEx(gfx->window->renderer,
                      gfx->m_allTextures[drawable.spriteSheet],
@@ -55,15 +56,29 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      SDL_FLIP_NONE);
 }
 
-void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color)
+void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color, SDL_bool filled)
 {
     SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.g, color.a);
-    SDL_RenderFillRect(gfx->window->renderer, &rect);
+
+    if (filled)
+    {
+        SDL_RenderFillRect(gfx->window->renderer, &rect);
+    }
+    else
+    {
+        SDL_RenderDrawRect(gfx->window->renderer, &rect);
+    }
 }
 
 void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
 {
     GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
+}
+
+void GraphicsDrawLine(Graphics *gfx, int x1, int y1, int x2, int y2, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLine(gfx->window->renderer, x1, y1, x2, y2);
 }
 
 void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
@@ -82,10 +97,8 @@ void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
 
     for (float x = rect.x; x < rect.x + rect.w; x++)
     {
-        SDL_Rect drawRect = {x, rect.y, 1, rect.h};
-        SDL_SetRenderDrawColor(gfx->window->renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
-        SDL_RenderFillRect(gfx->window->renderer, &drawRect);
-
+        SDL_Color color = {(int)CurR, (int)CurG, (int)CurB, (int)CurA};
+        GraphicsDrawRect(gfx, (SDL_Rect){x, rect.y, 1, rect.h}, color, SDL_TRUE);
         //Add an increment to the color channels
         CurR += dR;
         CurG += dG;
@@ -110,9 +123,8 @@ void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
 
     for (float y = rect.y; y < rect.y + rect.h; y++)
     {
-        SDL_Rect drawRect = {rect.x, y, rect.w, 1};
-        SDL_SetRenderDrawColor(gfx->window->renderer, (int)CurR, (int)CurG, (int)CurB, (int)CurA);
-        SDL_RenderFillRect(gfx->window->renderer, &drawRect);
+        SDL_Color color = {(int)CurR, (int)CurG, (int)CurB, (int)CurA};
+        GraphicsDrawRect(gfx, (SDL_Rect){rect.x, y, rect.w, 1}, color, SDL_TRUE);
 
         //Add an increment to the color channels
         CurR += dR;

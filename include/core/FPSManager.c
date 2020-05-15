@@ -21,5 +21,6 @@ void FPSManagerAdjust(FPSManager *fpsManager)
 {
     fpsManager->endWait = SDL_GetPerformanceCounter();
     float difference = (fpsManager->endWait - fpsManager->startWait) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-    SDL_Delay(((((float)(1000 / fpsManager->desiredFPS)) - difference) < 0) ? 0 : (((float)(1000 / fpsManager->desiredFPS)) - difference));
+    if (fpsManager->desiredFPS != 0)
+        SDL_Delay(((((float)(1000 / fpsManager->desiredFPS)) - difference) < 0) ? 0 : (((float)(1000 / fpsManager->desiredFPS)) - difference));
 }

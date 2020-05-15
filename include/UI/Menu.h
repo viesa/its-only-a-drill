@@ -58,6 +58,10 @@ typedef struct Menu
     Anim previewBody;
 
     MapList *mapList;
+
+    double volumeMaster;
+    Uint8 volumeSFX;
+    Uint8 volumeMusic;
 } Menu;
 
 // Creates menu
@@ -65,7 +69,7 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
 void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player);
 void MenuUpdateSplash(Menu *menu);
 void MenuUpdateName(Menu *menu);
-void MenuUpdateMainMenu(Menu *menu, Player *player);
+void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps);
 void MenuUpdateInGameMenu(Menu *menu);
 void MenuUpdateJoinLobby(Menu *menu);
 void MenuUpdateHostLobby(Menu *menu);
@@ -75,6 +79,8 @@ void MenuUpdateOptions(Menu *menu);
 void MenuUpdateResolution(Menu *menu);
 void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
 void MenuUpdateKeybinding(Menu *menu);
+void MenuUpdateAudio(Menu *menu);
+
 void MenuUpdateCustomMap(Menu *menu);
 void MenuUpdateSkin(Menu *menu, Player *player);
 void MenuTitleDraw(Menu *menu, char title[100]);

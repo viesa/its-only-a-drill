@@ -62,19 +62,67 @@ void CameraUpdate(Camera *camera)
 
 void CameraDraw(Camera *camera, Drawable drawable)
 {
-    drawable.dst.x -= camera->position.x;
-    drawable.dst.y -= camera->position.y;
-    Vec2 mid = CameraMiddle(camera);
-    drawable.dst.x -= mid.x;
-    drawable.dst.y -= mid.y;
-    drawable.dst.x *= camera->scale;
-    drawable.dst.y *= camera->scale;
-    drawable.dst.w *= camera->scale;
-    drawable.dst.h *= camera->scale;
-    drawable.dst.x += mid.x;
-    drawable.dst.y += mid.y;
+    CameraTransformRect(camera, &drawable.dst);
     if (SDL_HasIntersection(&drawable.dst, &camera->viewport))
         GraphicsDraw(camera->gfx, drawable);
+}
+
+void CameraDrawRect(Camera *camera, SDL_Rect rect, SDL_Color color, SDL_bool filled)
+{
+    CameraTransformRect(camera, &rect);
+    if (SDL_HasIntersection(&rect, &camera->viewport))
+        GraphicsDrawRect(camera->gfx, rect, color, filled);
+}
+
+void CameraDrawPoint(Camera *camera, Vec2 pos, size_t radius)
+{
+    CameraTransformPoint(camera, &pos);
+    SDL_Rect rect = {pos.x - radius * camera->scale,
+                     pos.y - radius * camera->scale,
+                     radius * 2 * camera->scale,
+                     radius * 2 * camera->scale};
+    if (SDL_HasIntersection(&rect, &camera->viewport))
+        GraphicsDraw(camera->gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, rect, SS_RedCircle));
+}
+
+void CameraDrawLine(Camera *camera, int x1, int y1, int x2, int y2, SDL_Color color)
+{
+    Vec2 point1 = Vec2Create((float)x1, (float)y1);
+    Vec2 point2 = Vec2Create((float)x2, (float)y2);
+    CameraTransformPoint(camera, &point1);
+    CameraTransformPoint(camera, &point2);
+
+    SDL_Rect rect = {point1.x, point1.y, point2.x - point1.x, point2.y - point1.y};
+    if (SDL_HasIntersection(&rect, &camera->viewport))
+        GraphicsDrawLine(camera->gfx, point1.x, point1.y, point2.x, point2.y, color);
+}
+
+void CameraTransformRect(Camera *camera, SDL_Rect *rect)
+{
+    rect->x -= camera->position.x;
+    rect->y -= camera->position.y;
+    Vec2 mid = CameraMiddle(camera);
+    rect->x -= mid.x;
+    rect->y -= mid.y;
+    rect->x *= camera->scale;
+    rect->y *= camera->scale;
+    rect->w *= camera->scale;
+    rect->h *= camera->scale;
+    rect->x += mid.x;
+    rect->y += mid.y;
+}
+
+void CameraTransformPoint(Camera *camera, Vec2 *point)
+{
+    point->x -= camera->position.x;
+    point->y -= camera->position.y;
+    Vec2 mid = CameraMiddle(camera);
+    point->x -= mid.x;
+    point->y -= mid.y;
+    point->x *= camera->scale;
+    point->y *= camera->scale;
+    point->x += mid.x;
+    point->y += mid.y;
 }
 
 Vec2 CameraMiddle(Camera *camera)

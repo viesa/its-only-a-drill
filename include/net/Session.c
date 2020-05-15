@@ -20,7 +20,10 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
 
     session.mapInfo = MapInfoCreateFromJSON(json);
     if (session.mapInfo.uid == -1)
+    {
+        badSession.mapInfo = session.mapInfo;
         return badSession;
+    }
 
     JSONDestroy(json);
     return session;
@@ -28,6 +31,8 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
 
 void SessionDestroy(Session *session)
 {
+    if (session->playerIDs)
+        VectorDestroy(session->playerIDs);
     FREE(session->rawMap);
     MapInfoDestroy(&session->mapInfo);
 }

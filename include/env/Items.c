@@ -18,7 +18,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 1000;
+        i.Stats.falloff = 250;
         i.Stats.cooldownMS = 500.0f;
         i.Stats.currentTime = 10.0f;
         i.itemAction = SoundCreate(SF_SwordSwing);

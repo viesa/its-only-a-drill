@@ -27,13 +27,13 @@ void LoadingBarUpdate(LoadingBar *bar)
         int h = winH / 5;
         int progW = w / 100 * bar->progress - 10;
 
-        SDL_SetRenderDrawColor(bar->gfx->window->renderer, 255, 255, 255, 255);
         SDL_Rect bg = {winW / 2 - w / 2, winH / 2 - h / 2, w, h};
-        SDL_RenderFillRect(bar->gfx->window->renderer, &bg);
+        SDL_Color bg_color = {255, 255, 255, 255};
+        GraphicsDrawRect(bar->gfx, bg, bg_color, SDL_TRUE);
 
-        SDL_SetRenderDrawColor(bar->gfx->window->renderer, 0, 0, 0, 255);
+        SDL_Color fg_color = {0, 0, 0, 255};
         SDL_Rect fg = {winW / 2 - w / 2 + 5, winH / 2 - h / 2 + 5, progW, h - 10};
-        SDL_RenderFillRect(bar->gfx->window->renderer, &fg);
+        GraphicsDrawRect(bar->gfx, fg, fg_color, SDL_TRUE);
     }
 }
 

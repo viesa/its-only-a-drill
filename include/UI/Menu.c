@@ -41,6 +41,10 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
 
     menu->mapList = mapList;
 
+    menu->volumeMaster = 1;
+    menu->volumeSFX = 64;
+    menu->volumeMusic = 64;
+
     return menu;
 }
 
@@ -84,16 +88,16 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
     }
 
     //Update text colors
-    menu->clr[0] = (SDL_Color){menu->loopSwing, 159, 227};
-    menu->clr[1] = (SDL_Color){menu->loopSwing, 139, 207};
-    menu->clr[2] = (SDL_Color){menu->loopSwing, 119, 187};
-    menu->clr[3] = (SDL_Color){menu->loopSwing, 99, 167};
-    menu->clr[4] = (SDL_Color){menu->loopSwing, 79, 147};
-    menu->clr[5] = (SDL_Color){menu->loopSwing, 59, 127};
-    menu->clr[6] = (SDL_Color){menu->loopSwing, 39, 107};
-    menu->clr[7] = (SDL_Color){menu->loopSwing, 19, 87};
-    menu->clr[8] = (SDL_Color){255 - menu->loopSwing, 180, 184};
-    menu->clr[9] = (SDL_Color){255 - menu->loopSwing, 180, 184};
+    menu->clr[0] = (SDL_Color){menu->loopSwing, 159, 227, 255};
+    menu->clr[1] = (SDL_Color){menu->loopSwing, 139, 207, 255};
+    menu->clr[2] = (SDL_Color){menu->loopSwing, 119, 187, 255};
+    menu->clr[3] = (SDL_Color){menu->loopSwing, 99, 167, 255};
+    menu->clr[4] = (SDL_Color){menu->loopSwing, 79, 147, 255};
+    menu->clr[5] = (SDL_Color){menu->loopSwing, 59, 127, 255};
+    menu->clr[6] = (SDL_Color){menu->loopSwing, 39, 107, 255};
+    menu->clr[7] = (SDL_Color){menu->loopSwing, 19, 87, 255};
+    menu->clr[8] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
+    menu->clr[9] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
 
     AnimUpdate(&menu->previewBody, ClockGetDeltaTime());
     AnimUpdate(&menu->previewLeg, ClockGetDeltaTime());
@@ -113,6 +117,13 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
     }
     menu->lastIndex = menu->activeIndex;
 
+    //actually do some shit with the volumes?
+    AudioSetSFX(menu->volumeSFX);
+    AudioSetMusic(menu->volumeMusic);
+
+    //MASTER LAST
+    AudioSetMaster(menu->volumeMaster);
+
     //Decides what shall be drawn on top
     switch (MenuStateGet())
     {
@@ -123,7 +134,7 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         MenuUpdateName(menu);
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, player);
+        MenuUpdateMainMenu(menu, player, fpsManager);
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu(menu);
@@ -151,6 +162,9 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
         break;
     case MS_KEYBINDING:
         MenuUpdateKeybinding(menu);
+        break;
+    case MS_Audio:
+        MenuUpdateAudio(menu);
         break;
     case MS_CustomMap:
         MenuUpdateCustomMap(menu);
@@ -208,7 +222,7 @@ void MenuUpdateName(Menu *menu)
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu, Player *player)
+void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
 {
     //Determine menu options
     int optionLength = 8;
@@ -276,9 +290,12 @@ void MenuUpdateMainMenu(Menu *menu, Player *player)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)ENTITY_ARRAY[*player->entity].drawables[0].spriteSheet,
+            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
                                                menu->gfx->window->width,
-                                               menu->gfx->window->height, *menu->bindings);
+                                               menu->gfx->window->height, *menu->bindings,
+                                               menu->gfx->window->isFullscreen,
+                                               menu->gfx->window->vsyncEnabled,
+                                               fps->desiredFPS);
             SettingsSave(settings);
             break;
         }
@@ -398,6 +415,7 @@ void MenuUpdateHostLobby(Menu *menu)
         {
             MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
             FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
 
             ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
 
@@ -580,12 +598,13 @@ void MenuUpdateLobby(Menu *menu)
 
         if (i == menu->activeIndex)
         {
-            int rectWidth = FontGetSize(menu->font, FontGetDynamicSizing(menu->font), options[i]).w;
+            int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
             int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
 
-            SDL_Rect drawRect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
-            SDL_SetRenderDrawColor(menu->font->gfx->window->renderer, 0, 0, 0, 200);
-            SDL_RenderFillRect(menu->font->gfx->window->renderer, &drawRect);
+            SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
+            SDL_Color color = {0, 0, 0, 200};
+            GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
+
             FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else
@@ -618,7 +637,7 @@ void MenuUpdateLobby(Menu *menu)
     int w = menu->gfx->window->width / 3 + 100;
     int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
     SDL_Rect mapBackgroundRect = {x, y, w, h};
-    GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200});
+    GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
 
     MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
 
@@ -626,7 +645,7 @@ void MenuUpdateLobby(Menu *menu)
     sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
 
     FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
-               x + (w / 2) - FontGetSize(menu->font, FontGetDynamicSizing(menu->font), maxPlayers).w / 2,
+               x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
                y + 20,
                FAL_L, 0, 1, F3D_TL, 10, menu->clr);
 
@@ -638,13 +657,14 @@ void MenuUpdateLobby(Menu *menu)
 void MenuUpdateOptions(Menu *menu)
 {
     //Determine menu options
-    int optionLength = 6;
-    char options[6][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
+        {"Audio optiions"},
         {"Back"}};
 
     if (menu->gfx->window->isFullscreen)
@@ -692,7 +712,7 @@ void MenuUpdateOptions(Menu *menu)
             MenuStateSet(MS_Resolution);
         }
         break;
-        case 2: //Vsync // do we use OpenGL?
+        case 2: //Vsync
         {
             if (menu->gfx->window->vsyncEnabled)
             {
@@ -716,6 +736,11 @@ void MenuUpdateOptions(Menu *menu)
         }
         case 5:
         {
+            MenuStateSet(MS_Audio);
+            break;
+        }
+        case 6:
+        {
 
             if (clientManager.inGame)
             {
@@ -729,6 +754,7 @@ void MenuUpdateOptions(Menu *menu)
         }
         }
     }
+
     MenuDraw(menu, options, optionLength);
     MenuTitleDraw(menu, "Options");
 }
@@ -953,6 +979,96 @@ void MenuUpdateKeybinding(Menu *menu)
     MenuTitleDraw(menu, "Keybindings");
 }
 
+void MenuUpdateAudio(Menu *menu)
+{
+    int step = 4;
+
+    // VOLUME SETTINGS
+    // VOLUME CHANNELS: MUSIC, SFX
+    // VOLUME PROPERTIES: 0-128 (Uint8 format)
+    //
+    // MASTER VOLUME: MULTIPLIER
+
+    //Determine menu options
+    int optionLength = 4;
+    char options[4][100] = {
+        {"Master"},
+        {"SFX"},
+        {"Music"},
+        {"Back"}};
+
+    sprintf(options[0], "Master: %d%%", (int)(menu->volumeMaster * 100));
+    sprintf(options[1], "SFX: %u/64", menu->volumeSFX);
+    sprintf(options[2], "Music: %u/64", menu->volumeMusic);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_A) || InputIsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0:
+            menu->volumeMaster -= .1;
+            break;
+        case 1:
+            menu->volumeSFX -= step;
+            ;
+            break;
+        case 2:
+            menu->volumeMusic -= step;
+            break;
+        }
+    }
+
+    if (InputIsKeyPressed(SDL_SCANCODE_D) || InputIsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        switch (menu->activeIndex)
+        {
+        case 0:
+            menu->volumeMaster += .1;
+            break;
+        case 1:
+            menu->volumeSFX += step;
+            break;
+        case 2:
+            menu->volumeMusic += step;
+            break;
+        }
+    }
+
+    // Loop back
+    if (menu->volumeMaster < 0)
+        menu->volumeMaster = 0;
+    if (menu->volumeMaster > 2)
+        menu->volumeMaster = 2;
+
+    if (menu->volumeMusic > 128)
+        menu->volumeMusic = 0;
+    if (menu->volumeSFX > 128)
+        menu->volumeSFX = 0;
+
+    if (menu->volumeMusic > 64)
+        menu->volumeMusic = 64;
+    if (menu->volumeSFX > 64)
+        menu->volumeSFX = 64;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        switch (menu->activeIndex)
+        {
+        case 3:
+        {
+            MenuStateSet(MS_Options);
+            break;
+        }
+        }
+    }
+
+    MenuDraw(menu, options, optionLength);
+    MenuTitleDraw(menu, "Audio options");
+}
+
 void MenuUpdateCustomMap(Menu *menu)
 {
     //Determine menu options
@@ -1099,8 +1215,8 @@ void MenuUpdateSkin(Menu *menu, Player *player)
     menu->previewBody.active->dst.w = h;
     menu->previewBody.active->dst.h = h;
 
-    menu->previewBody.active->rot_anchor = Vec2Sub(RectMid(menu->previewBody.active->dst), Vec2Create(menu->previewBody.active->dst.x, menu->previewBody.active->dst.y));
-    menu->previewLeg.active->rot_anchor = Vec2Sub(RectMid(menu->previewLeg.active->dst), Vec2Create(menu->previewLeg.active->dst.x, menu->previewLeg.active->dst.y));
+    menu->previewBody.active->rot_anchor = Vec2Create(0.5f, 0.5f);
+    menu->previewLeg.active->rot_anchor = Vec2Create(0.5f, 0.5f);
 
     menu->previewBody.active->rot = 180;
     menu->previewLeg.active->rot = 180;
@@ -1114,9 +1230,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Prisoner;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
-
+            PlayerSetSpriteSheet(player, spriteSheet);
             MenuStateSet(MS_MainMenu);
             break;
         }
@@ -1124,8 +1238,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_ChernobylWorker;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1134,8 +1247,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_IronMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1144,8 +1256,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_iDubbbz;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1154,8 +1265,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_OldMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1164,8 +1274,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Sonic;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1208,11 +1317,11 @@ void MenuDrawPreviewMap(Menu *menu)
         int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
         int w_t = (int)TransitionGetSaveSlot(3) + 100;
         int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
-        GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)});
+        GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)}, SDL_TRUE);
     }
     else
     {
-        GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200});
+        GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
     }
 
     MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
@@ -1222,7 +1331,7 @@ void MenuDrawPreviewMap(Menu *menu)
         char maxPlayers[20];
         sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
         FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
-                   x + (w / 2) - FontGetSize(menu->font, FontGetDynamicSizing(menu->font), maxPlayers).w / 2,
+                   x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
                    y + 20,
                    FAL_L, 0, 1, F3D_TL, 10, menu->clr);
     }
@@ -1265,12 +1374,12 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
 
         if (i == menu->activeIndex)
         {
-            int rectWidth = FontGetSize(menu->font, FontGetDynamicSizing(menu->font), options[i]).w;
+            int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
             int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
 
-            SDL_Rect drawRect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
-            SDL_SetRenderDrawColor(menu->font->gfx->window->renderer, 0, 0, 0, 200);
-            SDL_RenderFillRect(menu->font->gfx->window->renderer, &drawRect);
+            SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
+            SDL_Color color = {0, 0, 0, 200};
+            GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
             FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else

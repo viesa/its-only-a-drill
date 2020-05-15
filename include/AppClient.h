@@ -17,11 +17,11 @@
 #include "Player.h"
 #include "Map.h"
 #include "MapList.h"
-#include "Behavior.h"
 #include "Weapon.h"
 #include "Inventory.h"
 #include "Keybinding.h"
 #include "Notification.h"
+#include "NPCManager.h"
 
 typedef struct AppClient AppClient;
 
@@ -32,5 +32,6 @@ void AppClientRun(AppClient *app);
 
 void AppClientUpdate(AppClient *app);
 void AppClientDraw(AppClient *app);
+void AppClientUpdateSettings(AppClient *app);
 
 #endif

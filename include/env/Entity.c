@@ -5,7 +5,6 @@
 Entity EntityCreate(Vec2 position, EntityType type, int id)
 {
     Entity entity;
-    Vec2 enemyPos;
     entity.isNPC = SDL_FALSE;
     entity.type = type;
     entity.id = id;
@@ -15,22 +14,22 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     {
     case ET_Woman:
         entity.Friction = 7.7f;
-        entity.mass = 50.0f;
+        entity.mass = 100.0f + (float)(rand() % 1000) / 1000.0f;
         entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
         entity.hitboxIndex = 0;
         entity.nDrawables = 1;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
-        entity.entityState = Neutral;
-
-        enemyPos = RectMid(entity.drawables[0].dst);
-        entity.desiredPoint = Vec2AddL(enemyPos, 200);
-        entity.indexPoint = 0;
         break;
 
-    case ET_PlayerSpawn:
-        entity.drawables[0].spriteSheet = SS_BackgroundTiles;
+    case ET_WomanP:
+        entity.Friction = 7.7f;
+        entity.mass = 96.0f;
+        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
         entity.hitboxIndex = 0;
+        entity.nDrawables = 1;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
         break;
 
     case ET_MapObject:
@@ -40,7 +39,7 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
 
     case ET_Player:
         entity.Friction = 9.7f;
-        entity.mass = 50.0f;
+        entity.mass = 96.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
         entity.drawables[0] = DrawableCreateDefaultConfig();
@@ -123,8 +122,8 @@ void EntityDrawIndex(EntityIndexP index, Camera *camera)
 void EntityCalculateNetForces(Entity *entity)
 {
     // first get momentum
-    float ComputedFormula = powf((1.0f + (2.0f / entity->mass)), entity->mass) / 8 + 0.059f;
-    entity->Velocity = Vec2DivL(entity->Force, ComputedFormula);
+    float ComputedFormula = 1 - entity->mass / 4096.0f;
+    entity->Velocity = Vec2MulL(entity->Velocity, ComputedFormula);
 
 // compute friendly
 #ifndef frictionReal
@@ -145,8 +144,7 @@ void EntityRotateAll(EntityIndexP index, float degrees)
 {
     for (int i = 0; i < ENTITY_ARRAY[*index].nDrawables; i++)
     {
-        SDL_Rect dstMid = {0, 0, ENTITY_ARRAY[*index].drawables[i].dst.w, ENTITY_ARRAY[*index].drawables[i].dst.w};
-        ENTITY_ARRAY[*index].drawables[i].rot_anchor = RectMid(dstMid);
+        ENTITY_ARRAY[*index].drawables[i].rot_anchor = Vec2Create(0.5f, 0.5f);
         ENTITY_ARRAY[*index].drawables[i].rot = degrees;
     }
 }

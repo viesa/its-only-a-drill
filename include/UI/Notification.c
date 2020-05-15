@@ -97,13 +97,13 @@ void NotifierUpdate()
     }
     notificationColor.a = (Uint8)notifier.buff[0].opacity;
 
-    SDL_SetRenderDrawColor(notifier.font->gfx->window->renderer, 0, 0, 0, notifier.buff[0].opacity);
-    SDL_Rect bg = FontGetSize(notifier.font, FontGetDynamicSizing(notifier.font), notifier.buff[0].text);
-    bg.w += 20;
-    bg.h += 20;
+    SDL_Color color = {0, 0, 0, notifier.buff[0].opacity};
+    SDL_Rect bg;
+    bg.w = FontGetWidth(notifier.font, FontGetDynamicSizing(notifier.font), notifier.buff[0].text) + 20;
+    bg.h = FontGetHeight(FontGetDynamicSizing(notifier.font)) + 20;
     bg.x = notifier.font->gfx->window->width - bg.w;
     bg.y = notifier.font->gfx->window->height - bg.h;
-    SDL_RenderFillRect(notifier.font->gfx->window->renderer, &bg);
+    GraphicsDrawRect(notifier.font->gfx, bg, color, SDL_TRUE);
 
     FontDraw(notifier.font, FontGetDynamicSizing(notifier.font), notifier.buff[0].text, bg.x + 10, bg.y + 10, FAL_L, 0, notificationColor);
 }

@@ -216,7 +216,7 @@ int ClientUDPSend(PacketType type, void *data, size_t size)
 
     assert("Attempting to send UDP-packet without client initialization" && client.isInitialized);
 
-    UDPpacket *outgoing = UDPPacketCreate(type, ENTITY_ARRAY[*client.player->entity].id, data, size);
+    UDPpacket *outgoing = UDPPacketCreate(type, PlayerGetEntity(client.player)->id, data, size);
     outgoing->address.host = client.server.ip->host;
     outgoing->address.port = client.server.ip->port;
 
@@ -258,7 +258,7 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
     }
     assert("Attempting to send TCP-packet without client initialization" && client.isInitialized);
 
-    int id = ENTITY_ARRAY[*client.player->entity].id;
+    int id = PlayerGetEntity(client.player)->id;
     TCPpacket *outgoing = TCPPacketCreate(type, id, data, size);
     outgoing->address = client.server.socket;
 

@@ -87,6 +87,7 @@ void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, F
 void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
 
 FontSheet FontGetDynamicSizing(Font *font);
+int FontGetWidth(Font *font, FontSheet fontEnum, char text[]);
 int FontGetHeight(FontSheet fontEnum);
 
 void FontDestroy(Font *font);
