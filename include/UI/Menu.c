@@ -290,7 +290,7 @@ void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)ENTITY_ARRAY[*player->entity].drawables[0].spriteSheet,
+            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
                                                menu->gfx->window->width,
                                                menu->gfx->window->height, *menu->bindings,
                                                menu->gfx->window->isFullscreen,
@@ -1230,9 +1230,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Prisoner;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
-
+            PlayerSetSpriteSheet(player, spriteSheet);
             MenuStateSet(MS_MainMenu);
             break;
         }
@@ -1240,8 +1238,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_ChernobylWorker;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1250,8 +1247,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_IronMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1260,8 +1256,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_iDubbbz;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1270,8 +1265,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_OldMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1280,8 +1274,7 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Sonic;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            AnimChangeSpriteSheet(&player->leg, spriteSheet);
-            AnimChangeSpriteSheet(&player->body, spriteSheet);
+            PlayerSetSpriteSheet(player, spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;

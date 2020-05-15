@@ -1,63 +1,82 @@
 #include "Player.h"
 
 #include "Library.h"
-#define respawnCooldown 500
 
-Player PlayerCreate(Camera *camera)
+struct Player
 {
-    Player ret;
-    ret.entity = EntityManagerAdd(ET_Player, Vec2Create(1000.0f + rand() % 200 - 100, 1000.0f + rand() % 200 - 100));
-    ret.leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
-    ret.body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
-    ret.aimFollow = Vec2Create(0.0f, 0.0f);
-    ret.forward = Vec2Create(1.0f, 0.0f);
-    ret.inventory = InventoryCreate();
-    ret.score = 0;
-    return ret;
+    EntityIndexP entity; // Players borrows an entity to control
+    PlayerState state;
+    InventoryListItems inventory;
+    SpriteSheet spriteSheet;
+
+    Vec2 forward;
+    Vec2 aimFollow;
+    float aimFollowRadius;
+
+    Anim leg;
+    Anim body;
+
+    int score;
+    float respawnTimer;
+    float respawnCooldown;
+};
+
+Player *PlayerCreate(Camera *camera)
+{
+    Player *player = MALLOC(Player);
+    ALLOC_ERROR_CHECK(player);
+    player->entity = EntityManagerAdd(ET_Player, Vec2Create(0.0f, 0.0f));
+    player->inventory = InventoryCreate();
+    player->spriteSheet = SS_Character_Prisoner;
+    player->forward = Vec2Create(1.0f, 0.0f);
+    player->aimFollow = Vec2Create(0.0f, 0.0f);
+    player->aimFollowRadius = 50.0f;
+    player->leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
+    player->body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_Character_Prisoner, 4, 0.05f);
+    player->score = 0;
+    player->respawnCooldown = 500.0f;
+    player->respawnTimer = player->respawnCooldown;
+    return player;
+}
+
+void PlayerDestroy(Player *player)
+{
+    FREE(player);
 }
 
 void PlayerUpdate(Player *player, Camera *camera)
 {
+    Entity *entity = &ENTITY_ARRAY[*player->entity];
     PlayerCameraUpdate(player, camera);
-    if (ENTITY_ARRAY[*player->entity].health > 0)
+    if (entity->health <= 0)
     {
-        PlayerMomventUpdate(player);
-        PlayerAnimationUpdate(player);
-        RotatePlayerToCamera(player);
-    }
-    else
-    {
-        if (ENTITY_ARRAY[*player->entity].entityState != EntityDead)
+        if (player->state == PL_Dead)
         {
-#ifdef PLAYER_RESPAWN
-            log_debug("entity died");
-#endif
-            player->respawnTimer = respawnCooldown;
-            ENTITY_ARRAY[*player->entity].entityState = EntityDead;
-            ENTITY_ARRAY[*player->entity].drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){ENTITY_ARRAY[*player->entity].position.x, ENTITY_ARRAY[*player->entity].position.y, 77, 63}, SS_Character_Prisoner);
-            ENTITY_ARRAY[*player->entity].drawables[1] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){ENTITY_ARRAY[*player->entity].position.x, ENTITY_ARRAY[*player->entity].position.y, 77, 63}, SS_Character_Prisoner);
-            ENTITY_ARRAY[*player->entity].isCollider = 0;
+            player->respawnTimer -= ClockGetDeltaTime();
+            if (player->respawnTimer <= 0.0f)
+            {
+                PlayerRevive(player);
+            }
         }
         else
         {
-            player->respawnTimer -= ClockGetDeltaTime();
-#ifdef PLAYER_RESPAWN
-            log_debug("time to revive= %dms", player->respawnTimer);
-#endif
-            if (player->respawnTimer <= 0)
-            {
-#ifdef PLAYER_RESPAWN
-                log_debug("entity revived");
-#endif
-                ENTITY_ARRAY[*player->entity].entityState = ET_Player;
-                ENTITY_ARRAY[*player->entity].health = 100;
-                ENTITY_ARRAY[*player->entity].drawables[0] = DrawableCreateDefaultConfig();
-                ENTITY_ARRAY[*player->entity].drawables[1] = DrawableCreateDefaultConfig();
-                ENTITY_ARRAY[*player->entity].isCollider = 1; 
-                // set player position to spawnpoint
-            }
+            PlayerKill(player);
         }
     }
+    else
+    {
+        PlayerMomventUpdate(player);
+        PlayerAnimationUpdate(player);
+        PlayerRotateToCamera(player);
+        if (InputIsMousePressed(BUTTON_LEFT))
+            PlayerShoot(player, camera);
+    }
+    weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
+}
+
+void PlayerDraw(Player *player, Camera *camera)
+{
+    EntityDrawIndex(player->entity, camera);
 }
 
 void PlayerCameraUpdate(Player *player, Camera *camera)
@@ -70,7 +89,7 @@ void PlayerCameraUpdate(Player *player, Camera *camera)
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
 
     player->forward = Vec2Unit(playerToMouse);
-    Vec2 aim = Vec2MulL(player->forward, RADIUS);
+    Vec2 aim = Vec2MulL(player->forward, player->aimFollowRadius);
 
     player->aimFollow = Vec2Add(aim, ENTITY_ARRAY[*player->entity].position);
 }
@@ -113,14 +132,78 @@ void PlayerAnimationUpdate(Player *player)
     AnimApplyToDrawable(&player->body, &ENTITY_ARRAY[*player->entity].drawables[1], 1.5f);
 }
 
-void RotatePlayerToCamera(Player *player)
+void PlayerRotateToCamera(Player *player)
 {
     float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), player->forward));
     float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(player->entity, degrees);
 }
 
-void PlayerDraw(Player *player, Camera *camera)
+void PlayerShoot(Player *player, Camera *camera)
 {
-    EntityDrawIndex(player->entity, camera);
+#ifdef PLAYER_DEBUG
+    log_debug("current cooldown %f", item->Stats.currentTime);
+#endif
+    Item *item = &player->inventory.contents[player->inventory.top - 1];
+    if (item->Stats.currentTime <= 0)
+    {
+        Entity *entity = PlayerGetEntity(player);
+
+        item->Stats.currentTime = item->Stats.cooldownMS;
+        Vec2 mousePos = InputLastMousePos();
+        Vec2 cameraPos = CameraGetPos(camera);
+        Vec2 playerPos = Vec2Sub(entity->position, cameraPos);
+
+        Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
+        Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
+
+        // push back
+        entity->Force.x -= item->Stats.falloff;
+        entity->Force.y -= item->Stats.falloff;
+        //bullet(index, mousePos, point, item, unitPlayerToMouse);
+
+        RayScanClosest(player->entity, camera, &unitPlayerToMouse, &item->Stats);
+    }
+}
+
+void PlayerKill(Player *player)
+{
+    Entity *entity = &ENTITY_ARRAY[*player->entity];
+    player->respawnTimer = player->respawnCooldown;
+    player->state = PL_Dead;
+    entity->drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){entity->position.x, entity->position.y, 77, 63}, player->spriteSheet);
+    entity->nDrawables = 1;
+    entity->isCollider = SDL_FALSE;
+}
+
+void PlayerRevive(Player *player)
+{
+    Entity *entity = &ENTITY_ARRAY[*player->entity];
+    player->respawnTimer = player->respawnCooldown;
+    player->state = PL_Alive;
+    entity->drawables[0] = DrawableCreateDefaultConfig();
+    entity->drawables[1] = DrawableCreateDefaultConfig();
+    entity->nDrawables = 2;
+    entity->isCollider = SDL_TRUE;
+    entity->health = 100;
+}
+
+void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet)
+{
+    Entity *entity = &ENTITY_ARRAY[*player->entity];
+    for (int i = 0; i < entity->nDrawables; i++)
+        entity->drawables[i].spriteSheet = spriteSheet;
+    AnimChangeSpriteSheet(&player->body, spriteSheet);
+    AnimChangeSpriteSheet(&player->leg, spriteSheet);
+    player->spriteSheet = spriteSheet;
+}
+
+Entity *PlayerGetEntity(Player *player)
+{
+    return &ENTITY_ARRAY[*player->entity];
+}
+
+Vec2 *PlayerGetAimFollowP(Player *player)
+{
+    return &player->aimFollow;
 }

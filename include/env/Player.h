@@ -6,23 +6,21 @@
 #include "Vec2.h"
 #include "EntityManager.h"
 #include "Anim.h"
+#include "Weapon.h"
 
-#define RADIUS 25
-
-typedef struct Player
+typedef enum PlayerState
 {
-    EntityIndexP entity; // Players borrows an entity to control
-    Anim leg;
-    Anim body;
-    Vec2 aimFollow;
-    Vec2 forward;
-    int respawnTimer;
-    InventoryListItems inventory;
-    int score;
-} Player;
+    PL_Alive,
+    PL_Dead,
+    PL_Count
+} PlayerState;
+
+typedef struct Player Player;
 
 //creates a player and a entity
-Player PlayerCreate(Camera *camera);
+Player *PlayerCreate(Camera *camera);
+
+void PlayerDestroy(Player *player);
 
 // updates player logic like movement and camera position
 void PlayerUpdate(Player *player, Camera *camera);
@@ -35,6 +33,17 @@ void PlayerMomventUpdate(Player *player);
 // updates the animation
 void PlayerAnimationUpdate(Player *player);
 // rotates the player relative to the camera
-void RotatePlayerToCamera(Player *player);
+void PlayerRotateToCamera(Player *player);
+// Player shoot
+void PlayerShoot(Player *player, Camera *camera);
+// Sets players HP to 0 and state PL_Dead
+void PlayerKill(Player *player);
+// Sets players HP to max and state PL_Alie
+void PlayerRevive(Player *player);
+// Change spritesheet of all animations
+void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet);
+
+Entity *PlayerGetEntity(Player *player);
+Vec2 *PlayerGetAimFollowP(Player *player);
 
 #endif

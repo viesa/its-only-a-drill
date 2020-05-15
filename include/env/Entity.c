@@ -5,7 +5,6 @@
 Entity EntityCreate(Vec2 position, EntityType type, int id)
 {
     Entity entity;
-    Vec2 enemyPos;
     entity.isNPC = SDL_FALSE;
     entity.type = type;
     entity.id = id;
@@ -21,11 +20,6 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.nDrawables = 1;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
-        entity.entityState = Neutral;
-
-        enemyPos = RectMid(entity.drawables[0].dst);
-        entity.desiredPoint = Vec2AddL(enemyPos, 200);
-        entity.indexPoint = 0;
         break;
 
     case ET_PlayerSpawn:

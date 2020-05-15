@@ -23,21 +23,10 @@ typedef enum EntityType
     //Used only by Map.c
     ET_MapObject,
     ET_None,
-    ET_Count,
     //Used only by weapon.c
-    ET_Bullet
+    ET_Bullet,
+    ET_Count,
 } EntityType;
-
-typedef enum entityState
-{
-    Passive,
-    Neutral,
-    Fight,
-    Aggressive,
-    EntityDead,
-    // used only for player so that the player can take control
-    EntityPlayer
-} EntityState;
 
 typedef struct CompressedEntity
 {
@@ -70,9 +59,6 @@ typedef struct Entity
     unsigned int hitboxIndex;
 
     int health;
-    EntityState entityState;
-    Vec2 desiredPoint;
-    int indexPoint;
 } Entity;
 
 ///Creates a entity

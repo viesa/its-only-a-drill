@@ -166,7 +166,7 @@ void ClientManagerHandleIAmAlivePacket(ParsedPacket packet)
 void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
     int id = *(int *)packet.data;
-    ENTITY_ARRAY[*client.player->entity].id = id;
+    PlayerGetEntity(client.player)->id = id;
     client.receivedPlayerID = SDL_TRUE;
 
     // Sends a empty packet to signal the server which IP to respond with
@@ -304,7 +304,7 @@ void ClientManagerHandleStartSessionPacket(ParsedPacket packet)
 {
     if (MenuStateGet() != MS_Lobby)
         return;
-    ENTITY_ARRAY[*client.player->entity] = *(Entity *)packet.data;
+    *PlayerGetEntity(client.player) = *(Entity *)packet.data;
     MenuStateSet(MS_None);
     GameStateSet(GS_Playing);
     clientManager.inGame = SDL_TRUE;
@@ -359,7 +359,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet)
 {
     int send = *(int *)Packet.data;
 
-    ENTITY_ARRAY[*client.player->entity].health -= send;
+    PlayerGetEntity(client.player)->health -= send;
 }
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
