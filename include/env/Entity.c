@@ -10,31 +10,14 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
     entity.id = id;
     entity.position = position;
     entity.Force = Vec2Create(0.0f, 0.0f);
+    // Default hitbox offset if not set
+    EntityChangeHitboxOffset(&entity, 0, 0);
+    // Default hitbox size if not set
+    EntityChangeHitboxSize(&entity, 0, 0);
     switch (type)
     {
-    case ET_Woman:
-        entity.Friction = 7.7f;
-        entity.mass = 100.0f + (float)(rand() % 1000) / 1000.0f;
-        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
-        entity.hitboxIndex = 0;
-        entity.nDrawables = 1;
-        entity.health = 100;
-        entity.isCollider = SDL_TRUE;
-        break;
-
-    case ET_WomanP:
-        entity.Friction = 7.7f;
-        entity.mass = 96.0f;
-        entity.drawables[0] = DrawableCreate((SDL_Rect){0, 44, 57, 43}, (SDL_Rect){entity.position.x, entity.position.y, 57, 43}, SS_Characters);
-        entity.hitboxIndex = 0;
-        entity.nDrawables = 1;
-        entity.health = 100;
-        entity.isCollider = SDL_TRUE;
-        break;
-
     case ET_MapObject:
         entity.drawables[0].spriteSheet = SS_BackgroundTiles;
-        entity.hitboxIndex = 0;
         break;
 
     case ET_Player:
@@ -42,17 +25,31 @@ Entity EntityCreate(Vec2 position, EntityType type, int id)
         entity.mass = 96.0f;
         entity.health = 100;
         entity.isCollider = SDL_TRUE;
+        entity.isMovable = SDL_TRUE;
         entity.drawables[0] = DrawableCreateDefaultConfig();
         entity.drawables[1] = DrawableCreateDefaultConfig();
-        entity.hitboxIndex = 0;
         entity.nDrawables = 2;
+        EntityChangeHitboxOffset(&entity, 5, 5);
+        EntityChangeHitboxSize(&entity, 39, 39);
+        break;
+    case ET_NPC:
+        entity.Friction = 9.7f;
+        entity.mass = 96.0f;
+        entity.health = 100;
+        entity.isCollider = SDL_TRUE;
+        entity.isMovable = SDL_TRUE;
+        entity.drawables[0] = DrawableCreateDefaultConfig();
+        entity.drawables[1] = DrawableCreateDefaultConfig();
+        entity.nDrawables = 2;
+        EntityChangeHitboxOffset(&entity, 5, 5);
+        EntityChangeHitboxSize(&entity, 39, 39);
         break;
     case ET_Bullet:
         entity.Friction = 0.0f;
         entity.mass = 5.0f;
         entity.isCollider = SDL_TRUE;
+        entity.isMovable = SDL_TRUE;
         entity.drawables[0].spriteSheet = SS_BackgroundTiles;
-        entity.hitboxIndex = 0;
         break;
 
     default:
@@ -111,6 +108,7 @@ void EntityDraw(Entity *entity, Camera *camera)
         entity->drawables[i].dst.x = entity->position.x;
         entity->drawables[i].dst.y = entity->position.y;
         CameraDraw(camera, entity->drawables[i]);
+        CameraDrawRect(camera, EntityGetHitbox(entity), (SDL_Color){255, 255, 255, 255}, SDL_FALSE);
     }
 }
 
@@ -147,4 +145,24 @@ void EntityRotateAll(EntityIndexP index, float degrees)
         ENTITY_ARRAY[*index].drawables[i].rot_anchor = Vec2Create(0.5f, 0.5f);
         ENTITY_ARRAY[*index].drawables[i].rot = degrees;
     }
+}
+
+SDL_Rect EntityGetHitbox(Entity *entity)
+{
+    return (SDL_Rect){entity->position.x + entity->hitboxOffset.x,
+                      entity->position.y + entity->hitboxOffset.y,
+                      entity->hitboxSize.x,
+                      entity->hitboxSize.y};
+}
+
+void EntityChangeHitboxOffset(Entity *entity, int x, int y)
+{
+    entity->hitboxOffset.x = (float)x;
+    entity->hitboxOffset.y = (float)y;
+}
+
+void EntityChangeHitboxSize(Entity *entity, int width, int height)
+{
+    entity->hitboxSize.x = (float)width;
+    entity->hitboxSize.y = (float)height;
 }

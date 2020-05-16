@@ -241,15 +241,18 @@ int LoadAllEnties(JSON *mapData, json_value *entitiesStart, EntityIndexP **desti
         SDL_Rect dst = {x, y, w, h};
 
         EntityIndexP index = EntityManagerAdd(type, Vec2Create(x, y));
-        ENTITY_ARRAY[*index].id = IDOffset + nextID++;
-        ENTITY_ARRAY[*index].drawables[0].dst = dst;
-        ENTITY_ARRAY[*index].drawables[0].src = src;
-        ENTITY_ARRAY[*index].drawables[0].rot = r;
-        ENTITY_ARRAY[*index].drawables[0].rot_anchor = Vec2Create(0.5f, 0.5f);
-        ENTITY_ARRAY[*index].nDrawables = 1;
-        ENTITY_ARRAY[*index].mass = m;
-        ENTITY_ARRAY[*index].isCollider = (SDL_bool)c;
-        ENTITY_ARRAY[*index].hitboxIndex = 0;
+        Entity *entity = &ENTITY_ARRAY[*index];
+        entity->id = IDOffset + nextID++;
+        entity->drawables[0].dst = dst;
+        entity->drawables[0].src = src;
+        entity->drawables[0].rot = r;
+        entity->drawables[0].rot_anchor = Vec2Create(0.5f, 0.5f);
+        entity->nDrawables = 1;
+        entity->mass = m;
+        entity->isCollider = (SDL_bool)c;
+        entity->isMovable = (SDL_bool)(m != 100000);
+        EntityChangeHitboxOffset(entity, 0, 0);
+        EntityChangeHitboxSize(entity, entity->drawables[0].dst.w, entity->drawables[0].dst.h);
 
         bufferMap.contents[numEnttiesLoaded] = index;
         numEnttiesLoaded++;

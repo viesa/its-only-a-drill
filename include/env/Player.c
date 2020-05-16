@@ -108,6 +108,8 @@ void PlayerMomventUpdate(Player *player)
 
 void PlayerAnimationUpdate(Player *player)
 {
+    log_info("body frame: %d", player->body.currentFrame);
+    log_info("leg frame: %d", player->leg.currentFrame);
     // animation
     AnimUpdate(&player->leg, ClockGetDeltaTime());
     AnimUpdate(&player->body, ClockGetDeltaTime());

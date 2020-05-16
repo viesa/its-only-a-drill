@@ -104,7 +104,7 @@ void NPCKill(NPC *npc)
     entity->health = 0;
     entity->drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){entity->position.x, entity->position.y, 77, 63}, npc->spriteSheet);
     entity->nDrawables = 1;
-    entity->hitboxIndex = 0;
+    entity->isCollider = SDL_FALSE;
     npc->state = NPC_Dead;
     AnimStop(&npc->leg);
     AnimStop(&npc->body);
@@ -154,7 +154,8 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
                       npc->DPBoxSize,
                       npc->DPBoxSize};
 
-    if (SDL_HasIntersection(&entity->drawables[entity->hitboxIndex].dst, &boxDP))
+    SDL_Rect hitbox = EntityGetHitbox(entity);
+    if (SDL_HasIntersection(&hitbox, &boxDP))
     {
         npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
         if (npc->movePatternIndex == 11 || npc->movePatternIndex <= 9)
@@ -186,7 +187,8 @@ void NPCUpdateBehaviorAggressive(NPC *npc)
                       npc->DPBoxSize,
                       npc->DPBoxSize};
 
-    if (SDL_HasIntersection(&entity->drawables[entity->hitboxIndex].dst, &boxDP))
+    SDL_Rect hitbox = EntityGetHitbox(entity);
+    if (SDL_HasIntersection(&hitbox, &boxDP))
     {
         npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
         npc->movePatternIndex = npc->movePatternIndex >= 9 ? 0 : npc->movePatternIndex + 1;
@@ -263,6 +265,13 @@ void NPCShoot(NPC *npc, Camera *camera)
 
 void NPCUpdateAnimation(NPC *npc)
 {
+    if (npc->leg.currentFrame < 0 || npc->leg.currentFrame > npc->leg.nFrames ||
+        npc->body.currentFrame < 0 || npc->leg.currentFrame > npc->body.nFrames)
+    {
+        log_info("body frame: %d", npc->body.currentFrame);
+        log_info("leg frame: %d", npc->leg.currentFrame);
+    }
+
     AnimUpdate(&npc->leg, ClockGetDeltaTime());
     AnimUpdate(&npc->body, ClockGetDeltaTime());
 

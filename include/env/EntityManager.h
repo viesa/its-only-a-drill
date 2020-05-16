@@ -17,7 +17,7 @@ void EntityManagerUninitalize();
 void EntityManagerUpdate();
 
 void EntityManagerUpdateMovement();
-/// finds the collision and fixes the problem with rules
+/// Finds the collision and fixes the problem with rules
 void EntityManagerOnCollision();
 
 EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position);
