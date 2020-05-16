@@ -3,29 +3,23 @@
 
 #include "Dependencies.h"
 
-#include "Window.h"
 #include "Drawable.h"
+#include "Window.h"
 
-typedef struct Graphics
-{
-    Window *window;
-    SDL_Texture *m_allTextures[SS_Count];
+void GraphicsInitialize();
+void GraphicsUnitialize();
 
-    int mapWidth;
-    int mapHeight;
-} Graphics;
-
-Graphics *GraphicsCreate();
-void GraphicsDestroy(Graphics *gfx);
+int GraphicsGetMapWidth();
+int GraphicsGetMapHeight();
 
 /// Draw texture into the back-buffer
-void GraphicsDraw(Graphics *gfx, Drawable drawable);
-void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color, SDL_bool filled);
-void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius);
-void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect area, SDL_Color start, SDL_Color end);
-void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect area, SDL_Color start, SDL_Color end);
-void GraphicsDrawLine(Graphics *gfx, int x1, int y1, int x2, int y2, SDL_Color color);
+void GraphicsDraw(Drawable drawable);
+void GraphicsDrawRect(SDL_Rect rect, SDL_Color color, SDL_bool filled);
+void GraphicsDrawPoint(Vec2 pos, size_t radius);
+void GraphicsDrawGradientX(SDL_Rect area, SDL_Color start, SDL_Color end);
+void GraphicsDrawGradientY(SDL_Rect area, SDL_Color start, SDL_Color end);
+void GraphicsDrawLine(int x1, int y1, int x2, int y2, SDL_Color color);
 
-SDL_Texture *GraphicsLoadTexture(Graphics *gfx, char *path);
+SDL_Texture *GraphicsLoadTexture(char *path);
 
 #endif

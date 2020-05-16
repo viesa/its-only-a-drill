@@ -95,11 +95,11 @@ void ClientManagerUpdate()
     SDL_UnlockMutex(client.inBufferMutex);
 }
 
-void ClientManagerDrawConnectedPlayers(Camera *camera)
+void ClientManagerDrawConnectedPlayers()
 {
     for (int i = 0; i < clientManager.players->size; i++)
     {
-        EntityDrawIndex(CLIENTMANAGER_PLAYERS[i], camera);
+        EntityDrawIndex(CLIENTMANAGER_PLAYERS[i]);
     }
 }
 

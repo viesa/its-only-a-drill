@@ -65,7 +65,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
     return i;
 }
 
-void ItemDraw(Camera *camera, Item *item, Vec2 pos)
+void ItemDraw(Item *item, Vec2 pos)
 {
     if (item->picked)
     {
@@ -76,29 +76,29 @@ void ItemDraw(Camera *camera, Item *item, Vec2 pos)
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
-        CameraDraw(camera, item->drawable);
+        CameraDraw(item->drawable);
     }
 }
 
-void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos)
+void ItemPocketDraw(Item *item, Vec2 pos)
 {
     if (item->picked)
     {
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
-        GraphicsDraw(gfx, item->drawable);
+        GraphicsDraw(item->drawable);
     }
 }
 
-void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos)
+void ItemEquipDraw(Item *item, Vec2 pos)
 {
     if (item->picked)
     {
         item->postion = pos;
         item->drawable.dst.x = item->postion.x;
         item->drawable.dst.y = item->postion.y;
-        CameraDraw(camera, item->drawable);
+        CameraDraw(item->drawable);
     }
 }
 
@@ -214,11 +214,11 @@ void inventoryPop(InventoryListItems *i)
     // the item that will be drop must be in the last available place in the investory list array!
     i->top--;
 }
-void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera)
+void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground)
 {
     for (int i = 0; i < Ground->top; i++)
     {
-        ItemDraw(camera, &Ground->contents[i], Ground->contents[i].postion);
+        ItemDraw(&Ground->contents[i], Ground->contents[i].postion);
     }
 
     return;

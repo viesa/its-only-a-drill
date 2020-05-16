@@ -101,9 +101,9 @@ void NotifierUpdate()
     SDL_Rect bg;
     bg.w = FontGetWidth(notifier.font, FontGetDynamicSizing(notifier.font), notifier.buff[0].text) + 20;
     bg.h = FontGetHeight(FontGetDynamicSizing(notifier.font)) + 20;
-    bg.x = notifier.font->gfx->window->width - bg.w;
-    bg.y = notifier.font->gfx->window->height - bg.h;
-    GraphicsDrawRect(notifier.font->gfx, bg, color, SDL_TRUE);
+    bg.x = WindowGetWidth() - bg.w;
+    bg.y = WindowGetHeight() - bg.h;
+    GraphicsDrawRect(bg, color, SDL_TRUE);
 
     FontDraw(notifier.font, FontGetDynamicSizing(notifier.font), notifier.buff[0].text, bg.x + 10, bg.y + 10, FAL_L, 0, notificationColor);
 }

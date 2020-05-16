@@ -80,9 +80,9 @@ Entity EntityDecompress(CompressedEntity *cEntity);
 // Only modifies the parts CompressedEntity and Entity shares
 void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity);
 // Draws every drawable in the entity
-void EntityDraw(Entity *entity, Camera *camera);
+void EntityDraw(Entity *entity);
 // Draws every drawable in the entity
-void EntityDrawIndex(EntityIndexP index, Camera *camera);
+void EntityDrawIndex(EntityIndexP index);
 // Calculates the net forces after friction and collision
 /// This function does NOT use ClockGetDeltaTime
 /// Instead it uses parameter dt to allow for smaller timesteps

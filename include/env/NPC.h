@@ -23,23 +23,23 @@ typedef enum NPCState
 NPC *NPCCreate(Vec2 pos, Player *player);
 void NPCDestroy(NPC *npc);
 
-void NPCUpdate(NPC *npc, Camera *camera);
-void NPCDraw(NPC *npc, Camera *camera);
+void NPCUpdate(NPC *npc);
+void NPCDraw(NPC *npc);
 
 void NPCSetSpriteSheet(NPC *npc, SpriteSheet spriteSheet);
 
 void NPCKill(NPC *npc);
 
-void NPCUpdateBehavior(NPC *npc, Camera *camera);
+void NPCUpdateBehavior(NPC *npc);
 void NPCUpdateBehaviorNeutral(NPC *npc);
-void NPCUpdateBehaviorFight(NPC *npc, Camera *camera);
+void NPCUpdateBehaviorFight(NPC *npc);
 void NPCUpdateBehaviorAggressive(NPC *npc);
 
 void NPCMoveTo(NPC *npc, Vec2 moveTo);
 
 void NPCSwitchBehaviorState(NPC *npc);
 
-void NPCShoot(NPC *npc, Camera *camera);
+void NPCShoot(NPC *npc);
 
 void NPCUpdateAnimation(NPC *npc);
 

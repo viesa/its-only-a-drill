@@ -4,7 +4,6 @@
 
 struct
 {
-    Graphics *gfx;
     Font *font;
     TransitionType type;
     float duration;
@@ -16,9 +15,8 @@ struct
     int skipped;
 } trans;
 
-void TransitionInitalize(Graphics *gfx, Font *font)
+void TransitionInitalize(Font *font)
 {
-    trans.gfx = gfx;
     trans.font = font;
     trans.duration = 0.0f;
     trans.elapsed = 0.0f;
@@ -67,7 +65,7 @@ void TransitionDraw()
         }
         trans.saveSlots[0] = Clamp(trans.saveSlots[0], 0, 255);
 
-        GraphicsDrawGradientX(trans.gfx, (SDL_Rect){0, 0, trans.gfx->window->width, trans.gfx->window->height}, (SDL_Color){0, 0, 0, trans.saveSlots[0]}, (SDL_Color){0, 0, 0, trans.saveSlots[0]});
+        GraphicsDrawGradientX((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight()}, (SDL_Color){0, 0, 0, trans.saveSlots[0]}, (SDL_Color){0, 0, 0, trans.saveSlots[0]});
     }
     case TT_FadeOut:
     {
@@ -83,23 +81,23 @@ void TransitionDraw()
         trans.saveSlots[0] = start + total * sinMultiplier;
         trans.saveSlots[0] = Clamp(trans.saveSlots[0], 0, 255);
 
-        GraphicsDrawGradientX(trans.gfx, (SDL_Rect){0, 0, trans.gfx->window->width, trans.gfx->window->height}, (SDL_Color){0, 0, 0, trans.saveSlots[0]}, (SDL_Color){0, 0, 0, trans.saveSlots[0]});
+        GraphicsDrawGradientX((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight()}, (SDL_Color){0, 0, 0, trans.saveSlots[0]}, (SDL_Color){0, 0, 0, trans.saveSlots[0]});
     }
     break;
     case TT_MenuToMap:
     {
         float scaleBase = 0.33f;
-        float xBase = (float)trans.gfx->window->width / 2.0f;
-        float yBase = (float)trans.gfx->window->height / 2.0f;
-        float wBase = (float)trans.gfx->window->width / 3.0f;
-        float hBase = (float)trans.gfx->window->height / 3.0f;
+        float xBase = (float)WindowGetWidth() / 2.0f;
+        float yBase = (float)WindowGetHeight() / 2.0f;
+        float wBase = (float)WindowGetWidth() / 3.0f;
+        float hBase = (float)WindowGetHeight() / 3.0f;
         float alphaBase = 200.0f;
 
         float scaleTotal = 1.0f - scaleBase;
         float xTotal = -xBase;
         float yTotal = -yBase;
-        float wTotal = (float)trans.gfx->window->width - wBase;
-        float hTotal = (float)trans.gfx->window->height - hBase;
+        float wTotal = (float)WindowGetWidth() - wBase;
+        float hTotal = (float)WindowGetHeight() - hBase;
         float alphaTotal = 255.0f - alphaBase;
 
         float sinMultiplier = (sinf(trans.elapsed / trans.duration * PI + 3.0f * PI / 2.0f) + 1.0f) / 2.0f;
@@ -117,12 +115,12 @@ void TransitionDraw()
             trans.saveSlots[2] = 0.0f;
 
         trans.saveSlots[3] = wBase + wTotal * sinMultiplier;
-        if (trans.saveSlots[3] >= (float)trans.gfx->window->width)
-            trans.saveSlots[3] = (float)trans.gfx->window->width;
+        if (trans.saveSlots[3] >= (float)WindowGetWidth())
+            trans.saveSlots[3] = (float)WindowGetWidth();
 
         trans.saveSlots[4] = hBase + hTotal * sinMultiplier;
-        if (trans.saveSlots[4] >= (float)trans.gfx->window->height)
-            trans.saveSlots[4] = (float)trans.gfx->window->height;
+        if (trans.saveSlots[4] >= (float)WindowGetHeight())
+            trans.saveSlots[4] = (float)WindowGetHeight();
 
         trans.saveSlots[5] = alphaBase + alphaTotal * sinMultiplier;
         if (trans.saveSlots[5] >= 255.0f)
@@ -134,15 +132,15 @@ void TransitionDraw()
         float scaleBase = 1.0f;
         float xBase = 0.0f;
         float yBase = 0.0f;
-        float wBase = (float)trans.gfx->window->width;
-        float hBase = (float)trans.gfx->window->height;
+        float wBase = (float)WindowGetWidth();
+        float hBase = (float)WindowGetHeight();
         float alphaBase = 255.0f;
 
         float scaleTotal = 0.33f - scaleBase;
-        float xTotal = (float)trans.gfx->window->width / 2.0f;
-        float yTotal = (float)trans.gfx->window->height / 2.0f;
-        float wTotal = (float)trans.gfx->window->width / 3.0f - wBase;
-        float hTotal = (float)trans.gfx->window->height / 3.0f - hBase;
+        float xTotal = (float)WindowGetWidth() / 2.0f;
+        float yTotal = (float)WindowGetHeight() / 2.0f;
+        float wTotal = (float)WindowGetWidth() / 3.0f - wBase;
+        float hTotal = (float)WindowGetHeight() / 3.0f - hBase;
         float alphaTotal = 200.0f - alphaBase;
 
         float sinMultiplier = (sinf(trans.elapsed / trans.duration * PI + 3.0f * PI / 2.0f) + 1.0f) / 2.0f;
@@ -152,20 +150,20 @@ void TransitionDraw()
             trans.saveSlots[0] = 0.33f;
 
         trans.saveSlots[1] = xBase + xTotal * sinMultiplier;
-        if (trans.saveSlots[1] >= (float)trans.gfx->window->width / 2.0f)
-            trans.saveSlots[1] = (float)trans.gfx->window->width / 2.0f;
+        if (trans.saveSlots[1] >= (float)WindowGetWidth() / 2.0f)
+            trans.saveSlots[1] = (float)WindowGetWidth() / 2.0f;
 
         trans.saveSlots[2] = yBase + yTotal * sinMultiplier;
-        if (trans.saveSlots[2] >= (float)trans.gfx->window->height / 2.0f)
-            trans.saveSlots[2] = (float)trans.gfx->window->height / 2.0f;
+        if (trans.saveSlots[2] >= (float)WindowGetHeight() / 2.0f)
+            trans.saveSlots[2] = (float)WindowGetHeight() / 2.0f;
 
         trans.saveSlots[3] = wBase + wTotal * sinMultiplier;
-        if (trans.saveSlots[3] <= (float)trans.gfx->window->width / 3.0f)
-            trans.saveSlots[3] = (float)trans.gfx->window->width / 3.0f;
+        if (trans.saveSlots[3] <= (float)WindowGetWidth() / 3.0f)
+            trans.saveSlots[3] = (float)WindowGetWidth() / 3.0f;
 
         trans.saveSlots[4] = hBase + hTotal * sinMultiplier;
-        if (trans.saveSlots[4] <= (float)trans.gfx->window->height / 3.0f)
-            trans.saveSlots[4] = (float)trans.gfx->window->height / 3.0f;
+        if (trans.saveSlots[4] <= (float)WindowGetHeight() / 3.0f)
+            trans.saveSlots[4] = (float)WindowGetHeight() / 3.0f;
 
         trans.saveSlots[5] = alphaBase + alphaTotal * sinMultiplier;
         if (trans.saveSlots[5] <= 200.0f)
@@ -199,18 +197,18 @@ void TransitionStart(TransitionType type, float duration)
         break;
     case TT_MenuToMap:
         trans.saveSlots[0] = 0.33f;
-        trans.saveSlots[1] = (float)trans.gfx->window->width / 2.0f;
-        trans.saveSlots[2] = (float)trans.gfx->window->height / 2.0f;
-        trans.saveSlots[3] = (float)trans.gfx->window->width / 3.0f;
-        trans.saveSlots[4] = (float)trans.gfx->window->height / 3.0f;
+        trans.saveSlots[1] = (float)WindowGetWidth() / 2.0f;
+        trans.saveSlots[2] = (float)WindowGetHeight() / 2.0f;
+        trans.saveSlots[3] = (float)WindowGetWidth() / 3.0f;
+        trans.saveSlots[4] = (float)WindowGetHeight() / 3.0f;
         trans.saveSlots[5] = 200.0f;
         break;
     case TT_MapToMenu:
         trans.saveSlots[0] = 1.0f;
         trans.saveSlots[1] = 0.0f;
         trans.saveSlots[2] = 0.0f;
-        trans.saveSlots[3] = (float)trans.gfx->window->width;
-        trans.saveSlots[4] = (float)trans.gfx->window->height;
+        trans.saveSlots[3] = (float)WindowGetWidth();
+        trans.saveSlots[4] = (float)WindowGetHeight();
         trans.saveSlots[5] = 255.0f;
         break;
     default:

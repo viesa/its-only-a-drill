@@ -1,52 +1,71 @@
 #include "Graphics.h"
 
-Graphics *GraphicsCreate()
+typedef struct Graphics
 {
-    Graphics *gfx = MALLOC(Graphics);
+    SDL_Texture *m_allTextures[SS_Count];
 
-    gfx->window = WindowCreate("It's only a drill");
+    int mapWidth;
+    int mapHeight;
+} Graphics;
+
+static Graphics *gfx;
+
+void GraphicsInitialize()
+{
+    gfx = MALLOC(Graphics);
+    ALLOC_ERROR_CHECK(gfx);
+
+    WindowInitialize("It's only a drill");
     gfx->mapWidth = 2000;
     gfx->mapHeight = 2000;
 
     //INIT ALL TEXTURES
     for (int i = 0; i < SS_Count; i++)
         gfx->m_allTextures[i] = NULL;
-    gfx->m_allTextures[SS_Menu] = GraphicsLoadTexture(gfx, "docs/spritesheets/menu.png");
-    gfx->m_allTextures[SS_Lobby] = GraphicsLoadTexture(gfx, "docs/spritesheets/lobby.png");
-    gfx->m_allTextures[SS_Legacy] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tilemap.png");
-    gfx->m_allTextures[SS_Tiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_tiles.png");
-    gfx->m_allTextures[SS_Characters] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/spritesheet_characters.png");
-    gfx->m_allTextures[SS_Character_Prisoner] = GraphicsLoadTexture(gfx, "docs/spritesheets/Prisoner.png");
-    gfx->m_allTextures[SS_Character_ChernobylWorker] = GraphicsLoadTexture(gfx, "docs/spritesheets/ChernobylWorker.png");
-    gfx->m_allTextures[SS_Character_IronMan] = GraphicsLoadTexture(gfx, "docs/spritesheets/IronMan.png");
-    gfx->m_allTextures[SS_Character_iDubbbz] = GraphicsLoadTexture(gfx, "docs/spritesheets/iDubbbz.png");
-    gfx->m_allTextures[SS_Character_OldMan] = GraphicsLoadTexture(gfx, "docs/spritesheets/OldMan.png");
-    gfx->m_allTextures[SS_Character_Sonic] = GraphicsLoadTexture(gfx, "docs/spritesheets/Sonic.png");
-    gfx->m_allTextures[SS_Tools] = GraphicsLoadTexture(gfx, "docs/spritesheets/old/tools.png");
-    gfx->m_allTextures[SS_Weapons] = GraphicsLoadTexture(gfx, "docs/spritesheets/weapons.png");
-    gfx->m_allTextures[SS_BackgroundTiles] = GraphicsLoadTexture(gfx, "docs/spritesheets/background-tiles.png");
-    gfx->m_allTextures[SS_RedCircle] = GraphicsLoadTexture(gfx, "assets/img/red_circle.png");
-    gfx->m_allTextures[SS_Scanline] = GraphicsLoadTexture(gfx, "assets/img/scanlines.png");
-
-    return gfx;
+    gfx->m_allTextures[SS_Menu] = GraphicsLoadTexture("docs/spritesheets/menu.png");
+    gfx->m_allTextures[SS_Lobby] = GraphicsLoadTexture("docs/spritesheets/lobby.png");
+    gfx->m_allTextures[SS_Legacy] = GraphicsLoadTexture("docs/spritesheets/old/tilemap.png");
+    gfx->m_allTextures[SS_Tiles] = GraphicsLoadTexture("docs/spritesheets/old/spritesheet_tiles.png");
+    gfx->m_allTextures[SS_Characters] = GraphicsLoadTexture("docs/spritesheets/old/spritesheet_characters.png");
+    gfx->m_allTextures[SS_Character_Prisoner] = GraphicsLoadTexture("docs/spritesheets/Prisoner.png");
+    gfx->m_allTextures[SS_Character_ChernobylWorker] = GraphicsLoadTexture("docs/spritesheets/ChernobylWorker.png");
+    gfx->m_allTextures[SS_Character_IronMan] = GraphicsLoadTexture("docs/spritesheets/IronMan.png");
+    gfx->m_allTextures[SS_Character_iDubbbz] = GraphicsLoadTexture("docs/spritesheets/iDubbbz.png");
+    gfx->m_allTextures[SS_Character_OldMan] = GraphicsLoadTexture("docs/spritesheets/OldMan.png");
+    gfx->m_allTextures[SS_Character_Sonic] = GraphicsLoadTexture("docs/spritesheets/Sonic.png");
+    gfx->m_allTextures[SS_Tools] = GraphicsLoadTexture("docs/spritesheets/old/tools.png");
+    gfx->m_allTextures[SS_Weapons] = GraphicsLoadTexture("docs/spritesheets/weapons.png");
+    gfx->m_allTextures[SS_BackgroundTiles] = GraphicsLoadTexture("docs/spritesheets/background-tiles.png");
+    gfx->m_allTextures[SS_RedCircle] = GraphicsLoadTexture("assets/img/red_circle.png");
+    gfx->m_allTextures[SS_Scanline] = GraphicsLoadTexture("assets/img/scanlines.png");
 }
 
-void GraphicsDestroy(Graphics *gfx)
+void GraphicsUnitialize()
 {
     for (int i = 0; i < SS_Count; i++)
     {
         SDL_DestroyTexture(gfx->m_allTextures[i]);
     }
-    WindowDestroy(gfx->window);
+    WindowUninitialize();
     SDL_free(gfx);
 }
 
-void GraphicsDraw(Graphics *gfx, Drawable drawable)
+int GraphicsGetMapWidth()
+{
+    return gfx->mapWidth;
+}
+
+int GraphicsGetMapHeight()
+{
+    return gfx->mapHeight;
+}
+
+void GraphicsDraw(Drawable drawable)
 {
     SDL_Point rot_point = (SDL_Point){drawable.rot_anchor.x * (float)drawable.dst.w,
                                       drawable.rot_anchor.y * (float)drawable.dst.h};
     drawable.spriteSheet %= SS_Count;
-    SDL_RenderCopyEx(gfx->window->renderer,
+    SDL_RenderCopyEx(WindowGetRenderer(),
                      gfx->m_allTextures[drawable.spriteSheet],
                      &drawable.src,
                      &drawable.dst,
@@ -55,32 +74,32 @@ void GraphicsDraw(Graphics *gfx, Drawable drawable)
                      SDL_FLIP_NONE);
 }
 
-void GraphicsDrawRect(Graphics *gfx, SDL_Rect rect, SDL_Color color, SDL_bool filled)
+void GraphicsDrawRect(SDL_Rect rect, SDL_Color color, SDL_bool filled)
 {
-    SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.g, color.a);
+    SDL_SetRenderDrawColor(WindowGetRenderer(), color.r, color.g, color.g, color.a);
 
     if (filled)
     {
-        SDL_RenderFillRect(gfx->window->renderer, &rect);
+        SDL_RenderFillRect(WindowGetRenderer(), &rect);
     }
     else
     {
-        SDL_RenderDrawRect(gfx->window->renderer, &rect);
+        SDL_RenderDrawRect(WindowGetRenderer(), &rect);
     }
 }
 
-void GraphicsDrawPoint(Graphics *gfx, Vec2 pos, size_t radius)
+void GraphicsDrawPoint(Vec2 pos, size_t radius)
 {
-    GraphicsDraw(gfx, DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
+    GraphicsDraw(DrawableCreate((SDL_Rect){0, 0, 2000, 2000}, (SDL_Rect){(int)pos.x, (int)pos.y, radius * 2, radius * 2}, SS_RedCircle));
 }
 
-void GraphicsDrawLine(Graphics *gfx, int x1, int y1, int x2, int y2, SDL_Color color)
+void GraphicsDrawLine(int x1, int y1, int x2, int y2, SDL_Color color)
 {
-    SDL_SetRenderDrawColor(gfx->window->renderer, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawLine(gfx->window->renderer, x1, y1, x2, y2);
+    SDL_SetRenderDrawColor(WindowGetRenderer(), color.r, color.g, color.b, color.a);
+    SDL_RenderDrawLine(WindowGetRenderer(), x1, y1, x2, y2);
 }
 
-void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+void GraphicsDrawGradientX(SDL_Rect rect, SDL_Color start, SDL_Color end)
 {
     //Current color channels
     float CurR = (float)start.r;
@@ -97,7 +116,7 @@ void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
     for (float x = rect.x; x < rect.x + rect.w; x++)
     {
         SDL_Color color = {(int)CurR, (int)CurG, (int)CurB, (int)CurA};
-        GraphicsDrawRect(gfx, (SDL_Rect){x, rect.y, 1, rect.h}, color, SDL_TRUE);
+        GraphicsDrawRect((SDL_Rect){x, rect.y, 1, rect.h}, color, SDL_TRUE);
         //Add an increment to the color channels
         CurR += dR;
         CurG += dG;
@@ -106,7 +125,7 @@ void GraphicsDrawGradientX(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
     }
 }
 
-void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Color end)
+void GraphicsDrawGradientY(SDL_Rect rect, SDL_Color start, SDL_Color end)
 {
     //Current color channels
     float CurR = (float)start.r;
@@ -123,7 +142,7 @@ void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
     for (float y = rect.y; y < rect.y + rect.h; y++)
     {
         SDL_Color color = {(int)CurR, (int)CurG, (int)CurB, (int)CurA};
-        GraphicsDrawRect(gfx, (SDL_Rect){rect.x, y, rect.w, 1}, color, SDL_TRUE);
+        GraphicsDrawRect((SDL_Rect){rect.x, y, rect.w, 1}, color, SDL_TRUE);
 
         //Add an increment to the color channels
         CurR += dR;
@@ -133,9 +152,9 @@ void GraphicsDrawGradientY(Graphics *gfx, SDL_Rect rect, SDL_Color start, SDL_Co
     }
 }
 
-SDL_Texture *GraphicsLoadTexture(Graphics *gfx, char *path)
+SDL_Texture *GraphicsLoadTexture(char *path)
 {
-    SDL_Texture *texture = IMG_LoadTexture(gfx->window->renderer, path);
+    SDL_Texture *texture = IMG_LoadTexture(WindowGetRenderer(), path);
     if (!texture)
         log_warn("Could not load texture: [%s]", path);
     return texture;

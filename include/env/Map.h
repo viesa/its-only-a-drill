@@ -12,7 +12,7 @@ void MapUninitialize();
 
 int MapGenerateNew(JSON *mapdata);
 
-void MapDraw(Camera *camera);
+void MapDraw();
 
 EntityIndexP *MapGetContents();
 unsigned int MapGetContentSize();

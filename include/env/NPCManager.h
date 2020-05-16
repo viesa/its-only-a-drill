@@ -8,8 +8,8 @@
 void NPCManagerInitialize(Player *player);
 void NPCManagerUninitialize();
 
-void NPCManagerUpdate(Camera *camera);
-void NPCManagerDrawAllNPCS(Camera *camera);
+void NPCManagerUpdate();
+void NPCManagerDrawAllNPCS();
 
 void NPCManagerAddNew(Vec2 pos);
 

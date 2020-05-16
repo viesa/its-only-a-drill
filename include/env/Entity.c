@@ -101,20 +101,19 @@ void EntityAddCompressed(Entity *entity, CompressedEntity *cEntity)
     }
 }
 
-void EntityDraw(Entity *entity, Camera *camera)
+void EntityDraw(Entity *entity)
 {
     for (int i = 0; i < entity->nDrawables; i++)
     {
         entity->drawables[i].dst.x = entity->position.x;
         entity->drawables[i].dst.y = entity->position.y;
-        CameraDraw(camera, entity->drawables[i]);
-        CameraDrawRect(camera, EntityGetHitbox(entity), (SDL_Color){255, 255, 255, 255}, SDL_FALSE);
+        CameraDraw(entity->drawables[i]);
     }
 }
 
-void EntityDrawIndex(EntityIndexP index, Camera *camera)
+void EntityDrawIndex(EntityIndexP index)
 {
-    EntityDraw(&ENTITY_ARRAY[*index], camera);
+    EntityDraw(&ENTITY_ARRAY[*index]);
 }
 
 void EntityCalculateNetForces(Entity *entity)

@@ -4,12 +4,9 @@ struct AppClient
 {
     SDL_bool *running;
 
-    Graphics *gfx;
     Font *font;
     Gui *gui;
-    Camera *camera;
     FPSManager *fpsManager;
-    Menu *menu;
     Keybinding *bindings;
     Vec2 middleOfMap;
 
@@ -27,23 +24,23 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     StateInitialize();
     MapInitialize();
     AudioInitialize();
+    GraphicsInitialize();
+    CameraInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->fpsManager = fpsManager;
-    app->gfx = GraphicsCreate();
-    app->font = FontCreate(app->gfx);
+    app->font = FontCreate();
     app->gui = GuiCreate(app->font);
-    app->camera = CameraCreate(app->gfx, NULL);
     app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
-    app->player = PlayerCreate(app->camera);
-    app->middleOfMap = Vec2Create((float)app->gfx->mapWidth / 2.0f, (float)app->gfx->mapHeight / 2.0f);
-    AppClientUpdateSettings(app);
-    app->menu = MenuCreate(app->gfx, app->camera, app->font, app->bindings, app->mapList);
-    StateSetMenu(app->menu);
+    app->player = PlayerCreate();
+    app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
+    app->groundListItems = GroundListCreate();
 
+    TransitionInitalize(app->font);
     NotifyInitialize(app->font);
+    MenuInitialize(app->font, app->bindings, app->mapList);
 
     LobbyInitialize();
     ClientInitialize(app->player);
@@ -54,10 +51,10 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
     ScoreCreate(0);
     ScoreIncrement(100, 0);
 
-    app->groundListItems = GroundListCreate();
-
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
+
+    AppClientUpdateSettings(app);
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -69,12 +66,10 @@ void AppClientDestroy(AppClient *app)
     ClientManagerUninitialize();
     ClientUninitialize();
     LobbyUninitialize();
-    AudioUninitialize();
 
     NPCManagerUninitialize();
     PlayerDestroy(app->player);
 
-    MenuDestroy(app->menu);
     KeybindingFree(app->bindings);
     GuiDestroy(app->gui);
     FontDestroy(app->font);
@@ -82,19 +77,21 @@ void AppClientDestroy(AppClient *app)
     MapUninitialize();
     EntityManagerUninitalize();
 
-    CameraDestroy(app->camera);
-    GraphicsDestroy(app->gfx);
+    AudioUninitialize();
+    MenuUninitialize();
+    CameraUninitialize();
+    GraphicsUnitialize();
 
     SDL_free(app);
 }
 
 void AppClientRun(AppClient *app)
 {
-    WindowClear(app->gfx->window);
+    WindowClear();
     AppClientDraw(app);
     AppClientUpdate(app);
     // AppClientDraw(app);
-    WindowPresent(app->gfx->window);
+    WindowPresent();
 }
 
 void AppClientUpdate(AppClient *app)
@@ -115,9 +112,9 @@ void AppClientUpdate(AppClient *app)
         case MS_CustomMap:
         case MS_HostLobby:
         case MS_Lobby:
-            CameraSetFollowSnap(app->camera, &app->middleOfMap);
+            CameraSetFollowSnap(&app->middleOfMap);
         case MS_InGameMenu:
-            CameraUpdate(app->camera);
+            CameraUpdate();
             break;
         default:
             break;
@@ -132,10 +129,10 @@ void AppClientUpdate(AppClient *app)
             GameStateSet(GS_Menu);
             MenuStateSet(MS_InGameMenu);
         }
-        CameraUpdate(app->camera);
+        CameraUpdate();
 
-        NPCManagerUpdate(app->camera);
-        PlayerUpdate(app->player, app->camera);
+        NPCManagerUpdate();
+        PlayerUpdate(app->player);
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate();
@@ -158,23 +155,23 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
-        MenuUpdate(app->menu, app->fpsManager, app->player);
+        MenuUpdate(app->fpsManager, app->player);
         GuiOverlayUpdate(app->gui);
         if (MenuStateGet() == MS_InGameMenu)
         {
-            PlayerDraw(app->player, app->camera);
-            ClientManagerDrawConnectedPlayers(app->camera);
+            PlayerDraw(app->player);
+            ClientManagerDrawConnectedPlayers();
         }
         break;
     }
     case GS_Playing:
     {
-        CameraSetFollow(app->camera, PlayerGetAimFollowP(app->player));
-        MapDraw(app->camera);
+        CameraSetFollow(PlayerGetAimFollowP(app->player));
+        MapDraw();
 
-        NPCManagerDrawAllNPCS(app->camera);
-        PlayerDraw(app->player, app->camera);
-        ClientManagerDrawConnectedPlayers(app->camera);
+        NPCManagerDrawAllNPCS();
+        PlayerDraw(app->player);
+        ClientManagerDrawConnectedPlayers();
         GuiUpdate(app->gui);
         break;
     }
@@ -197,13 +194,13 @@ void AppClientUpdateSettings(AppClient *app)
     {
         *app->bindings = settings.keys; //keys
 
-        WindowSetSize(app->gfx->window, settings.resolutionW, settings.resolutionH); //resolution
+        WindowSetSize(settings.resolutionW, settings.resolutionH); //resolution
 
         PlayerSetSpriteSheet(app->player, (SpriteSheet)settings.skin);
 
-        WindowSetFullscreen(app->gfx->window, settings.isFullscreen); // fullscreen
+        WindowSetFullscreen(settings.isFullscreen); // fullscreen
 
-        WindowSetVSync(app->gfx->window, settings.vsync); // vsync
+        WindowSetVSync(settings.vsync); // vsync
 
         app->fpsManager->desiredFPS = settings.fps; // fps
     }

@@ -15,7 +15,7 @@ Gui *GuiCreate(Font *font)
     gui->defaultEdge = 30;
     gui->defaultSize = 50;
     gui->defaultOffset = 3;
-    gui->scan = DrawableCreate((SDL_Rect){0, 0, 1600, 1200}, (SDL_Rect){0, 0, font->gfx->window->width, font->gfx->window->height}, SS_Scanline);
+    gui->scan = DrawableCreate((SDL_Rect){0, 0, 1600, 1200}, (SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight()}, SS_Scanline);
 
     return gui;
 }
@@ -28,18 +28,18 @@ void GuiDestroy(Gui *gui)
 void GuiOverlayUpdate(Gui *gui)
 {
     //Draw scanlines
-    gui->scan.dst.w = gui->font->gfx->window->width;
-    gui->scan.dst.h = gui->font->gfx->window->height;
-    GraphicsDraw(gui->font->gfx, gui->scan);
+    gui->scan.dst.w = WindowGetWidth();
+    gui->scan.dst.h = WindowGetHeight();
+    GraphicsDraw(gui->scan);
 }
 
 void GuiUpdate(Gui *gui)
 {
     //Draw overlays
-    GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
-    GraphicsDrawGradientY(gui->font->gfx, (SDL_Rect){0, gui->font->gfx->window->height / 5 * 4, gui->font->gfx->window->width, gui->font->gfx->window->height / 5}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
-    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){0, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
-    GraphicsDrawGradientX(gui->font->gfx, (SDL_Rect){gui->font->gfx->window->width / 5 * 4, 0, gui->font->gfx->window->width / 5, gui->font->gfx->window->height}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
+    GraphicsDrawGradientY((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight() / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
+    GraphicsDrawGradientY((SDL_Rect){0, WindowGetHeight() / 5 * 4, WindowGetWidth(), WindowGetHeight() / 5}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
+    GraphicsDrawGradientX((SDL_Rect){0, 0, WindowGetWidth() / 5, WindowGetHeight()}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
+    GraphicsDrawGradientX((SDL_Rect){WindowGetWidth() / 5 * 4, 0, WindowGetWidth() / 5, WindowGetHeight()}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //Points
     gui->points = ScoreInfo(0); //Temp Score grej
@@ -88,7 +88,7 @@ void GuiUpdate(Gui *gui)
         {255 - gui->loopSwing, 180, 184, 255},
         {255 - gui->loopSwing, 180, 184, 255}};
 
-    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, gui->font->gfx->window->width - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, WindowGetWidth() - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Disp. Objective
     //SDL_Color objColor[2] = {

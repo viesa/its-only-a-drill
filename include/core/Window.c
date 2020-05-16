@@ -1,8 +1,20 @@
 #include "Window.h"
 
-Window *WindowCreate(const char *title)
+typedef struct Window
 {
-    Window *window = MALLOC(Window);
+    SDL_Window *sdl_window;
+    SDL_Renderer *renderer;
+    int width;
+    int height;
+    SDL_bool isFullscreen;
+    SDL_bool vsyncEnabled;
+} Window;
+
+static Window *window;
+
+void WindowInitialize(const char *title)
+{
+    window = MALLOC(Window);
     SDL_DisplayMode displaymode;
     SDL_GetCurrentDisplayMode(0, &displaymode);
 #ifdef WINDOW_DEBUG
@@ -35,31 +47,51 @@ Window *WindowCreate(const char *title)
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    WindowSetIcon(window, "assets/window_icon.bmp");
+    WindowSetIcon("assets/window_icon.bmp");
 
-    WindowSetFullscreen(window, SDL_FALSE);
-    WindowSetVSync(window, SDL_TRUE);
-
-    return window;
+    WindowSetFullscreen(SDL_FALSE);
+    WindowSetVSync(SDL_TRUE);
 }
 
-void WindowDestroy(Window *window)
+void WindowUninitialize()
 {
     SDL_DestroyRenderer(window->renderer);
     SDL_DestroyWindow(window->sdl_window);
     SDL_free(window);
 }
 
-void WindowClear(Window *window)
+int WindowGetWidth()
+{
+    return window->width;
+}
+int WindowGetHeight()
+{
+    return window->height;
+}
+SDL_Renderer *WindowGetRenderer()
+{
+    return window->renderer;
+}
+
+SDL_bool WindowIsFullscreen()
+{
+    return window->isFullscreen;
+}
+SDL_bool WindowIsVSyncEnabled()
+{
+    return window->vsyncEnabled;
+}
+
+void WindowClear()
 {
     SDL_SetRenderDrawColor(window->renderer, 0, 0, 0, 255);
     SDL_RenderClear(window->renderer);
 }
-void WindowPresent(Window *window)
+void WindowPresent()
 {
     SDL_RenderPresent(window->renderer);
 }
-void WindowSetAntiAliasing(Window *window, const int level)
+void WindowSetAntiAliasing(const int level)
 {
     if (level < 0 || level > 8)
     {
@@ -70,27 +102,27 @@ void WindowSetAntiAliasing(Window *window, const int level)
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, alevel);
 }
 
-void WindowSetVSync(Window *window, SDL_bool onoff)
+void WindowSetVSync(SDL_bool onoff)
 {
     SDL_GL_SetSwapInterval((window->vsyncEnabled = onoff));
 }
 
-void WindowSetFullscreen(Window *window, SDL_bool onoff)
+void WindowSetFullscreen(SDL_bool onoff)
 {
     SDL_SetWindowFullscreen(window->sdl_window, (window->isFullscreen = onoff) ? SDL_WINDOW_FULLSCREEN : 0);
 }
 
-void WindowSetTitle(Window *window, const char *title)
+void WindowSetTitle(const char *title)
 {
     SDL_SetWindowTitle(window->sdl_window, title);
 }
 
-void WindowSetSize(Window *window, int width, int height)
+void WindowSetSize(int width, int height)
 {
     SDL_SetWindowSize(window->sdl_window, (window->width = width), (window->height = height));
 }
 
-void WindowSetIcon(Window *window, const char *filepath)
+void WindowSetIcon(const char *filepath)
 {
     SDL_Surface *win_icon = SDL_LoadBMP(filepath);
     if (!win_icon)

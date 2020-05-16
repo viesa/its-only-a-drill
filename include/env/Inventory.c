@@ -1,18 +1,18 @@
 #include "Inventory.h"
 
-void InventoryDisplay(Graphics *gfx, InventoryListItems *i)
+void InventoryDisplay(InventoryListItems *i)
 {
-    Drawable backround = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, ((gfx->window->height * 0.5) - 75), 300, 150}, SS_Tiles);
-    GraphicsDraw(gfx, backround);
+    Drawable backround = DrawableCreate((SDL_Rect){0, 0, 50, 50}, (SDL_Rect){0, ((WindowGetHeight() * 0.5) - 75), 300, 150}, SS_Tiles);
+    GraphicsDraw(backround);
     for (int j = 0; j < i->top; j++)
     {
         if (j < 5)
         {
-            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){25 + (j * 50), (gfx->window->height * 0.5) - 50}));
+            ItemPocketDraw(&i->contents[j], ((Vec2){25 + (j * 50), (WindowGetHeight() * 0.5) - 50}));
         }
         else
         {
-            ItemPocketDraw(gfx, &i->contents[j], ((Vec2){25 + ((j - 5) * 50), (gfx->window->height * 0.5)}));
+            ItemPocketDraw(&i->contents[j], ((Vec2){25 + ((j - 5) * 50), (WindowGetHeight() * 0.5)}));
         }
     }
 }
@@ -30,7 +30,7 @@ void InventorySelectItem(InventoryListItems *i, int item)
     }
 }
 
-void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerPos)
+void InventoryDisplayEquiped(InventoryListItems *i, Vec2 PlayerPos)
 {
     for (int j = 0; j < i->top; j++)
     {
@@ -41,7 +41,7 @@ void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerP
             //held.postion.x = 300;
             //held.postion.y = 500;
             //GraphicsDraw(gfx,held.drawable);
-            ItemEquipDraw(camera, &i->contents[j], ((Vec2){PlayerPos.x + 20, PlayerPos.y}));
+            ItemEquipDraw(&i->contents[j], ((Vec2){PlayerPos.x + 20, PlayerPos.y}));
         }
     }
 }

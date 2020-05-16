@@ -72,9 +72,9 @@ void NPCDestroy(NPC *npc)
     FREE(npc);
 }
 
-void NPCUpdate(NPC *npc, Camera *camera)
+void NPCUpdate(NPC *npc)
 {
-    NPCUpdateBehavior(npc, camera);
+    NPCUpdateBehavior(npc);
     if (npc->state != NPC_Dead)
         NPCUpdateAnimation(npc);
     if (npc->state == NPC_Fight)
@@ -83,9 +83,9 @@ void NPCUpdate(NPC *npc, Camera *camera)
     float degrees = npc->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(npc->entity, degrees);
 }
-void NPCDraw(NPC *npc, Camera *camera)
+void NPCDraw(NPC *npc)
 {
-    EntityDrawIndex(npc->entity, camera);
+    EntityDrawIndex(npc->entity);
 }
 
 void NPCSetSpriteSheet(NPC *npc, SpriteSheet spriteSheet)
@@ -110,7 +110,7 @@ void NPCKill(NPC *npc)
     AnimStop(&npc->body);
 }
 
-void NPCUpdateBehavior(NPC *npc, Camera *camera)
+void NPCUpdateBehavior(NPC *npc)
 {
     NPCSwitchBehaviorState(npc);
 
@@ -127,7 +127,7 @@ void NPCUpdateBehavior(NPC *npc, Camera *camera)
     }
     case NPC_Fight:
     {
-        NPCUpdateBehaviorFight(npc, camera);
+        NPCUpdateBehaviorFight(npc);
         break;
     }
     case NPC_Aggressive:
@@ -168,9 +168,9 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
         }
     }
 }
-void NPCUpdateBehaviorFight(NPC *npc, Camera *camera)
+void NPCUpdateBehaviorFight(NPC *npc)
 {
-    NPCShoot(npc, camera);
+    NPCShoot(npc);
     if (PlayerGetEntity(npc->player)->health < 0)
     {
         npc->state = NPC_Neutral;
@@ -229,7 +229,7 @@ void NPCSwitchBehaviorState(NPC *npc)
     }
 }
 
-void NPCShoot(NPC *npc, Camera *camera)
+void NPCShoot(NPC *npc)
 {
     Item *item = &npc->inventory.contents[npc->inventory.top - 1];
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
@@ -251,7 +251,7 @@ void NPCShoot(NPC *npc, Camera *camera)
         point.x = entity->drawables[0].dst.x + (entity->drawables[0].dst.w / 2);
         point.y = entity->drawables[0].dst.y + (entity->drawables[0].dst.h / 2);
 
-        CameraDrawLine(camera, point.x, point.y, makeDestination.x, makeDestination.y, (SDL_Color){255, 50, 50, 150});
+        CameraDrawLine(point.x, point.y, makeDestination.x, makeDestination.y, (SDL_Color){255, 50, 50, 150});
         // push back
         entity->Force.x -= itemFalloff.x;
         entity->Force.y -= itemFalloff.y;
@@ -265,13 +265,6 @@ void NPCShoot(NPC *npc, Camera *camera)
 
 void NPCUpdateAnimation(NPC *npc)
 {
-    if (npc->leg.currentFrame < 0 || npc->leg.currentFrame > npc->leg.nFrames ||
-        npc->body.currentFrame < 0 || npc->leg.currentFrame > npc->body.nFrames)
-    {
-        log_info("body frame: %d", npc->body.currentFrame);
-        log_info("leg frame: %d", npc->leg.currentFrame);
-    }
-
     AnimUpdate(&npc->leg, ClockGetDeltaTime());
     AnimUpdate(&npc->body, ClockGetDeltaTime());
 

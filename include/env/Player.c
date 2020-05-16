@@ -21,7 +21,7 @@ struct Player
     float respawnCooldown;
 };
 
-Player *PlayerCreate(Camera *camera)
+Player *PlayerCreate()
 {
     Player *player = MALLOC(Player);
     ALLOC_ERROR_CHECK(player);
@@ -44,10 +44,10 @@ void PlayerDestroy(Player *player)
     FREE(player);
 }
 
-void PlayerUpdate(Player *player, Camera *camera)
+void PlayerUpdate(Player *player)
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
-    PlayerCameraUpdate(player, camera);
+    PlayerCameraUpdate(player);
     if (entity->health <= 0)
     {
         if (player->state == PL_Dead)
@@ -71,22 +71,22 @@ void PlayerUpdate(Player *player, Camera *camera)
         if (InputIsMousePressed(BUTTON_LEFT))
         {
             if (player->inventory.contents[player->inventory.top - 1].Stats.ammo > 0)
-                PlayerShoot(player, camera);
+                PlayerShoot(player);
         }
     }
     weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
 }
 
-void PlayerDraw(Player *player, Camera *camera)
+void PlayerDraw(Player *player)
 {
-    EntityDrawIndex(player->entity, camera);
+    EntityDrawIndex(player->entity);
 }
 
-void PlayerCameraUpdate(Player *player, Camera *camera)
+void PlayerCameraUpdate(Player *player)
 {
     // camera
     Vec2 mousePos = InputLastMousePos();
-    Vec2 cameraPos = CameraGetPos(camera);
+    Vec2 cameraPos = CameraGetPos();
     Vec2 playerPos = Vec2Sub(RectMid(ENTITY_ARRAY[*player->entity].drawables[0].dst), cameraPos);
 
     Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
@@ -108,8 +108,6 @@ void PlayerMomventUpdate(Player *player)
 
 void PlayerAnimationUpdate(Player *player)
 {
-    log_info("body frame: %d", player->body.currentFrame);
-    log_info("leg frame: %d", player->leg.currentFrame);
     // animation
     AnimUpdate(&player->leg, ClockGetDeltaTime());
     AnimUpdate(&player->body, ClockGetDeltaTime());
@@ -144,7 +142,7 @@ void PlayerRotateToCamera(Player *player)
     EntityRotateAll(player->entity, degrees);
 }
 
-void PlayerShoot(Player *player, Camera *camera)
+void PlayerShoot(Player *player)
 {
     Item *item = &player->inventory.contents[player->inventory.top - 1];
 #ifdef PLAYER_DEBUG
@@ -156,7 +154,7 @@ void PlayerShoot(Player *player, Camera *camera)
 
         item->Stats.currentTime = item->Stats.cooldownMS;
         Vec2 mousePos = InputLastMousePos();
-        Vec2 cameraPos = CameraGetPos(camera);
+        Vec2 cameraPos = CameraGetPos();
         Vec2 playerPos = Vec2Sub(entity->position, cameraPos);
 
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
@@ -167,7 +165,7 @@ void PlayerShoot(Player *player, Camera *camera)
         entity->Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
 
-        RayScanClosest(player->entity, camera, &unitPlayerToMouse, &item->Stats);
+        RayScanClosest(player->entity, &unitPlayerToMouse, &item->Stats);
     }
 }
 

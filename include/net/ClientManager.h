@@ -27,7 +27,7 @@ void ClientManagerUninitialize();
 // Updates the entire network situation for this client
 void ClientManagerUpdate();
 // Draws the entire network situation for this client
-void ClientManagerDrawConnectedPlayers(Camera *camera);
+void ClientManagerDrawConnectedPlayers();
 
 // Adds deltatime to the server timeout timer
 void ClientManagerUpdateServerTimeoutTimer();

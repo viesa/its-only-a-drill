@@ -45,11 +45,10 @@ typedef enum Font3dDirection
 
 typedef struct Font
 {
-    Graphics *gfx;
     TTF_Font *fonts[TTF_Count];
 } Font;
 
-Font *FontCreate(Graphics *gfx);
+Font *FontCreate();
 
 // FontDraw() - Draws one line of text from string.
 // Warning: x is dependent on which alignment setting is used.

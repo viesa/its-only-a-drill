@@ -7,12 +7,11 @@
 
 typedef struct LoadingBar
 {
-    Graphics *gfx;
     SDL_bool active;
     float progress;
 } LoadingBar;
 
-LoadingBar *LoadingBarCreate(Graphics *gfx);
+LoadingBar *LoadingBarCreate();
 void LoadingBarReset(LoadingBar *bar);
 void LoadingBarUpdate(LoadingBar *bar);
 void LoadingBarAdd(LoadingBar *bar, float progress);

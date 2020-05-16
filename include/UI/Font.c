@@ -1,9 +1,8 @@
 #include "Font.h"
 
-Font *FontCreate(Graphics *gfx)
+Font *FontCreate()
 {
     Font *font = MALLOC(Font);
-    font->gfx = gfx;
 
     //Debug font
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
@@ -45,7 +44,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
         boxWidth = drawSize.w;
 
     SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font->fonts[fontEnum], text, color, boxWidth);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
     SDL_FreeSurface(surface);
 
     int texW = 0;
@@ -55,11 +54,11 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
 
     if (align == FAL_MENUSIDE)
     {
-        SDL_RenderCopyEx(font->gfx->window->renderer, texture, NULL, &dstrect, -30, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(WindowGetRenderer(), texture, NULL, &dstrect, -30, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
     }
     else
     {
-        SDL_RenderCopy(font->gfx->window->renderer, texture, NULL, &dstrect);
+        SDL_RenderCopy(WindowGetRenderer(), texture, NULL, &dstrect);
     }
 
     SDL_DestroyTexture(texture);
@@ -71,7 +70,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
 SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
     int x = 0;
     int y = 0;
     int texW = 0;
@@ -86,7 +85,7 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
 int FontGetWidth(Font *font, FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(font->gfx->window->renderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
     int texW = 0;
     int texH = 0;
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
@@ -158,8 +157,8 @@ FontSheet FontGetDynamicSizing(Font *font)
     //L:  2 500 000
     //XL: 3 500 000
 
-    int w = font->gfx->window->width;
-    int h = font->gfx->window->height;
+    int w = WindowGetWidth();
+    int h = WindowGetHeight();
     int px = w * h;
 
     if (px > 3800000)

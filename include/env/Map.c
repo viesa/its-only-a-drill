@@ -124,12 +124,12 @@ int MapGenerateNew(JSON *mapData)
     return 1;
 }
 
-void MapDraw(Camera *camera)
+void MapDraw()
 {
     if (map.contents)
         for (int i = 0; i < map.n; i++)
         {
-            EntityDrawIndex(map.contents[i], camera);
+            EntityDrawIndex(map.contents[i]);
         }
 }
 

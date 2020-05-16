@@ -68,11 +68,11 @@ void AnimUpdate(Anim *anim, float dt)
     anim->active = &anim->frames[anim->currentFrame];
 }
 
-void AnimDraw(Anim *anim, Camera *camera)
+void AnimDraw(Anim *anim)
 {
     if (anim->active && anim->nFrames != -1)
     {
-        CameraDraw(camera, *anim->active);
+        CameraDraw(*anim->active);
     }
 }
 

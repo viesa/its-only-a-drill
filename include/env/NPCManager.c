@@ -21,20 +21,20 @@ void NPCManagerUninitialize()
     VectorDestroy(npcManager.npcs);
 }
 
-void NPCManagerUpdate(Camera *camera)
+void NPCManagerUpdate()
 {
     for (int i = 0; i < npcManager.npcs->size; i++)
     {
         NPC *npc = ((NPC **)npcManager.npcs->data)[i];
-        NPCUpdate(npc, camera);
+        NPCUpdate(npc);
     }
 }
-void NPCManagerDrawAllNPCS(Camera *camera)
+void NPCManagerDrawAllNPCS()
 {
     for (int i = 0; i < npcManager.npcs->size; i++)
     {
         NPC *npc = ((NPC **)npcManager.npcs->data)[i];
-        NPCDraw(npc, camera);
+        NPCDraw(npc);
     }
 }
 

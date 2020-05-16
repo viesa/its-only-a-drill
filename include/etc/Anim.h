@@ -37,7 +37,7 @@ typedef struct Anim
 Anim AnimCreate(AnimType animType, AnimRepeatOption anro, SpriteSheet spriteSheet, int startFrame, float delta);
 
 void AnimUpdate(Anim *anim, float dt);
-void AnimDraw(Anim *anim, Camera *camera);
+void AnimDraw(Anim *anim);
 
 void AnimPause(Anim *anim);
 void AnimResume(Anim *anim);

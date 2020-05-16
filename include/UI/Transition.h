@@ -15,7 +15,7 @@ typedef enum TransitionType
     TT_Count
 } TransitionType;
 
-void TransitionInitalize(Graphics *gfx, Font *font);
+void TransitionInitalize(Font *font);
 
 void TransitionDraw();
 
