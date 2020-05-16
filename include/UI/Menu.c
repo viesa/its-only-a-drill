@@ -1110,9 +1110,13 @@ void MenuUpdateCustomMap(Menu *menu, Player *player)
         JSON *mapdata = JSONCreate(mapInfo.filename);
         MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
+        NPCManagerClearNPCS();
         for (int i = 0; i < mapInfo.enemySpawns->size; i++)
             NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
-        PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
+        if (mapInfo.enemySpawns->size > 0)
+            PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
+        else
+            PlayerGetEntity(player)->position = Vec2Create(1000.0f, 1000.0f);
     }
 
     MenuDraw(menu, options, optionLength);
