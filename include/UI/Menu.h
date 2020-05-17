@@ -26,7 +26,7 @@
 #define FETCH_LOBBY_INTERVAL (0.5f)
 
 // Creates menu
-void MenuInitialize(Keybinding *bindings, MapList *mapList);
+void MenuInitialize(MapList *mapList);
 void MenuUninitialize();
 
 void MenuResetActiveIndex();

@@ -10,7 +10,6 @@ typedef struct Menu
     Drawable lobbyHostDbl;
     Drawable lobbyNormalDbl;
     LoadingBar *loadingBar;
-    Keybinding *bindings;
     float loopCount;
     int loopSwing;
     int swingDir;
@@ -40,13 +39,12 @@ typedef struct Menu
 
 static Menu *menu;
 
-void MenuInitialize(Keybinding *bindings, MapList *mapList)
+void MenuInitialize(MapList *mapList)
 {
     menu = MALLOC(Menu);
     ALLOC_ERROR_CHECK(menu);
 
     menu->loadingBar = LoadingBarCreate();
-    menu->bindings = bindings;
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -357,7 +355,7 @@ void MenuUpdateMainMenu(Player *player)
         {
             Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
                                                WindowGetWidth(),
-                                               WindowGetHeight(), *menu->bindings,
+                                               WindowGetHeight(),
                                                WindowIsFullscreen(),
                                                WindowIsVSyncEnabled(),
                                                FPSManagerGetDesiredFPS());
@@ -979,55 +977,55 @@ void MenuUpdateKeybinding()
             {
             case 0:
             {
-                KeybindingChange(MOVE_UP, InputLastKeyDown(menu->bindings->KeyArray[MOVE_UP]), menu->bindings);
+                KeybindingChange(AC_MOVE_UP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_UP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 1:
             {
-                KeybindingChange(MOVE_LEFT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_LEFT]), menu->bindings);
+                KeybindingChange(AC_MOVE_LEFT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_LEFT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 2:
             {
-                KeybindingChange(MOVE_RIGHT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_RIGHT]), menu->bindings);
+                KeybindingChange(AC_MOVE_RIGHT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_RIGHT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 3:
             {
-                KeybindingChange(MOVE_DOWN, InputLastKeyDown(menu->bindings->KeyArray[MOVE_DOWN]), menu->bindings);
+                KeybindingChange(AC_MOVE_DOWN, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_DOWN]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 4:
             {
-                KeybindingChange(PICKUP, InputLastKeyDown(menu->bindings->KeyArray[PICKUP]), menu->bindings);
+                KeybindingChange(AC_PICKUP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_PICKUP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 5:
             {
-                KeybindingChange(DROP, InputLastKeyDown(menu->bindings->KeyArray[DROP]), menu->bindings);
+                KeybindingChange(AC_DROP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_DROP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 6:
             {
-                KeybindingChange(SHOOT, InputLastKeyDown(menu->bindings->KeyArray[SHOOT]), menu->bindings);
+                KeybindingChange(AC_SHOOT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_SHOOT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 7:
             {
-                KeybindingChange(RELOAD, InputLastKeyDown(menu->bindings->KeyArray[RELOAD]), menu->bindings);
+                KeybindingChange(AC_RELOAD, InputLastKeyDown(KEYBINDINGS_KEYS[AC_RELOAD]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 8:
             {
-                KeybindingChange(INVENTORY, InputLastKeyDown(menu->bindings->KeyArray[INVENTORY]), menu->bindings);
+                KeybindingChange(AC_INVENTORY, InputLastKeyDown(KEYBINDINGS_KEYS[AC_INVENTORY]));
                 menu->keybindingstate = 0;
 
                 break;

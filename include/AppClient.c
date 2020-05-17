@@ -4,7 +4,6 @@ struct AppClient
 {
     SDL_bool *running;
 
-    Keybinding *bindings;
     Vec2 middleOfMap;
 
     GroundListItems groundListItems;
@@ -29,16 +28,16 @@ AppClient *AppClientCreate(SDL_bool *running)
     LobbyInitialize();
     ClientManagerInitialize();
     GuiInitialize();
+    KeybindingInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
-    app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
     app->player = PlayerCreate();
     app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
     app->groundListItems = GroundListCreate();
 
-    MenuInitialize(app->bindings, app->mapList);
+    MenuInitialize(app->mapList);
     ClientInitialize(app->player);
     NPCManagerInitialize(app->player);
 
@@ -57,10 +56,11 @@ void AppClientDestroy(AppClient *app)
     {
         ClientTCPSend(PT_LeaveSession, NULL, 0);
     }
-    NPCManagerUninitialize(app->player);
-    ClientUninitialize(app->player);
-    MenuUninitialize(app->bindings, app->mapList);
+    NPCManagerUninitialize();
+    ClientUninitialize();
+    MenuUninitialize();
 
+    KeybindingUninitialize();
     GuiUninitialize();
     ClientManagerUninitialize();
     LobbyUninitialize();
@@ -182,8 +182,6 @@ void AppClientUpdateSettings(AppClient *app)
     Settings settings = SettingsGetFromFile(SETTINGS_PATH);
     if (settings.resolutionH != 1) // found settings file
     {
-        *app->bindings = settings.keys; //keys
-
         WindowSetSize(settings.resolutionW, settings.resolutionH); //resolution
 
         PlayerSetSpriteSheet(app->player, (SpriteSheet)settings.skin);
