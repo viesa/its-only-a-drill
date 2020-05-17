@@ -20,9 +20,10 @@ void EntityManagerInitialize()
     EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
 }
 
-void EntityManagerUninitalize()
+void EntityManagerUninitialize()
 {
     VectorDestroy(entityManager.entityVector);
+    FREE(entityManager.indices);
 }
 
 void EntityManagerUpdate()

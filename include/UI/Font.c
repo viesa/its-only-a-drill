@@ -1,8 +1,16 @@
 #include "Font.h"
 
-Font *FontCreate()
+typedef struct Font
 {
-    Font *font = MALLOC(Font);
+    TTF_Font *fonts[TTF_Count];
+} Font;
+
+static Font *font;
+
+void FontInitialize()
+{
+    font = MALLOC(Font);
+    ALLOC_ERROR_CHECK(font);
 
     //Debug font
     font->fonts[TTF_Arial] = TTF_OpenFont("./assets/fonts/arial.ttf", 25); //filepath, size
@@ -14,16 +22,23 @@ Font *FontCreate()
     font->fonts[TTF_Antilles_L] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 100);
     font->fonts[TTF_Antilles_XL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 125);
     font->fonts[TTF_Antilles_XXL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
-
-    return font;
 }
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color)
+void FontUninitialize()
+{
+    for (size_t i = 0; i < TTF_Count; i++)
+    {
+        TTF_CloseFont(font->fonts[i]);
+    }
+    FREE(font);
+}
+
+void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color)
 {
     int alignOffsetX = 0;
 
     //Calculate destination from alignment
-    SDL_Rect drawSize = FontGetSize(font, fontEnum, text);
+    SDL_Rect drawSize = FontGetSize(fontEnum, text);
 
     switch (align)
     {
@@ -67,7 +82,7 @@ void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, Fon
 // FontGetSize
 //
 // Get estimated size of text to be printed. Returned as a SDL_Rect.
-SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
+SDL_Rect FontGetSize(FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
     SDL_Texture *texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
@@ -82,7 +97,7 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[])
     return (SDL_Rect){x, y, texW, texH};
 }
 
-int FontGetWidth(Font *font, FontSheet fontEnum, char text[])
+int FontGetWidth(FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});
     SDL_Texture *texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
@@ -95,52 +110,52 @@ int FontGetWidth(Font *font, FontSheet fontEnum, char text[])
     return texW;
 }
 
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[])
+void FontDraw3D(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[])
 {
     for (size_t i = 0; i < layers; i++)
     {
         switch (dir)
         {
         case F3D_TL:
-            FontDraw(font, fontEnum, text, x - offset * i, y - offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x - offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TC:
-            FontDraw(font, fontEnum, text, x, y - offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TR:
-            FontDraw(font, fontEnum, text, x + offset * i, y - offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x + offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_CL:
-            FontDraw(font, fontEnum, text, x - offset * i, y, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x - offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_CC:
-            FontDraw(font, fontEnum, text, x, y, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x, y, align, boxWidth, color[i]);
             break;
         case F3D_CR:
-            FontDraw(font, fontEnum, text, x + offset * i, y, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x + offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_BL:
-            FontDraw(font, fontEnum, text, x - offset * i, y + offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x - offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BC:
-            FontDraw(font, fontEnum, text, x, y + offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BR:
-            FontDraw(font, fontEnum, text, x + offset * i, y + offset * i, align, boxWidth, color[i]);
+            FontDraw(fontEnum, text, x + offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         }
     }
 }
 
-void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[])
+void FontDraw3DCustom(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[])
 {
     for (size_t i = 0; i < layers; i++)
     {
-        FontDraw(font, fontEnum, text, x + offsetX * i, y + offsetY * i, align, boxWidth, color[i]);
+        FontDraw(fontEnum, text, x + offsetX * i, y + offsetY * i, align, boxWidth, color[i]);
     }
 }
 
-FontSheet FontGetDynamicSizing(Font *font)
+FontSheet FontGetDynamicSizing()
 {
     //Dynamic sizes: XS, S(50), M, L, XL
     //Screen resolutions:
@@ -203,14 +218,4 @@ int FontGetHeight(FontSheet fontEnum)
         return 0;
         break;
     }
-}
-
-void FontDestroy(Font *font)
-{
-    for (size_t i = 0; i < TTF_Count; i++)
-    {
-        TTF_CloseFont(font->fonts[i]);
-    }
-
-    SDL_free(font);
 }

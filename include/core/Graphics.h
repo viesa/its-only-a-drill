@@ -7,7 +7,7 @@
 #include "Window.h"
 
 void GraphicsInitialize();
-void GraphicsUnitialize();
+void GraphicsUninitialize();
 
 int GraphicsGetMapWidth();
 int GraphicsGetMapHeight();

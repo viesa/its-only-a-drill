@@ -10,7 +10,7 @@
 #define ENTITY_ARRAY EntityManagerGetArray()
 
 void EntityManagerInitialize();
-void EntityManagerUninitalize();
+void EntityManagerUninitialize();
 
 ///Waring only one
 ///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.

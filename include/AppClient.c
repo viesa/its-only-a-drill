@@ -4,8 +4,6 @@ struct AppClient
 {
     SDL_bool *running;
 
-    Font *font;
-    Gui *gui;
     FPSManager *fpsManager;
     Keybinding *bindings;
     Vec2 middleOfMap;
@@ -20,32 +18,30 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 {
     srand(time(NULL));
     CursorInitialize();
-    EntityManagerInitialize();
     StateInitialize();
-    MapInitialize();
-    AudioInitialize();
     GraphicsInitialize();
     CameraInitialize();
+    FontInitialize();
+    EntityManagerInitialize();
+    MapInitialize();
+    AudioInitialize();
+    TransitionInitialize();
+    NotifyInitialize();
+    LobbyInitialize();
+    ClientManagerInitialize();
+    GuiInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->fpsManager = fpsManager;
-    app->font = FontCreate();
-    app->gui = GuiCreate(app->font);
     app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
     app->player = PlayerCreate();
     app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
     app->groundListItems = GroundListCreate();
 
-    TransitionInitalize(app->font);
-    NotifyInitialize(app->font);
-    MenuInitialize(app->font, app->bindings, app->mapList);
-
-    LobbyInitialize();
+    MenuInitialize(app->bindings, app->mapList);
     ClientInitialize(app->player);
-    ClientManagerInitialize();
-
     NPCManagerInitialize(app->player);
 
     ScoreCreate(0);
@@ -63,26 +59,22 @@ void AppClientDestroy(AppClient *app)
     {
         ClientTCPSend(PT_LeaveSession, NULL, 0);
     }
+    NPCManagerUninitialize(app->player);
+    ClientUninitialize(app->player);
+    MenuUninitialize(app->bindings, app->mapList);
+
+    GuiUninitialize();
     ClientManagerUninitialize();
-    ClientUninitialize();
     LobbyUninitialize();
-
-    NPCManagerUninitialize();
-    PlayerDestroy(app->player);
-
-    KeybindingFree(app->bindings);
-    GuiDestroy(app->gui);
-    FontDestroy(app->font);
-
-    MapUninitialize();
-    EntityManagerUninitalize();
-
+    TransitionUninitialize();
     AudioUninitialize();
-    MenuUninitialize();
+    MapUninitialize();
+    EntityManagerUninitialize();
+    FontUninitialize();
     CameraUninitialize();
-    GraphicsUnitialize();
+    GraphicsUninitialize();
 
-    SDL_free(app);
+    FREE(app);
 }
 
 void AppClientRun(AppClient *app)
@@ -156,7 +148,7 @@ void AppClientDraw(AppClient *app)
     case GS_Menu:
     {
         MenuUpdate(app->fpsManager, app->player);
-        GuiOverlayUpdate(app->gui);
+        GuiOverlayUpdate();
         if (MenuStateGet() == MS_InGameMenu)
         {
             PlayerDraw(app->player);
@@ -172,7 +164,7 @@ void AppClientDraw(AppClient *app)
         NPCManagerDrawAllNPCS();
         PlayerDraw(app->player);
         ClientManagerDrawConnectedPlayers();
-        GuiUpdate(app->gui);
+        GuiUpdate();
         break;
     }
     default:
@@ -184,7 +176,7 @@ void AppClientDraw(AppClient *app)
         log_info("FPS: %f", ClockGetFPS());
 
 #ifdef ANY_DEBUG
-    GuiDrawFPS(app->gui);
+    GuiDrawFPS();
 #endif
 }
 void AppClientUpdateSettings(AppClient *app)

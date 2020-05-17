@@ -40,7 +40,7 @@ void GraphicsInitialize()
     gfx->m_allTextures[SS_Scanline] = GraphicsLoadTexture("assets/img/scanlines.png");
 }
 
-void GraphicsUnitialize()
+void GraphicsUninitialize()
 {
     for (int i = 0; i < SS_Count; i++)
     {

@@ -27,7 +27,7 @@ void AppServerDestroy(AppServer *app)
     ServerTCPBroadcast(PT_CloseAllSessions, NULL, 0);
     ServerStopListening();
     ServerUninitialize();
-    EntityManagerUninitalize();
+    EntityManagerUninitialize();
     if (app->cliWorker)
         SDL_WaitThread(app->cliWorker, NULL);
 }

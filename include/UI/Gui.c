@@ -2,10 +2,27 @@
 
 #include "Library.h"
 
-Gui *GuiCreate(Font *font)
+//Graphical User Interface - GUI
+typedef struct Gui
 {
-    Gui *gui = MALLOC(Gui);
-    gui->font = font;
+    long int points;
+    float loopCount;
+    float loopSwing;
+    float swingDir;
+    int fps;
+    float defaultEdge;
+    float defaultSize;
+    float defaultOffset;
+    Drawable scan;
+} Gui;
+
+static Gui *gui;
+
+void GuiInitialize()
+{
+    gui = MALLOC(Gui);
+    ALLOC_ERROR_CHECK(gui);
+
     gui->points = 3;
     gui->loopCount = 0;
     gui->loopSwing = 87;
@@ -16,16 +33,14 @@ Gui *GuiCreate(Font *font)
     gui->defaultSize = 50;
     gui->defaultOffset = 3;
     gui->scan = DrawableCreate((SDL_Rect){0, 0, 1600, 1200}, (SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight()}, SS_Scanline);
-
-    return gui;
 }
 
-void GuiDestroy(Gui *gui)
+void GuiUninitialize()
 {
-    SDL_free(gui);
+    FREE(gui);
 }
 
-void GuiOverlayUpdate(Gui *gui)
+void GuiOverlayUpdate()
 {
     //Draw scanlines
     gui->scan.dst.w = WindowGetWidth();
@@ -33,7 +48,7 @@ void GuiOverlayUpdate(Gui *gui)
     GraphicsDraw(gui->scan);
 }
 
-void GuiUpdate(Gui *gui)
+void GuiUpdate()
 {
     //Draw overlays
     GraphicsDrawGradientY((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight() / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
@@ -88,7 +103,7 @@ void GuiUpdate(Gui *gui)
         {255 - gui->loopSwing, 180, 184, 255},
         {255 - gui->loopSwing, 180, 184, 255}};
 
-    FontDraw3DCustom(gui->font, FontGetDynamicSizing(gui->font), pts, WindowGetWidth() - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
+    FontDraw3DCustom(FontGetDynamicSizing(), pts, WindowGetWidth() - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
     // Disp. Objective
     //SDL_Color objColor[2] = {
@@ -100,7 +115,7 @@ void GuiUpdate(Gui *gui)
     GuiOverlayUpdate(gui);
 }
 
-void GuiDrawFPS(Gui *gui)
+void GuiDrawFPS()
 {
     if (!gui->loopCount % 5)
     {
@@ -108,5 +123,5 @@ void GuiDrawFPS(Gui *gui)
     }
     char fps[10];
     sprintf(fps, "%d", gui->fps);
-    FontDraw(gui->font, TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
+    FontDraw(TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
 }

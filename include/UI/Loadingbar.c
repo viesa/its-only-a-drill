@@ -3,9 +3,16 @@
 LoadingBar *LoadingBarCreate()
 {
     LoadingBar *bar = MALLOC(LoadingBar);
+    ALLOC_ERROR_CHECK(bar);
+
     bar->active = SDL_FALSE;
     bar->progress = 0;
     return bar;
+}
+
+void LoadingBarDestroy(LoadingBar *bar)
+{
+    FREE(bar);
 }
 
 void LoadingBarReset(LoadingBar *bar)
@@ -53,8 +60,4 @@ void LoadingBarShow(LoadingBar *bar)
 void LoadingBarHide(LoadingBar *bar)
 {
     bar->active = SDL_FALSE;
-}
-void LoadingBarDestroy(LoadingBar *bar)
-{
-    SDL_free(bar);
 }
