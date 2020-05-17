@@ -283,8 +283,8 @@ void MenuUpdateName()
 
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        strcpy(client.name, InputGetPortalContent());
-        ClientTCPSend(PT_Connect, client.name, strlen(client.name) + 1);
+        ClientSetName(InputGetPortalContent());
+        ClientTCPSend(PT_Connect, ClientGetName(), strlen(ClientGetName()) + 1);
         MenuStateSet(MS_MainMenu);
     }
 }
@@ -415,7 +415,7 @@ void MenuUpdateInGameMenu()
         {
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
-            clientManager.inGame = SDL_FALSE;
+            ClientManagerSetInGame(SDL_FALSE);
             NPCManagerClearNPCS();
             break;
         }
@@ -540,7 +540,7 @@ void MenuUpdateJoinLobby()
     }
 
     //Determine menu options
-    int optionLength = clientManager.joinList->size + 1;
+    int optionLength = ClientManagerGetJoinListSize() + 1;
     char options[optionLength][100];
     for (int i = 0; i < optionLength - 1; i++)
     {
@@ -616,7 +616,7 @@ void MenuUpdateLobby()
     ///
 
     //Define playerlist
-    int playerListLength = lobby.names->size;
+    int playerListLength = LobbyGetNumNames();
     char playerList[playerListLength][100];
 
     //Determine playerlist
@@ -644,15 +644,17 @@ void MenuUpdateLobby()
     /// OPTIONS
     ///
 
-    int optionLength = 1 + (int)lobby.isHost;
+    int host = (int)LobbyIsHost();
+
+    int optionLength = 1 + host;
     char options[optionLength][100];
 
     //Rectify options
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    strcpy(options[optionLength - 1 - (int)lobby.isHost], "Leave");
-    if (lobby.isHost)
+    strcpy(options[optionLength - 1 - host], "Leave");
+    if (host)
     {
         strcpy(options[optionLength - 1], "Start");
     }
@@ -683,14 +685,14 @@ void MenuUpdateLobby()
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        if (menu->activeIndex == optionLength - 1 - (int)lobby.isHost)
+        if (menu->activeIndex == optionLength - 1 - (int)host)
         {
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
-            VectorClear(lobby.names);
-            lobby.isHost = SDL_FALSE;
+            LobbyClearNames();
+            LobbySetIsHost(SDL_FALSE);
         }
-        if (lobby.isHost && menu->activeIndex == optionLength - 1)
+        if (host && menu->activeIndex == optionLength - 1)
         {
             // Start the session
             ClientTCPSend(PT_StartSession, NULL, 0);
@@ -809,7 +811,7 @@ void MenuUpdateOptions()
         case 6:
         {
 
-            if (clientManager.inGame)
+            if (ClientManagerIsInGame())
             {
                 MenuStateSet(MS_InGameMenu);
             }
@@ -1199,7 +1201,7 @@ void MenuUpdateCustomMap(Player *player)
         MusicStop(&menu->MenuTheme);
         menu->startedOutTransition = SDL_FALSE;
         // To make in-game menu work properly
-        clientManager.inGame = SDL_TRUE;
+        ClientManagerSetInGame(SDL_TRUE);
     }
     else if (menu->startedOutTransition && !TransitionIsDone())
     {

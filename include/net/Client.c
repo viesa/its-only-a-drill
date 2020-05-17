@@ -1,21 +1,54 @@
 #include "Client.h"
 
+typedef struct Client
+{
+    Player *player;
+
+    NetPlayer server;
+    UDPsocket udpSocket;
+    SDLNet_SocketSet socketSet;
+
+    Vector *inBuffer;
+    SDL_mutex *inBufferMutex;
+
+    SDL_bool isListening;
+    SDL_bool isInitialized;
+    SDL_bool receivedPlayerID;
+
+    SDL_Thread *listenThread;
+
+    float connectTimer;
+    SDL_mutex *connectMutex;
+
+    char name[MAX_PLAYERNAME_SIZE];
+    SDL_bool hasSentName;
+} Client;
+
+static Client *client;
+
 void ClientInitialize(Player *player)
 {
-    client.player = player;
-    client.socketSet = SDLNet_AllocSocketSet(2);
-    client.isInitialized = SDL_FALSE;
-    client.isListening = SDL_FALSE;
-    client.inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
-    client.inBufferMutex = SDL_CreateMutex();
-    SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
-    client.connectTimer = 0.0f;
-    client.connectMutex = SDL_CreateMutex();
+    client = MALLOC(Client);
+    ALLOC_ERROR_CHECK(client);
+    client->player = player;
+    client->server = NetPlayerCreate(NULL, 0);
+    client->udpSocket = NULL;
+    client->socketSet = SDLNet_AllocSocketSet(2);
+    client->isListening = SDL_FALSE;
+    client->isInitialized = SDL_FALSE;
+    client->receivedPlayerID = SDL_FALSE;
+    client->inBuffer = VectorCreate(sizeof(ParsedPacket), 100);
+    client->inBufferMutex = SDL_CreateMutex();
+    client->connectTimer = 0.0f;
+    client->connectMutex = SDL_CreateMutex();
+
+    ClientClearName();
+    client->hasSentName = SDL_FALSE;
 
     // Start with assuming we are offline
     ConStateSet(CON_Offline);
 
-    client.isInitialized = SDL_TRUE;
+    client->isInitialized = SDL_TRUE;
 
     ClientTryConnect();
 }
@@ -23,11 +56,15 @@ void ClientInitialize(Player *player)
 void ClientUninitialize()
 {
     ClientDisconnect();
-    VectorDestroy(client.inBuffer);
-    SDL_DestroyMutex(client.inBufferMutex);
-    SDLNet_FreeSocketSet(client.socketSet);
-    SDL_DestroyMutex(client.connectMutex);
-    client.isInitialized = SDL_FALSE;
+    VectorDestroy(client->inBuffer);
+    SDL_DestroyMutex(client->inBufferMutex);
+    SDLNet_FreeSocketSet(client->socketSet);
+    SDL_DestroyMutex(client->connectMutex);
+    client->isInitialized = SDL_FALSE;
+    client->receivedPlayerID = SDL_FALSE;
+    if (client->player)
+        PlayerGetEntity(client->player)->id = -1;
+    FREE(client);
 }
 
 void ClientUpdate()
@@ -35,28 +72,47 @@ void ClientUpdate()
     if (ConStateGet() == CON_Offline)
     {
         const int wait = 5.0f;
-        if (client.connectTimer >= wait)
+        if (client->connectTimer >= wait)
         {
             ClientTryConnect();
-            client.connectTimer = 0.0f;
+            client->connectTimer = 0.0f;
         }
         else
         {
-            client.connectTimer += ClockGetDeltaTime();
+            client->connectTimer += ClockGetDeltaTime();
         }
+    }
+    ClientUpdateServerTimeoutTimer();
+    ClientPingServer();
+}
+
+void ClientUpdateServerTimeoutTimer()
+{
+    if (ConStateGet() == CON_Online && ClientIsWaitingForAliveReply())
+    {
+        client->server.timeoutTimer += ClockGetDeltaTime();
+    }
+}
+
+void ClientPingServer()
+{
+    if (ConStateGet() == CON_Online && !ClientIsWaitingForAliveReply())
+    {
+        ClientTCPSend(PT_AreYouAlive, NULL, 0);
+        client->server.waitingForAliveReply = SDL_TRUE;
     }
 }
 
 void ClientTryConnect()
 {
-    assert("Attempting to connect client without client initialization" && client.isInitialized);
+    assert("Attempting to connect client without client initialization" && client->isInitialized);
     SDL_Thread *worker = SDL_CreateThread((SDL_ThreadFunction)ClientConnectThreadFn, "Server Connector", NULL);
     SDL_DetachThread(worker);
 }
 
 void ClientConnectThreadFn()
 {
-    int status = SDL_TryLockMutex(client.connectMutex);
+    int status = SDL_TryLockMutex(client->connectMutex);
     if (status == SDL_MUTEX_TIMEDOUT)
     {
         // Another thread is already trying to connect
@@ -72,7 +128,7 @@ void ClientConnectThreadFn()
 
     if (ConStateGet() == CON_Online)
     {
-        SDL_UnlockMutex(client.connectMutex);
+        SDL_UnlockMutex(client->connectMutex);
         return;
     }
 
@@ -91,18 +147,18 @@ void ClientConnectThreadFn()
 #ifdef CLIENT_DEBUG
         log_error("Failed to resolve host: (%s:%d): %s", ip, port, SDLNet_GetError());
 #endif
-        SDL_UnlockMutex(client.connectMutex);
+        SDL_UnlockMutex(client->connectMutex);
         Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
 
     // Open UDP-socket on random port
-    if (!(client.udpSocket = SDLNet_UDP_Open(0)))
+    if (!(client->udpSocket = SDLNet_UDP_Open(0)))
     {
 #ifdef CLIENT_DEBUG
         log_error("Failed to open port (UDP) (%s:%d)): %s", ip, port, SDLNet_GetError());
 #endif
-        SDL_UnlockMutex(client.connectMutex);
+        SDL_UnlockMutex(client->connectMutex);
         Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
@@ -114,44 +170,44 @@ void ClientConnectThreadFn()
         log_error("Failed to open port (TCP) (%s:%d)): %s", ip, port, SDLNet_GetError());
 #endif
         // Clean up
-        SDLNet_UDP_Close(client.udpSocket);
-        SDL_UnlockMutex(client.connectMutex);
+        SDLNet_UDP_Close(client->udpSocket);
+        SDL_UnlockMutex(client->connectMutex);
         Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
-    client.server = NetPlayerCreate(tcpSocket, 0);
+    client->server = NetPlayerCreate(tcpSocket, 0);
 
     // Add TCP-socket to socket set
-    if (SDLNet_UDP_AddSocket(client.socketSet, client.udpSocket) == -1)
+    if (SDLNet_UDP_AddSocket(client->socketSet, client->udpSocket) == -1)
     {
 #ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (UDP): %s", SDLNet_GetError());
 #endif
         // Clean up
         SDLNet_TCP_Close(tcpSocket);
-        SDLNet_UDP_Close(client.udpSocket);
-        SDL_UnlockMutex(client.connectMutex);
+        SDLNet_UDP_Close(client->udpSocket);
+        SDL_UnlockMutex(client->connectMutex);
         Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
     // Add TCP-socket to socket set
-    if (SDLNet_TCP_AddSocket(client.socketSet, client.server.socket) == -1)
+    if (SDLNet_TCP_AddSocket(client->socketSet, client->server.socket) == -1)
     {
 #ifdef CLIENT_DEBUG
         log_error("Failed to add socket to socket set (TCP): %s", SDLNet_GetError());
 #endif
         // Clean up
         SDLNet_TCP_Close(tcpSocket);
-        SDLNet_UDP_Close(client.udpSocket);
-        SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
-        SDL_UnlockMutex(client.connectMutex);
+        SDLNet_UDP_Close(client->udpSocket);
+        SDLNet_UDP_DelSocket(client->socketSet, client->udpSocket);
+        SDL_UnlockMutex(client->connectMutex);
         Notify("Failed to connect", 2.0f, NT_WARN);
         return;
     }
 
-    if (!strlen(client.name) == 0)
+    if (!strlen(client->name) == 0)
     {
-        ClientTCPSend(PT_Connect, client.name, strlen(client.name));
+        ClientTCPSend(PT_Connect, client->name, strlen(client->name));
     }
 
     ClientStartListening();
@@ -159,36 +215,32 @@ void ClientConnectThreadFn()
     ConStateSet(CON_Online);
     Notify("Connection established", 2.0f, NT_INFO);
 
-    SDL_UnlockMutex(client.connectMutex);
+    SDL_UnlockMutex(client->connectMutex);
 }
 
 int ClientDisconnect()
 {
-    assert("Attempting to disconnect client without client initialization" && client.isInitialized);
+    assert("Attempting to disconnect client without client initialization" && client->isInitialized);
 
-    if (client.isListening)
+    if (client->isListening)
     {
         ClientStopListening();
     }
 
     ClientTCPSend(PT_Disconnect, NULL, 0);
-    if (client.udpSocket)
+    if (client->udpSocket)
     {
-        SDLNet_UDP_DelSocket(client.socketSet, client.udpSocket);
-        SDLNet_UDP_Close(client.udpSocket);
+        SDLNet_UDP_DelSocket(client->socketSet, client->udpSocket);
+        SDLNet_UDP_Close(client->udpSocket);
     }
-    if (client.server.socket)
+    if (client->server.socket)
     {
-        SDLNet_TCP_DelSocket(client.socketSet, client.server.socket);
-        SDLNet_TCP_Close(client.server.socket);
+        SDLNet_TCP_DelSocket(client->socketSet, client->server.socket);
+        SDLNet_TCP_Close(client->server.socket);
     }
 
-    for (size_t i = 0; i < client.inBuffer->size; i++)
-    {
-        ParsedPacketDestroy(&CLIENT_INBUFFER[i]);
-    }
-    VectorClear(client.inBuffer);
-    SDL_UnlockMutex(client.inBufferMutex);
+    ClientClearInBuffer();
+    SDL_UnlockMutex(client->inBufferMutex);
 
     ConStateSet(CON_Offline);
 
@@ -197,28 +249,28 @@ int ClientDisconnect()
 
 void ClientStartListening()
 {
-    assert("Attempting to start client without client initialization" && client.isInitialized);
+    assert("Attempting to start client without client initialization" && client->isInitialized);
 
-    client.isListening = SDL_TRUE;
-    client.listenThread = SDL_CreateThread((SDL_ThreadFunction)ClientListenToServer, "Server Listen Thread", NULL);
+    client->isListening = SDL_TRUE;
+    client->listenThread = SDL_CreateThread((SDL_ThreadFunction)ClientListenToServer, "Server Listen Thread", NULL);
 }
 
 void ClientStopListening()
 {
-    client.isListening = SDL_FALSE;
-    SDL_WaitThread(client.listenThread, NULL);
+    client->isListening = SDL_FALSE;
+    SDL_WaitThread(client->listenThread, NULL);
 }
 
 int ClientUDPSend(PacketType type, void *data, size_t size)
 {
-    if (!client.server.socket)
+    if (!client->server.socket)
         return 0;
 
-    assert("Attempting to send UDP-packet without client initialization" && client.isInitialized);
+    assert("Attempting to send UDP-packet without client initialization" && client->isInitialized);
 
-    UDPpacket *outgoing = UDPPacketCreate(type, PlayerGetEntity(client.player)->id, data, size);
-    outgoing->address.host = client.server.ip->host;
-    outgoing->address.port = client.server.ip->port;
+    UDPpacket *outgoing = UDPPacketCreate(type, PlayerGetEntity(client->player)->id, data, size);
+    outgoing->address.host = client->server.ip->host;
+    outgoing->address.port = client->server.ip->port;
 
     int result = ClientUDPOut(outgoing);
 
@@ -229,7 +281,7 @@ int ClientUDPSend(PacketType type, void *data, size_t size)
 
 int ClientUDPOut(UDPpacket *packet)
 {
-    if (!SDLNet_UDP_Send(client.udpSocket, -1, packet))
+    if (!SDLNet_UDP_Send(client->udpSocket, -1, packet))
     {
 #ifdef CLIENT_DEBUG
         log_warn("Failed to send UDP-packet to server: %s", SDLNet_GetError());
@@ -249,18 +301,18 @@ int ClientUDPOut(UDPpacket *packet)
 
 int ClientTCPSend(PacketType type, void *data, size_t size)
 {
-    if (!client.server.socket)
+    if (!client->server.socket)
     {
 #ifdef CLIENT_DEBUG
         log_warn("Attempted to send a package to server without being connected to it");
 #endif
         return 0;
     }
-    assert("Attempting to send TCP-packet without client initialization" && client.isInitialized);
+    assert("Attempting to send TCP-packet without client initialization" && client->isInitialized);
 
-    int id = PlayerGetEntity(client.player)->id;
+    int id = PlayerGetEntity(client->player)->id;
     TCPpacket *outgoing = TCPPacketCreate(type, id, data, size);
-    outgoing->address = client.server.socket;
+    outgoing->address = client->server.socket;
 
     int result = ClientTCPOut(outgoing);
 
@@ -271,7 +323,7 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
 
 int ClientTCPOut(TCPpacket *packet)
 {
-    assert("Attempting to send packet without client initialization" && client.isInitialized);
+    assert("Attempting to send packet without client initialization" && client->isInitialized);
 
     int totalSizeToSend = (int)packet->len;
     int totalSent = 0;
@@ -304,12 +356,12 @@ int ClientTCPOut(TCPpacket *packet)
 
 void ClientListenToServer()
 {
-    assert("Attempting to start client listener without client initialization" && client.isInitialized);
+    assert("Attempting to start client listener without client initialization" && client->isInitialized);
 
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
-    while (client.isListening)
+    while (client->isListening)
     {
-        int nReadySockets = SDLNet_CheckSockets(client.socketSet, 20);
+        int nReadySockets = SDLNet_CheckSockets(client->socketSet, 20);
         if (!nReadySockets)
         {
             // If no sockets are ready, swap thread
@@ -318,14 +370,14 @@ void ClientListenToServer()
         else if (nReadySockets)
         {
             // Check if the socket ready was TCP-socket
-            if (SDLNet_SocketReady(client.server.socket))
+            if (SDLNet_SocketReady(client->server.socket))
             {
                 ClientTryReceiveTCPPacket();
                 if (--nReadySockets == 0)
                     continue;
             }
             // Check if the socket ready was UDP-socket
-            if (SDLNet_SocketReady(client.udpSocket))
+            if (SDLNet_SocketReady(client->udpSocket))
             {
                 ClientTryReceiveUDPPacket();
                 if (--nReadySockets == 0)
@@ -344,10 +396,10 @@ void ClientListenToServer()
 int ClientTryReceiveUDPPacket()
 {
     UDPpacket *incoming = SDLNet_AllocPacket(MAX_MSGLEN);
-    incoming->address.host = client.server.ip->host;
-    incoming->address.port = client.server.ip->port;
+    incoming->address.host = client->server.ip->host;
+    incoming->address.port = client->server.ip->port;
 
-    int result = SDLNet_UDP_Recv(client.udpSocket, incoming);
+    int result = SDLNet_UDP_Recv(client->udpSocket, incoming);
     if (result == -1)
     {
 #ifdef CLIENT_DEBUG
@@ -379,9 +431,9 @@ int ClientTryReceiveUDPPacket()
                 return 0;
             }
 
-            ParsedPacket parsedPacket = ParsedPacketCreate(type, incoming->data, incoming->len, client.server);
-            SDL_LockMutex(client.inBufferMutex);
-            VectorPushBack(client.inBuffer, &parsedPacket);
+            ParsedPacket parsedPacket = ParsedPacketCreate(type, incoming->data, incoming->len, client->server);
+            SDL_LockMutex(client->inBufferMutex);
+            VectorPushBack(client->inBuffer, &parsedPacket);
 #ifdef CLIENT_IO
             PacketPrintInformation(parsedPacket.type,
                                    0,
@@ -390,7 +442,7 @@ int ClientTryReceiveUDPPacket()
                                    *parsedPacket.sender.ip,
                                    "UDP", "INCOMING");
 #endif
-            SDL_UnlockMutex(client.inBufferMutex);
+            SDL_UnlockMutex(client->inBufferMutex);
         }
     }
     UDPPacketDestroy(incoming);
@@ -405,12 +457,12 @@ int ClientTryReceiveTCPPacket()
     while (headerReceived < TCP_HEADER_SIZE)
     {
         // Attempts to receive as much as possible
-        int newReceive = SDLNet_TCP_Recv(client.server.socket, header + headerReceived, TCP_HEADER_SIZE - headerReceived);
+        int newReceive = SDLNet_TCP_Recv(client->server.socket, header + headerReceived, TCP_HEADER_SIZE - headerReceived);
         // If nothing was received, or negative, connection was dissrupted
         if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
-            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client->server.ip->host, client->server.ip->port);
 #endif
             return 0;
         }
@@ -435,12 +487,12 @@ int ClientTryReceiveTCPPacket()
     while (totalReceived < totalSizeToReceive)
     {
         // Attempts to receive as much as possible
-        int newReceive = SDLNet_TCP_Recv(client.server.socket, buffer + totalReceived, totalSizeToReceive - totalReceived);
+        int newReceive = SDLNet_TCP_Recv(client->server.socket, buffer + totalReceived, totalSizeToReceive - totalReceived);
         // If nothing was received, or negative, connection was dissrupted
         if (newReceive <= 0)
         {
 #ifdef CLIENT_DEBUG
-            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client.server.ip->host, client.server.ip->port);
+            log_warn("Failed to receive TCP-packet from server (IP | PORT) (%d | %d)", client->server.ip->host, client->server.ip->port);
 #endif
             FREE(buffer);
             return 0;
@@ -461,10 +513,10 @@ int ClientTryReceiveTCPPacket()
         return 0;
     }
 
-    ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, client.server);
+    ParsedPacket parsedPacket = ParsedPacketCreate(type, buffer, dataLength, client->server);
     // Add to inBuffer.
-    SDL_LockMutex(client.inBufferMutex);
-    VectorPushBack(client.inBuffer, &parsedPacket);
+    SDL_LockMutex(client->inBufferMutex);
+    VectorPushBack(client->inBuffer, &parsedPacket);
 #ifdef CLIENT_IO
     PacketPrintInformation(parsedPacket.type,
                            parsedPacket.sender.id,
@@ -473,28 +525,92 @@ int ClientTryReceiveTCPPacket()
                            *parsedPacket.sender.ip,
                            "TCP", "INCOMING");
 #endif
-    SDL_UnlockMutex(client.inBufferMutex);
+    SDL_UnlockMutex(client->inBufferMutex);
 
     FREE(buffer);
     return 1;
 }
 
-ParsedPacket *ClientGetInBufferArray()
+ParsedPacket *ClientGetInBuffer()
 {
-    return (ParsedPacket *)client.inBuffer->data;
+    return (ParsedPacket *)client->inBuffer->data;
+}
+
+void ClientClearInBuffer()
+{
+    for (size_t i = 0; i < client->inBuffer->size; i++)
+    {
+        ParsedPacketDestroy(&CLIENT_INBUFFER[i]);
+    }
+    VectorClear(client->inBuffer);
+}
+
+void ClientReceivedAlivePacket()
+{
+    client->server.timeoutTimer = 0.0f;
+    client->server.waitingForAliveReply = SDL_FALSE;
+}
+
+void ClientSetPlayerID(int id)
+{
+    PlayerGetEntity(client->player)->id = id;
+    client->receivedPlayerID = SDL_TRUE;
+}
+
+void ClientSetPlayerEntity(Entity *entity)
+{
+    // Shallow copy the entity to the player
+    *PlayerGetEntity(client->player) = *entity;
+}
+
+char *ClientGetName()
+{
+    return client->name;
+}
+
+void ClientSetName(char *name)
+{
+    ClientClearName();
+    int toCopy = strlen(name) < MAX_PLAYERNAME_SIZE ? strlen(name) : MAX_PLAYERNAME_SIZE;
+    SDL_memcpy(client->name, name, toCopy);
+}
+
+void ClientClearName()
+{
+    SDL_memset(client->name, 0, MAX_PLAYERNAME_SIZE);
+}
+
+Player *ClientGetPlayer()
+{
+    return client->player;
 }
 
 size_t ClientGetInBufferArraySize()
 {
-    return client.inBuffer->size;
+    return client->inBuffer->size;
 }
 
 Vector *ClientGetInBufferVector()
 {
-    return client.inBuffer;
+    return client->inBuffer;
 }
 
-void ClientPlayerIsInitialized()
+size_t ClientGetInBufferSize()
 {
-    client.receivedPlayerID = SDL_TRUE;
+    return client->inBuffer->size;
+}
+
+SDL_mutex *ClientGetInBufferMutex()
+{
+    return client->inBufferMutex;
+}
+
+SDL_bool ClientIsWaitingForAliveReply()
+{
+    return client->server.waitingForAliveReply;
+}
+
+float ClientGetTimeoutTimer()
+{
+    return client->server.timeoutTimer;
 }

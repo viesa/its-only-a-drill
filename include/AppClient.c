@@ -59,7 +59,7 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 }
 void AppClientDestroy(AppClient *app)
 {
-    if (clientManager.inLobby || clientManager.inGame)
+    if (ClientManagerIsInLobby() || ClientManagerIsInGame())
     {
         ClientTCPSend(PT_LeaveSession, NULL, 0);
     }

@@ -11,15 +11,6 @@
 #define CLIENTMANAGER_PLAYERS ClientManagerGetPlayersArray()
 #define CLIENTMANAGER_JOINLIST ClientManagerGetJoinListArray()
 
-struct
-{
-    Vector *players;
-    // A vector of structs, JoinableSession
-    Vector *joinList;
-    SDL_bool inLobby; // both of these cannot be true at once
-    SDL_bool inGame;  // :)
-} clientManager;
-
 // Creates the client manager
 void ClientManagerInitialize();
 // Destroys the client manager
@@ -28,16 +19,18 @@ void ClientManagerUninitialize();
 void ClientManagerUpdate();
 // Draws the entire network situation for this client
 void ClientManagerDrawConnectedPlayers();
-
-// Adds deltatime to the server timeout timer
-void ClientManagerUpdateServerTimeoutTimer();
 // Disconnect from server if it hasn't replied to 'alive' packets before time-out
 void ClientManagerDisconnectFromTimeoutServer();
-// Sends 'alive' packets to server, updating its time-out timer
-void ClientManagerPingServer();
 // Handles all state changes from leaving a session
 // Menustate, Gamestate, inGame etc.
 void ClientManagerLeaveSessionLocally();
+
+SDL_bool ClientManagerIsInGame();
+SDL_bool ClientManagerIsInLobby();
+size_t ClientManagerGetJoinListSize();
+
+void ClientManagerSetInLobby(SDL_bool inLobby);
+void ClientManagerSetInGame(SDL_bool inGame);
 
 // Handles different kind of packets
 void ClientManagerHandleTextPacket(ParsedPacket packet);
