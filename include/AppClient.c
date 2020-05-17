@@ -4,7 +4,6 @@ struct AppClient
 {
     SDL_bool *running;
 
-    FPSManager *fpsManager;
     Keybinding *bindings;
     Vec2 middleOfMap;
 
@@ -14,7 +13,7 @@ struct AppClient
     MapList *mapList;
 };
 
-AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
+AppClient *AppClientCreate(SDL_bool *running)
 {
     srand(time(NULL));
     CursorInitialize();
@@ -33,7 +32,6 @@ AppClient *AppClientCreate(SDL_bool *running, FPSManager *fpsManager)
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
-    app->fpsManager = fpsManager;
     app->bindings = KeybindingCreate();
     app->mapList = MapListCreate("maps");
     app->player = PlayerCreate();
@@ -147,7 +145,7 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
-        MenuUpdate(app->fpsManager, app->player);
+        MenuUpdate(app->player);
         GuiOverlayUpdate();
         if (MenuStateGet() == MS_InGameMenu)
         {
@@ -194,7 +192,7 @@ void AppClientUpdateSettings(AppClient *app)
 
         WindowSetVSync(settings.vsync); // vsync
 
-        app->fpsManager->desiredFPS = settings.fps; // fps
+        FPSManagerSetDesiredFPS(settings.fps); // fps
     }
     SettingsDestroy(&settings);
 }

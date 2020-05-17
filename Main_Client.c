@@ -14,24 +14,25 @@ int main()
 
     InputInitialize();
     ClockInitialize();
+    FPSManagerInitialize();
 
-    FPSManager *fpsManager = FPSManagerCreate();
     Event *event = EventCreate(&running);
-    AppClient *app = AppClientCreate(&running, fpsManager);
+    AppClient *app = AppClientCreate(&running);
 
     while (running)
     {
-        FPSManagerStart(fpsManager);
+        FPSManagerStart();
         ClockTick();
         InputUpdateKeymaps();
         EventPollAll(event);
         AppClientRun(app);
-        FPSManagerAdjust(fpsManager);
+        FPSManagerAdjust();
     }
 
     EventDestroy(event);
     AppClientDestroy(app);
 
+    FPSManagerUninitialize();
     InputUninitialize();
 
     QuitSDL();

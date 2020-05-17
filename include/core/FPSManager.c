@@ -1,26 +1,49 @@
 #include "FPSManager.h"
 
-FPSManager *FPSManagerCreate()
+typedef struct FPSManager
 {
-    FPSManager *fpsManager = MALLOC(FPSManager);
+    unsigned long startWait;
+    unsigned long endWait;
+    int desiredFPS;
+} FPSManager;
+
+static FPSManager *fpsManager;
+
+void FPSManagerInitialize()
+{
+    fpsManager = MALLOC(FPSManager);
+    ALLOC_ERROR_CHECK(fpsManager);
+
     fpsManager->startWait = 0;
     fpsManager->endWait = 0;
     fpsManager->desiredFPS = 60;
-    return fpsManager;
 }
-void FPSManagerDestroy(FPSManager *fpsManager)
+void FPSManagerUninitialize()
 {
-    SDL_free(fpsManager);
+    FREE(fpsManager);
 }
 
-void FPSManagerStart(FPSManager *fpsManager)
+void FPSManagerStart()
 {
     fpsManager->startWait = SDL_GetPerformanceCounter();
 }
-void FPSManagerAdjust(FPSManager *fpsManager)
+void FPSManagerAdjust()
 {
-    fpsManager->endWait = SDL_GetPerformanceCounter();
-    float difference = (fpsManager->endWait - fpsManager->startWait) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
     if (fpsManager->desiredFPS != 0)
+    {
+        fpsManager->endWait = SDL_GetPerformanceCounter();
+        float difference = (fpsManager->endWait - fpsManager->startWait) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
+
         SDL_Delay(((((float)(1000 / fpsManager->desiredFPS)) - difference) < 0) ? 0 : (((float)(1000 / fpsManager->desiredFPS)) - difference));
+    }
+}
+
+int FPSManagerGetDesiredFPS()
+{
+    return fpsManager->desiredFPS;
+}
+
+void FPSManagerSetDesiredFPS(int fps)
+{
+    fpsManager->desiredFPS = fps;
 }

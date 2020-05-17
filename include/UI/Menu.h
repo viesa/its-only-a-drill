@@ -35,10 +35,10 @@ void MenuResetFetchLobbyTimer();
 void MenuSetStartedInTransistion(SDL_bool started);
 void MenuSetStartedOutTransistion(SDL_bool started);
 
-void MenuUpdate(FPSManager *fpsManager, Player *player);
+void MenuUpdate(Player *player);
 void MenuUpdateSplash();
 void MenuUpdateName();
-void MenuUpdateMainMenu(Player *player, FPSManager *fps);
+void MenuUpdateMainMenu(Player *player);
 void MenuUpdateInGameMenu();
 void MenuUpdateJoinLobby();
 void MenuUpdateHostLobby();
@@ -46,7 +46,7 @@ void MenuUpdateWaitingForLobby();
 void MenuUpdateLobby();
 void MenuUpdateOptions();
 void MenuUpdateResolution();
-void MenuUpdateFPS(FPSManager *fpsManager);
+void MenuUpdateFPS();
 void MenuUpdateKeybinding();
 void MenuUpdateAudio();
 

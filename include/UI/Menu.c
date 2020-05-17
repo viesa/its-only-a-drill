@@ -113,7 +113,7 @@ void MenuSetStartedOutTransistion(SDL_bool started)
     menu->startedOutTransition = started;
 }
 
-void MenuUpdate(FPSManager *fpsManager, Player *player)
+void MenuUpdate(Player *player)
 {
     menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
@@ -199,7 +199,7 @@ void MenuUpdate(FPSManager *fpsManager, Player *player)
         MenuUpdateName();
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(player, fpsManager);
+        MenuUpdateMainMenu(player);
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu();
@@ -223,7 +223,7 @@ void MenuUpdate(FPSManager *fpsManager, Player *player)
         MenuUpdateResolution();
         break;
     case MS_FPS:
-        MenuUpdateFPS(fpsManager);
+        MenuUpdateFPS();
         break;
     case MS_KEYBINDING:
         MenuUpdateKeybinding();
@@ -287,7 +287,7 @@ void MenuUpdateName()
     }
 }
 
-void MenuUpdateMainMenu(Player *player, FPSManager *fps)
+void MenuUpdateMainMenu(Player *player)
 {
     //Determine menu options
     int optionLength = 8;
@@ -360,7 +360,7 @@ void MenuUpdateMainMenu(Player *player, FPSManager *fps)
                                                WindowGetHeight(), *menu->bindings,
                                                WindowIsFullscreen(),
                                                WindowIsVSyncEnabled(),
-                                               fps->desiredFPS);
+                                               FPSManagerGetDesiredFPS());
             SettingsSave(settings);
             break;
         }
@@ -885,7 +885,7 @@ void MenuUpdateResolution()
     MenuTitleDraw("Resolution");
 }
 
-void MenuUpdateFPS(FPSManager *fpsManager)
+void MenuUpdateFPS()
 {
     //Determine menu options
     int optionLength = 6;
@@ -907,28 +907,28 @@ void MenuUpdateFPS(FPSManager *fpsManager)
         {
         case 0:
         {
-            fpsManager->desiredFPS = 30;
+            FPSManagerSetDesiredFPS(30);
             break;
         }
         case 1:
         {
-            fpsManager->desiredFPS = 60;
+            FPSManagerSetDesiredFPS(60);
             break;
         }
         break;
         case 2:
         {
-            fpsManager->desiredFPS = 90;
+            FPSManagerSetDesiredFPS(90);
             break;
         }
         case 3:
         {
-            fpsManager->desiredFPS = 120;
+            FPSManagerSetDesiredFPS(120);
             break;
         }
         case 4:
         {
-            fpsManager->desiredFPS = 999; // they won't know
+            FPSManagerSetDesiredFPS(0); // Zero = inactivate
             break;
         }
         case 5:

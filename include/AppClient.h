@@ -25,7 +25,7 @@
 
 typedef struct AppClient AppClient;
 
-AppClient *AppClientCreate(SDL_bool *isRunning, FPSManager *fpsManager);
+AppClient *AppClientCreate(SDL_bool *isRunning);
 void AppClientDestroy(AppClient *app);
 
 void AppClientRun(AppClient *app);
