@@ -17,6 +17,7 @@ typedef enum MenuState
     MS_InGameMenu,
     MS_JoinLobby,
     MS_HostLobby,
+    MS_RoundsLobby,
     MS_WaitingForLobby,
     MS_Lobby,
     MS_Options,

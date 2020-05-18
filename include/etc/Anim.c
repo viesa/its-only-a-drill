@@ -39,7 +39,7 @@ Anim AnimCreate(AnimType animType, AnimRepeatOption anro, SpriteSheet spriteShee
         const int height = 33;
         int x = 625;
         int y = 659;
-        anim.nFrames = 7;
+        anim.nFrames = 6;
         for (int i = 0; i < anim.nFrames; i++)
         {
             anim.frames[i] = DrawableCreate((SDL_Rect){x, y + height * i, width, height}, (SDL_Rect){0, 0, width, height}, spriteSheet);

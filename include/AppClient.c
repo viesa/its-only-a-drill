@@ -36,6 +36,8 @@ AppClient *AppClientCreate(SDL_bool *running)
     app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
     app->groundListItems = GroundListCreate();
 
+    SettingsApply(app->player);
+
     MenuInitialize(app->mapList);
     ClientInitialize(app->player);
     NPCManagerInitialize(app->player);
@@ -46,7 +48,6 @@ AppClient *AppClientCreate(SDL_bool *running)
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
-    AppClientUpdateSettings(app);
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -172,21 +173,4 @@ void AppClientDraw(AppClient *app)
 #ifdef ANY_DEBUG
     GuiDrawFPS();
 #endif
-}
-void AppClientUpdateSettings(AppClient *app)
-{
-    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
-    if (settings.resolutionH != 1) // found settings file
-    {
-        WindowSetSize(settings.resolutionW, settings.resolutionH); //resolution
-
-        PlayerSetSpriteSheet(app->player, (SpriteSheet)settings.skin);
-
-        WindowSetFullscreen(settings.isFullscreen); // fullscreen
-
-        WindowSetVSync(settings.vsync); // vsync
-
-        FPSManagerSetDesiredFPS(settings.fps); // fps
-    }
-    SettingsDestroy(&settings);
 }

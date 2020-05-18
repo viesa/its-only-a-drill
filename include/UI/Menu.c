@@ -23,7 +23,7 @@ typedef struct Menu
     Music MenuTheme;
     int themecheck;
     SDL_Color clr[10];
-
+    int lobbyNumRounds;
     SDL_bool startedInTransition;
     SDL_bool startedOutTransition;
 
@@ -46,8 +46,6 @@ void MenuInitialize(MapList *mapList)
 
     menu->loadingBar = LoadingBarCreate();
     menu->loopCount = 0;
-    menu->loopSwing = 87;
-    menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
     menu->keybindingstate = 0;
@@ -69,6 +67,8 @@ void MenuInitialize(MapList *mapList)
     menu->MenuStep = SoundCreate(SF_MenuStep);
     menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->themecheck = 0;
+
+    menu->lobbyNumRounds = 5;
 
     menu->previewLeg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
     menu->previewBody = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
@@ -128,39 +128,24 @@ void MenuUpdate(Player *player)
 
     if (menu->loopCount < 2 * PI)
     {
-        menu->loopCount += .1f;
+        menu->loopCount += ClockGetDeltaTime() * 2 * PI;
     }
     else
     {
         menu->loopCount = 0;
     }
 
-    if (menu->loopSwing >= 255)
-        menu->swingDir = 0; // go back down
-
-    if (menu->loopSwing <= 200)
-        menu->swingDir = 1; //go back up
-
-    if (menu->swingDir)
-    {
-        menu->loopSwing++;
-    }
-    else
-    {
-        menu->loopSwing--;
-    }
-
     //Update text colors
-    menu->clr[0] = (SDL_Color){menu->loopSwing, 159, 227, 255};
-    menu->clr[1] = (SDL_Color){menu->loopSwing, 139, 207, 255};
-    menu->clr[2] = (SDL_Color){menu->loopSwing, 119, 187, 255};
-    menu->clr[3] = (SDL_Color){menu->loopSwing, 99, 167, 255};
-    menu->clr[4] = (SDL_Color){menu->loopSwing, 79, 147, 255};
-    menu->clr[5] = (SDL_Color){menu->loopSwing, 59, 127, 255};
-    menu->clr[6] = (SDL_Color){menu->loopSwing, 39, 107, 255};
-    menu->clr[7] = (SDL_Color){menu->loopSwing, 19, 87, 255};
-    menu->clr[8] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
-    menu->clr[9] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
+    menu->clr[0] = (SDL_Color){215, 159, 227, 255};
+    menu->clr[1] = (SDL_Color){215, 139, 207, 255};
+    menu->clr[2] = (SDL_Color){215, 119, 187, 255};
+    menu->clr[3] = (SDL_Color){215, 99, 167, 255};
+    menu->clr[4] = (SDL_Color){215, 79, 147, 255};
+    menu->clr[5] = (SDL_Color){215, 59, 127, 255};
+    menu->clr[6] = (SDL_Color){215, 39, 107, 255};
+    menu->clr[7] = (SDL_Color){215, 19, 87, 255};
+    menu->clr[8] = (SDL_Color){40, 180, 184, 255};
+    menu->clr[9] = (SDL_Color){40, 180, 184, 255};
 
     AnimUpdate(&menu->previewBody, ClockGetDeltaTime());
     AnimUpdate(&menu->previewLeg, ClockGetDeltaTime());
@@ -197,7 +182,7 @@ void MenuUpdate(Player *player)
         MenuUpdateName();
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(player);
+        MenuUpdateMainMenu();
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu();
@@ -208,6 +193,9 @@ void MenuUpdate(Player *player)
     case MS_HostLobby:
         MenuUpdateHostLobby();
         break;
+    case MS_RoundsLobby:
+        MenuUpdateRoundsLobby();
+        break;
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby();
         break;
@@ -215,7 +203,7 @@ void MenuUpdate(Player *player)
         MenuUpdateLobby();
         break;
     case MS_Options:
-        MenuUpdateOptions();
+        MenuUpdateOptions(player);
         break;
     case MS_Resolution:
         MenuUpdateResolution();
@@ -285,18 +273,17 @@ void MenuUpdateName()
     }
 }
 
-void MenuUpdateMainMenu(Player *player)
+void MenuUpdateMainMenu()
 {
     //Determine menu options
-    int optionLength = 8;
-    char options[8][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
         {"Change name"},
         {"Change skin"},
         {"Options"},
-        {"Save options"},
         {"Exit"}};
     // makes it loop
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -353,14 +340,6 @@ void MenuUpdateMainMenu(Player *player)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
-                                               WindowGetWidth(),
-                                               WindowGetHeight(),
-                                               WindowIsFullscreen(),
-                                               WindowIsVSyncEnabled(),
-                                               FPSManagerGetDesiredFPS());
-            SettingsSave(settings);
-            break;
         }
         case 7:
         {
@@ -477,13 +456,7 @@ void MenuUpdateHostLobby()
         }
         else
         {
-            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-            FileIO lfile = FileIOCreate(mapInfo.filename);
-            FileIORead(&lfile);
-
-            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
-
-            MenuStateSet(MS_WaitingForLobby);
+            MenuStateSet(MS_RoundsLobby);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
@@ -520,6 +493,53 @@ void MenuUpdateHostLobby()
     }
 
     MenuTitleDraw("Host Lobby");
+}
+
+void MenuUpdateRoundsLobby()
+{
+    int optionLength = 2;
+    char options[2][100] = {
+        {"num rounds"},
+        {"Start lobby"}};
+
+    sprintf(options[0], "Rounds: %d", menu->lobbyNumRounds);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_A) || InputIsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds -= 1;
+    }
+
+    if (InputIsKeyPressed(SDL_SCANCODE_D) || InputIsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds += 1;
+    }
+
+    // Loop back
+    if (menu->lobbyNumRounds < 1)
+        menu->lobbyNumRounds = 1;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        if (menu->activeIndex == 1)
+        {
+            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
+            FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
+
+            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
+
+            MenuStateSet(MS_WaitingForLobby);
+        }
+    }
+
+    MenuDraw(options, optionLength);
+    FontDraw(FontGetDynamicSizing(), "Choose number of rounds with [A]/[D].", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
+    MenuTitleDraw("Number of rounds");
 }
 
 void MenuUpdateJoinLobby()
@@ -720,17 +740,18 @@ void MenuUpdateLobby()
     MenuTitleDraw("Lobby");
 }
 
-void MenuUpdateOptions()
+void MenuUpdateOptions(Player *player)
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 8;
+    char options[8][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
-        {"Audio optiions"},
+        {"Audio options"},
+        {"Save options"},
         {"Back"}};
 
     if (WindowIsFullscreen())
@@ -805,6 +826,18 @@ void MenuUpdateOptions()
             break;
         }
         case 6:
+        {
+            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
+                                               WindowGetWidth(),
+                                               WindowGetHeight(),
+                                               WindowIsFullscreen(),
+                                               WindowIsVSyncEnabled(),
+                                               FPSManagerGetDesiredFPS(),
+                                               KeybindingGetKeys());
+            SettingsSave(settings);
+            break;
+        }
+        case 7:
         {
 
             if (ClientManagerIsInGame())
