@@ -3,6 +3,7 @@
 
 #include "Dependencies.h"
 #include "Graphics.h"
+#include "Vector.h"
 
 typedef enum FontSheet
 {
@@ -16,14 +17,22 @@ typedef enum FontSheet
     TTF_Count
 } FontSheet;
 
+typedef struct FontCache
+{
+    SDL_Texture *texture;
+    char *text;
+    FontSheet font;
+    SDL_Color clr;
+    Vec2 size;
+} FontCache;
+
 // Font align enum.
 // FAL_(X) [Left, Center, Right]
 typedef enum FontAlign
 {
     FAL_L,
     FAL_C,
-    FAL_R,
-    FAL_MENUSIDE
+    FAL_R
 } FontAlign;
 
 // Font 3d drawing direction.
@@ -56,6 +65,8 @@ void FontUninitialize();
 // color: color to display text in.
 void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
 
+void FontCachedDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
+
 // Queries the predicted size of the font to be printed, enabling center and right alignment.
 SDL_Rect FontGetSize(FontSheet fontEnum, char text[]);
 
@@ -82,5 +93,7 @@ void FontDraw3DCustom(FontSheet fontEnum, char text[], float x, float y, FontAli
 FontSheet FontGetDynamicSizing();
 int FontGetWidth(FontSheet fontEnum, char text[]);
 int FontGetHeight(FontSheet fontEnum);
+
+FontCache *FontAddCache(FontSheet fontEnum, char *text, SDL_Color color);
 
 #endif

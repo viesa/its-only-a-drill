@@ -3,6 +3,7 @@
 typedef struct Font
 {
     TTF_Font *fonts[TTF_Count];
+    Vector *cached;
 } Font;
 
 static Font *font;
@@ -22,6 +23,8 @@ void FontInitialize()
     font->fonts[TTF_Antilles_L] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 100);
     font->fonts[TTF_Antilles_XL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 125);
     font->fonts[TTF_Antilles_XXL] = TTF_OpenFont("./assets/fonts/antillesoutital.ttf", 175);
+
+    font->cached = VectorCreate(sizeof(FontCache), 500);
 }
 
 void FontUninitialize()
@@ -30,11 +33,21 @@ void FontUninitialize()
     {
         TTF_CloseFont(font->fonts[i]);
     }
+    for (size_t i = 0; i < font->cached->size; i++)
+    {
+        FREE(((FontCache *)font->cached->data)->text);
+        SDL_DestroyTexture(((FontCache *)font->cached->data)->texture);
+    }
     FREE(font);
 }
 
 void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color)
 {
+
+    // check if exist
+
+    // if not exist
+
     int alignOffsetX = 0;
 
     //Calculate destination from alignment
@@ -42,7 +55,6 @@ void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align
 
     switch (align)
     {
-    case FAL_MENUSIDE:
     case FAL_L:
         break;
     case FAL_C:
@@ -67,16 +79,47 @@ void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align
     SDL_QueryTexture(texture, NULL, NULL, &texW, &texH);
     SDL_Rect dstrect = {x - alignOffsetX, y, texW, texH};
 
-    if (align == FAL_MENUSIDE)
-    {
-        SDL_RenderCopyEx(WindowGetRenderer(), texture, NULL, &dstrect, -30, &(SDL_Point){0, 0}, SDL_FLIP_NONE);
-    }
-    else
-    {
-        SDL_RenderCopy(WindowGetRenderer(), texture, NULL, &dstrect);
-    }
+    SDL_RenderCopy(WindowGetRenderer(), texture, NULL, &dstrect);
 
     SDL_DestroyTexture(texture);
+}
+
+void FontCachedDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color)
+{
+    FontCache *found = NULL;
+    for (size_t i = 0; i < font->cached->size; i++)
+    {
+        FontCache *fontCache = &((FontCache *)font->cached->data)[i];
+
+        if (!strcmp(fontCache->text, text) &&
+            fontCache->font == fontEnum &&
+            !SDL_memcmp(&fontCache->clr, &color, sizeof(SDL_Color)))
+        {
+            found = fontCache;
+            break;
+        }
+    }
+
+    if (!found)
+        found = FontAddCache(fontEnum, text, color);
+
+    int alignOffsetX = 0;
+    switch (align)
+    {
+    case FAL_L:
+        break;
+    case FAL_C:
+        alignOffsetX = found->size.x / 2;
+        break;
+    case FAL_R:
+        alignOffsetX = found->size.x;
+        break;
+    }
+
+    if (!boxWidth)
+        boxWidth = found->size.x;
+    SDL_Rect dst = {x - alignOffsetX, y, found->size.x, found->size.y};
+    SDL_RenderCopy(WindowGetRenderer(), found->texture, NULL, &dst);
 }
 
 SDL_Rect FontGetSize(FontSheet fontEnum, char text[])
@@ -114,31 +157,31 @@ void FontDraw3D(FontSheet fontEnum, char text[], float x, float y, FontAlign ali
         switch (dir)
         {
         case F3D_TL:
-            FontDraw(fontEnum, text, x - offset * i, y - offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x - offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TC:
-            FontDraw(fontEnum, text, x, y - offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_TR:
-            FontDraw(fontEnum, text, x + offset * i, y - offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x + offset * i, y - offset * i, align, boxWidth, color[i]);
             break;
         case F3D_CL:
-            FontDraw(fontEnum, text, x - offset * i, y, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x - offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_CC:
-            FontDraw(fontEnum, text, x, y, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x, y, align, boxWidth, color[i]);
             break;
         case F3D_CR:
-            FontDraw(fontEnum, text, x + offset * i, y, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x + offset * i, y, align, boxWidth, color[i]);
             break;
         case F3D_BL:
-            FontDraw(fontEnum, text, x - offset * i, y + offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x - offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BC:
-            FontDraw(fontEnum, text, x, y + offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x, y + offset * i, align, boxWidth, color[i]);
             break;
         case F3D_BR:
-            FontDraw(fontEnum, text, x + offset * i, y + offset * i, align, boxWidth, color[i]);
+            FontCachedDraw(fontEnum, text, x + offset * i, y + offset * i, align, boxWidth, color[i]);
             break;
         }
     }
@@ -148,7 +191,7 @@ void FontDraw3DCustom(FontSheet fontEnum, char text[], float x, float y, FontAli
 {
     for (size_t i = 0; i < layers; i++)
     {
-        FontDraw(fontEnum, text, x + offsetX * i, y + offsetY * i, align, boxWidth, color[i]);
+        FontCachedDraw(fontEnum, text, x + offsetX * i, y + offsetY * i, align, boxWidth, color[i]);
     }
 }
 
@@ -215,4 +258,23 @@ int FontGetHeight(FontSheet fontEnum)
         return 0;
         break;
     }
+}
+
+FontCache *FontAddCache(FontSheet fontEnum, char *text, SDL_Color color)
+{
+    FontCache fontCache;
+    fontCache.clr = color;
+    fontCache.font = fontEnum;
+    SDL_Rect rect = FontGetSize(fontEnum, text);
+    fontCache.size = Vec2Create(rect.w, rect.h);
+    fontCache.text = MALLOC_N(char, strlen(text) + 1);
+    strcpy(fontCache.text, text);
+
+    SDL_Surface *surface = TTF_RenderText_Blended_Wrapped(font->fonts[fontEnum], text, color, rect.w);
+    fontCache.texture = SDL_CreateTextureFromSurface(WindowGetRenderer(), surface);
+    SDL_FreeSurface(surface);
+
+    VectorPushBack(font->cached, &fontCache);
+
+    return &((FontCache *)font->cached->data)[font->cached->size - 1];
 }

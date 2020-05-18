@@ -24,7 +24,6 @@ typedef struct Menu
     int themecheck;
     SDL_Color clr[10];
     int lobbyNumRounds;
-
     SDL_bool startedInTransition;
     SDL_bool startedOutTransition;
 
@@ -47,8 +46,6 @@ void MenuInitialize(MapList *mapList)
 
     menu->loadingBar = LoadingBarCreate();
     menu->loopCount = 0;
-    menu->loopSwing = 87;
-    menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
     menu->keybindingstate = 0;
@@ -131,39 +128,24 @@ void MenuUpdate(Player *player)
 
     if (menu->loopCount < 2 * PI)
     {
-        menu->loopCount += .1f;
+        menu->loopCount += ClockGetDeltaTime() * 2 * PI;
     }
     else
     {
         menu->loopCount = 0;
     }
 
-    if (menu->loopSwing >= 255)
-        menu->swingDir = 0; // go back down
-
-    if (menu->loopSwing <= 200)
-        menu->swingDir = 1; //go back up
-
-    if (menu->swingDir)
-    {
-        menu->loopSwing++;
-    }
-    else
-    {
-        menu->loopSwing--;
-    }
-
     //Update text colors
-    menu->clr[0] = (SDL_Color){menu->loopSwing, 159, 227, 255};
-    menu->clr[1] = (SDL_Color){menu->loopSwing, 139, 207, 255};
-    menu->clr[2] = (SDL_Color){menu->loopSwing, 119, 187, 255};
-    menu->clr[3] = (SDL_Color){menu->loopSwing, 99, 167, 255};
-    menu->clr[4] = (SDL_Color){menu->loopSwing, 79, 147, 255};
-    menu->clr[5] = (SDL_Color){menu->loopSwing, 59, 127, 255};
-    menu->clr[6] = (SDL_Color){menu->loopSwing, 39, 107, 255};
-    menu->clr[7] = (SDL_Color){menu->loopSwing, 19, 87, 255};
-    menu->clr[8] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
-    menu->clr[9] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
+    menu->clr[0] = (SDL_Color){215, 159, 227, 255};
+    menu->clr[1] = (SDL_Color){215, 139, 207, 255};
+    menu->clr[2] = (SDL_Color){215, 119, 187, 255};
+    menu->clr[3] = (SDL_Color){215, 99, 167, 255};
+    menu->clr[4] = (SDL_Color){215, 79, 147, 255};
+    menu->clr[5] = (SDL_Color){215, 59, 127, 255};
+    menu->clr[6] = (SDL_Color){215, 39, 107, 255};
+    menu->clr[7] = (SDL_Color){215, 19, 87, 255};
+    menu->clr[8] = (SDL_Color){40, 180, 184, 255};
+    menu->clr[9] = (SDL_Color){40, 180, 184, 255};
 
     AnimUpdate(&menu->previewBody, ClockGetDeltaTime());
     AnimUpdate(&menu->previewLeg, ClockGetDeltaTime());
@@ -768,7 +750,7 @@ void MenuUpdateOptions(Player *player)
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
-        {"Audio optiions"},
+        {"Audio options"},
         {"Save options"},
         {"Back"}};
 
