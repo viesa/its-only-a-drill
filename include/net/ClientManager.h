@@ -4,6 +4,7 @@
 #include "Client.h"
 #include "JoinableSesssion.h"
 #include "Lobby.h"
+#include "Instance.h"
 #include "State.h"
 #include "Map.h"
 #include "Notification.h"
@@ -16,14 +17,18 @@ void ClientManagerInitialize();
 // Destroys the client manager
 void ClientManagerUninitialize();
 // Updates the entire network situation for this client
-void ClientManagerUpdate();
+void ClientManagerHandleAllPackets();
 // Draws the entire network situation for this client
 void ClientManagerDrawConnectedPlayers();
+// Draws all buffred shooting lines
+void ClientManagerDrawBufferedShootingLines();
 // Disconnect from server if it hasn't replied to 'alive' packets before time-out
 void ClientManagerDisconnectFromTimeoutServer();
 // Handles all state changes from leaving a session
 // Menustate, Gamestate, inGame etc.
 void ClientManagerLeaveSessionLocally();
+// Clears the connected players entities
+void ClientManagerClearPlayers();
 
 SDL_bool ClientManagerIsInGame();
 SDL_bool ClientManagerIsInLobby();
@@ -36,6 +41,7 @@ void ClientManagerSetInGame(SDL_bool inGame);
 void ClientManagerHandleTextPacket(ParsedPacket packet);
 void ClientManagerHandleAreYouAlivePacket(ParsedPacket packet);
 void ClientManagerHandleIAmAlivePacket(ParsedPacket packet);
+void ClientManagerHandleIsPlayerActivePacket(ParsedPacket packet);
 void ClientManagerHandleConnectPacket(ParsedPacket packet);
 void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet);
 void ClientManagerHandleDisconnectPacket(ParsedPacket packet);
@@ -50,8 +56,13 @@ void ClientManagerHandleStartSessionPacket(ParsedPacket packet);
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);
+void ClientManagerHandlePlayerHitPacket(ParsedPacket packet);
+void ClientManagerHandlePlayerShootPacket(ParsedPacket packet);
+void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet);
+void ClientManagerHandleNewRoundPacket(ParsedPacket packet);
+void ClientManagerHandleScoreboardPacket(ParsedPacket packet);
+void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
-void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

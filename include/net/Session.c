@@ -1,6 +1,6 @@
 #include "Session.h"
 
-Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
+Session SessionCreate(int id, int nRounds, NetPlayer *host, char *rawmap, size_t size)
 {
     Session badSession;
     badSession.id = -1;
@@ -15,6 +15,9 @@ Session SessionCreate(int id, NetPlayer *host, char *rawmap, size_t size)
     ALLOC_ERROR_CHECK(session.rawMap);
     session.rawMapDataSize = size;
     SDL_memcpy(session.rawMap, rawmap, size);
+    session.nDeadPlayers = 0;
+    session.nRounds = nRounds;
+    session.currentRound = 0;
 
     JSON *json = JSONCreateFromArray(session.rawMap, size);
 
@@ -40,4 +43,11 @@ void SessionDestroy(Session *session)
 int *SessionGetPlayerIDs(Session *session)
 {
     return (int *)session->playerIDs->data;
+}
+
+void SessionResetForNewRound(Session *session)
+{
+    // AppServer will take care of "currentRound >= nRounds" (finished game)
+    session->currentRound++;
+    session->nDeadPlayers = 0;
 }

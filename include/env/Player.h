@@ -42,6 +42,8 @@ void PlayerKill(Player *player);
 void PlayerRevive(Player *player);
 // Change spritesheet of all animations
 void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet);
+// Sets the spawnpoint of player
+void PlayerSetSpawnPoint(Player *player, Vec2 spawnPoint);
 
 Entity *PlayerGetEntity(Player *player);
 Vec2 *PlayerGetAimFollowP(Player *player);

@@ -1,31 +1,50 @@
 #include "ClientManager.h"
 
-struct
+typedef struct ShootingLine
+{
+    Vec2 start;
+    Vec2 end;
+} ShootingLine;
+
+typedef struct ClientManager
 {
     Vector *players;
+    Vector *shootingLines;
     // A vector of structs, JoinableSession
     Vector *joinList;
     SDL_bool inLobby; // both of these cannot be true at once
     SDL_bool inGame;  // :)
-} clientManager;
+} ClientManager;
+
+static ClientManager *clientManager;
 
 void ClientManagerInitialize()
 {
-    clientManager.players = VectorCreate(sizeof(EntityIndexP), 100);
-    clientManager.joinList = VectorCreate(sizeof(JoinableSession), 5);
-    clientManager.inLobby = SDL_FALSE;
-    clientManager.inGame = SDL_FALSE;
+    clientManager = MALLOC(ClientManager);
+    ALLOC_ERROR_CHECK(clientManager);
+
+    clientManager->players = VectorCreate(sizeof(EntityIndexP), 100);
+    clientManager->shootingLines = VectorCreate(sizeof(ShootingLine), 10);
+    clientManager->joinList = VectorCreate(sizeof(JoinableSession), 5);
+    clientManager->inLobby = SDL_FALSE;
+    clientManager->inGame = SDL_FALSE;
+    LobbyInitialize();
+    InstanceInitialize();
 }
 
 void ClientManagerUninitialize()
 {
-    for (int i = 0; i < clientManager.players->size; i++)
+    InstanceUninitialize();
+    LobbyUninitialize();
+    for (int i = 0; i < clientManager->players->size; i++)
         EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
-    VectorDestroy(clientManager.players);
-    VectorDestroy(clientManager.joinList);
+    VectorDestroy(clientManager->joinList);
+    VectorDestroy(clientManager->shootingLines);
+    VectorDestroy(clientManager->players);
+    FREE(clientManager);
 }
 
-void ClientManagerUpdate()
+void ClientManagerHandleAllPackets()
 {
     ClientManagerDisconnectFromTimeoutServer();
 
@@ -87,8 +106,23 @@ void ClientManagerUpdate()
         case PT_PlayerHit:
             ClientManagerHandlePlayerHitPacket(nextPacket);
             break;
+        case PT_PlayerDead:
+            ClientManagerHandlePlayerDeadPacket(nextPacket);
+            break;
+        case PT_PlayerShoot:
+            ClientManagerHandlePlayerShootPacket(nextPacket);
+            break;
         case PT_CloseAllSessions:
             ClientManagerHandleCloseAllSessionsPacket(nextPacket);
+            break;
+        case PT_NewRound:
+            ClientManagerHandleNewRoundPacket(nextPacket);
+            break;
+        case PT_Scoreboard:
+            ClientManagerHandleScoreboardPacket(nextPacket);
+            break;
+        case PT_FetchPlayerPoints:
+            ClientManagerHandleFetchPlayerPoints(nextPacket);
             break;
         default:
             break;
@@ -100,10 +134,20 @@ void ClientManagerUpdate()
 
 void ClientManagerDrawConnectedPlayers()
 {
-    for (int i = 0; i < clientManager.players->size; i++)
+    for (int i = 0; i < clientManager->players->size; i++)
     {
         EntityDrawIndex(CLIENTMANAGER_PLAYERS[i]);
     }
+}
+
+void ClientManagerDrawBufferedShootingLines()
+{
+    for (int i = 0; i < clientManager->shootingLines->size; i++)
+    {
+        ShootingLine line = ((ShootingLine *)clientManager->shootingLines->data)[i];
+        CameraDrawLine(line.start.x, line.start.y, line.end.x, line.end.y, (SDL_Color){200, 200, 200, 255});
+    }
+    VectorClear(clientManager->shootingLines);
 }
 
 void ClientManagerDisconnectFromTimeoutServer()
@@ -121,8 +165,8 @@ void ClientManagerDisconnectFromTimeoutServer()
 
 void ClientManagerLeaveSessionLocally()
 {
-    clientManager.inLobby = SDL_FALSE;
-    clientManager.inGame = SDL_FALSE;
+    clientManager->inLobby = SDL_FALSE;
+    clientManager->inGame = SDL_FALSE;
     GameStateSet(GS_Menu);
     MenuState menuState = MenuStateGet();
     if (menuState == MS_None ||
@@ -133,26 +177,35 @@ void ClientManagerLeaveSessionLocally()
         MenuStateSet(MS_MainMenu);
 }
 
+void ClientManagerClearPlayers()
+{
+    for (int i = 0; i < clientManager->players->size; i++)
+    {
+        EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
+        VectorClear(clientManager->players);
+    }
+}
+
 SDL_bool ClientManagerIsInGame()
 {
-    return clientManager.inGame;
+    return clientManager->inGame;
 }
 SDL_bool ClientManagerIsInLobby()
 {
-    return clientManager.inLobby;
+    return clientManager->inLobby;
 }
 size_t ClientManagerGetJoinListSize()
 {
-    return clientManager.joinList->size;
+    return clientManager->joinList->size;
 }
 
 void ClientManagerSetInLobby(SDL_bool inLobby)
 {
-    clientManager.inLobby = inLobby;
+    clientManager->inLobby = inLobby;
 }
 void ClientManagerSetInGame(SDL_bool inGame)
 {
-    clientManager.inGame = inGame;
+    clientManager->inGame = inGame;
 }
 
 void ClientManagerHandleTextPacket(ParsedPacket packet)
@@ -168,6 +221,29 @@ void ClientManagerHandleAreYouAlivePacket(ParsedPacket packet)
 void ClientManagerHandleIAmAlivePacket(ParsedPacket packet)
 {
     ClientReceivedAlivePacket();
+}
+
+void ClientManagerHandleIsPlayerActivePacket(ParsedPacket packet)
+{
+    struct PlayerStatus
+    {
+        int id;
+        SDL_bool active;
+    } playerStatus = *(struct PlayerStatus *)packet.data;
+
+    if (!playerStatus.active)
+    {
+        for (int i = 0; i < clientManager->players->size; i++)
+        {
+            Entity *current = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
+            if (current->id == playerStatus.id)
+            {
+                EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
+                VectorEraseElement(clientManager->players, &CLIENTMANAGER_PLAYERS[i]);
+                return;
+            }
+        }
+    }
 }
 
 void ClientManagerHandleConnectPacket(ParsedPacket packet)
@@ -198,19 +274,19 @@ void ClientManagerHandleNewPlayerPacket(ParsedPacket packet)
 
     EntityIndexP newEntity = EntityManagerAddNoConfig();
     ENTITY_ARRAY[*newEntity] = *entity;
-    VectorPushBack(clientManager.players, &newEntity);
+    VectorPushBack(clientManager->players, &newEntity);
 }
 
 void ClientManagerHandleDelPlayerPacket(ParsedPacket packet)
 {
     int id = *(int *)packet.data;
 
-    for (size_t i = 0; i < clientManager.players->size; i++)
+    for (size_t i = 0; i < clientManager->players->size; i++)
     {
         if (ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]].id == id)
         {
             EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
-            VectorErase(clientManager.players, i);
+            VectorErase(clientManager->players, i);
             break;
         }
     }
@@ -234,7 +310,7 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 {
     CompressedEntity cEntity = *(CompressedEntity *)packet.data;
 
-    for (int i = 0; i < clientManager.players->size; i++)
+    for (int i = 0; i < clientManager->players->size; i++)
     {
         Entity *entity = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
         if (entity->id == cEntity.id)
@@ -294,7 +370,7 @@ void ClientManagerHandleJoinSessionPacket(ParsedPacket packet)
             return;
         }
         MenuStateSet(MS_Lobby);
-        clientManager.inLobby = SDL_TRUE;
+        clientManager->inLobby = SDL_TRUE;
     }
 }
 
@@ -310,13 +386,16 @@ void ClientManagerHandleStartSessionPacket(ParsedPacket packet)
 {
     if (MenuStateGet() != MS_Lobby)
         return;
-    ClientSetPlayerEntity((Entity *)packet.data);
+    Entity *entity = (Entity *)packet.data;
+    ClientSetPlayerEntity(entity);
+    PlayerSetSpawnPoint(ClientGetPlayer(), entity->position);
     MenuStateSet(MS_None);
     GameStateSet(GS_Playing);
     ClientManagerSetInGame(SDL_TRUE);
     ClientManagerSetInLobby(SDL_TRUE);
     LobbyClearNames();
     LobbySetIsHost(SDL_FALSE);
+    ClientManagerClearPlayers();
 }
 
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
@@ -327,7 +406,7 @@ void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
 {
     // Clear joinList of old joinable sessions
-    VectorClear(clientManager.joinList);
+    VectorClear(clientManager->joinList);
 
     // If no session exists, add spcecial element to joinList
     if (!packet.size)
@@ -339,13 +418,13 @@ void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
     // Add all joinable sessions to joinList
     for (int i = 0; i < nSessions; i++)
     {
-        VectorPushBack(clientManager.joinList, &fetched[i]);
+        VectorPushBack(clientManager->joinList, &fetched[i]);
     }
 }
 
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 {
-    if (clientManager.inLobby)
+    if (clientManager->inLobby)
     {
         char *allMembers = (char *)packet.data;
 
@@ -357,11 +436,63 @@ void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
     }
 }
 
-void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet)
+void ClientManagerHandlePlayerHitPacket(ParsedPacket packet)
 {
-    int send = *(int *)Packet.data;
+    HitData hitData = *(HitData *)packet.data;
+    Entity *playerEntity = PlayerGetEntity(ClientGetPlayer());
+    if (playerEntity->id == hitData.id)
+    {
+        playerEntity->health -= hitData.damage;
+        return;
+    }
+    for (size_t i = 0; i < clientManager->players->size; i++)
+    {
+        Entity *current = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
+        if (current->id == hitData.id)
+        {
+            current->health -= hitData.damage;
+            return;
+        }
+    }
+}
 
-    PlayerGetEntity(ClientGetPlayer())->health -= send;
+void ClientManagerHandlePlayerShootPacket(ParsedPacket packet)
+{
+    ShootData shootData = *(ShootData *)packet.data;
+    ShootingLine shootingLine = {shootData.lineStart, shootData.lineEnd};
+    VectorPushBack(clientManager->shootingLines, &shootingLine);
+}
+
+void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet)
+{
+    int id = *(int *)packet.data;
+    for (int i = 0; i < clientManager->players->size; i++)
+    {
+        Entity *current = &ENTITY_ARRAY[*CLIENTMANAGER_PLAYERS[i]];
+        if (current->id == id)
+        {
+            current->nDrawables = 1;
+            current->isCollider = SDL_FALSE;
+            current->drawables[0].dst = (SDL_Rect){0, 0, 70, 70};
+        }
+    }
+}
+
+void ClientManagerHandleNewRoundPacket(ParsedPacket packet)
+{
+    int round = *(int *)packet.data;
+    InstanceSetRound(round);
+    PlayerRevive(ClientGetPlayer());
+}
+
+void ClientManagerHandleScoreboardPacket(ParsedPacket packet)
+{
+}
+
+void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet)
+{
+    int points = *(int *)packet.data;
+    InstanceSetPoints(points);
 }
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
@@ -371,10 +502,10 @@ void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 
 EntityIndexP *ClientManagerGetPlayersArray()
 {
-    return (EntityIndexP *)clientManager.players->data;
+    return (EntityIndexP *)clientManager->players->data;
 }
 
 JoinableSession *ClientManagerGetJoinListArray()
 {
-    return (JoinableSession *)clientManager.joinList->data;
+    return (JoinableSession *)clientManager->joinList->data;
 }

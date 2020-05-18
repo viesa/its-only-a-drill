@@ -25,7 +25,6 @@ AppClient *AppClientCreate(SDL_bool *running)
     AudioInitialize();
     TransitionInitialize();
     NotifyInitialize();
-    LobbyInitialize();
     ClientManagerInitialize();
     GuiInitialize();
     KeybindingInitialize();
@@ -63,7 +62,6 @@ void AppClientDestroy(AppClient *app)
     KeybindingUninitialize();
     GuiUninitialize();
     ClientManagerUninitialize();
-    LobbyUninitialize();
     TransitionUninitialize();
     AudioUninitialize();
     MapUninitialize();
@@ -87,7 +85,7 @@ void AppClientRun(AppClient *app)
 void AppClientUpdate(AppClient *app)
 {
     ClientUpdate();
-    ClientManagerUpdate();
+    ClientManagerHandleAllPackets();
 
     switch (GameStateGet())
     {
@@ -160,8 +158,9 @@ void AppClientDraw(AppClient *app)
         MapDraw();
 
         NPCManagerDrawAllNPCS();
-        PlayerDraw(app->player);
         ClientManagerDrawConnectedPlayers();
+        PlayerDraw(app->player);
+        ClientManagerDrawBufferedShootingLines();
         GuiUpdate();
         break;
     }
@@ -169,9 +168,6 @@ void AppClientDraw(AppClient *app)
         break;
     }
     NotifierUpdate();
-
-    if (InputIsKeyPressed(SDL_SCANCODE_P))
-        log_info("FPS: %f", ClockGetFPS());
 
 #ifdef ANY_DEBUG
     GuiDrawFPS();

@@ -22,6 +22,9 @@ typedef struct NetPlayer
 
     float timeoutTimer;
     SDL_bool waitingForAliveReply;
+
+    // Only used by server to store points in the current round
+    float pointBuffer;
 } NetPlayer;
 
 NetPlayer NetPlayerCreate(TCPsocket socket, int id);

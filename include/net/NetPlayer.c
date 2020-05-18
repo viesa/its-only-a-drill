@@ -13,5 +13,6 @@ NetPlayer NetPlayerCreate(TCPsocket socket, int id)
     strcpy(netPlayer.name, "Unnamed");
     netPlayer.timeoutTimer = 0.0f;
     netPlayer.waitingForAliveReply = SDL_FALSE;
+    netPlayer.pointBuffer = 0.0f;
     return netPlayer;
 }

@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include "Library.h"
+#include "Client.h"
 
 struct Player
 {
@@ -19,6 +20,8 @@ struct Player
     int score;
     float respawnTimer;
     float respawnCooldown;
+
+    Vec2 spawnPoint;
 };
 
 Player *PlayerCreate()
@@ -36,6 +39,7 @@ Player *PlayerCreate()
     player->score = 0;
     player->respawnCooldown = 500.0f;
     player->respawnTimer = player->respawnCooldown;
+    player->spawnPoint = Vec2Create(0.0f, 0.0f);
     return player;
 }
 
@@ -50,18 +54,8 @@ void PlayerUpdate(Player *player)
     PlayerCameraUpdate(player);
     if (entity->health <= 0)
     {
-        if (player->state == PL_Dead)
-        {
-            player->respawnTimer -= ClockGetDeltaTime();
-            if (player->respawnTimer <= 0.0f)
-            {
-                PlayerRevive(player);
-            }
-        }
-        else
-        {
-            PlayerKill(player);
-        }
+        PlayerKill(player);
+        ClientTCPSend(PT_PlayerDead, NULL, 0);
     }
     else
     {
@@ -209,4 +203,9 @@ Entity *PlayerGetEntity(Player *player)
 Vec2 *PlayerGetAimFollowP(Player *player)
 {
     return &player->aimFollow;
+}
+
+void PlayerSetSpawnPoint(Player *player, Vec2 spawnPoint)
+{
+    player->spawnPoint = spawnPoint;
 }

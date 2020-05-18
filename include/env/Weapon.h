@@ -7,11 +7,17 @@
 #include "Items.h"
 #include "EntityManager.h"
 
-typedef struct data
+typedef struct HitData
 {
     int id;
     int damage;
-} Data;
+} HitData;
+
+typedef struct ShootData
+{
+    Vec2 lineStart;
+    Vec2 lineEnd;
+} ShootData;
 
 // updates weapon logik thats needed efter frame like cooldown
 void weaponUpdate(Item *item);

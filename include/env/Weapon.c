@@ -30,11 +30,11 @@ void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
             tmpPointY = rangeWithOffset.y;
             if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
             { // reduce accuracy
-                Data sendData;
-                sendData.id = ENTITY_ARRAY[i].id;
-                sendData.damage = stats->Damage;
+                HitData hitData;
+                hitData.id = ENTITY_ARRAY[i].id;
+                hitData.damage = stats->Damage;
 
-                ClientTCPSend(15, &sendData, sizeof(int) * 2);
+                ClientTCPSend(15, &hitData, sizeof(int) * 2);
 
                 ENTITY_ARRAY[i].Force.x += direction->x * (float)(stats->falloff / 10);
                 ENTITY_ARRAY[i].Force.y += direction->x * (float)(stats->falloff / 10);
@@ -106,15 +106,28 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
     if (closestEntity <= 0)
     {
         CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, (int)rangeWithOffset.x, (int)rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
+        ShootData shootData = {playerCenter, rangeWithOffset};
+        ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
     }
     else
     {
+        Entity *entity = &ENTITY_ARRAY[closestEntity];
         CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, endPointX, endPointY, (SDL_Color){255, 50, 50, 150});
-        ENTITY_ARRAY[closestEntity].health -= stats->Damage;
-        ENTITY_ARRAY[closestEntity].Force.x += direction->x * (float)(stats->falloff / 10);
-        ENTITY_ARRAY[closestEntity].Force.y += direction->y * (float)(stats->falloff / 10);
+        ShootData shootData = {playerCenter, Vec2Create(endPointX, endPointY)};
+        ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
+        if (entity->type == ET_Player)
+        {
+            HitData hitData = {entity->id, stats->Damage};
+            ClientTCPSend(PT_PlayerHit, &hitData, sizeof(HitData));
+        }
+        else if (entity->type == ET_NPC)
+        {
+            entity->health -= stats->Damage;
+        }
+        entity->Force.x += direction->x * (float)(stats->falloff / 10);
+        entity->Force.y += direction->y * (float)(stats->falloff / 10);
 #ifdef Debug_Weapon_GetHitInfo
-        log_debug("closest entity[%d] health=%d ", closestEntity, ENTITY_ARRAY[closestEntity].health);
+        log_debug("closest entity[%d] health=%d ", closestEntity, entity->health);
 #endif
     }
 }
