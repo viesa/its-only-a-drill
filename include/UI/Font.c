@@ -79,9 +79,6 @@ void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align
     SDL_DestroyTexture(texture);
 }
 
-// FontGetSize
-//
-// Get estimated size of text to be printed. Returned as a SDL_Rect.
 SDL_Rect FontGetSize(FontSheet fontEnum, char text[])
 {
     SDL_Surface *surface = TTF_RenderText_Solid(font->fonts[fontEnum], text, (SDL_Color){0, 0, 0});

@@ -12,7 +12,6 @@ typedef enum FontSheet
     TTF_Antilles_L,
     TTF_Antilles_XL,
     TTF_Antilles_XXL,
-    // TTF_Robot_Crush, Används inte och skapar därför seg-fault när du freear
     TTF_Arial,
     TTF_Count
 } FontSheet;
@@ -55,7 +54,6 @@ void FontUninitialize();
 // align: aligns text to asked alignment (Left, Centered, Right).
 // boxWidth: allows maximum textbox width, enables wrapping.
 // color: color to display text in.
-
 void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
 
 // Queries the predicted size of the font to be printed, enabling center and right alignment.

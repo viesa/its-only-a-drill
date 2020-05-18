@@ -23,6 +23,7 @@ typedef struct Menu
     Music MenuTheme;
     int themecheck;
     SDL_Color clr[10];
+    int lobbyNumRounds;
 
     SDL_bool startedInTransition;
     SDL_bool startedOutTransition;
@@ -69,6 +70,8 @@ void MenuInitialize(MapList *mapList)
     menu->MenuStep = SoundCreate(SF_MenuStep);
     menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->themecheck = 0;
+
+    menu->lobbyNumRounds = 5;
 
     menu->previewLeg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
     menu->previewBody = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
@@ -197,7 +200,7 @@ void MenuUpdate(Player *player)
         MenuUpdateName();
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(player);
+        MenuUpdateMainMenu();
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu();
@@ -208,6 +211,9 @@ void MenuUpdate(Player *player)
     case MS_HostLobby:
         MenuUpdateHostLobby();
         break;
+    case MS_RoundsLobby:
+        MenuUpdateRoundsLobby();
+        break;
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby();
         break;
@@ -215,7 +221,7 @@ void MenuUpdate(Player *player)
         MenuUpdateLobby();
         break;
     case MS_Options:
-        MenuUpdateOptions();
+        MenuUpdateOptions(player);
         break;
     case MS_Resolution:
         MenuUpdateResolution();
@@ -285,18 +291,17 @@ void MenuUpdateName()
     }
 }
 
-void MenuUpdateMainMenu(Player *player)
+void MenuUpdateMainMenu()
 {
     //Determine menu options
-    int optionLength = 8;
-    char options[8][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
         {"Change name"},
         {"Change skin"},
         {"Options"},
-        {"Save options"},
         {"Exit"}};
     // makes it loop
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -353,14 +358,6 @@ void MenuUpdateMainMenu(Player *player)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
-                                               WindowGetWidth(),
-                                               WindowGetHeight(),
-                                               WindowIsFullscreen(),
-                                               WindowIsVSyncEnabled(),
-                                               FPSManagerGetDesiredFPS());
-            SettingsSave(settings);
-            break;
         }
         case 7:
         {
@@ -477,13 +474,7 @@ void MenuUpdateHostLobby()
         }
         else
         {
-            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-            FileIO lfile = FileIOCreate(mapInfo.filename);
-            FileIORead(&lfile);
-
-            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
-
-            MenuStateSet(MS_WaitingForLobby);
+            MenuStateSet(MS_RoundsLobby);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
@@ -520,6 +511,53 @@ void MenuUpdateHostLobby()
     }
 
     MenuTitleDraw("Host Lobby");
+}
+
+void MenuUpdateRoundsLobby()
+{
+    int optionLength = 2;
+    char options[2][100] = {
+        {"num rounds"},
+        {"Start lobby"}};
+
+    sprintf(options[0], "Rounds: %d", menu->lobbyNumRounds);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_A) || InputIsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds -= 1;
+    }
+
+    if (InputIsKeyPressed(SDL_SCANCODE_D) || InputIsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds += 1;
+    }
+
+    // Loop back
+    if (menu->lobbyNumRounds < 1)
+        menu->lobbyNumRounds = 1;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        if (menu->activeIndex == 1)
+        {
+            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
+            FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
+
+            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
+
+            MenuStateSet(MS_WaitingForLobby);
+        }
+    }
+
+    MenuDraw(options, optionLength);
+    FontDraw(FontGetDynamicSizing(), "Choose number of rounds with [A]/[D].", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
+    MenuTitleDraw("Number of rounds");
 }
 
 void MenuUpdateJoinLobby()
@@ -720,17 +758,18 @@ void MenuUpdateLobby()
     MenuTitleDraw("Lobby");
 }
 
-void MenuUpdateOptions()
+void MenuUpdateOptions(Player *player)
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 8;
+    char options[8][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
         {"Audio optiions"},
+        {"Save options"},
         {"Back"}};
 
     if (WindowIsFullscreen())
@@ -805,6 +844,17 @@ void MenuUpdateOptions()
             break;
         }
         case 6:
+        {
+            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
+                                               WindowGetWidth(),
+                                               WindowGetHeight(),
+                                               WindowIsFullscreen(),
+                                               WindowIsVSyncEnabled(),
+                                               FPSManagerGetDesiredFPS());
+            SettingsSave(settings);
+            break;
+        }
+        case 7:
         {
 
             if (ClientManagerIsInGame())
