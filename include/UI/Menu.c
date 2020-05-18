@@ -832,7 +832,8 @@ void MenuUpdateOptions(Player *player)
                                                WindowGetHeight(),
                                                WindowIsFullscreen(),
                                                WindowIsVSyncEnabled(),
-                                               FPSManagerGetDesiredFPS());
+                                               FPSManagerGetDesiredFPS(),
+                                               KeybindingGetKeys());
             SettingsSave(settings);
             break;
         }

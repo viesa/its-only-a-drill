@@ -17,6 +17,7 @@ typedef enum ActionCode
     AC_SHOOT = 6,
     AC_RELOAD = 7,
     AC_INVENTORY = 8,
+    AC_Count = 9
 } ActionCode;
 
 void KeybindingInitialize();
