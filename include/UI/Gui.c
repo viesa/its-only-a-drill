@@ -46,7 +46,7 @@ void GuiOverlayUpdate()
     GraphicsDraw(gui->scan);
 }
 
-void GuiUpdate()
+void GuiUpdate(Player *player)
 {
     //Draw overlays
     GraphicsDrawGradientY((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight() / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
@@ -55,7 +55,7 @@ void GuiUpdate()
     GraphicsDrawGradientX((SDL_Rect){WindowGetWidth() / 5 * 4, 0, WindowGetWidth() / 5, WindowGetHeight()}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //Points
-    gui->points = ScoreInfo(0); //Temp Score grej
+    gui->points = ScoreboardGetScore(PlayerGetEntity(player)->id); //Temp Score grej
 
     //Update loop variables
     if (gui->loopCount < 2 * PI)
@@ -91,7 +91,7 @@ void GuiUpdate()
     //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
     //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
-    GuiOverlayUpdate(gui);
+    GuiOverlayUpdate();
 }
 
 void GuiDrawFPS()
@@ -103,4 +103,20 @@ void GuiDrawFPS()
     char fps[10];
     sprintf(fps, "%.0f", gui->fps);
     FontDraw(TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255});
+}
+
+void GuiDrawFinishedRoundMessage()
+{
+    GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
+    char buffer[100] = {0};
+    sprintf(buffer, "Round Finished! New round starting: %.1f", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
+}
+
+void GuiDrawFinishedMatchMessage()
+{
+    GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
+    char buffer[100] = {0};
+    sprintf(buffer, "Finished Match. Returning to Main Menu: %.1f", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
 }

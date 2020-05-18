@@ -5,6 +5,7 @@
 #include "JoinableSesssion.h"
 #include "Lobby.h"
 #include "Instance.h"
+#include "Round.h"
 #include "State.h"
 #include "Map.h"
 #include "Notification.h"
@@ -49,10 +50,11 @@ void ClientManagerHandleNewPlayerPacket(ParsedPacket packet);
 void ClientManagerHandleDelPlayerPacket(ParsedPacket packet);
 void ClientManagerHandleEntityPacket(ParsedPacket packet);
 void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet);
+void ClientManagerHandleCloseSessionPacket(ParsedPacket packet);
 void ClientManagerHandleCreateSessionPacket(ParsedPacket packet);
 void ClientManagerHandleJoinSessionPacket(ParsedPacket packet);
 void ClientManagerHandleFullSessionPacket(ParsedPacket packet);
-void ClientManagerHandleStartSessionPacket(ParsedPacket packet);
+void ClientManagerHandleStartRoundPacket(ParsedPacket packet);
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet);
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet);
@@ -63,6 +65,8 @@ void ClientManagerHandleNewRoundPacket(ParsedPacket packet);
 void ClientManagerHandleScoreboardPacket(ParsedPacket packet);
 void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
+void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet);
+void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

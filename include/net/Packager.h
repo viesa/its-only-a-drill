@@ -27,6 +27,7 @@ typedef enum PacketType
     PT_DelPlayer,         // When server broadcasts deletion of a player
     PT_Entity,            // When sending an entity
     PT_CompressedEntity,  // When sending a compressed entity
+    PT_CloseSession,      // When server notifies clients that session is closing
     PT_CreateSession,     // When client wants to create a lobby
     PT_JoinSession,       // When client wants to join a lobby
     PT_LeaveSession,      // When client notifies the server it is leaving the session
@@ -35,7 +36,7 @@ typedef enum PacketType
     PT_HostAssign,        // When the host notfies the ID of the host
     PT_FetchSessions,     // When client asks server what sessions exists
     PT_FetchLobby,        // When client asks server which players are in given lobby
-    PT_StartSession,      // When host starts the session from the lobby, server returns the entity of the player
+    PT_StartRound,        // When host starts the session from the lobby, server returns the entity of the player
     PT_PlayerHit,         // When a player is getting shot [0] = id of shot player, [1] = damage
     PT_PlayerShoot,       // When a player shoots this is sent so other clients can draw the line
     PT_PlayerDead,        // When a player is killed, it notifies the server with this packet so other players will know too
@@ -43,6 +44,8 @@ typedef enum PacketType
     PT_Scoreboard,        // When a round is finished and server updates the scoreboard
     PT_FetchPlayerPoints, // When a player wants to update their own points. Client is only able to fetch their own points
     PT_CloseAllSessions,  // When server want to close all running sessions
+    PT_MatchFinished,     // When server notifying the clients the match is over
+    PT_RoundFinished,     // When server notifying the clients the round is over
     PT_None,
     PT_Count
 } PacketType;

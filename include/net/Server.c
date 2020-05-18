@@ -141,10 +141,32 @@ void ServerStopListening()
 
 void ServerUpdateTimeoutTimers()
 {
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
+    {
+        if (SERVER_PLAYERS[i].waitingForAliveReply)
+            SERVER_PLAYERS[i].timeoutTimer += ClockGetDeltaTime();
+    }
 }
 
 void ServerPingClients()
 {
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
+    {
+        if (!SERVER_PLAYERS[i].waitingForAliveReply)
+        {
+            ServerTCPSend(PT_AreYouAlive, NULL, 0, SERVER_PLAYERS[i]);
+            SERVER_PLAYERS[i].waitingForAliveReply = SDL_TRUE;
+        }
+    }
+}
+
+void ServerRemoveSession(Session *session)
+{
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        // This function also remove session completely when last player is removed
+        ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[i]);
+    }
 }
 
 void ServerUDPBroadcast(PacketType type, void *data, int size)
@@ -163,7 +185,7 @@ void ServerUDPBroadcastSession(PacketType type, Session *session, void *data, in
     // Creates a UDP-packet to send. ID of server is 0
     UDPpacket *packet = UDPPacketCreate(type, 0, data, size);
     int *playerIDs = SessionGetPlayerIDs(session);
-    for (int i = 0; i < server->sessions->size; i++)
+    for (int i = 0; i < session->playerIDs->size; i++)
     {
         NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
 
@@ -753,8 +775,16 @@ void ServerRemovePlayerFromSession(Session *session, int playerID)
     if (playerID != -1)
         ServerTCPBroadcastSession(PT_DelPlayer, session, &playerID, sizeof(int));
 
+    NetPlayer *playerP = ServerGetPlayerByID(playerID);
+    if (!playerP)
+        return;
+
     // Sets the sessionID of player to -1, so that they can join a new session
-    ServerGetPlayerByID(playerID)->sessionID = -1;
+    playerP->sessionID = -1;
+    // Clears points earned in this session
+    playerP->pointBuffer = 0.0f;
+    // Clears entity
+    playerP->entity = (Entity){0};
 }
 
 void ServerClearInBuffer()

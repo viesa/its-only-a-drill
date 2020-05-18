@@ -64,10 +64,17 @@ int WindowGetWidth()
 {
     return window->width;
 }
+
 int WindowGetHeight()
 {
     return window->height;
 }
+
+SDL_Rect WindowGetScreenRect()
+{
+    return (SDL_Rect){0, 0, window->width, window->height};
+}
+
 SDL_Renderer *WindowGetRenderer()
 {
     return window->renderer;
@@ -77,6 +84,7 @@ SDL_bool WindowIsFullscreen()
 {
     return window->isFullscreen;
 }
+
 SDL_bool WindowIsVSyncEnabled()
 {
     return window->vsyncEnabled;

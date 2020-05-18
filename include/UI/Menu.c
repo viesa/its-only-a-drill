@@ -499,7 +499,7 @@ void MenuUpdateRoundsLobby()
 {
     int optionLength = 2;
     char options[2][100] = {
-        {"num rounds"},
+        {"Num rounds"},
         {"Start lobby"}};
 
     sprintf(options[0], "Rounds: %d", menu->lobbyNumRounds);
@@ -531,7 +531,13 @@ void MenuUpdateRoundsLobby()
             FileIO lfile = FileIOCreate(mapInfo.filename);
             FileIORead(&lfile);
 
-            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
+            char *sessionDetails = MALLOC_N(char, sizeof(int) + lfile.size);
+            SDL_memcpy(sessionDetails, &menu->lobbyNumRounds, sizeof(int));
+            SDL_memcpy(sessionDetails + sizeof(int), lfile.contents, lfile.size);
+
+            ClientTCPSend(PT_CreateSession, sessionDetails, sizeof(int) + lfile.size);
+
+            FREE(sessionDetails);
 
             MenuStateSet(MS_WaitingForLobby);
         }
@@ -711,7 +717,7 @@ void MenuUpdateLobby()
         if (host && menu->activeIndex == optionLength - 1)
         {
             // Start the session
-            ClientTCPSend(PT_StartSession, NULL, 0);
+            ClientTCPSend(PT_StartRound, NULL, 0);
         }
     }
 
@@ -1210,6 +1216,8 @@ void MenuUpdateCustomMap(Player *player)
         NPCManagerClearNPCS();
         for (int i = 0; i < mapInfo.enemySpawns->size; i++)
             NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
+        Entity *playerEntity = PlayerGetEntity(ClientGetPlayer());
+        *playerEntity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, playerEntity->id);
         if (mapInfo.enemySpawns->size > 0)
             PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
         else

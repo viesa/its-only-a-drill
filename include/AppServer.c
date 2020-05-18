@@ -38,6 +38,7 @@ void AppServerGo(AppServer *app)
     ServerUpdateTimeoutTimers(app);
     ServerManagerKickTimeoutClients(app);
     ServerPingClients(app);
+    ServerManagerAdvanceSessionsWithOnePlayerAlive();
 }
 
 void AppServerUpdateCLI(AppServer *app)

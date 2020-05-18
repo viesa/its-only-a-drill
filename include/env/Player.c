@@ -40,6 +40,7 @@ Player *PlayerCreate()
     player->respawnCooldown = 500.0f;
     player->respawnTimer = player->respawnCooldown;
     player->spawnPoint = Vec2Create(0.0f, 0.0f);
+
     return player;
 }
 

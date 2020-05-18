@@ -1,17 +1,5 @@
 #include "ServerManager.h"
 
-struct
-{
-} serverManager;
-
-void ServerManagerInitialize(SDL_bool *isRunning)
-{
-}
-
-void ServerManagerUninitialize()
-{
-}
-
 void ServerManagerHandleAllPackets()
 {
     SDL_LockMutex(ServerGetInBufferMutex());
@@ -54,8 +42,8 @@ void ServerManagerHandleAllPackets()
         case PT_LeaveSession:
             ServerManagerHandleLeaveSessionPacket(nextPacket);
             break;
-        case PT_StartSession:
-            ServerManagerHandleStartSessionPacket(nextPacket);
+        case PT_StartRound:
+            ServerManagerHandleStartRoundPacket(nextPacket);
             break;
         case PT_ChangeSkin:
             ServerManagerHandleChangeSkinPacket(nextPacket);
@@ -98,6 +86,120 @@ void ServerManagerKickTimeoutClients()
             ServerRemoveClient(SERVER_PLAYERS[i]);
         }
     }
+}
+
+void ServerManagerAdvanceSessionsWithOnePlayerAlive()
+{
+    for (int i = 0; i < ServerGetNumSessions(); i++)
+    {
+        int nAlivePlayers = 0;
+        Session *session = &SERVER_SESSIONS[i];
+        if (session->inGame)
+        {
+            NetPlayer *playerLeft = NULL;
+            for (int i = 0; i < session->playerIDs->size; i++)
+            {
+                NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+                if (!player)
+                {
+                    ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[i]);
+                    break;
+                }
+                if (player->state == NPS_Alive)
+                {
+                    nAlivePlayers++;
+                    playerLeft = player;
+                }
+                if (nAlivePlayers > 1)
+                    break;
+            }
+            if (nAlivePlayers <= 1 && !session->quittingMatch && !session->startingNewRound)
+            {
+                // Award the winning player with points for winning
+                playerLeft->pointBuffer += (float)(session->playerIDs->size * 10);
+
+                if (++session->currentRound >= session->nRounds || session->playerIDs->size <= 1)
+                {
+                    // Match finished
+                    session->finishedMatchCountdown = 5.0f;
+                    session->quittingMatch = SDL_TRUE;
+                }
+                else
+                {
+                    // Round finished
+                    session->finishedRoundCountdown = 5.0f;
+                    session->startingNewRound = SDL_TRUE;
+                }
+            }
+
+            if (session->quittingMatch)
+            {
+                session->finishedMatchCountdown -= ClockGetDeltaTime();
+                ServerUDPBroadcastSession(PT_MatchFinished, session, &session->finishedMatchCountdown, sizeof(float));
+                if (session->finishedMatchCountdown <= 0.0f)
+                {
+                    ServerTCPBroadcastSession(PT_CloseSession, session, NULL, 0);
+                    ServerRemoveSession(session);
+                    session->quittingMatch = SDL_FALSE;
+                }
+            }
+            else if (session->startingNewRound)
+            {
+                session->finishedRoundCountdown -= ClockGetDeltaTime();
+                ServerUDPBroadcastSession(PT_RoundFinished, session, &session->finishedRoundCountdown, sizeof(float));
+                if (session->finishedRoundCountdown <= 0.0f)
+                {
+                    ServerTCPBroadcastSession(PT_NewRound, session, &session->currentRound, sizeof(int));
+                    ServerManagerStartSession(session);
+                    session->startingNewRound = SDL_FALSE;
+                }
+            }
+        }
+    }
+}
+
+void ServerManagerStartSession(Session *session)
+{
+    int *playerIDs = SessionGetPlayerIDs(session);
+    // Notify client that the session started, and provide client with his entity
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+        to->state = NPS_Alive;
+        Entity *entity = &to->entity;
+        if (i < session->mapInfo.playerSpawns->size)
+        {
+            *entity = EntityCreate(MapInfoGetPlayerSpawns(&session->mapInfo)[i].position, ET_Player, to->id);
+            for (int i = 0; i < MAX_DRAWABLES; i++)
+            {
+                entity->drawables[i].spriteSheet = to->spriteSheet;
+                entity->drawables[i].dst.w = (int)(33.0f * 1.5f);
+                entity->drawables[i].dst.h = (int)(33.0f * 1.5f);
+            }
+        }
+        else
+        {
+            *entity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, to->id);
+            for (int i = 0; i < MAX_DRAWABLES; i++)
+                entity->drawables[i].spriteSheet = to->spriteSheet;
+        }
+        ServerTCPSend(PT_StartRound, entity, sizeof(Entity), *to);
+    }
+    // Notify the client about every other players, and provide client with their entites
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
+        for (int j = 0; j < session->playerIDs->size; j++)
+        {
+            if (playerIDs[j] != to->id)
+            {
+                Entity *outgoing = &ServerGetPlayerByID(playerIDs[j])->entity;
+                ServerTCPSend(PT_NewPlayer, outgoing, sizeof(Entity), *to);
+            }
+        }
+    }
+    session->inGame = SDL_TRUE;
+    session->nDeadPlayers = 0;
 }
 
 void ServerManagerHandleTextPacket(ParsedPacket packet)
@@ -237,7 +339,10 @@ void ServerManagerHandleCompressedEntityPacket(ParsedPacket packet)
 
 void ServerManagerHandleCreateSessionPacket(ParsedPacket packet)
 {
-    char *rawMap = (char *)packet.data;
+    int numRounds = 0;
+    SDL_memcpy(&numRounds, packet.data, sizeof(int));
+    char *rawMap = ((char *)packet.data) + sizeof(int);
+    size_t rawMapDataSize = packet.size - sizeof(int);
 
     // If player doesn't actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
@@ -246,7 +351,7 @@ void ServerManagerHandleCreateSessionPacket(ParsedPacket packet)
 
     int sessionID = ServerGetSessionID();
 
-    Session session = SessionCreate(sessionID, 5, senderP, rawMap, packet.size);
+    Session session = SessionCreate(sessionID, numRounds, senderP, rawMap, rawMapDataSize);
     // If session ID is -1, something bad happened when it was created
     if (session.id < 0)
     {
@@ -333,7 +438,7 @@ void ServerManagerHandleJoinSessionPacket(ParsedPacket packet)
     }
 }
 
-void ServerManagerHandleStartSessionPacket(ParsedPacket packet)
+void ServerManagerHandleStartRoundPacket(ParsedPacket packet)
 {
     // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
@@ -347,36 +452,7 @@ void ServerManagerHandleStartSessionPacket(ParsedPacket packet)
     if (senderP->id != session->hostID)
         return;
 
-    int *playerIDs = SessionGetPlayerIDs(session);
-    // Notify client that the session started, and provide client with his entity
-    for (int i = 0; i < session->playerIDs->size; i++)
-    {
-        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
-        Entity *entity = &to->entity;
-        if (i < session->mapInfo.playerSpawns->size)
-        {
-            entity->position = MapInfoGetPlayerSpawns(&session->mapInfo)[i].position;
-        }
-        else
-        {
-            entity->position = Vec2Create(0.0f, 0.0f);
-        }
-        ServerTCPSend(PT_StartSession, entity, sizeof(Entity), *to);
-    }
-    // Notify the client about every other players, and provide client with their entites
-    for (int i = 0; i < session->playerIDs->size; i++)
-    {
-        NetPlayer *to = ServerGetPlayerByID(playerIDs[i]);
-        for (int j = 0; j < session->playerIDs->size; j++)
-        {
-            if (playerIDs[j] != to->id)
-            {
-                Entity *outgoing = &ServerGetPlayerByID(playerIDs[j])->entity;
-                ServerTCPSend(PT_NewPlayer, outgoing, sizeof(Entity), *to);
-            }
-        }
-    }
-    session->inGame = SDL_TRUE;
+    ServerManagerStartSession(session);
 }
 
 void ServerManagerHandleLeaveSessionPacket(ParsedPacket packet)
@@ -405,6 +481,7 @@ void ServerManagerHandleChangeSkinPacket(ParsedPacket packet)
         return;
 
     SpriteSheet spriteSheet = (SpriteSheet)int_spriteSheet;
+    senderP->spriteSheet = spriteSheet;
 
     for (int i = 0; i < MAX_DRAWABLES; i++)
         senderP->entity.drawables[i].spriteSheet = spriteSheet;
@@ -492,6 +569,9 @@ void ServerManagerHandlePlayerHitPacket(ParsedPacket packet)
 
     HitData hitData = *(HitData *)packet.data;
 
+    // Award player with points for hitting a target, relative to the damage dealt
+    senderP->pointBuffer += (float)hitData.damage / 40.0f;
+
     ServerTCPBroadcastSession(PT_PlayerHit, session, &hitData, sizeof(HitData));
 }
 
@@ -522,6 +602,11 @@ void ServerManagerHandlePlayerDeadPacket(ParsedPacket packet)
     Session *session = ServerGetSessionByID(senderP->sessionID);
     if (!session)
         return;
+
+    senderP->state = NPS_Dead;
+
+    // Award player with points relative to how many people died before
+    senderP->pointBuffer += (float)(session->nDeadPlayers++) * 10.0f;
 
     ServerTCPBroadcastExclusiveSession(PT_PlayerDead, session, &senderP->id, sizeof(int), packet.sender);
 }

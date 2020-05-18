@@ -205,7 +205,7 @@ void ClientConnectThreadFn()
         return;
     }
 
-    if (!strlen(client->name) == 0)
+    if (strlen(client->name) != 0)
     {
         ClientTCPSend(PT_Connect, client->name, strlen(client->name));
     }
