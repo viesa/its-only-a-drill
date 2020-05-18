@@ -59,11 +59,11 @@ typedef struct groundListItems
 } GroundListItems;
 
 Item ItemCreate(ItemType type, Vec2 postion);
-void ItemDraw(Camera *camera, Item *item, Vec2 position);
+void ItemDraw(Item *item, Vec2 position);
 //Draws items in invemtory
-void ItemPocketDraw(Graphics *gfx, Item *item, Vec2 pos);
+void ItemPocketDraw(Item *item, Vec2 pos);
 //Draws the equiped item
-void ItemEquipDraw(Camera *camera, Item *item, Vec2 pos);
+void ItemEquipDraw(Item *item, Vec2 pos);
 
 InventoryListItems InventoryCreate(void);
 void ItemPickup(InventoryListItems *i, Item *y, GroundListItems *g, int tmp);
@@ -72,7 +72,7 @@ GroundListItems GroundListCreate(void);
 void ItemDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos);
 void groundListAdd(GroundListItems *g, InventoryListItems *i);
 void inventoryPop(InventoryListItems *i);
-void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground, Camera *camera);
+void UpdateItemDraw(InventoryListItems *Inventory, GroundListItems *Ground);
 
 void ItemDynamicDrop(GroundListItems *g, InventoryListItems *i, Vec2 playerPos, int item);
 

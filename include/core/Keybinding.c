@@ -1,32 +1,39 @@
 #include "Keybinding.h"
 
-Keybinding *KeybindingCreate() 
+typedef struct Keybinding
 {
-    Keybinding *bindings = MALLOC(Keybinding);
-    bindings->KeyArray[MOVE_UP] = SDL_SCANCODE_W;
-    bindings->KeyArray[MOVE_LEFT] = SDL_SCANCODE_A;
-    bindings->KeyArray[MOVE_RIGHT] = SDL_SCANCODE_D;
-    bindings->KeyArray[MOVE_DOWN] = SDL_SCANCODE_S;
-    bindings->KeyArray[PICKUP] = SDL_SCANCODE_Q;
-    bindings->KeyArray[DROP] = SDL_SCANCODE_Z;
-    bindings->KeyArray[SHOOT] = BUTTON_LEFT;
-    bindings->KeyArray[RELOAD] = SDL_SCANCODE_R;
-    bindings->KeyArray[INVENTORY] = SDL_SCANCODE_TAB;
-    return bindings;
+    SDL_Scancode KeyArray[BINDINGS];
+} Keybinding;
+
+static Keybinding *bindings;
+
+void KeybindingInitialize()
+{
+    bindings = MALLOC(Keybinding);
+    ALLOC_ERROR_CHECK(bindings);
+
+    bindings->KeyArray[AC_MOVE_UP] = SDL_SCANCODE_W;
+    bindings->KeyArray[AC_MOVE_LEFT] = SDL_SCANCODE_A;
+    bindings->KeyArray[AC_MOVE_RIGHT] = SDL_SCANCODE_D;
+    bindings->KeyArray[AC_MOVE_DOWN] = SDL_SCANCODE_S;
+    bindings->KeyArray[AC_PICKUP] = SDL_SCANCODE_Q;
+    bindings->KeyArray[AC_DROP] = SDL_SCANCODE_Z;
+    bindings->KeyArray[AC_SHOOT] = BUTTON_LEFT;
+    bindings->KeyArray[AC_RELOAD] = SDL_SCANCODE_R;
+    bindings->KeyArray[AC_INVENTORY] = SDL_SCANCODE_TAB;
 }
 
-void KeybindingChange(ActionCode action, SDL_Scancode key, Keybinding *bindings) 
+void KeybindingUninitialize()
+{
+    FREE(bindings);
+}
+
+void KeybindingChange(ActionCode action, SDL_Scancode key)
 {
     bindings->KeyArray[action] = key;
 }
 
-void KeybindingFree(Keybinding *bindings) 
+SDL_Scancode *KeybindingGetKeys()
 {
-    SDL_free(bindings);
+    return bindings->KeyArray;
 }
-
-/*void KeybindingChange2(const SDL_Scancode key, SDL_Scancode key) 
-{
-
-}*/
-

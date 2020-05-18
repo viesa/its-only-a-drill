@@ -3,21 +3,17 @@
 
 #include "Dependencies.h"
 
-typedef struct FPSManager
-{
-    unsigned long startWait;
-    unsigned long endWait;
-    int desiredFPS;
-} FPSManager;
+void FPSManagerInitialize();
+void FPSManagerUninitialize();
 
-// creates space on the heap
-FPSManager *FPSManagerCreate();
-// removes the data for the heap
-void FPSManagerDestroy(FPSManager *fpsManager);
-
-// gets the start proformens data
-void FPSManagerStart(FPSManager *fpsManager);
-// applys the proformens data to limit fps
-void FPSManagerAdjust(FPSManager *fpsManager);
+// Start the performance counter
+void FPSManagerStart();
+// Apply the wait to reach desired FPS
+void FPSManagerAdjust();
+// Returns the desired FPS
+int FPSManagerGetDesiredFPS();
+/// Sets the desired FPS that FPSManagerAdjust() adjusts to
+///\param fps: if fps == 0, inactive the delay
+void FPSManagerSetDesiredFPS(int fps);
 
 #endif

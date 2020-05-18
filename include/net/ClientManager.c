@@ -1,5 +1,14 @@
 #include "ClientManager.h"
 
+struct
+{
+    Vector *players;
+    // A vector of structs, JoinableSession
+    Vector *joinList;
+    SDL_bool inLobby; // both of these cannot be true at once
+    SDL_bool inGame;  // :)
+} clientManager;
+
 void ClientManagerInitialize()
 {
     clientManager.players = VectorCreate(sizeof(EntityIndexP), 100);
@@ -18,12 +27,10 @@ void ClientManagerUninitialize()
 
 void ClientManagerUpdate()
 {
-    ClientManagerUpdateServerTimeoutTimer();
     ClientManagerDisconnectFromTimeoutServer();
-    ClientManagerPingServer();
 
-    SDL_LockMutex(client.inBufferMutex);
-    for (size_t i = 0; i < client.inBuffer->size; i++)
+    SDL_LockMutex(ClientGetInBufferMutex());
+    for (size_t i = 0; i < ClientGetInBufferSize(); i++)
     {
         ParsedPacket nextPacket = CLIENT_INBUFFER[i];
 
@@ -87,33 +94,21 @@ void ClientManagerUpdate()
             break;
         }
     }
-    for (size_t i = 0; i < client.inBuffer->size; i++)
-    {
-        ParsedPacketDestroy(&CLIENT_INBUFFER[i]);
-    }
-    VectorClear(client.inBuffer);
-    SDL_UnlockMutex(client.inBufferMutex);
+    ClientClearInBuffer();
+    SDL_UnlockMutex(ClientGetInBufferMutex());
 }
 
-void ClientManagerDrawConnectedPlayers(Camera *camera)
+void ClientManagerDrawConnectedPlayers()
 {
     for (int i = 0; i < clientManager.players->size; i++)
     {
-        EntityDrawIndex(CLIENTMANAGER_PLAYERS[i], camera);
-    }
-}
-
-void ClientManagerUpdateServerTimeoutTimer()
-{
-    if (ConStateGet() == CON_Online && client.server.waitingForAliveReply)
-    {
-        client.server.timeoutTimer += ClockGetDeltaTime();
+        EntityDrawIndex(CLIENTMANAGER_PLAYERS[i]);
     }
 }
 
 void ClientManagerDisconnectFromTimeoutServer()
 {
-    if (ConStateGet() == CON_Online && client.server.timeoutTimer > SERVER_TIMEOUT)
+    if (ConStateGet() == CON_Online && ClientGetTimeoutTimer() > SERVER_TIMEOUT)
     {
 #ifdef CLIENTMANAGER_DEBUG
         log_info("Disconnected from server Reason: Timeout");
@@ -121,15 +116,6 @@ void ClientManagerDisconnectFromTimeoutServer()
         ClientDisconnect();
         ClientManagerLeaveSessionLocally();
         Notify("Connection closed", 1.0f, NT_ERROR);
-    }
-}
-
-void ClientManagerPingServer()
-{
-    if (ConStateGet() == CON_Online && !client.server.waitingForAliveReply)
-    {
-        ClientTCPSend(PT_AreYouAlive, NULL, 0);
-        client.server.waitingForAliveReply = SDL_TRUE;
     }
 }
 
@@ -147,6 +133,28 @@ void ClientManagerLeaveSessionLocally()
         MenuStateSet(MS_MainMenu);
 }
 
+SDL_bool ClientManagerIsInGame()
+{
+    return clientManager.inGame;
+}
+SDL_bool ClientManagerIsInLobby()
+{
+    return clientManager.inLobby;
+}
+size_t ClientManagerGetJoinListSize()
+{
+    return clientManager.joinList->size;
+}
+
+void ClientManagerSetInLobby(SDL_bool inLobby)
+{
+    clientManager.inLobby = inLobby;
+}
+void ClientManagerSetInGame(SDL_bool inGame)
+{
+    clientManager.inGame = inGame;
+}
+
 void ClientManagerHandleTextPacket(ParsedPacket packet)
 {
     // Maybe we can print it? O.O
@@ -159,24 +167,22 @@ void ClientManagerHandleAreYouAlivePacket(ParsedPacket packet)
 
 void ClientManagerHandleIAmAlivePacket(ParsedPacket packet)
 {
-    client.server.timeoutTimer = 0.0f;
-    client.server.waitingForAliveReply = SDL_FALSE;
+    ClientReceivedAlivePacket();
 }
 
 void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
     int id = *(int *)packet.data;
-    PlayerGetEntity(client.player)->id = id;
-    client.receivedPlayerID = SDL_TRUE;
+    ClientSetPlayerID(id);
 
-    // Sends a empty packet to signal the server which IP to respond with
+    // Sends a empty packet to signal the server which IP to respond with when sending UDP-packets
     ClientUDPSend(PT_None, NULL, 0);
 }
 
 void ClientManagerHandleDuplicateNamePacket(ParsedPacket packet)
 {
     MenuStateSet(MS_Name);
-    SDL_memset(client.name, 0, MAX_PLAYERNAME_SIZE);
+    ClientClearName();
     Notify("Username taken", 1.0f, NT_ERROR);
 }
 
@@ -304,18 +310,18 @@ void ClientManagerHandleStartSessionPacket(ParsedPacket packet)
 {
     if (MenuStateGet() != MS_Lobby)
         return;
-    *PlayerGetEntity(client.player) = *(Entity *)packet.data;
+    ClientSetPlayerEntity((Entity *)packet.data);
     MenuStateSet(MS_None);
     GameStateSet(GS_Playing);
-    clientManager.inGame = SDL_TRUE;
-    clientManager.inLobby = SDL_FALSE;
-    VectorClear(lobby.names);
-    lobby.isHost = SDL_FALSE;
+    ClientManagerSetInGame(SDL_TRUE);
+    ClientManagerSetInLobby(SDL_TRUE);
+    LobbyClearNames();
+    LobbySetIsHost(SDL_FALSE);
 }
 
 void ClientManagerHandleHostAssignPacket(ParsedPacket packet)
 {
-    lobby.isHost = SDL_TRUE;
+    LobbySetIsHost(SDL_TRUE);
 }
 
 void ClientManagerHandleFetchSessionsPacket(ParsedPacket packet)
@@ -345,13 +351,9 @@ void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 
         int nLobbyMembers = packet.size / 20;
 
-        VectorClear(lobby.names);
+        LobbyClearNames();
         for (int i = 0; i < nLobbyMembers; i++)
-        {
-            LobbyName name = {0};
-            strcpy(name.data, allMembers + i * 20);
-            VectorPushBack(lobby.names, &name);
-        }
+            LobbyAddName(allMembers + i * 20);
     }
 }
 
@@ -359,7 +361,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket Packet)
 {
     int send = *(int *)Packet.data;
 
-    PlayerGetEntity(client.player)->health -= send;
+    PlayerGetEntity(ClientGetPlayer())->health -= send;
 }
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)

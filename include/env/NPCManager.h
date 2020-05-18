@@ -9,10 +9,10 @@ void NPCManagerInitialize(Player *player);
 void NPCManagerUninitialize();
 
 void NPCManagerUpdate();
-void NPCManagerDrawAllNPCS(Camera *camera);
+void NPCManagerDrawAllNPCS();
 
 void NPCManagerAddNew(Vec2 pos);
 
-void NPCManagerResetNPCS();
+void NPCManagerClearNPCS();
 
 #endif

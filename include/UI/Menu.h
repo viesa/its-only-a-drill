@@ -20,73 +20,40 @@
 #include "Anim.h"
 #include "Transition.h"
 #include "Settings.h"
+#include "NPCManager.h"
 
 #define FETCH_SESSIONS_INTERVAL (2.0f)
 #define FETCH_LOBBY_INTERVAL (0.5f)
 
-typedef struct Menu
-{
-    Graphics *gfx;
-    Camera *camera;
-
-    Font *font;
-    Drawable mainMenuDbl;
-    float mainMenuDblDelta;
-    int mainMenuDblDir;
-    Drawable lobbyHostDbl;
-    Drawable lobbyNormalDbl;
-    LoadingBar *loadingBar;
-    Keybinding *bindings;
-    float loopCount;
-    int loopSwing;
-    int swingDir;
-    int activeIndex;
-    int lastIndex;
-    int keybindingstate;
-    SDL_bool indexChanged;
-    float fetchSessionsTimer;
-    float fetchLobbyTimer;
-    Sound MenuStep;
-    Music MenuTheme;
-    int themecheck;
-    SDL_Color clr[10];
-
-    SDL_bool startedInTransition;
-    SDL_bool startedOutTransition;
-
-    Anim previewLeg;
-    Anim previewBody;
-
-    MapList *mapList;
-
-    double volumeMaster;
-    Uint8 volumeSFX;
-    Uint8 volumeMusic;
-} Menu;
-
 // Creates menu
-Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings, MapList *mapList);
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player);
-void MenuUpdateSplash(Menu *menu);
-void MenuUpdateName(Menu *menu);
-void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps);
-void MenuUpdateInGameMenu(Menu *menu);
-void MenuUpdateJoinLobby(Menu *menu);
-void MenuUpdateHostLobby(Menu *menu);
-void MenuUpdateWaitingForLobby(Menu *menu);
-void MenuUpdateLobby(Menu *menu);
-void MenuUpdateOptions(Menu *menu);
-void MenuUpdateResolution(Menu *menu);
-void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager);
-void MenuUpdateKeybinding(Menu *menu);
-void MenuUpdateAudio(Menu *menu);
+void MenuInitialize(MapList *mapList);
+void MenuUninitialize();
 
-void MenuUpdateCustomMap(Menu *menu);
-void MenuUpdateSkin(Menu *menu, Player *player);
-void MenuTitleDraw(Menu *menu, char title[100]);
-void MenuDrawPreviewMap(Menu *menu);
-void MenuDraw(Menu *menu, char options[][100], int optionLength);
+void MenuResetActiveIndex();
+void MenuResetFetchSessionsTimer();
+void MenuResetFetchLobbyTimer();
+void MenuSetStartedInTransistion(SDL_bool started);
+void MenuSetStartedOutTransistion(SDL_bool started);
 
-void MenuDestroy(Menu *menu);
+void MenuUpdate(Player *player);
+void MenuUpdateSplash();
+void MenuUpdateName();
+void MenuUpdateMainMenu(Player *player);
+void MenuUpdateInGameMenu();
+void MenuUpdateJoinLobby();
+void MenuUpdateHostLobby();
+void MenuUpdateWaitingForLobby();
+void MenuUpdateLobby();
+void MenuUpdateOptions();
+void MenuUpdateResolution();
+void MenuUpdateFPS();
+void MenuUpdateKeybinding();
+void MenuUpdateAudio();
+
+void MenuUpdateCustomMap(Player *player);
+void MenuUpdateSkin(Player *player);
+void MenuTitleDraw(char title[100]);
+void MenuDrawPreviewMap();
+void MenuDraw(char options[][100], int optionLength);
 
 #endif

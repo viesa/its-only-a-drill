@@ -27,7 +27,7 @@ void AppServerDestroy(AppServer *app)
     ServerTCPBroadcast(PT_CloseAllSessions, NULL, 0);
     ServerStopListening();
     ServerUninitialize();
-    EntityManagerUninitalize();
+    EntityManagerUninitialize();
     if (app->cliWorker)
         SDL_WaitThread(app->cliWorker, NULL);
 }
@@ -35,15 +35,15 @@ void AppServerDestroy(AppServer *app)
 void AppServerGo(AppServer *app)
 {
     AppServerHandleAllPackets(app);
-    AppServerUpdateTimeoutTimers(app);
+    ServerUpdateTimeoutTimers(app);
     AppServerKickTimeoutClients(app);
-    AppServerPingClients(app);
+    ServerPingClients(app);
 }
 
 void AppServerHandleAllPackets(AppServer *app)
 {
-    SDL_LockMutex(server.inBufferMutex);
-    for (size_t i = 0; i < server.inBuffer->size; i++)
+    SDL_LockMutex(ServerGetInBufferMutex());
+    for (size_t i = 0; i < ServerGetInBufferSize(); i++)
     {
         ParsedPacket nextPacket = SERVER_INBUFFER[i];
 
@@ -101,18 +101,14 @@ void AppServerHandleAllPackets(AppServer *app)
             break;
         }
     }
-    for (size_t i = 0; i < server.inBuffer->size; i++)
-    {
-        ParsedPacketDestroy(&SERVER_INBUFFER[i]);
-    }
-    VectorClear(server.inBuffer);
-    SDL_UnlockMutex(server.inBufferMutex);
+    ServerClearInBuffer();
+    SDL_UnlockMutex(ServerGetInBufferMutex());
 }
 
 void AppServerUpdateCLI(AppServer *app)
 {
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_LOW);
-    while (server.isListening)
+    while (ServerIsListening())
     {
         AppServerDrawCLI(app);
 
@@ -135,7 +131,7 @@ void AppServerUpdateCLI(AppServer *app)
             {
                 CLIStateSet(CS_Traffic);
                 // Takes the lock so that "(B) Go back" is printed before any traffic
-                SDL_LockMutex(server.trafficMutex);
+                SDL_LockMutex(ServerGetTrafficMutex());
             }
             if (input == 'Q')
             {
@@ -203,8 +199,8 @@ void AppServerDrawCLI(AppServer *app)
     break;
     case CS_PlayerList:
     {
-        printf("Number of players: %zu\n\n", server.players->size);
-        for (int i = 0; i < server.players->size; i++)
+        printf("Number of players: %zu\n\n", ServerGetNumPlayers());
+        for (int i = 0; i < ServerGetNumPlayers(); i++)
         {
             NetPlayer *pl = &SERVER_PLAYERS[i];
             printf("[ID:%d] %s IP:%d:%d ", pl->id, pl->name, pl->ip->host, pl->ip->port);
@@ -214,7 +210,7 @@ void AppServerDrawCLI(AppServer *app)
                 printf("Session:%d ", pl->sessionID);
             printf("Timeout:%.3f\n", pl->timeoutTimer);
         }
-        if (server.players->size > 0)
+        if (ServerGetNumPlayers() > 0)
             printf("\n");
         printf("(R) Reload\n");
         printf("(B) Go Back\n");
@@ -222,8 +218,8 @@ void AppServerDrawCLI(AppServer *app)
     break;
     case CS_SessionList:
     {
-        printf("Number of sessions: %zu\n\n", server.sessions->size);
-        for (int i = 0; i < server.sessions->size; i++)
+        printf("Number of sessions: %zu\n\n", ServerGetNumSessions());
+        for (int i = 0; i < ServerGetNumSessions(); i++)
         {
             Session *session = &SERVER_SESSIONS[i];
             NetPlayer *host = ServerGetPlayerByID(session->hostID);
@@ -235,7 +231,7 @@ void AppServerDrawCLI(AppServer *app)
                    session->mapInfo.maxPlayers,
                    name);
         }
-        if (server.sessions->size > 0)
+        if (ServerGetNumSessions() > 0)
             printf("\n");
         printf("(R) Reload\n");
         printf("(B) Go Back\n");
@@ -244,7 +240,7 @@ void AppServerDrawCLI(AppServer *app)
     case CS_Traffic:
     {
         printf("(B) Go Back\n");
-        SDL_UnlockMutex(server.trafficMutex);
+        SDL_UnlockMutex(ServerGetTrafficMutex());
     }
     break;
     default:
@@ -268,7 +264,7 @@ void AppServerClearTerminal(AppServer *app)
 
 void AppServerUpdateTimeoutTimers(AppServer *app)
 {
-    for (int i = 0; i < server.players->size; i++)
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
     {
         if (SERVER_PLAYERS[i].waitingForAliveReply)
             SERVER_PLAYERS[i].timeoutTimer += ClockGetDeltaTime();
@@ -277,7 +273,7 @@ void AppServerUpdateTimeoutTimers(AppServer *app)
 
 void AppServerKickTimeoutClients(AppServer *app)
 {
-    for (int i = 0; i < server.players->size; i++)
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
     {
         if (SERVER_PLAYERS[i].timeoutTimer > CLIENT_TIMEOUT)
         {
@@ -291,7 +287,7 @@ void AppServerKickTimeoutClients(AppServer *app)
 
 void AppServerPingClients(AppServer *app)
 {
-    for (int i = 0; i < server.players->size; i++)
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
     {
         if (!SERVER_PLAYERS[i].waitingForAliveReply)
         {
@@ -336,7 +332,7 @@ void AppServerHandleConnectPacket(ParsedPacket packet)
     if (!strcmp(senderP->name, (char *)packet.data))
         return;
 
-    for (size_t i = 0; i < server.players->size; i++)
+    for (size_t i = 0; i < ServerGetNumPlayers(); i++)
     {
         if (!strcmp(SERVER_PLAYERS[i].name, (char *)packet.data))
         {
@@ -376,7 +372,7 @@ void AppServerHandleEntityPacket(ParsedPacket packet)
 {
     Entity incomingEntity = *(Entity *)packet.data;
 
-    for (int i = 0; i < server.players->size; i++)
+    for (int i = 0; i < ServerGetNumPlayers(); i++)
     {
         if (SERVER_PLAYERS[i].entity.id == packet.sender.entity.id)
         {
@@ -426,7 +422,7 @@ void AppServerHandleCreateSessionPacket(ParsedPacket packet)
     }
     else
     {
-        VectorPushBack(server.sessions, &session);
+        ServerAddSession(&session);
         ServerTCPSend(PT_CreateSession, &session.id, sizeof(int), packet.sender);
     }
 }
@@ -445,7 +441,7 @@ void AppServerHandleJoinSessionPacket(ParsedPacket packet)
     // Check if player is already in another session, if so, disconnect it from the other session
     if (senderP->sessionID >= 0)
     {
-        for (size_t i = 0; i < server.sessions->size; i++)
+        for (size_t i = 0; i < ServerGetNumSessions(); i++)
         {
             // Find correct session
             if (SERVER_SESSIONS[i].id == senderP->sessionID)
@@ -582,7 +578,7 @@ void AppServerHandleChangeSkinPacket(ParsedPacket packet)
 
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet)
 {
-    int nSessions = server.sessions->size;
+    int nSessions = ServerGetNumSessions();
     // Reserve for possible max ammout of data
     // Actual number is allSesssions - nStartedSessions
     JoinableSession outgoing[nSessions];

@@ -53,16 +53,17 @@ NPC *NPCCreate(Vec2 pos, Player *player)
     ALLOC_ERROR_CHECK(npc);
     npc->player = player;
     npc->entity = EntityManagerAdd(ET_Player, pos);
-    npc->spriteSheet = SS_Character_Prisoner;
-    npc->leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_Character_ChernobylWorker, 4, 0.05f);
-    npc->body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_Character_ChernobylWorker, 4, 0.05f);
+    npc->state = NPC_Neutral;
+    npc->spriteSheet = SS_Character_ChernobylWorker;
+    npc->leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
+    npc->body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
     npc->forward = Vec2Create(1.0f, 0.0f);
     npc->inventory = InventoryCreate();
     npc->desiredPos = pos;
     npc->movePatternIndex = 0;
     npc->movePattern = MovePatternCreate();
     npc->movementSpeed = 500.0f;
-    npc->aggravationRadius = 250.0f;
+    npc->aggravationRadius = 150.0f;
     npc->DPBoxSize = 6;
     return npc;
 }
@@ -73,15 +74,18 @@ void NPCDestroy(NPC *npc)
 
 void NPCUpdate(NPC *npc)
 {
-    if (ENTITY_ARRAY[*npc->entity].health <= 0)
-    {
-        npc->state = NPC_Dead;
-    }
-    NPCUpdateAnimation(npc);
+    NPCUpdateBehavior(npc);
+    if (npc->state != NPC_Dead)
+        NPCUpdateAnimation(npc);
+    if (npc->state == NPC_Fight)
+        npc->forward = Vec2Unit(Vec2Sub(PlayerGetEntity(npc->player)->position, ENTITY_ARRAY[*npc->entity].position));
+    float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), npc->forward));
+    float degrees = npc->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
+    EntityRotateAll(npc->entity, degrees);
 }
-void NPCDraw(NPC *npc, Camera *camera)
+void NPCDraw(NPC *npc)
 {
-    EntityDrawIndex(npc->entity, camera);
+    EntityDrawIndex(npc->entity);
 }
 
 void NPCSetSpriteSheet(NPC *npc, SpriteSheet spriteSheet)
@@ -100,11 +104,13 @@ void NPCKill(NPC *npc)
     entity->health = 0;
     entity->drawables[0] = DrawableCreate((SDL_Rect){0, 0, 70, 70}, (SDL_Rect){entity->position.x, entity->position.y, 77, 63}, npc->spriteSheet);
     entity->nDrawables = 1;
-    entity->hitboxIndex = 0;
+    entity->isCollider = SDL_FALSE;
     npc->state = NPC_Dead;
+    AnimStop(&npc->leg);
+    AnimStop(&npc->body);
 }
 
-void NPCUpdateBehavior(NPC *npc, Camera *camera)
+void NPCUpdateBehavior(NPC *npc)
 {
     NPCSwitchBehaviorState(npc);
 
@@ -121,7 +127,7 @@ void NPCUpdateBehavior(NPC *npc, Camera *camera)
     }
     case NPC_Fight:
     {
-        NPCUpdateBehaviorFight(npc, camera);
+        NPCUpdateBehaviorFight(npc);
         break;
     }
     case NPC_Aggressive:
@@ -148,7 +154,8 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
                       npc->DPBoxSize,
                       npc->DPBoxSize};
 
-    if (SDL_HasIntersection(&entity->drawables[entity->hitboxIndex].dst, &boxDP))
+    SDL_Rect hitbox = EntityGetHitbox(entity);
+    if (SDL_HasIntersection(&hitbox, &boxDP))
     {
         npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
         if (npc->movePatternIndex == 11 || npc->movePatternIndex <= 9)
@@ -161,9 +168,9 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
         }
     }
 }
-void NPCUpdateBehaviorFight(NPC *npc, Camera *camera)
+void NPCUpdateBehaviorFight(NPC *npc)
 {
-    NPCShoot(npc, camera);
+    NPCShoot(npc);
     if (PlayerGetEntity(npc->player)->health < 0)
     {
         npc->state = NPC_Neutral;
@@ -180,7 +187,8 @@ void NPCUpdateBehaviorAggressive(NPC *npc)
                       npc->DPBoxSize,
                       npc->DPBoxSize};
 
-    if (SDL_HasIntersection(&entity->drawables[entity->hitboxIndex].dst, &boxDP))
+    SDL_Rect hitbox = EntityGetHitbox(entity);
+    if (SDL_HasIntersection(&hitbox, &boxDP))
     {
         npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
         npc->movePatternIndex = npc->movePatternIndex >= 9 ? 0 : npc->movePatternIndex + 1;
@@ -195,28 +203,33 @@ void NPCMoveTo(NPC *npc, Vec2 moveTo)
     Vec2 enemyMovement = Vec2MulL(unitenemyVec, npc->movementSpeed);
     entity->Force.x += enemyMovement.x;
     entity->Force.y += enemyMovement.y;
+    npc->forward = Vec2Unit(entity->Force);
 }
 
 void NPCSwitchBehaviorState(NPC *npc)
 {
     Entity *entity = &ENTITY_ARRAY[*npc->entity];
     Entity *pEntity = PlayerGetEntity(npc->player);
-    if (entity->health <= 0)
+    if (entity->health <= 0 && npc->state != NPC_Dead)
     {
-        npc->state = NPC_Dead;
+        NPCKill(npc);
     }
     else if (npc->state != NPC_Dead)
     {
         Vec2 enemyToPlayer = Vec2Sub(pEntity->position, entity->position);
-        if (entity->health < 100 || Vec2Len(enemyToPlayer) <= npc->aggravationRadius)
+        npc->state = NPC_Neutral;
+        if (entity->health < 100)
         {
             npc->state = NPC_Aggressive;
-            npc->state = NPC_Aggressive;
+        }
+        if (Vec2Len(enemyToPlayer) <= npc->aggravationRadius)
+        {
+            npc->state = NPC_Fight;
         }
     }
 }
 
-void NPCShoot(NPC *npc, Camera *camera)
+void NPCShoot(NPC *npc)
 {
     Item *item = &npc->inventory.contents[npc->inventory.top - 1];
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
@@ -238,7 +251,7 @@ void NPCShoot(NPC *npc, Camera *camera)
         point.x = entity->drawables[0].dst.x + (entity->drawables[0].dst.w / 2);
         point.y = entity->drawables[0].dst.y + (entity->drawables[0].dst.h / 2);
 
-        CameraDrawLine(camera, point.x, point.y, makeDestination.x, makeDestination.y, (SDL_Color){255, 50, 50, 150});
+        CameraDrawLine(point.x, point.y, makeDestination.x, makeDestination.y, (SDL_Color){255, 50, 50, 150});
         // push back
         entity->Force.x -= itemFalloff.x;
         entity->Force.y -= itemFalloff.y;
@@ -255,7 +268,7 @@ void NPCUpdateAnimation(NPC *npc)
     AnimUpdate(&npc->leg, ClockGetDeltaTime());
     AnimUpdate(&npc->body, ClockGetDeltaTime());
 
-    if (Vec2LenSq(ENTITY_ARRAY[*npc->entity].Velocity) == 0.0f || Vec2LenSq(ENTITY_ARRAY[*npc->entity].Force) == 0.0f)
+    if (Vec2LenSq(ENTITY_ARRAY[*npc->entity].Velocity) < 0.1f || Vec2LenSq(ENTITY_ARRAY[*npc->entity].Force) < 0.1f || npc->state == NPC_Fight)
     {
         AnimStop(&npc->leg);
         AnimPause(&npc->body);

@@ -9,10 +9,10 @@
 #include "Entity.h"
 
 //Draws the inventory
-void InventoryDisplay(Graphics *gfx, InventoryListItems *i);
+void InventoryDisplay(InventoryListItems *i);
 //Selects the "item"
 void InventorySelectItem(InventoryListItems *i, int item);
 //Shows the equiped item in the players hand
-void InventoryDisplayEquiped(Camera *camera, InventoryListItems *i, Vec2 PlayerPos);
+void InventoryDisplayEquiped(InventoryListItems *i, Vec2 PlayerPos);
 
 #endif

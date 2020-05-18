@@ -9,38 +9,13 @@
 #include "NetPlayer.h"
 #include "Session.h"
 
-#define SERVER_INBUFFER ServerGetInBufferArray()
-#define SERVER_PLAYERS ServerGetPlayerArray()
-#define SERVER_IDS ServerGetIDArray()
-#define SERVER_SESSIONS ServerGetSessionArray()
-#define SERVER_SESSIONBITMAP ServerGetSessionBitmapArray()
-
-#define TRAFFIC_BUFFER_SIZE 5000
+#define SERVER_INBUFFER ServerGetInBuffer()
+#define SERVER_PLAYERS ServerGetPlayers()
+#define SERVER_IDS ServerGetIDs()
+#define SERVER_SESSIONS ServerGetSessions()
+#define SERVER_SESSIONBITMAP ServerGetSessionBitmaps()
 
 #define CLIENT_TIMEOUT 3.0f
-
-struct
-{
-    UDPsocket udpSocket;
-    TCPsocket tcpSocket;
-    SDLNet_SocketSet socketSet;
-    Vector *players;
-    Vector *ids; //0 means taken
-    int currentIDIndex;
-
-    Vector *sessions;
-    Vector *sessionBitmap;
-
-    Vector *inBuffer;
-    SDL_mutex *inBufferMutex;
-
-    SDL_bool isListening;
-    SDL_bool isInitialized;
-
-    SDL_Thread *listenThread;
-
-    SDL_mutex *trafficMutex;
-} server;
 
 // Creates a UDP server on a fixed port
 void ServerInitialize();
@@ -50,6 +25,12 @@ void ServerUninitialize();
 void ServerStartListening();
 // Marks server as not listening and collects listener thread
 void ServerStopListening();
+
+// Adds deltatime to every client timeout timer
+void ServerUpdateTimeoutTimers();
+// Sends 'alive' packets to all clients, updating their time-out timer
+void ServerPingClients();
+
 // Broadcast UDP-packet to connected clients
 void ServerUDPBroadcast(PacketType type, void *data, int size);
 // Broadcast UDP-packet to connected clients on the given session
@@ -86,7 +67,7 @@ int ServerTryReceiveTCPPacket(NetPlayer player);
 // Deletes the client from player-list and notifies all clients
 void ServerRemoveClient(NetPlayer player);
 // Returns lowest free unique ID
-int ServerGetID();
+int ServerGenID();
 // Marks the id as non-taken
 void ServerFreeID(int id);
 // Returns lowest free unique session ID
@@ -104,9 +85,19 @@ NetPlayer *ServerGetPlayerByNetPlayer(NetPlayer player);
 // Removes a player from given session, notfies players and remove the session if necessary
 void ServerRemovePlayerFromSession(Session *session, int playerID);
 
-ParsedPacket *ServerGetInBufferArray();
-NetPlayer *ServerGetPlayerArray();
-SDL_bool *ServerGetIDArray();
-Session *ServerGetSessionArray();
-SDL_bool *ServerGetSessionBitmapArray();
+void ServerClearInBuffer();
+// Append a new session to session list
+void ServerAddSession(Session *session);
+
+SDL_bool ServerIsListening();
+ParsedPacket *ServerGetInBuffer();
+size_t ServerGetInBufferSize();
+SDL_mutex *ServerGetInBufferMutex();
+NetPlayer *ServerGetPlayers();
+size_t ServerGetNumPlayers();
+SDL_bool *ServerGetIDs();
+Session *ServerGetSessions();
+size_t ServerGetNumSessions();
+SDL_bool *ServerGetSessionBitmaps();
+SDL_mutex *ServerGetTrafficMutex();
 #endif

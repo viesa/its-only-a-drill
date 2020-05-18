@@ -3,29 +3,25 @@
 
 #include "Dependencies.h"
 
-typedef struct Window
-{
-    SDL_Window *sdl_window;
-    SDL_Renderer *renderer;
-    int width;
-    int height;
-    SDL_bool isFullscreen;
-    SDL_bool vsyncEnabled;
-} Window;
-
-Window *WindowCreate(const char *title);
-void WindowDestroy(Window *window);
+void WindowInitialize(const char *title);
+void WindowUninitialize();
 
 /// Removes everything on screen
-void WindowClear(Window *window);
+void WindowClear();
 /// Swap back-buffer and front-buffer
 /// to display everything on screen
-void WindowPresent(Window *window);
+void WindowPresent();
 
-void WindowSetAntiAliasing(Window *window, int level);
-void WindowSetVSync(Window *window, SDL_bool onoff);
-void WindowSetFullscreen(Window *window, SDL_bool onoff);
-void WindowSetTitle(Window *window, const char *title);
-void WindowSetSize(Window *window, int width, int height);
-void WindowSetIcon(Window *window, const char *filepath);
+int WindowGetWidth();
+int WindowGetHeight();
+SDL_Renderer *WindowGetRenderer();
+SDL_bool WindowIsFullscreen();
+SDL_bool WindowIsVSyncEnabled();
+
+void WindowSetAntiAliasing(int level);
+void WindowSetVSync(SDL_bool onoff);
+void WindowSetFullscreen(SDL_bool onoff);
+void WindowSetTitle(const char *title);
+void WindowSetSize(int width, int height);
+void WindowSetIcon(const char *filepath);
 #endif

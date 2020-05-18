@@ -8,39 +8,20 @@
 #include "State.h"
 #include "Notification.h"
 
-#define CLIENT_INBUFFER ClientGetInBufferArray()
+#define CLIENT_INBUFFER ClientGetInBuffer()
 
 #define SERVER_TIMEOUT 3.0f
-
-struct
-{
-    Player *player;
-
-    NetPlayer server;
-    UDPsocket udpSocket;
-    SDLNet_SocketSet socketSet;
-
-    Vector *inBuffer;
-    SDL_mutex *inBufferMutex;
-
-    SDL_bool isListening;
-    SDL_bool isInitialized;
-    SDL_bool receivedPlayerID;
-
-    SDL_Thread *listenThread;
-
-    char name[MAX_PLAYERNAME_SIZE];
-    SDL_bool hasSentName;
-
-    float connectTimer;
-    SDL_mutex *connectMutex;
-} client;
 
 ///\param player: which player the client should pair up with
 void ClientInitialize(Player *player);
 void ClientUninitialize();
 
 void ClientUpdate();
+
+// Adds deltatime to the server timeout timer
+void ClientUpdateServerTimeoutTimer();
+// Sends 'alive' packets to server, updating its time-out timer
+void ClientPingServer();
 
 // Connects client to server
 void ClientTryConnect();
@@ -66,7 +47,30 @@ void ClientListenToServer();
 int ClientTryReceiveUDPPacket();
 // Try receive TCP-packet and add it to inBuffer
 int ClientTryReceiveTCPPacket();
+// Destroy all packets and clear inBuffer
+void ClientClearInBuffer();
+// Resets timeout timer and marks as notWaitingForAliveReply
+void ClientReceivedAlivePacket();
+// Sets player ID and marks client with receivedPlayerID
+void ClientSetPlayerID(int id);
+// Sets player entity. Used when starting a match
+void ClientSetPlayerEntity(Entity *entity);
+// Returns the name set by the player
+// This is never a null-pointer, but it might point to empty string
+char *ClientGetName();
+// Sets name of client, it copies MAX_PLAYERNAME_SIZE characters
+// This function calls ClientClearName() before copying
+void ClientSetName(char *name);
+// Clear the name with memset
+void ClientClearName();
 
-ParsedPacket *ClientGetInBufferArray();
+Player *ClientGetPlayer();
+ParsedPacket *ClientGetInBuffer();
+size_t ClientGetInBufferSize();
+SDL_mutex *ClientGetInBufferMutex();
+
+SDL_bool ClientIsWaitingForAliveReply();
+
+float ClientGetTimeoutTimer();
 
 #endif

@@ -4,26 +4,26 @@
 
 #include "Input.h"
 
+#define KEYBINDINGS_KEYS KeybindingGetKeys()
+
 typedef enum ActionCode
 {
-    MOVE_UP = 0,
-    MOVE_LEFT = 1,
-    MOVE_RIGHT = 2,
-    MOVE_DOWN = 3,
-    PICKUP = 4,
-    DROP = 5,
-    SHOOT = 6,
-    RELOAD = 7,
-    INVENTORY = 8
+    AC_MOVE_UP = 0,
+    AC_MOVE_LEFT = 1,
+    AC_MOVE_RIGHT = 2,
+    AC_MOVE_DOWN = 3,
+    AC_PICKUP = 4,
+    AC_DROP = 5,
+    AC_SHOOT = 6,
+    AC_RELOAD = 7,
+    AC_INVENTORY = 8,
 } ActionCode;
 
-typedef struct Keybinding
-{
-    SDL_Scancode KeyArray[BINDINGS];
-} Keybinding;
+void KeybindingInitialize();
+void KeybindingUninitialize();
 
-Keybinding *KeybindingCreate();
-void KeybindingChange(ActionCode action, SDL_Scancode key, Keybinding *bindings);
-void KeybindingFree(Keybinding *bindings);
+void KeybindingChange(ActionCode action, SDL_Scancode key);
+
+SDL_Scancode *KeybindingGetKeys();
 
 #endif

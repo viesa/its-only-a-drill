@@ -61,6 +61,4 @@ void MenuStateSet(MenuState newState);
 void ConStateSet(ConState newState);
 void CLIStateSet(CLIState newState);
 
-void StateSetMenu(void *menu);
-
 #endif

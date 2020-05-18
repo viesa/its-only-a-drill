@@ -33,10 +33,10 @@
 // #define WINDOW_DEBUG
 // #define GRAPHICS_DEBUG
 
-//#define ENTITY_DEBUG
-//#define WEAPON_DEBIG
-//#define Debug_Weapon_GetHitInfo
-//#define PLAYER_RESPAWN
+// #define ENTITY_DEBUG
+// #define WEAPON_DEBIG
+// #define Debug_Weapon_GetHitInfo
+// #define PLAYER_RESPAWN
 
 // #define VECTOR_DEBUG
 // #define VECTOR_DEBUG_STRICT

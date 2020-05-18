@@ -10,14 +10,14 @@
 #define ENTITY_ARRAY EntityManagerGetArray()
 
 void EntityManagerInitialize();
-void EntityManagerUninitalize();
+void EntityManagerUninitialize();
 
 ///Waring only one
 ///@IMPORTANT the first entity is dominant whitch means it does the pyhsics first.
 void EntityManagerUpdate();
 
 void EntityManagerUpdateMovement();
-/// finds the collision and fixes the problem with rules
+/// Finds the collision and fixes the problem with rules
 void EntityManagerOnCollision();
 
 EntityIndexP EntityManagerAdd(EntityType entityType, Vec2 position);

@@ -43,13 +43,8 @@ typedef enum Font3dDirection
     F3D_BR
 } Font3dDirection;
 
-typedef struct Font
-{
-    Graphics *gfx;
-    TTF_Font *fonts[TTF_Count];
-} Font;
-
-Font *FontCreate(Graphics *gfx);
+void FontInitialize();
+void FontUninitialize();
 
 // FontDraw() - Draws one line of text from string.
 // Warning: x is dependent on which alignment setting is used.
@@ -61,10 +56,10 @@ Font *FontCreate(Graphics *gfx);
 // boxWidth: allows maximum textbox width, enables wrapping.
 // color: color to display text in.
 
-void FontDraw(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
+void FontDraw(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, SDL_Color color);
 
 // Queries the predicted size of the font to be printed, enabling center and right alignment.
-SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
+SDL_Rect FontGetSize(FontSheet fontEnum, char text[]);
 
 // Enables 3d text display. Requires a 3d direction.
 // Draws from the furthest-back layer to the first, following the color array.
@@ -82,14 +77,12 @@ SDL_Rect FontGetSize(Font *font, FontSheet fontEnum, char text[]);
 // direction: direction of the offset, from the POV of viewing text.
 // layers: length of color[]
 // color[]: array of all colors to be displayed on text layers.
-void FontDraw3D(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
+void FontDraw3D(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offset, Font3dDirection dir, int layers, SDL_Color color[]);
 
-void FontDraw3DCustom(Font *font, FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
+void FontDraw3DCustom(FontSheet fontEnum, char text[], float x, float y, FontAlign align, int boxWidth, float offsetX, float offsetY, int layers, SDL_Color color[]);
 
-FontSheet FontGetDynamicSizing(Font *font);
-int FontGetWidth(Font *font, FontSheet fontEnum, char text[]);
+FontSheet FontGetDynamicSizing();
+int FontGetWidth(FontSheet fontEnum, char text[]);
 int FontGetHeight(FontSheet fontEnum);
-
-void FontDestroy(Font *font);
 
 #endif

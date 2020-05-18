@@ -12,14 +12,14 @@ void weaponUpdate(Item *item)
     item->Stats.currentTime = (item->Stats.currentTime <= 0.0f) ? -1 : item->Stats.currentTime;
 }
 
-void RayScan(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *stats)
+void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
     Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
 
-    CameraDrawLine(camera, playerCenter.x, playerCenter.y, rangeWithOffset.x, rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
+    CameraDrawLine(playerCenter.x, playerCenter.y, rangeWithOffset.x, rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *source != i) // take aways this if statment for fun time with map
@@ -45,14 +45,14 @@ void RayScan(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *
         }
     }
 }
-void RayScanSingelplayer(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *stats)
+void RayScanSingelplayer(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
     Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
 
-    CameraDrawLine(camera, playerCenter.x, playerCenter.y, rangeWithOffset.x, rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
+    CameraDrawLine(playerCenter.x, playerCenter.y, rangeWithOffset.x, rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
         if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *source != i) // take aways this if statment for fun time with map
@@ -74,7 +74,7 @@ void RayScanSingelplayer(EntityIndexP source, Camera *camera, Vec2 *direction, W
     }
 }
 
-void RayScanClosest(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *stats)
+void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
 {
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY, closestEntity = 0, endPointX, endPointY;
     float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
@@ -105,11 +105,11 @@ void RayScanClosest(EntityIndexP source, Camera *camera, Vec2 *direction, Weapon
     }
     if (closestEntity <= 0)
     {
-        CameraDrawLine(camera, (int)playerCenter.x, (int)playerCenter.y, (int)rangeWithOffset.x, (int)rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
+        CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, (int)rangeWithOffset.x, (int)rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
     }
     else
     {
-        CameraDrawLine(camera, (int)playerCenter.x, (int)playerCenter.y, endPointX, endPointY, (SDL_Color){255, 50, 50, 150});
+        CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, endPointX, endPointY, (SDL_Color){255, 50, 50, 150});
         ENTITY_ARRAY[closestEntity].health -= stats->Damage;
         ENTITY_ARRAY[closestEntity].Force.x += direction->x * (float)(stats->falloff / 10);
         ENTITY_ARRAY[closestEntity].Force.y += direction->y * (float)(stats->falloff / 10);
@@ -119,7 +119,7 @@ void RayScanClosest(EntityIndexP source, Camera *camera, Vec2 *direction, Weapon
     }
 }
 
-void rayMarchingTest(EntityIndexP source, Camera *camera, Vec2 *direction, WeaponStats *stats)
+void rayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
 {
     Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 point;
@@ -133,7 +133,7 @@ void rayMarchingTest(EntityIndexP source, Camera *camera, Vec2 *direction, Weapo
         StepSize += DirectionScale;
         reach -= fabsf(DirectionScale);
 
-        CameraDrawLine(camera, RayOrgin.x, RayOrgin.y, point.x, point.y, (SDL_Color){255, 50, 50, 150});
+        CameraDrawLine(RayOrgin.x, RayOrgin.y, point.x, point.y, (SDL_Color){255, 50, 50, 150});
         // if testLineWithEntitys is true you hit something, if reach is >0 you hit the max distance, stepsize if the step is too big, DirectionScale you hit something unhitable
         if (testLineWithEntitys(previousPoint, point, source, &stats->Damage) || reach <= 0 || StepSize > unhitable || DirectionScale <= 0)
             break;

@@ -2,14 +2,49 @@
 
 #include "Library.h"
 
-Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings, MapList *mapList)
+typedef struct Menu
 {
-    Menu *menu = MALLOC(Menu);
-    menu->gfx = gfx;
-    menu->camera = camera;
-    menu->font = font;
-    menu->loadingBar = LoadingBarCreate(menu->gfx);
-    menu->bindings = bindings;
+    Drawable mainMenuDbl;
+    float mainMenuDblDelta;
+    int mainMenuDblDir;
+    Drawable lobbyHostDbl;
+    Drawable lobbyNormalDbl;
+    LoadingBar *loadingBar;
+    float loopCount;
+    int loopSwing;
+    int swingDir;
+    int activeIndex;
+    int lastIndex;
+    int keybindingstate;
+    SDL_bool indexChanged;
+    float fetchSessionsTimer;
+    float fetchLobbyTimer;
+    Sound MenuStep;
+    Music MenuTheme;
+    int themecheck;
+    SDL_Color clr[10];
+
+    SDL_bool startedInTransition;
+    SDL_bool startedOutTransition;
+
+    Anim previewLeg;
+    Anim previewBody;
+
+    MapList *mapList;
+
+    double volumeMaster;
+    Uint8 volumeSFX;
+    Uint8 volumeMusic;
+} Menu;
+
+static Menu *menu;
+
+void MenuInitialize(MapList *mapList)
+{
+    menu = MALLOC(Menu);
+    ALLOC_ERROR_CHECK(menu);
+
+    menu->loadingBar = LoadingBarCreate();
     menu->loopCount = 0;
     menu->loopSwing = 87;
     menu->swingDir = 0;
@@ -24,11 +59,10 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
     menu->startedOutTransition = SDL_FALSE;
 
     SDL_Rect src = {0, 0, 3413, 1920};
-    SDL_Rect dst = {0, 0, gfx->window->width, gfx->window->height};
+    SDL_Rect dst = {0, 0, WindowGetWidth(), WindowGetHeight()};
     menu->mainMenuDbl = DrawableCreate(src, dst, SS_Menu);
     menu->lobbyNormalDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
     menu->lobbyHostDbl = DrawableCreate((SDL_Rect){0, 0, 1920, 1080}, dst, SS_Lobby);
-    TransitionInitalize(menu->gfx, menu->font);
     TransitionStart(TT_FadeOut, 2);
     LoadingBarShow(menu->loadingBar);
 
@@ -44,11 +78,40 @@ Menu *MenuCreate(Graphics *gfx, Camera *camera, Font *font, Keybinding *bindings
     menu->volumeMaster = 1;
     menu->volumeSFX = 64;
     menu->volumeMusic = 64;
-
-    return menu;
 }
 
-void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
+void MenuUninitialize()
+{
+    LoadingBarDestroy(menu->loadingBar);
+    FREE(menu);
+}
+
+void MenuResetActiveIndex()
+{
+    menu->activeIndex = 0;
+}
+
+void MenuResetFetchSessionsTimer()
+{
+    menu->fetchSessionsTimer = FETCH_SESSIONS_INTERVAL;
+}
+
+void MenuResetFetchLobbyTimer()
+{
+    menu->fetchLobbyTimer = FETCH_LOBBY_INTERVAL;
+}
+
+void MenuSetStartedInTransistion(SDL_bool started)
+{
+    menu->startedInTransition = started;
+}
+
+void MenuSetStartedOutTransistion(SDL_bool started)
+{
+    menu->startedOutTransition = started;
+}
+
+void MenuUpdate(Player *player)
 {
     menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
@@ -128,56 +191,56 @@ void MenuUpdate(Menu *menu, FPSManager *fpsManager, Player *player)
     switch (MenuStateGet())
     {
     case MS_Splash:
-        MenuUpdateSplash(menu);
+        MenuUpdateSplash();
         break;
     case MS_Name:
-        MenuUpdateName(menu);
+        MenuUpdateName();
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(menu, player, fpsManager);
+        MenuUpdateMainMenu(player);
         break;
     case MS_InGameMenu:
-        MenuUpdateInGameMenu(menu);
+        MenuUpdateInGameMenu();
         break;
     case MS_JoinLobby:
-        MenuUpdateJoinLobby(menu);
+        MenuUpdateJoinLobby();
         break;
     case MS_HostLobby:
-        MenuUpdateHostLobby(menu);
+        MenuUpdateHostLobby();
         break;
     case MS_WaitingForLobby:
-        MenuUpdateWaitingForLobby(menu);
+        MenuUpdateWaitingForLobby();
         break;
     case MS_Lobby:
-        MenuUpdateLobby(menu);
+        MenuUpdateLobby();
         break;
     case MS_Options:
-        MenuUpdateOptions(menu);
+        MenuUpdateOptions();
         break;
     case MS_Resolution:
-        MenuUpdateResolution(menu);
+        MenuUpdateResolution();
         break;
     case MS_FPS:
-        MenuUpdateFPS(menu, fpsManager);
+        MenuUpdateFPS();
         break;
     case MS_KEYBINDING:
-        MenuUpdateKeybinding(menu);
+        MenuUpdateKeybinding();
         break;
     case MS_Audio:
-        MenuUpdateAudio(menu);
+        MenuUpdateAudio();
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(menu);
+        MenuUpdateCustomMap(player);
         break;
     case MS_Skin:
-        MenuUpdateSkin(menu, player);
+        MenuUpdateSkin(player);
         break;
     default:
         break;
     }
 }
 
-void MenuUpdateSplash(Menu *menu)
+void MenuUpdateSplash()
 {
     if (!menu->loadingBar->active)
     {
@@ -187,10 +250,10 @@ void MenuUpdateSplash(Menu *menu)
             MenuStateSet(MS_Name);
         }
 
-        GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+        GraphicsDraw(menu->mainMenuDbl);
 
-        FontDraw3DCustom(menu->font, TTF_Antilles_XXL, "It's Only a Drill", menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
-        FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Press any key", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
+        FontDraw3DCustom(TTF_Antilles_XXL, "It's Only a Drill", WindowGetWidth() / 2, WindowGetHeight() / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+        FontDraw(FontGetDynamicSizing(), "Press any key", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
     }
     //Fade-in animation
     TransitionDraw();
@@ -204,25 +267,25 @@ void MenuUpdateSplash(Menu *menu)
     }
 }
 
-void MenuUpdateName(Menu *menu)
+void MenuUpdateName()
 {
-    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+    GraphicsDraw(menu->mainMenuDbl);
 
     if (InputIsKeyPressed(SDL_SCANCODE_BACKSPACE))
         InputPortalBackspace();
 
-    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, InputGetPortalContent(), menu->gfx->window->width / 2, menu->gfx->window->height / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
-    FontDraw(menu->font, FontGetDynamicSizing(menu->font), "Type a name, press [Enter] when done.", menu->gfx->window->width / 2, menu->gfx->window->height / 4 * 3, FAL_C, 0, menu->clr[9]);
+    FontDraw3DCustom(TTF_Antilles_XXL, InputGetPortalContent(), WindowGetWidth() / 2, WindowGetHeight() / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+    FontDraw(FontGetDynamicSizing(), "Type a name, press [Enter] when done.", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
 
     if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        strcpy(client.name, InputGetPortalContent());
-        ClientTCPSend(PT_Connect, client.name, strlen(client.name) + 1);
+        ClientSetName(InputGetPortalContent());
+        ClientTCPSend(PT_Connect, ClientGetName(), strlen(ClientGetName()) + 1);
         MenuStateSet(MS_MainMenu);
     }
 }
 
-void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
+void MenuUpdateMainMenu(Player *player)
 {
     //Determine menu options
     int optionLength = 8;
@@ -291,11 +354,11 @@ void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
         case 6:
         {
             Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
-                                               menu->gfx->window->width,
-                                               menu->gfx->window->height, *menu->bindings,
-                                               menu->gfx->window->isFullscreen,
-                                               menu->gfx->window->vsyncEnabled,
-                                               fps->desiredFPS);
+                                               WindowGetWidth(),
+                                               WindowGetHeight(),
+                                               WindowIsFullscreen(),
+                                               WindowIsVSyncEnabled(),
+                                               FPSManagerGetDesiredFPS());
             SettingsSave(settings);
             break;
         }
@@ -310,11 +373,11 @@ void MenuUpdateMainMenu(Menu *menu, Player *player, FPSManager *fps)
             break;
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "It's Only a Drill");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("It's Only a Drill");
 }
 
-void MenuUpdateInGameMenu(Menu *menu)
+void MenuUpdateInGameMenu()
 {
     int optionLength = 3;
     char options[3][100] = {
@@ -348,7 +411,8 @@ void MenuUpdateInGameMenu(Menu *menu)
         {
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
-            clientManager.inGame = SDL_FALSE;
+            ClientManagerSetInGame(SDL_FALSE);
+            NPCManagerClearNPCS();
             break;
         }
         default:
@@ -356,13 +420,13 @@ void MenuUpdateInGameMenu(Menu *menu)
         }
     }
 
-    MenuDraw(menu, options, optionLength);
+    MenuDraw(options, optionLength);
 
-    MenuTitleDraw(menu, "Quick Menu");
+    MenuTitleDraw("Quick Menu");
 
-    MenuDrawPreviewMap(menu);
+    MenuDrawPreviewMap();
 
-    MapDraw(menu->camera);
+    MapDraw();
 
     if (menu->startedInTransition && TransitionIsDone())
     {
@@ -376,17 +440,17 @@ void MenuUpdateInGameMenu(Menu *menu)
     }
     else if ((menu->startedInTransition || menu->startedOutTransition) && !TransitionIsDone())
     {
-        CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
+        CameraSetScale(TransitionGetSaveSlot(0));
         int x = (int)TransitionGetSaveSlot(1);
         int y = (int)TransitionGetSaveSlot(2);
         int w = (int)TransitionGetSaveSlot(3);
         int h = (int)TransitionGetSaveSlot(4);
-        CameraSetViewPort(menu->camera, (SDL_Rect){x, y, w, h});
+        CameraSetViewPort((SDL_Rect){x, y, w, h});
         TransitionDraw();
     }
 }
 
-void MenuUpdateHostLobby(Menu *menu)
+void MenuUpdateHostLobby()
 {
     //Determine menu options
     int optionLength = MapListGetNumMaps(menu->mapList) + 1;
@@ -430,11 +494,11 @@ void MenuUpdateHostLobby(Menu *menu)
         JSONDestroy(mapdata);
     }
 
-    MenuDraw(menu, options, optionLength);
+    MenuDraw(options, optionLength);
 
     if (menu->activeIndex != optionLength - 1)
     {
-        MenuDrawPreviewMap(menu);
+        MenuDrawPreviewMap();
     }
 
     if (menu->startedOutTransition && TransitionIsDone())
@@ -447,18 +511,18 @@ void MenuUpdateHostLobby(Menu *menu)
     else if (menu->startedOutTransition && !TransitionIsDone())
     {
         TransitionDraw();
-        CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
+        CameraSetScale(TransitionGetSaveSlot(0));
         int x = (int)TransitionGetSaveSlot(1);
         int y = (int)TransitionGetSaveSlot(2);
         int w = (int)TransitionGetSaveSlot(3);
         int h = (int)TransitionGetSaveSlot(4);
-        CameraSetViewPort(menu->camera, (SDL_Rect){x, y, w, h});
+        CameraSetViewPort((SDL_Rect){x, y, w, h});
     }
 
-    MenuTitleDraw(menu, "Host Lobby");
+    MenuTitleDraw("Host Lobby");
 }
 
-void MenuUpdateJoinLobby(Menu *menu)
+void MenuUpdateJoinLobby()
 {
     // Updates menu every 2 seconds
     if (menu->fetchSessionsTimer >= FETCH_SESSIONS_INTERVAL)
@@ -472,7 +536,7 @@ void MenuUpdateJoinLobby(Menu *menu)
     }
 
     //Determine menu options
-    int optionLength = clientManager.joinList->size + 1;
+    int optionLength = ClientManagerGetJoinListSize() + 1;
     char options[optionLength][100];
     for (int i = 0; i < optionLength - 1; i++)
     {
@@ -499,11 +563,11 @@ void MenuUpdateJoinLobby(Menu *menu)
             MenuStateSet(MS_WaitingForLobby);
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Join Lobby");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Join Lobby");
 }
 
-void MenuUpdateWaitingForLobby(Menu *menu)
+void MenuUpdateWaitingForLobby()
 {
     //Add appropriate amount of ., fill with space after for equal text width at all times.
     int optionLength = 1;
@@ -524,13 +588,13 @@ void MenuUpdateWaitingForLobby(Menu *menu)
     // State is changed by ClientManager upon receiving confirmation from server
     // We could add a timeout
 
-    MenuDraw(menu, options, optionLength);
+    MenuDraw(options, optionLength);
 }
 
-void MenuUpdateLobby(Menu *menu)
+void MenuUpdateLobby()
 {
     //Draw backdrop
-    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+    GraphicsDraw(menu->mainMenuDbl);
 
     // Updates lobby list every 0.5 seconds
     if (menu->fetchLobbyTimer >= FETCH_LOBBY_INTERVAL)
@@ -548,7 +612,7 @@ void MenuUpdateLobby(Menu *menu)
     ///
 
     //Define playerlist
-    int playerListLength = lobby.names->size;
+    int playerListLength = LobbyGetNumNames();
     char playerList[playerListLength][100];
 
     //Determine playerlist
@@ -557,34 +621,36 @@ void MenuUpdateLobby(Menu *menu)
         sprintf(playerList[i], "%s", LOBBY_NAMES[i].data);
     }
 
-    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing(menu->font));
+    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing());
 
     //Draw playerlist
     for (int i = 0; i < playerListLength; i++)
     {
         int yPos = FontGetHeight(TTF_Antilles_XXL) + 50 + spacing * i;
 
-        if (yPos > menu->gfx->window->height - 50 - 2 * spacing)
+        if (yPos > WindowGetHeight() - 50 - 2 * spacing)
             continue;
 
-        int xPos = menu->gfx->window->width / 20;
+        int xPos = WindowGetWidth() / 20;
 
-        FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), playerList[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
+        FontDraw3D(FontGetDynamicSizing(), playerList[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
     }
 
     ///
     /// OPTIONS
     ///
 
-    int optionLength = 1 + (int)lobby.isHost;
+    int host = (int)LobbyIsHost();
+
+    int optionLength = 1 + host;
     char options[optionLength][100];
 
     //Rectify options
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
 
-    strcpy(options[optionLength - 1 - (int)lobby.isHost], "Leave");
-    if (lobby.isHost)
+    strcpy(options[optionLength - 1 - host], "Leave");
+    if (host)
     {
         strcpy(options[optionLength - 1], "Start");
     }
@@ -592,37 +658,37 @@ void MenuUpdateLobby(Menu *menu)
     //Draw lobby options
     for (int i = 0; i < optionLength; i++)
     {
-        int yPos = menu->gfx->window->height - 50 - 2 * spacing + spacing * i;
+        int yPos = WindowGetHeight() - 50 - 2 * spacing + spacing * i;
 
-        int xPos = menu->gfx->window->width / 20;
+        int xPos = WindowGetWidth() / 20;
 
         if (i == menu->activeIndex)
         {
-            int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
-            int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
+            int rectWidth = FontGetWidth(FontGetDynamicSizing(), options[i]);
+            int rectHeight = FontGetHeight(FontGetDynamicSizing());
 
             SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
             SDL_Color color = {0, 0, 0, 200};
-            GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
+            GraphicsDrawRect(rect, color, SDL_TRUE);
 
-            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+            FontDraw3DCustom(FontGetDynamicSizing(), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else
         {
-            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
+            FontDraw3D(FontGetDynamicSizing(), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
         }
     }
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
-        if (menu->activeIndex == optionLength - 1 - (int)lobby.isHost)
+        if (menu->activeIndex == optionLength - 1 - (int)host)
         {
             MenuStateSet(MS_MainMenu);
             ClientTCPSend(PT_LeaveSession, NULL, 0);
-            VectorClear(lobby.names);
-            lobby.isHost = SDL_FALSE;
+            LobbyClearNames();
+            LobbySetIsHost(SDL_FALSE);
         }
-        if (lobby.isHost && menu->activeIndex == optionLength - 1)
+        if (host && menu->activeIndex == optionLength - 1)
         {
             // Start the session
             ClientTCPSend(PT_StartSession, NULL, 0);
@@ -632,29 +698,29 @@ void MenuUpdateLobby(Menu *menu)
     ///
     /// MAP PREVIEW
     ///
-    int x = menu->gfx->window->width / 2 - 50;
-    int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
-    int w = menu->gfx->window->width / 3 + 100;
-    int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
+    int x = WindowGetWidth() / 2 - 50;
+    int y = WindowGetHeight() / 2 - 50 - FontGetHeight(FontGetDynamicSizing()) - 20;
+    int w = WindowGetWidth() / 3 + 100;
+    int h = WindowGetHeight() / 3 + 120 + FontGetHeight(FontGetDynamicSizing());
     SDL_Rect mapBackgroundRect = {x, y, w, h};
-    GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
+    GraphicsDrawRect(mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
 
     MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
 
     char maxPlayers[20];
     sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
 
-    FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
-               x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
+    FontDraw3D(FontGetDynamicSizing(), maxPlayers,
+               x + (w / 2) - FontGetWidth(FontGetDynamicSizing(), maxPlayers) / 2,
                y + 20,
                FAL_L, 0, 1, F3D_TL, 10, menu->clr);
 
-    MapDraw(menu->camera);
+    MapDraw();
 
-    MenuTitleDraw(menu, "Lobby");
+    MenuTitleDraw("Lobby");
 }
 
-void MenuUpdateOptions(Menu *menu)
+void MenuUpdateOptions()
 {
     //Determine menu options
     int optionLength = 7;
@@ -667,7 +733,7 @@ void MenuUpdateOptions(Menu *menu)
         {"Audio optiions"},
         {"Back"}};
 
-    if (menu->gfx->window->isFullscreen)
+    if (WindowIsFullscreen())
     {
         sprintf(options[0], "Exit fullscreen");
     }
@@ -676,7 +742,7 @@ void MenuUpdateOptions(Menu *menu)
         sprintf(options[0], "Enter fullscreen");
     }
 
-    if (menu->gfx->window->vsyncEnabled)
+    if (WindowIsVSyncEnabled())
     {
         sprintf(options[2], "vSync on");
     }
@@ -694,17 +760,16 @@ void MenuUpdateOptions(Menu *menu)
         switch (menu->activeIndex)
         {
         case 0: //toggle fullscreen
-            if (menu->gfx->window->isFullscreen)
+            if (WindowIsFullscreen())
             {
-                WindowSetFullscreen(menu->gfx->window, SDL_FALSE);
+                WindowSetFullscreen(SDL_FALSE);
             }
             else
             {
-                WindowSetFullscreen(menu->gfx->window, SDL_TRUE);
+                WindowSetFullscreen(SDL_TRUE);
                 SDL_DisplayMode displaymode;
                 SDL_GetCurrentDisplayMode(0, &displaymode);
-                menu->gfx->window->width = displaymode.w;
-                menu->gfx->window->height = displaymode.h;
+                WindowSetSize(displaymode.w, displaymode.h);
             }
             break;
         case 1: //set resolution
@@ -714,13 +779,13 @@ void MenuUpdateOptions(Menu *menu)
         break;
         case 2: //Vsync
         {
-            if (menu->gfx->window->vsyncEnabled)
+            if (WindowIsVSyncEnabled())
             {
-                WindowSetVSync(menu->gfx->window, SDL_FALSE);
+                WindowSetVSync(SDL_FALSE);
             }
             else
             {
-                WindowSetVSync(menu->gfx->window, SDL_TRUE);
+                WindowSetVSync(SDL_TRUE);
             }
         }
         break;
@@ -742,7 +807,7 @@ void MenuUpdateOptions(Menu *menu)
         case 6:
         {
 
-            if (clientManager.inGame)
+            if (ClientManagerIsInGame())
             {
                 MenuStateSet(MS_InGameMenu);
             }
@@ -755,11 +820,11 @@ void MenuUpdateOptions(Menu *menu)
         }
     }
 
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Options");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Options");
 }
 
-void MenuUpdateResolution(Menu *menu)
+void MenuUpdateResolution()
 {
     //Determine menu options
     int optionLength = 6;
@@ -784,27 +849,27 @@ void MenuUpdateResolution(Menu *menu)
         case 0:
             width = 640;
             height = 480;
-            WindowSetSize(menu->gfx->window, width, height);
+            WindowSetSize(width, height);
             break;
         case 1:
             width = 1280;
             height = 720;
-            WindowSetSize(menu->gfx->window, width, height);
+            WindowSetSize(width, height);
             break;
         case 2:
             width = 1920;
             height = 1080;
-            WindowSetSize(menu->gfx->window, width, height);
+            WindowSetSize(width, height);
             break;
         case 3:
             width = 1920;
             height = 1200;
-            WindowSetSize(menu->gfx->window, width, height);
+            WindowSetSize(width, height);
             break;
         case 4:
             width = 2560;
             height = 1440;
-            WindowSetSize(menu->gfx->window, width, height);
+            WindowSetSize(width, height);
             break;
         case 5:
         {
@@ -814,11 +879,11 @@ void MenuUpdateResolution(Menu *menu)
         }
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Resolution");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Resolution");
 }
 
-void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
+void MenuUpdateFPS()
 {
     //Determine menu options
     int optionLength = 6;
@@ -840,28 +905,28 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
         {
         case 0:
         {
-            fpsManager->desiredFPS = 30;
+            FPSManagerSetDesiredFPS(30);
             break;
         }
         case 1:
         {
-            fpsManager->desiredFPS = 60;
+            FPSManagerSetDesiredFPS(60);
             break;
         }
         break;
         case 2:
         {
-            fpsManager->desiredFPS = 90;
+            FPSManagerSetDesiredFPS(90);
             break;
         }
         case 3:
         {
-            fpsManager->desiredFPS = 120;
+            FPSManagerSetDesiredFPS(120);
             break;
         }
         case 4:
         {
-            fpsManager->desiredFPS = 999; // they won't know
+            FPSManagerSetDesiredFPS(0); // Zero = inactivate
             break;
         }
         case 5:
@@ -872,11 +937,11 @@ void MenuUpdateFPS(Menu *menu, FPSManager *fpsManager)
         }
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "FPS");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("FPS");
 }
 
-void MenuUpdateKeybinding(Menu *menu)
+void MenuUpdateKeybinding()
 {
     //Determine menu options
     int optionLength = 10;
@@ -912,55 +977,55 @@ void MenuUpdateKeybinding(Menu *menu)
             {
             case 0:
             {
-                KeybindingChange(MOVE_UP, InputLastKeyDown(menu->bindings->KeyArray[MOVE_UP]), menu->bindings);
+                KeybindingChange(AC_MOVE_UP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_UP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 1:
             {
-                KeybindingChange(MOVE_LEFT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_LEFT]), menu->bindings);
+                KeybindingChange(AC_MOVE_LEFT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_LEFT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 2:
             {
-                KeybindingChange(MOVE_RIGHT, InputLastKeyDown(menu->bindings->KeyArray[MOVE_RIGHT]), menu->bindings);
+                KeybindingChange(AC_MOVE_RIGHT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_RIGHT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 3:
             {
-                KeybindingChange(MOVE_DOWN, InputLastKeyDown(menu->bindings->KeyArray[MOVE_DOWN]), menu->bindings);
+                KeybindingChange(AC_MOVE_DOWN, InputLastKeyDown(KEYBINDINGS_KEYS[AC_MOVE_DOWN]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 4:
             {
-                KeybindingChange(PICKUP, InputLastKeyDown(menu->bindings->KeyArray[PICKUP]), menu->bindings);
+                KeybindingChange(AC_PICKUP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_PICKUP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 5:
             {
-                KeybindingChange(DROP, InputLastKeyDown(menu->bindings->KeyArray[DROP]), menu->bindings);
+                KeybindingChange(AC_DROP, InputLastKeyDown(KEYBINDINGS_KEYS[AC_DROP]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 6:
             {
-                KeybindingChange(SHOOT, InputLastKeyDown(menu->bindings->KeyArray[SHOOT]), menu->bindings);
+                KeybindingChange(AC_SHOOT, InputLastKeyDown(KEYBINDINGS_KEYS[AC_SHOOT]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 7:
             {
-                KeybindingChange(RELOAD, InputLastKeyDown(menu->bindings->KeyArray[RELOAD]), menu->bindings);
+                KeybindingChange(AC_RELOAD, InputLastKeyDown(KEYBINDINGS_KEYS[AC_RELOAD]));
                 menu->keybindingstate = 0;
                 break;
             }
             case 8:
             {
-                KeybindingChange(INVENTORY, InputLastKeyDown(menu->bindings->KeyArray[INVENTORY]), menu->bindings);
+                KeybindingChange(AC_INVENTORY, InputLastKeyDown(KEYBINDINGS_KEYS[AC_INVENTORY]));
                 menu->keybindingstate = 0;
 
                 break;
@@ -975,11 +1040,11 @@ void MenuUpdateKeybinding(Menu *menu)
             }
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Keybindings");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Keybindings");
 }
 
-void MenuUpdateAudio(Menu *menu)
+void MenuUpdateAudio()
 {
     int step = 4;
 
@@ -1065,11 +1130,11 @@ void MenuUpdateAudio(Menu *menu)
         }
     }
 
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Audio options");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Audio options");
 }
 
-void MenuUpdateCustomMap(Menu *menu)
+void MenuUpdateCustomMap(Player *player)
 {
     //Determine menu options
     int optionLength = MapListGetNumMaps(menu->mapList) + 1;
@@ -1109,13 +1174,20 @@ void MenuUpdateCustomMap(Menu *menu)
         JSON *mapdata = JSONCreate(mapInfo.filename);
         MapGenerateNew(mapdata);
         JSONDestroy(mapdata);
+        NPCManagerClearNPCS();
+        for (int i = 0; i < mapInfo.enemySpawns->size; i++)
+            NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
+        if (mapInfo.enemySpawns->size > 0)
+            PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
+        else
+            PlayerGetEntity(player)->position = Vec2Create(1000.0f, 1000.0f);
     }
 
-    MenuDraw(menu, options, optionLength);
+    MenuDraw(options, optionLength);
 
     if (menu->activeIndex != optionLength - 1)
     {
-        MenuDrawPreviewMap(menu);
+        MenuDrawPreviewMap();
     }
 
     if (menu->startedOutTransition && TransitionIsDone())
@@ -1125,23 +1197,23 @@ void MenuUpdateCustomMap(Menu *menu)
         MusicStop(&menu->MenuTheme);
         menu->startedOutTransition = SDL_FALSE;
         // To make in-game menu work properly
-        clientManager.inGame = SDL_TRUE;
+        ClientManagerSetInGame(SDL_TRUE);
     }
     else if (menu->startedOutTransition && !TransitionIsDone())
     {
         TransitionDraw();
-        CameraSetScale(menu->camera, TransitionGetSaveSlot(0));
+        CameraSetScale(TransitionGetSaveSlot(0));
         int x = (int)TransitionGetSaveSlot(1);
         int y = (int)TransitionGetSaveSlot(2);
         int w = (int)TransitionGetSaveSlot(3);
         int h = (int)TransitionGetSaveSlot(4);
-        CameraSetViewPort(menu->camera, (SDL_Rect){x, y, w, h});
+        CameraSetViewPort((SDL_Rect){x, y, w, h});
     }
 
-    MenuTitleDraw(menu, "Local game");
+    MenuTitleDraw("Local game");
 }
 
-void MenuUpdateSkin(Menu *menu, Player *player)
+void MenuUpdateSkin(Player *player)
 {
     //Determine menu options
     int optionLength = 7;
@@ -1203,12 +1275,12 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         break;
     }
     }
-    int h = menu->font->gfx->window->height / 3 * 2;
+    int h = WindowGetHeight() / 3 * 2;
 
-    menu->previewLeg.active->dst.x = menu->font->gfx->window->width - h - 100;
-    menu->previewLeg.active->dst.y = (menu->font->gfx->window->height - h) / 2;
-    menu->previewBody.active->dst.x = menu->font->gfx->window->width - h - 100;
-    menu->previewBody.active->dst.y = (menu->font->gfx->window->height - h) / 2;
+    menu->previewLeg.active->dst.x = WindowGetWidth() - h - 100;
+    menu->previewLeg.active->dst.y = (WindowGetHeight() - h) / 2;
+    menu->previewBody.active->dst.x = WindowGetWidth() - h - 100;
+    menu->previewBody.active->dst.y = (WindowGetHeight() - h) / 2;
 
     menu->previewLeg.active->dst.w = h;
     menu->previewLeg.active->dst.h = h;
@@ -1286,8 +1358,8 @@ void MenuUpdateSkin(Menu *menu, Player *player)
         }
         }
     }
-    MenuDraw(menu, options, optionLength);
-    MenuTitleDraw(menu, "Choose skin");
+    MenuDraw(options, optionLength);
+    MenuTitleDraw("Choose skin");
 
     // If you are heading out, don't draw the character again as it will be a "dirty frame"
     if (MenuStateGet() == MS_MainMenu)
@@ -1295,33 +1367,33 @@ void MenuUpdateSkin(Menu *menu, Player *player)
 
     if (menu->activeIndex == optionLength - 1)
         return;
-    GraphicsDraw(menu->font->gfx, *menu->previewLeg.active);
-    GraphicsDraw(menu->font->gfx, *menu->previewBody.active);
+    GraphicsDraw(*menu->previewLeg.active);
+    GraphicsDraw(*menu->previewBody.active);
 }
 
-void MenuTitleDraw(Menu *menu, char title[100])
+void MenuTitleDraw(char title[100])
 {
-    FontDraw3DCustom(menu->font, TTF_Antilles_XXL, title, menu->gfx->window->width / 20, 25, FAL_L, 0, cos(menu->loopCount) * 3, sin(menu->loopCount) * 3, 10, menu->clr);
+    FontDraw3DCustom(TTF_Antilles_XXL, title, WindowGetWidth() / 20, 25, FAL_L, 0, cos(menu->loopCount) * 3, sin(menu->loopCount) * 3, 10, menu->clr);
 }
 
-void MenuDrawPreviewMap(Menu *menu)
+void MenuDrawPreviewMap()
 {
-    int x = menu->gfx->window->width / 2 - 50;
-    int y = menu->gfx->window->height / 2 - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
-    int w = menu->gfx->window->width / 3 + 100;
-    int h = menu->gfx->window->height / 3 + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
+    int x = WindowGetWidth() / 2 - 50;
+    int y = WindowGetHeight() / 2 - 50 - FontGetHeight(FontGetDynamicSizing()) - 20;
+    int w = WindowGetWidth() / 3 + 100;
+    int h = WindowGetHeight() / 3 + 120 + FontGetHeight(FontGetDynamicSizing());
     SDL_Rect mapBackgroundRect = {x, y, w, h};
     if (menu->startedOutTransition || menu->startedInTransition)
     {
         int x_t = (int)TransitionGetSaveSlot(1) - 50;
-        int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetHeight(FontGetDynamicSizing(menu->font)) - 20;
+        int y_t = (int)TransitionGetSaveSlot(2) - 50 - FontGetHeight(FontGetDynamicSizing()) - 20;
         int w_t = (int)TransitionGetSaveSlot(3) + 100;
-        int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing(menu->font));
-        GraphicsDrawRect(menu->gfx, (SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)}, SDL_TRUE);
+        int h_t = (int)TransitionGetSaveSlot(4) + 120 + FontGetHeight(FontGetDynamicSizing());
+        GraphicsDrawRect((SDL_Rect){x_t, y_t, w_t, h_t}, (SDL_Color){0, 0, 0, (int)TransitionGetSaveSlot(5)}, SDL_TRUE);
     }
     else
     {
-        GraphicsDrawRect(menu->gfx, mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
+        GraphicsDrawRect(mapBackgroundRect, (SDL_Color){0, 0, 0, 200}, SDL_TRUE);
     }
 
     MapInfo currentInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
@@ -1330,35 +1402,35 @@ void MenuDrawPreviewMap(Menu *menu)
     {
         char maxPlayers[20];
         sprintf(maxPlayers, "Players: %d", currentInfo.maxPlayers);
-        FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), maxPlayers,
-                   x + (w / 2) - FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), maxPlayers) / 2,
+        FontDraw3D(FontGetDynamicSizing(), maxPlayers,
+                   x + (w / 2) - FontGetWidth(FontGetDynamicSizing(), maxPlayers) / 2,
                    y + 20,
                    FAL_L, 0, 1, F3D_TL, 10, menu->clr);
     }
-    MapDraw(menu->camera);
+    MapDraw();
 }
 
-void MenuDraw(Menu *menu, char options[][100], int optionLength)
+void MenuDraw(char options[][100], int optionLength)
 {
     //Get windows size
-    menu->mainMenuDbl.dst.w = menu->gfx->window->width;
-    menu->mainMenuDbl.dst.h = menu->gfx->window->height;
+    menu->mainMenuDbl.dst.w = WindowGetWidth();
+    menu->mainMenuDbl.dst.h = WindowGetHeight();
 
     //Draw background
-    GraphicsDraw(menu->gfx, menu->mainMenuDbl);
+    GraphicsDraw(menu->mainMenuDbl);
 
     //Get font spacing
     //*1.5 factor for space between lines
-    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing(menu->font));
+    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing());
 
     //Draw menu options
     for (int i = 0; i < optionLength; i++)
     {
         //Calculate scrolling menu
-        int screenCenterY = menu->gfx->window->height / 2;
+        int screenCenterY = WindowGetHeight() / 2;
         int yPos;
 
-        if (spacing * optionLength > menu->font->gfx->window->height - FontGetHeight(TTF_Antilles_XXL) - 50)
+        if (spacing * optionLength > WindowGetHeight() - FontGetHeight(TTF_Antilles_XXL) - 50)
         {
             yPos = screenCenterY - (spacing * menu->activeIndex) + spacing * i;
         }
@@ -1367,30 +1439,24 @@ void MenuDraw(Menu *menu, char options[][100], int optionLength)
             yPos = FontGetHeight(TTF_Antilles_XXL) + 50 + spacing * i;
         }
 
-        if (yPos + FontGetHeight(FontGetDynamicSizing(menu->font)) < FontGetHeight(TTF_Antilles_XXL) + 50)
+        if (yPos + FontGetHeight(FontGetDynamicSizing()) < FontGetHeight(TTF_Antilles_XXL) + 50)
             continue;
 
-        int xPos = menu->gfx->window->width / 20; //menu->gfx->window->width / 2
+        int xPos = WindowGetWidth() / 20; //WindowGetWidth() / 2
 
         if (i == menu->activeIndex)
         {
-            int rectWidth = FontGetWidth(menu->font, FontGetDynamicSizing(menu->font), options[i]);
-            int rectHeight = FontGetHeight(FontGetDynamicSizing(menu->font));
+            int rectWidth = FontGetWidth(FontGetDynamicSizing(), options[i]);
+            int rectHeight = FontGetHeight(FontGetDynamicSizing());
 
             SDL_Rect rect = {xPos - 20, yPos - 15, rectWidth + 40, rectHeight + 30};
             SDL_Color color = {0, 0, 0, 200};
-            GraphicsDrawRect(menu->gfx, rect, color, SDL_TRUE);
-            FontDraw3DCustom(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
+            GraphicsDrawRect(rect, color, SDL_TRUE);
+            FontDraw3DCustom(FontGetDynamicSizing(), options[i], xPos, yPos, FAL_L, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
         }
         else
         {
-            FontDraw3D(menu->font, FontGetDynamicSizing(menu->font), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
+            FontDraw3D(FontGetDynamicSizing(), options[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
         }
     }
-}
-
-void MenuDestroy(Menu *menu)
-{
-    LoadingBarDestroy(menu->loadingBar);
-    SDL_free(menu);
 }

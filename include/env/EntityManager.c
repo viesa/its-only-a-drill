@@ -20,9 +20,10 @@ void EntityManagerInitialize()
     EntityManagerAdd(ET_None, Vec2Create(0.0f, 0.0f));
 }
 
-void EntityManagerUninitalize()
+void EntityManagerUninitialize()
 {
     VectorDestroy(entityManager.entityVector);
+    FREE(entityManager.indices);
 }
 
 void EntityManagerUpdate()
@@ -35,69 +36,75 @@ void EntityManagerUpdateMovement()
 {
     for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
     {
-        // velocity
-        ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
-        // carculate Net_force so friction & collision & the other forces is handle before
-        EntityCalculateNetForces(&ENTITY_ARRAY[i]);
-
-        // update new position
-        ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
-        ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime();
-        if (Vec2LenSq(ENTITY_ARRAY[i].Velocity) > 0.1f &&
-            ENTITY_ARRAY[i].id >= 10000)
+        if (ENTITY_ARRAY[i].isMovable)
         {
-            CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[i]);
-            ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
+            // velocity
+            ENTITY_ARRAY[i].Velocity = Vec2DivL(ENTITY_ARRAY[i].Force, ENTITY_ARRAY[i].mass);
+            // carculate Net_force so friction & collision & the other forces is handle before
+            EntityCalculateNetForces(&ENTITY_ARRAY[i]);
+
+            // update new position
+            ENTITY_ARRAY[i].position.x += ENTITY_ARRAY[i].Velocity.x * ClockGetDeltaTime();
+            ENTITY_ARRAY[i].position.y += ENTITY_ARRAY[i].Velocity.y * ClockGetDeltaTime();
+            if (Vec2LenSq(ENTITY_ARRAY[i].Velocity) > 0.1f &&
+                ENTITY_ARRAY[i].id >= 10000)
+            {
+                CompressedEntity cEntity = EntityCompress(&ENTITY_ARRAY[i]);
+                ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
+            }
         }
     }
 }
 
 void EntityManagerOnCollision()
 {
-    SDL_Rect result;
     for (int Dominant = 1; Dominant < ENTITY_ARRAY_SIZE; Dominant++)
     {
-        if (ENTITY_ARRAY[Dominant].isCollider)
+        Entity *dEntity = &ENTITY_ARRAY[Dominant];
+        if (dEntity->isCollider && dEntity->isMovable)
+        {
             for (int Recessive = 1; Recessive < ENTITY_ARRAY_SIZE; Recessive++)
             {
-                if (ENTITY_ARRAY[Recessive].isCollider)
+                Entity *rEntity = &ENTITY_ARRAY[Recessive];
+                if (rEntity->isCollider && Dominant != Recessive)
                 {
-                    if (Dominant != Recessive)
+                    // Dominant hitbox
+                    SDL_Rect dHitbox = EntityGetHitbox(dEntity);
+                    // Recessive hitbox
+                    SDL_Rect rHitbox = EntityGetHitbox(rEntity);
+                    // Test intersection
+                    if (SDL_HasIntersection(&dHitbox, &rHitbox))
                     {
-                        // Dominant hitbox
-                        SDL_Rect *dHitbox = &ENTITY_ARRAY[Dominant].drawables[ENTITY_ARRAY[Dominant].hitboxIndex].dst;
-                        // Recessive hitbox
-                        SDL_Rect *rHitbox = &ENTITY_ARRAY[Recessive].drawables[ENTITY_ARRAY[Recessive].hitboxIndex].dst;
-                        if (SDL_IntersectRect(dHitbox, rHitbox, &result))
+                        // Calculating centers
+                        Vec2 DominantCenter = RectMid(dHitbox);
+                        Vec2 RecessiveCenter = RectMid(rHitbox);
+
+                        // Direction of impact (cemter to center)
+                        Vec2 ResultDirection = Vec2Unit(Vec2Sub(DominantCenter, RecessiveCenter));
+                        // If dominant-center == recessive-center, pretend impact was sideways
+                        if (Vec2LenSq(ResultDirection) == 0.0f)
+                            ResultDirection = Vec2Create(1.0f, 0.0f);
+
+                        float *dMass = &dEntity->mass;
+                        float *rMass = &rEntity->mass;
+                        // If dominant is not movable, make it's mass simulate infinity
+                        float massRatioBasedOnDominant = !dEntity->isMovable ? 0.0f : *dMass / (*dMass + *rMass);
+
+                        // Carefully step back where the rects did not intesect
+                        for (const float stepSize = 0.05f; SDL_HasIntersection(&dHitbox, &rHitbox);)
                         {
-                            Vec2 DominantCenter; // calculating center
-                            DominantCenter.x = (float)dHitbox->x + (float)dHitbox->w / 2.0f;
-                            DominantCenter.y = (float)dHitbox->y + (float)dHitbox->h / 2.0f;
-
-                            Vec2 RecessiveCenter; // calculating center
-                            RecessiveCenter.x = (float)rHitbox->x + (float)rHitbox->w / 2.0f;
-                            RecessiveCenter.y = (float)rHitbox->y + (float)rHitbox->h / 2.0f;
-
-                            Vec2 ResultDistance = Vec2Sub(DominantCenter, RecessiveCenter);
-                            // Vec2 direction = Vec2Unit(ResultDistance);
-
-                            //keept for transfer of energy
-                            //float HarassersForce = Vec2Len(ENTITY_ARRAY[Dominant].Force);
-                            //Vec2 forceVector = Vec2MulL(direction, HarassersForce);
-
-                            float massRatioBasedOnDominant = ENTITY_ARRAY[Dominant].mass / (ENTITY_ARRAY[Dominant].mass + ENTITY_ARRAY[Recessive].mass);
-                            if (massRatioBasedOnDominant >= 0.05f && massRatioBasedOnDominant != 0.5f)
-                            {
-                                ENTITY_ARRAY[Recessive].position.x -= (ResultDistance.x * massRatioBasedOnDominant) / 17.0f;
-                                ENTITY_ARRAY[Recessive].position.y -= (ResultDistance.y * massRatioBasedOnDominant) / 17.0f;
-
-                                ENTITY_ARRAY[Dominant].position.x += (ResultDistance.x * (1 - massRatioBasedOnDominant)) / 17.0f;
-                                ENTITY_ARRAY[Dominant].position.y += (ResultDistance.y * (1 - massRatioBasedOnDominant)) / 17.0f;
-                            }
+                            dEntity->position.x += ResultDirection.x * (1.0f - massRatioBasedOnDominant) * stepSize;
+                            dEntity->position.y += ResultDirection.y * (1.0f - massRatioBasedOnDominant) * stepSize;
+                            rEntity->position.x -= ResultDirection.x * massRatioBasedOnDominant * stepSize;
+                            rEntity->position.y -= ResultDirection.y * massRatioBasedOnDominant * stepSize;
+                            // Update hitboxes with new positions
+                            dHitbox = EntityGetHitbox(dEntity);
+                            rHitbox = EntityGetHitbox(rEntity);
                         }
                     }
                 }
             }
+        }
     }
 }
 
