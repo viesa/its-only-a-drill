@@ -164,7 +164,7 @@ void CameraSetViewPort(SDL_Rect rect)
 
 Vec2 CameraGetPos()
 {
-    return camera->position;
+    return Vec2MulL(camera->position, camera->scale);
 }
 
 void CameraSetScale(float scale)

@@ -155,7 +155,7 @@ void PlayerShoot(Player *player)
         item->Stats.currentTime = item->Stats.cooldownMS;
         Vec2 mousePos = InputLastMousePos();
         Vec2 cameraPos = CameraGetPos();
-        Vec2 playerPos = Vec2Sub(entity->position, cameraPos);
+        Vec2 playerPos = Vec2Sub(RectMid(entity->drawables[0].dst), cameraPos);
 
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
         Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
