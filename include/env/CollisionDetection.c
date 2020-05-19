@@ -23,16 +23,3 @@ SDL_bool CollisionCircleWithCircle(Circle *circleA, Circle *circleB)
 {
     return sqrt(pow((circleA->Position.y - circleB->Position.x), 2.0f) + pow((circleA->Position.y - circleB->Position.y), 2.0f)) < (circleA->Radius + circleB->Radius);
 }
-
-char CollisionBoxWithBoxReturnsSide_AABB(SDL_Rect *BoxA, SDL_Rect *BoxB)
-{
-    // first do we have a collision
-    if (CollisionBoxWithBox_AABB(BoxA, BoxB))
-    {
-    }
-    else
-    {
-        return 0;
-    }
-    return 0;
-}
