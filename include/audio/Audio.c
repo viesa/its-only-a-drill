@@ -51,6 +51,8 @@ void AudioInitialize()
     //------------------ Music files ------------------
     //-------------------------------------------------
     audio.m_music[MF_MainMusic] = AudioLoadMusic("assets/music/Omega Spectrum - Spectrum.mp3");
+    audio.m_music[MF_MainMusicTwo] = AudioLoadMusic("assets/music/DirtyElectroHouse_1.mp3");
+    audio.m_music[MF_GameMusic] = AudioLoadMusic("assets/music/Formant_2.mp3");
 }
 
 void AudioUninitialize()
