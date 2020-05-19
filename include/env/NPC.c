@@ -9,18 +9,18 @@ struct MovePattern
 MovePattern MovePatternCreate()
 {
     MovePattern pattern;
-    pattern.points[0] = Vec2Create(200.0f, 200.0f);
-    pattern.points[1] = Vec2Create(283.0f, 0.0f);
-    pattern.points[2] = Vec2Create(200.0f, -200.0f);
-    pattern.points[3] = Vec2Create(0.0f, -283.0f);
-    pattern.points[4] = Vec2Create(-200.0f, 200.0f);
-    pattern.points[5] = Vec2Create(-283.0f, 0.0f);
-    pattern.points[6] = Vec2Create(-200.0f, -200.0f);
-    pattern.points[7] = Vec2Create(50.0f, 0.0f);
-    pattern.points[8] = Vec2Create(150.0f, 100.0f);
-    pattern.points[9] = Vec2Create(200.0f, 200.0f);
-    pattern.points[10] = Vec2Create(100.0f, 100.0f);
-    pattern.points[11] = Vec2Create(-100.0f, -100.0f);
+    pattern.points[0] = Vec2Create(-50.0f, -50.0f);
+    pattern.points[1] = Vec2Create(0.0f, -71.0f);
+    pattern.points[2] = Vec2Create(50.0f, -50.0f);
+    pattern.points[3] = Vec2Create(71.0f, 0.0f);
+    pattern.points[4] = Vec2Create(50.0f, 50.0f);
+    pattern.points[5] = Vec2Create(0.0f, 71.0f);
+    pattern.points[6] = Vec2Create(-50.0f, 50.0f);
+    pattern.points[7] = Vec2Create(-71.0f, 0.0f);
+    pattern.points[8] = Vec2Create(-50.0f, -50.0f);
+    pattern.points[9] = Vec2Create(0.0f, 0.0f);
+    pattern.points[10] = Vec2Create(30.0f, 30.0f);
+    pattern.points[11] = Vec2Create(-50.0f, -50.0f);
     pattern.nPoints = 12;
     return pattern;
 }
@@ -50,7 +50,7 @@ NPC *NPCCreate(Vec2 pos)
     NPC *npc = MALLOC(NPC);
     ALLOC_ERROR_CHECK(npc);
     npc->entity = EntityManagerAdd(ET_Player, pos);
-    npc->state = NPC_Neutral;
+    npc->state = NPC_Passive;
     npc->spriteSheet = SS_Character_ChernobylWorker;
     npc->leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
     npc->body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
@@ -168,9 +168,16 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
 void NPCUpdateBehaviorFight(NPC *npc)
 {
     NPCShoot(npc);
+    Entity *entity = &ENTITY_ARRAY[*npc->entity];
+    Entity *pEntity = PlayerGetEntity();
+    Vec2 enemyToPlayer = Vec2Sub(pEntity->position, entity->position);    
     if (PlayerGetEntity()->health < 0)
     {
         npc->state = NPC_Neutral;
+    }
+    if (Vec2Len(enemyToPlayer) > npc->aggravationRadius)
+    {
+        npc->state = NPC_Aggressive;
     }
 }
 void NPCUpdateBehaviorAggressive(NPC *npc)
@@ -188,7 +195,7 @@ void NPCUpdateBehaviorAggressive(NPC *npc)
     if (SDL_HasIntersection(&hitbox, &boxDP))
     {
         npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
-        npc->movePatternIndex = npc->movePatternIndex >= 9 ? 0 : npc->movePatternIndex + 1;
+        npc->movePatternIndex = npc->movePatternIndex >= 7 ? 0 : npc->movePatternIndex + 1;
     }
 }
 
@@ -214,7 +221,7 @@ void NPCSwitchBehaviorState(NPC *npc)
     else if (npc->state != NPC_Dead)
     {
         Vec2 enemyToPlayer = Vec2Sub(pEntity->position, entity->position);
-        npc->state = NPC_Neutral;
+        //npc->state = NPC_Neutral;
         if (entity->health < 100)
         {
             npc->state = NPC_Aggressive;
