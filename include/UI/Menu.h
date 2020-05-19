@@ -35,13 +35,14 @@ void MenuResetFetchLobbyTimer();
 void MenuSetStartedInTransistion(SDL_bool started);
 void MenuSetStartedOutTransistion(SDL_bool started);
 
-void MenuUpdate(Player *player);
+void MenuUpdate();
 void MenuUpdateSplash();
 void MenuUpdateName();
-void MenuUpdateMainMenu(Player *player);
+void MenuUpdateMainMenu();
 void MenuUpdateInGameMenu();
 void MenuUpdateJoinLobby();
 void MenuUpdateHostLobby();
+void MenuUpdateRoundsLobby();
 void MenuUpdateWaitingForLobby();
 void MenuUpdateLobby();
 void MenuUpdateOptions();
@@ -50,8 +51,8 @@ void MenuUpdateFPS();
 void MenuUpdateKeybinding();
 void MenuUpdateAudio();
 
-void MenuUpdateCustomMap(Player *player);
-void MenuUpdateSkin(Player *player);
+void MenuUpdateCustomMap();
+void MenuUpdateSkin();
 void MenuTitleDraw(char title[100]);
 void MenuDrawPreviewMap();
 void MenuDraw(char options[][100], int optionLength);

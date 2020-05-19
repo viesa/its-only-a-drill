@@ -12,8 +12,34 @@ void weaponUpdate(Item *item)
     item->Stats.currentTime = (item->Stats.currentTime <= 0.0f) ? -1 : item->Stats.currentTime;
 }
 
-void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
+const void multiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
 {
+    Entity *entity = &ENTITY_ARRAY[*index];
+    if (entity->type == ET_Player)
+    {
+        HitData hitData = {entity->id, Stats->Damage};
+        ClientTCPSend(PT_PlayerHit, &hitData, sizeof(HitData));
+    }
+    else if (entity->type == ET_NPC)
+    {
+        entity->health -= Stats->Damage;
+    }
+
+    entity->Force.x += direction->x * (float)(Stats->falloff / 10);
+    entity->Force.y += direction->y * (float)(Stats->falloff / 10);
+}
+
+const void singelplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
+{
+    ENTITY_ARRAY[*index].health -= Stats->Damage;
+    ENTITY_ARRAY[*index].Force.x += direction->x * (float)(Stats->falloff / 10);
+    ENTITY_ARRAY[*index].Force.y += direction->y * (float)(Stats->falloff / 10);
+}
+
+void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
+{
+    void (*Func)(int *, Vec2 *, WeaponStats *);
+    Func = pointerToFunc;
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
@@ -30,42 +56,7 @@ void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
             tmpPointY = rangeWithOffset.y;
             if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
             { // reduce accuracy
-                Data sendData;
-                sendData.id = ENTITY_ARRAY[i].id;
-                sendData.damage = stats->Damage;
-
-                ClientTCPSend(15, &sendData, sizeof(int) * 2);
-
-                ENTITY_ARRAY[i].Force.x += direction->x * (float)(stats->falloff / 10);
-                ENTITY_ARRAY[i].Force.y += direction->x * (float)(stats->falloff / 10);
-#ifdef Debug_Weapon_GetHitInfo
-                log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
-#endif
-            }
-        }
-    }
-}
-void RayScanSingelplayer(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
-{
-    int tmpPosX, tmpPosY, tmpPointX, tmpPointY;
-    Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
-    Vec2 range = Vec2MulL(*direction, stats->falloff);
-    Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
-
-    CameraDrawLine(playerCenter.x, playerCenter.y, rangeWithOffset.x, rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
-    for (int i = 1; i < ENTITY_ARRAY_SIZE; i++)
-    {
-        if (ENTITY_ARRAY[i].isCollider == SDL_TRUE && *source != i) // take aways this if statment for fun time with map
-        {
-            tmpPosX = playerCenter.x;
-            tmpPosY = playerCenter.y;
-            tmpPointX = rangeWithOffset.x;
-            tmpPointY = rangeWithOffset.y;
-            if (SDL_IntersectRectAndLine(&ENTITY_ARRAY[i].drawables[0].dst, &tmpPointX, &tmpPointY, &tmpPosX, &tmpPosY))
-            { // reduce accuracy
-                ENTITY_ARRAY[i].health -= stats->Damage;
-                ENTITY_ARRAY[i].Force.x += direction->x * (float)(stats->falloff / 10);
-                ENTITY_ARRAY[i].Force.y += direction->x * (float)(stats->falloff / 10);
+                Func(&i, direction, stats);
 #ifdef Debug_Weapon_GetHitInfo
                 log_info("entity index = %d, id = %d, health = %d\n", i, ENTITY_ARRAY[i].id, ENTITY_ARRAY[i].health);
 #endif
@@ -74,8 +65,10 @@ void RayScanSingelplayer(EntityIndexP source, Vec2 *direction, WeaponStats *stat
     }
 }
 
-void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
+void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
 {
+    void (*Func)(int *, Vec2 *, WeaponStats *);
+    Func = pointerToFunc;
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY, closestEntity = 0, endPointX, endPointY;
     float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
@@ -106,20 +99,23 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
     if (closestEntity <= 0)
     {
         CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, (int)rangeWithOffset.x, (int)rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
+        ShootData shootData = {playerCenter, rangeWithOffset};
+        ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
     }
     else
     {
+        Func(&closestEntity, direction, stats);
         CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, endPointX, endPointY, (SDL_Color){255, 50, 50, 150});
-        ENTITY_ARRAY[closestEntity].health -= stats->Damage;
-        ENTITY_ARRAY[closestEntity].Force.x += direction->x * (float)(stats->falloff / 10);
-        ENTITY_ARRAY[closestEntity].Force.y += direction->y * (float)(stats->falloff / 10);
+        ShootData shootData = {playerCenter, Vec2Create(endPointX, endPointY)};
+        ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
 #ifdef Debug_Weapon_GetHitInfo
-        log_debug("closest entity[%d] health=%d ", closestEntity, ENTITY_ARRAY[closestEntity].health);
+        // "Entity" finns inte
+        // log_debug("closest entity[%d] health=%d ", closestEntity, entity->health);
 #endif
     }
 }
 
-void rayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats)
+void rayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
 {
     Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 point;

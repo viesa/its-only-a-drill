@@ -5,8 +5,7 @@
 #include "Clock.h"
 #include "EntityManager.h"
 #include "State.h"
-#include "Server.h"
-#include "JoinableSesssion.h"
+#include "ServerManager.h"
 
 typedef struct AppServer AppServer;
 
@@ -45,9 +44,11 @@ void AppServerHandleCompressedEntityPacket(ParsedPacket packet);
 void AppServerHandleCreateSessionPacket(ParsedPacket packet);
 void AppServerHandleJoinSessionPacket(ParsedPacket packet);
 void AppServerHandleLeaveSessionPacket(ParsedPacket packet);
-void AppServerHandleStartSessionPacket(ParsedPacket packet);
+void AppServerHandleStartRoundPacket(ParsedPacket packet);
 void AppServerHandleChangeSkinPacket(ParsedPacket packet);
 void AppServerHandleFetchLobbyPacket(ParsedPacket packet);
 void AppServerHandleFetchSessionsPacket(ParsedPacket packet);
 void AppServerHandlePlayerHitPacket(ParsedPacket packet);
+void AppServerHandlePlayerDeadPacket(ParsedPacket packet);
+
 #endif

@@ -8,7 +8,6 @@ struct AppClient
 
     GroundListItems groundListItems;
 
-    Player *player;
     MapList *mapList;
 };
 
@@ -25,29 +24,27 @@ AppClient *AppClientCreate(SDL_bool *running)
     AudioInitialize();
     TransitionInitialize();
     NotifyInitialize();
-    LobbyInitialize();
     ClientManagerInitialize();
     GuiInitialize();
     KeybindingInitialize();
+    ScoreboardInitialize();
+    PlayerInitialize();
+    SettingsInitialize();
+    NPCManagerInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->mapList = MapListCreate("maps");
-    app->player = PlayerCreate();
     app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
     app->groundListItems = GroundListCreate();
 
     MenuInitialize(app->mapList);
-    ClientInitialize(app->player);
-    NPCManagerInitialize(app->player);
-
-    ScoreCreate(0);
-    ScoreIncrement(100, 0);
+    ClientInitialize();
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
-    AppClientUpdateSettings(app);
+    SettingsApply();
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -60,10 +57,12 @@ void AppClientDestroy(AppClient *app)
     ClientUninitialize();
     MenuUninitialize();
 
+    SettingsUninitialize();
+    PlayerUninitialize();
+    ScoreboardUninitialize();
     KeybindingUninitialize();
     GuiUninitialize();
     ClientManagerUninitialize();
-    LobbyUninitialize();
     TransitionUninitialize();
     AudioUninitialize();
     MapUninitialize();
@@ -87,7 +86,7 @@ void AppClientRun(AppClient *app)
 void AppClientUpdate(AppClient *app)
 {
     ClientUpdate();
-    ClientManagerUpdate();
+    ClientManagerHandleAllPackets();
 
     switch (GameStateGet())
     {
@@ -122,20 +121,24 @@ void AppClientUpdate(AppClient *app)
         CameraUpdate();
 
         NPCManagerUpdate();
-        PlayerUpdate(app->player);
+        PlayerUpdate();
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate();
 
         // Sends player to server
-        CompressedEntity cEntity = EntityCompress(PlayerGetEntity(app->player));
+        CompressedEntity cEntity = EntityCompress(PlayerGetEntity());
         ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
 
         break;
     }
+    case GS_RoundFinished:
+    case GS_MatchFinished:
     default:
         break;
     }
+    if (ConStateGet() == CON_Online)
+        ClientTCPSend(PT_FetchPlayerPoints, NULL, 0);
 }
 
 void AppClientDraw(AppClient *app)
@@ -145,24 +148,37 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
-        MenuUpdate(app->player);
+        MenuUpdate();
         GuiOverlayUpdate();
         if (MenuStateGet() == MS_InGameMenu)
         {
-            PlayerDraw(app->player);
+            PlayerDraw();
             ClientManagerDrawConnectedPlayers();
         }
         break;
     }
     case GS_Playing:
+    case GS_RoundFinished:
+    case GS_MatchFinished:
     {
-        CameraSetFollow(PlayerGetAimFollowP(app->player));
+        CameraSetFollow(PlayerGetAimFollowP());
         MapDraw();
 
         NPCManagerDrawAllNPCS();
-        PlayerDraw(app->player);
         ClientManagerDrawConnectedPlayers();
+        PlayerDraw();
+        ClientManagerDrawBufferedShootingLines();
         GuiUpdate();
+
+        if (GameStateGet() == GS_RoundFinished)
+        {
+            GuiDrawFinishedRoundMessage();
+        }
+        else if (GameStateGet() == GS_MatchFinished)
+        {
+            GuiDrawFinishedMatchMessage();
+        }
+
         break;
     }
     default:
@@ -170,27 +186,7 @@ void AppClientDraw(AppClient *app)
     }
     NotifierUpdate();
 
-    if (InputIsKeyPressed(SDL_SCANCODE_P))
-        log_info("FPS: %f", ClockGetFPS());
-
 #ifdef ANY_DEBUG
     GuiDrawFPS();
 #endif
-}
-void AppClientUpdateSettings(AppClient *app)
-{
-    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
-    if (settings.resolutionH != 1) // found settings file
-    {
-        WindowSetSize(settings.resolutionW, settings.resolutionH); //resolution
-
-        PlayerSetSpriteSheet(app->player, (SpriteSheet)settings.skin);
-
-        WindowSetFullscreen(settings.isFullscreen); // fullscreen
-
-        WindowSetVSync(settings.vsync); // vsync
-
-        FPSManagerSetDesiredFPS(settings.fps); // fps
-    }
-    SettingsDestroy(&settings);
 }

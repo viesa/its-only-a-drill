@@ -18,7 +18,7 @@ void KeybindingInitialize()
     bindings->KeyArray[AC_MOVE_DOWN] = SDL_SCANCODE_S;
     bindings->KeyArray[AC_PICKUP] = SDL_SCANCODE_Q;
     bindings->KeyArray[AC_DROP] = SDL_SCANCODE_Z;
-    bindings->KeyArray[AC_SHOOT] = BUTTON_LEFT;
+    bindings->KeyArray[AC_SHOOT] = (SDL_Scancode)BUTTON_LEFT;
     bindings->KeyArray[AC_RELOAD] = SDL_SCANCODE_R;
     bindings->KeyArray[AC_INVENTORY] = SDL_SCANCODE_TAB;
 }

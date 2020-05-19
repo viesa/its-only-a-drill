@@ -4,6 +4,15 @@
 #include "Dependencies.h"
 #include "Entity.h"
 
+typedef enum NetPlayerState
+{
+    NPS_Alive,
+    NPS_Dead,
+    NPS_Spectating,
+    NPS_None,
+    NPS_Count
+} NetPlayerState;
+
 typedef struct NetPlayer
 {
     TCPsocket socket;
@@ -19,9 +28,15 @@ typedef struct NetPlayer
     Entity entity;
 
     char name[MAX_PLAYERNAME_SIZE];
+    SpriteSheet spriteSheet;
 
     float timeoutTimer;
     SDL_bool waitingForAliveReply;
+
+    // Only used by server to store points in the current round
+    float pointBuffer;
+
+    NetPlayerState state;
 } NetPlayer;
 
 NetPlayer NetPlayerCreate(TCPsocket socket, int id);

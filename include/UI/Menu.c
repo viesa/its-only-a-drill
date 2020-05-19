@@ -26,7 +26,7 @@ typedef struct Menu
     int themecheck;
     int themecheck2;
     SDL_Color clr[10];
-
+    int lobbyNumRounds;
     SDL_bool startedInTransition;
     SDL_bool startedOutTransition;
 
@@ -34,10 +34,6 @@ typedef struct Menu
     Anim previewBody;
 
     MapList *mapList;
-
-    double volumeMaster;
-    Uint8 volumeSFX;
-    Uint8 volumeMusic;
 } Menu;
 
 static Menu *menu;
@@ -49,8 +45,6 @@ void MenuInitialize(MapList *mapList)
 
     menu->loadingBar = LoadingBarCreate();
     menu->loopCount = 0;
-    menu->loopSwing = 87;
-    menu->swingDir = 0;
     menu->activeIndex = 0;
     menu->lastIndex = 0;
     menu->keybindingstate = 0;
@@ -76,14 +70,12 @@ void MenuInitialize(MapList *mapList)
     menu->themecheck = 0;
     menu->themecheck2 = 0;
 
+    menu->lobbyNumRounds = 5;
+
     menu->previewLeg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
     menu->previewBody = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
 
     menu->mapList = mapList;
-
-    menu->volumeMaster = 1;
-    menu->volumeSFX = 64;
-    menu->volumeMusic = 64;
 }
 
 void MenuUninitialize()
@@ -117,7 +109,7 @@ void MenuSetStartedOutTransistion(SDL_bool started)
     menu->startedOutTransition = started;
 }
 
-void MenuUpdate(Player *player)
+void MenuUpdate()
 {
     menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
@@ -134,26 +126,11 @@ void MenuUpdate(Player *player)
 
     if (menu->loopCount < 2 * PI)
     {
-        menu->loopCount += .1f;
+        menu->loopCount += ClockGetDeltaTime() * 2 * PI;
     }
     else
     {
         menu->loopCount = 0;
-    }
-
-    if (menu->loopSwing >= 255)
-        menu->swingDir = 0; // go back down
-
-    if (menu->loopSwing <= 200)
-        menu->swingDir = 1; //go back up
-
-    if (menu->swingDir)
-    {
-        menu->loopSwing++;
-    }
-    else
-    {
-        menu->loopSwing--;
     }
 
     if(menu->themecheck == menu->themecheck2) 
@@ -168,16 +145,16 @@ void MenuUpdate(Player *player)
         }
 
     //Update text colors
-    menu->clr[0] = (SDL_Color){menu->loopSwing, 159, 227, 255};
-    menu->clr[1] = (SDL_Color){menu->loopSwing, 139, 207, 255};
-    menu->clr[2] = (SDL_Color){menu->loopSwing, 119, 187, 255};
-    menu->clr[3] = (SDL_Color){menu->loopSwing, 99, 167, 255};
-    menu->clr[4] = (SDL_Color){menu->loopSwing, 79, 147, 255};
-    menu->clr[5] = (SDL_Color){menu->loopSwing, 59, 127, 255};
-    menu->clr[6] = (SDL_Color){menu->loopSwing, 39, 107, 255};
-    menu->clr[7] = (SDL_Color){menu->loopSwing, 19, 87, 255};
-    menu->clr[8] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
-    menu->clr[9] = (SDL_Color){255 - menu->loopSwing, 180, 184, 255};
+    menu->clr[0] = (SDL_Color){215, 159, 227, 255};
+    menu->clr[1] = (SDL_Color){215, 139, 207, 255};
+    menu->clr[2] = (SDL_Color){215, 119, 187, 255};
+    menu->clr[3] = (SDL_Color){215, 99, 167, 255};
+    menu->clr[4] = (SDL_Color){215, 79, 147, 255};
+    menu->clr[5] = (SDL_Color){215, 59, 127, 255};
+    menu->clr[6] = (SDL_Color){215, 39, 107, 255};
+    menu->clr[7] = (SDL_Color){215, 19, 87, 255};
+    menu->clr[8] = (SDL_Color){40, 180, 184, 255};
+    menu->clr[9] = (SDL_Color){40, 180, 184, 255};
 
     AnimUpdate(&menu->previewBody, ClockGetDeltaTime());
     AnimUpdate(&menu->previewLeg, ClockGetDeltaTime());
@@ -198,13 +175,6 @@ void MenuUpdate(Player *player)
     }
     menu->lastIndex = menu->activeIndex;
 
-    //actually do some shit with the volumes?
-    AudioSetSFX(menu->volumeSFX);
-    AudioSetMusic(menu->volumeMusic);
-
-    //MASTER LAST
-    AudioSetMaster(menu->volumeMaster);
-
     //Decides what shall be drawn on top
     switch (MenuStateGet())
     {
@@ -215,7 +185,7 @@ void MenuUpdate(Player *player)
         MenuUpdateName();
         break;
     case MS_MainMenu:
-        MenuUpdateMainMenu(player);
+        MenuUpdateMainMenu();
         break;
     case MS_InGameMenu:
         MenuUpdateInGameMenu();
@@ -225,6 +195,9 @@ void MenuUpdate(Player *player)
         break;
     case MS_HostLobby:
         MenuUpdateHostLobby();
+        break;
+    case MS_RoundsLobby:
+        MenuUpdateRoundsLobby();
         break;
     case MS_WaitingForLobby:
         MenuUpdateWaitingForLobby();
@@ -248,10 +221,10 @@ void MenuUpdate(Player *player)
         MenuUpdateAudio();
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(player);
+        MenuUpdateCustomMap();
         break;
     case MS_Skin:
-        MenuUpdateSkin(player);
+        MenuUpdateSkin();
         break;
     default:
         break;
@@ -268,6 +241,8 @@ void MenuUpdateSplash()
             MenuStateSet(MS_Name);
         }
 
+        menu->mainMenuDbl.dst.w = WindowGetWidth();
+        menu->mainMenuDbl.dst.h = WindowGetHeight();
         GraphicsDraw(menu->mainMenuDbl);
 
         FontDraw3DCustom(TTF_Antilles_XXL, "It's Only a Drill", WindowGetWidth() / 2, WindowGetHeight() / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
@@ -287,6 +262,8 @@ void MenuUpdateSplash()
 
 void MenuUpdateName()
 {
+    menu->mainMenuDbl.dst.w = WindowGetWidth();
+    menu->mainMenuDbl.dst.h = WindowGetHeight();
     GraphicsDraw(menu->mainMenuDbl);
 
     if (InputIsKeyPressed(SDL_SCANCODE_BACKSPACE))
@@ -303,18 +280,17 @@ void MenuUpdateName()
     }
 }
 
-void MenuUpdateMainMenu(Player *player)
+void MenuUpdateMainMenu()
 {
     //Determine menu options
-    int optionLength = 8;
-    char options[8][100] = {
+    int optionLength = 7;
+    char options[7][100] = {
         {"Join lobby"},
         {"Host lobby"},
         {"Local game"},
         {"Change name"},
         {"Change skin"},
         {"Options"},
-        {"Save options"},
         {"Exit"}};
     // makes it loop
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
@@ -371,14 +347,6 @@ void MenuUpdateMainMenu(Player *player)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
-                                               WindowGetWidth(),
-                                               WindowGetHeight(),
-                                               WindowIsFullscreen(),
-                                               WindowIsVSyncEnabled(),
-                                               FPSManagerGetDesiredFPS());
-            SettingsSave(settings);
-            break;
         }
         case 7:
         {
@@ -495,13 +463,7 @@ void MenuUpdateHostLobby()
         }
         else
         {
-            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
-            FileIO lfile = FileIOCreate(mapInfo.filename);
-            FileIORead(&lfile);
-
-            ClientTCPSend(PT_CreateSession, lfile.contents, lfile.size);
-
-            MenuStateSet(MS_WaitingForLobby);
+            MenuStateSet(MS_RoundsLobby);
         }
     }
     else if (menu->indexChanged && menu->activeIndex != optionLength - 1)
@@ -547,6 +509,59 @@ void MenuUpdateHostLobby()
     }
 
     MenuTitleDraw("Host Lobby");
+}
+
+void MenuUpdateRoundsLobby()
+{
+    int optionLength = 2;
+    char options[2][100] = {
+        {"Num rounds"},
+        {"Start lobby"}};
+
+    sprintf(options[0], "Rounds: %d", menu->lobbyNumRounds);
+
+    menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
+    menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_A) || InputIsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds -= 1;
+    }
+
+    if (InputIsKeyPressed(SDL_SCANCODE_D) || InputIsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        if (menu->activeIndex == 0)
+            menu->lobbyNumRounds += 1;
+    }
+
+    // Loop back
+    if (menu->lobbyNumRounds < 1)
+        menu->lobbyNumRounds = 1;
+
+    if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        if (menu->activeIndex == 1)
+        {
+            MapInfo mapInfo = MapListGetMaps(menu->mapList)[menu->activeIndex];
+            FileIO lfile = FileIOCreate(mapInfo.filename);
+            FileIORead(&lfile);
+
+            char *sessionDetails = MALLOC_N(char, sizeof(int) + lfile.size);
+            SDL_memcpy(sessionDetails, &menu->lobbyNumRounds, sizeof(int));
+            SDL_memcpy(sessionDetails + sizeof(int), lfile.contents, lfile.size);
+
+            ClientTCPSend(PT_CreateSession, sessionDetails, sizeof(int) + lfile.size);
+
+            FREE(sessionDetails);
+
+            MenuStateSet(MS_WaitingForLobby);
+        }
+    }
+
+    MenuDraw(options, optionLength);
+    FontDraw(FontGetDynamicSizing(), "Choose number of rounds with [A]/[D].", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
+    MenuTitleDraw("Number of rounds");
 }
 
 void MenuUpdateJoinLobby()
@@ -718,7 +733,7 @@ void MenuUpdateLobby()
         if (host && menu->activeIndex == optionLength - 1)
         {
             // Start the session
-            ClientTCPSend(PT_StartSession, NULL, 0);
+            ClientTCPSend(PT_StartRound, NULL, 0);
         }
     }
 
@@ -750,14 +765,15 @@ void MenuUpdateLobby()
 void MenuUpdateOptions()
 {
     //Determine menu options
-    int optionLength = 7;
-    char options[7][100] = {
+    int optionLength = 8;
+    char options[8][100] = {
         {"Toggle fullscreen"},
         {"Set resolution"},
         {"Toggle vSync"},
         {"SET FPS"},
         {"SET Keybinding"},
-        {"Audio optiions"},
+        {"Audio options"},
+        {"Save options"},
         {"Back"}};
 
     if (WindowIsFullscreen())
@@ -832,6 +848,13 @@ void MenuUpdateOptions()
             break;
         }
         case 6:
+        {
+            SettingsGenerate();
+            SettingsSave(SETTINGS_PATH);
+            Notify("Settings saved", 2.0f, NT_GOOD);
+            break;
+        }
+        case 7:
         {
 
             if (ClientManagerIsInGame())
@@ -1089,9 +1112,9 @@ void MenuUpdateAudio()
         {"Music"},
         {"Back"}};
 
-    sprintf(options[0], "Master: %d%%", (int)(menu->volumeMaster * 100));
-    sprintf(options[1], "SFX: %u/64", menu->volumeSFX);
-    sprintf(options[2], "Music: %u/64", menu->volumeMusic);
+    sprintf(options[0], "Master: %d%%", (int)(AudioGetMasterVolume() * 100));
+    sprintf(options[1], "SFX: %u/64", AudioGetSFXVolume());
+    sprintf(options[2], "Music: %u/64", AudioGetMusicVolume());
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
@@ -1101,14 +1124,13 @@ void MenuUpdateAudio()
         switch (menu->activeIndex)
         {
         case 0:
-            menu->volumeMaster -= .1;
+            AudioSetMasterVolume(AudioGetMasterVolume() - 0.1);
             break;
         case 1:
-            menu->volumeSFX -= step;
-            ;
+            AudioSetSFXVolume(AudioGetSFXVolume() - step);
             break;
         case 2:
-            menu->volumeMusic -= step;
+            AudioSetMusicVolume(AudioGetMusicVolume() - step);
             break;
         }
     }
@@ -1118,32 +1140,16 @@ void MenuUpdateAudio()
         switch (menu->activeIndex)
         {
         case 0:
-            menu->volumeMaster += .1;
+            AudioSetMasterVolume(AudioGetMasterVolume() + 0.1);
             break;
         case 1:
-            menu->volumeSFX += step;
+            AudioSetSFXVolume(AudioGetSFXVolume() + step);
             break;
         case 2:
-            menu->volumeMusic += step;
+            AudioSetMusicVolume(AudioGetMusicVolume() + step);
             break;
         }
     }
-
-    // Loop back
-    if (menu->volumeMaster < 0)
-        menu->volumeMaster = 0;
-    if (menu->volumeMaster > 2)
-        menu->volumeMaster = 2;
-
-    if (menu->volumeMusic > 128)
-        menu->volumeMusic = 0;
-    if (menu->volumeSFX > 128)
-        menu->volumeSFX = 0;
-
-    if (menu->volumeMusic > 64)
-        menu->volumeMusic = 64;
-    if (menu->volumeSFX > 64)
-        menu->volumeSFX = 64;
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {
@@ -1161,7 +1167,7 @@ void MenuUpdateAudio()
     MenuTitleDraw("Audio options");
 }
 
-void MenuUpdateCustomMap(Player *player)
+void MenuUpdateCustomMap()
 {
     //Determine menu options
     int optionLength = MapListGetNumMaps(menu->mapList) + 1;
@@ -1204,10 +1210,12 @@ void MenuUpdateCustomMap(Player *player)
         NPCManagerClearNPCS();
         for (int i = 0; i < mapInfo.enemySpawns->size; i++)
             NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
+        Entity *playerEntity = PlayerGetEntity();
+        *playerEntity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, playerEntity->id);
         if (mapInfo.enemySpawns->size > 0)
-            PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
+            PlayerGetEntity()->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
         else
-            PlayerGetEntity(player)->position = Vec2Create(1000.0f, 1000.0f);
+            PlayerGetEntity()->position = Vec2Create(1000.0f, 1000.0f);
     }
 
     MenuDraw(options, optionLength);
@@ -1240,7 +1248,7 @@ void MenuUpdateCustomMap(Player *player)
     MenuTitleDraw("Local game");
 }
 
-void MenuUpdateSkin(Player *player)
+void MenuUpdateSkin()
 {
     //Determine menu options
     int optionLength = 7;
@@ -1329,7 +1337,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Prisoner;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
             MenuStateSet(MS_MainMenu);
             break;
         }
@@ -1337,7 +1345,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_ChernobylWorker;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1346,7 +1354,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_IronMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1355,7 +1363,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_iDubbbz;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1364,7 +1372,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_OldMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1373,7 +1381,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Sonic;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;

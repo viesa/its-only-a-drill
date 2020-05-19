@@ -5,7 +5,7 @@
 #include "Vector.h"
 #include "NPC.h"
 
-void NPCManagerInitialize(Player *player);
+void NPCManagerInitialize();
 void NPCManagerUninitialize();
 
 void NPCManagerUpdate();

@@ -9,7 +9,7 @@ typedef struct Gui
     float loopCount;
     float loopSwing;
     float swingDir;
-    int fps;
+    float fps;
     float defaultEdge;
     float defaultSize;
     float defaultOffset;
@@ -25,8 +25,6 @@ void GuiInitialize()
 
     gui->points = 3;
     gui->loopCount = 0;
-    gui->loopSwing = 87;
-    gui->swingDir = 0;
     gui->fps = 0;
 
     gui->defaultEdge = 30;
@@ -57,51 +55,32 @@ void GuiUpdate()
     GraphicsDrawGradientX((SDL_Rect){WindowGetWidth() / 5 * 4, 0, WindowGetWidth() / 5, WindowGetHeight()}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //Points
-    gui->points = ScoreInfo(0); //Temp Score grej
+    gui->points = ScoreboardGetScore(PlayerGetEntity()->id); //Temp Score grej
 
     //Update loop variables
     if (gui->loopCount < 2 * PI)
     {
-        gui->loopCount += .1f;
+        gui->loopCount += ClockGetDeltaTime() * 2 * PI;
     }
     else
     {
         gui->loopCount = 0;
     }
 
-    if (gui->loopSwing >= 255)
-    {
-        gui->swingDir = 0; // go back down
-    }
-
-    if (gui->loopSwing <= 200)
-    {
-        gui->swingDir = 1; //go back up
-    }
-
-    if (gui->swingDir)
-    {
-        gui->loopSwing++;
-    }
-    else
-    {
-        gui->loopSwing--;
-    }
-
     // Disp. Points
     char pts[10];
     sprintf(pts, "%ld pts", gui->points);
     SDL_Color vitalsColor[10] = {
-        {gui->loopSwing, 159, 227, 255},
-        {gui->loopSwing, 139, 207, 255},
-        {gui->loopSwing, 119, 187, 255},
-        {gui->loopSwing, 99, 167, 255},
-        {gui->loopSwing, 79, 147, 255},
-        {gui->loopSwing, 59, 127, 255},
-        {gui->loopSwing, 39, 107, 255},
-        {gui->loopSwing, 19, 87, 255},
-        {255 - gui->loopSwing, 180, 184, 255},
-        {255 - gui->loopSwing, 180, 184, 255}};
+        {225, 159, 227, 255},
+        {225, 139, 207, 255},
+        {225, 119, 187, 255},
+        {225, 99, 167, 255},
+        {225, 79, 147, 255},
+        {225, 59, 127, 255},
+        {225, 39, 107, 255},
+        {225, 19, 87, 255},
+        {40, 180, 184, 255},
+        {40, 180, 184, 255}};
 
     FontDraw3DCustom(FontGetDynamicSizing(), pts, WindowGetWidth() - gui->defaultEdge, gui->defaultEdge, FAL_R, 0, cos(gui->loopCount) * 1.5, sin(gui->loopCount), 10, vitalsColor); //83
 
@@ -112,16 +91,32 @@ void GuiUpdate()
     //FontDraw3D(gui->font, TTF_Robot_Crush, "The target is a briefcase.", wW / 2, wH - (gui->defaultEdge + 2 * gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
     //FontDraw3D(gui->font, TTF_Robot_Crush, "Discretion is of essence.", wW / 2, wH - (gui->defaultEdge + gui->defaultSize), FC_ALIGN_CENTER, 0, gui->defaultOffset, F3D_TC, 2, objColor);
 
-    GuiOverlayUpdate(gui);
+    GuiOverlayUpdate();
 }
 
 void GuiDrawFPS()
 {
     if (!gui->loopCount % 5)
     {
-        gui->fps = (int)ClockGetFPS();
+        gui->fps = ClockGetFPS();
     }
     char fps[10];
-    sprintf(fps, "%d", gui->fps);
-    FontDraw(TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255}); //83
+    sprintf(fps, "%.0f", gui->fps);
+    FontDraw(TTF_Arial, fps, 5, 5, FAL_L, 0, (SDL_Color){255, 255, 255});
+}
+
+void GuiDrawFinishedRoundMessage()
+{
+    GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
+    char buffer[100] = {0};
+    sprintf(buffer, "Round Finished! New round starting: %.1f", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
+}
+
+void GuiDrawFinishedMatchMessage()
+{
+    GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
+    char buffer[100] = {0};
+    sprintf(buffer, "Finished Match. Returning to Main Menu: %.1f", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
 }

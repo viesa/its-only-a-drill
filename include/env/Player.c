@@ -1,8 +1,9 @@
 #include "Player.h"
 
 #include "Library.h"
+#include "Client.h"
 
-struct Player
+typedef struct Player
 {
     EntityIndexP entity; // Players borrows an entity to control
     PlayerState state;
@@ -19,12 +20,17 @@ struct Player
     int score;
     float respawnTimer;
     float respawnCooldown;
-};
 
-Player *PlayerCreate()
+    Vec2 spawnPoint;
+} Player;
+
+static Player *player;
+
+void PlayerInitialize()
 {
-    Player *player = MALLOC(Player);
+    player = MALLOC(Player);
     ALLOC_ERROR_CHECK(player);
+
     player->entity = EntityManagerAdd(ET_Player, Vec2Create(0.0f, 0.0f));
     player->inventory = InventoryCreate();
     player->spriteSheet = SS_Character_Prisoner;
@@ -36,32 +42,22 @@ Player *PlayerCreate()
     player->score = 0;
     player->respawnCooldown = 500.0f;
     player->respawnTimer = player->respawnCooldown;
-    return player;
+    player->spawnPoint = Vec2Create(0.0f, 0.0f);
 }
 
-void PlayerDestroy(Player *player)
+void PlayerUninitialize()
 {
     FREE(player);
 }
 
-void PlayerUpdate(Player *player)
+void PlayerUpdate()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     PlayerCameraUpdate(player);
     if (entity->health <= 0)
     {
-        if (player->state == PL_Dead)
-        {
-            player->respawnTimer -= ClockGetDeltaTime();
-            if (player->respawnTimer <= 0.0f)
-            {
-                PlayerRevive(player);
-            }
-        }
-        else
-        {
-            PlayerKill(player);
-        }
+        PlayerKill(player);
+        ClientTCPSend(PT_PlayerDead, NULL, 0);
     }
     else
     {
@@ -77,12 +73,12 @@ void PlayerUpdate(Player *player)
     weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
 }
 
-void PlayerDraw(Player *player)
+void PlayerDraw()
 {
     EntityDrawIndex(player->entity);
 }
 
-void PlayerCameraUpdate(Player *player)
+void PlayerCameraUpdate()
 {
     // camera
     Vec2 mousePos = InputLastMousePos();
@@ -97,7 +93,7 @@ void PlayerCameraUpdate(Player *player)
     player->aimFollow = Vec2Add(aim, ENTITY_ARRAY[*player->entity].position);
 }
 
-void PlayerMomventUpdate(Player *player)
+void PlayerMomventUpdate()
 {
     // Movment
     ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(SDL_SCANCODE_S) || InputIsKeyDown(SDL_SCANCODE_DOWN)) -
@@ -106,7 +102,7 @@ void PlayerMomventUpdate(Player *player)
                                                     (InputIsKeyDown(SDL_SCANCODE_A) || InputIsKeyDown(SDL_SCANCODE_LEFT)));
 }
 
-void PlayerAnimationUpdate(Player *player)
+void PlayerAnimationUpdate()
 {
     // animation
     AnimUpdate(&player->leg, ClockGetDeltaTime());
@@ -135,14 +131,14 @@ void PlayerAnimationUpdate(Player *player)
     AnimApplyToDrawable(&player->body, &ENTITY_ARRAY[*player->entity].drawables[1], 1.5f);
 }
 
-void PlayerRotateToCamera(Player *player)
+void PlayerRotateToCamera()
 {
     float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), player->forward));
     float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(player->entity, degrees);
 }
 
-void PlayerShoot(Player *player)
+void PlayerShoot()
 {
     Item *item = &player->inventory.contents[player->inventory.top - 1];
 #ifdef PLAYER_DEBUG
@@ -155,7 +151,7 @@ void PlayerShoot(Player *player)
         item->Stats.currentTime = item->Stats.cooldownMS;
         Vec2 mousePos = InputLastMousePos();
         Vec2 cameraPos = CameraGetPos();
-        Vec2 playerPos = Vec2Sub(entity->position, cameraPos);
+        Vec2 playerPos = Vec2Sub(RectMid(entity->drawables[0].dst), cameraPos);
 
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
         Vec2 unitPlayerToMouse = Vec2Unit(playerToMouse);
@@ -164,12 +160,12 @@ void PlayerShoot(Player *player)
         entity->Force.x -= item->Stats.falloff;
         entity->Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
-
-        RayScanClosest(player->entity, &unitPlayerToMouse, &item->Stats);
+        void *func = multiplayerHandler;
+        RayScan(player->entity, &unitPlayerToMouse, &item->Stats, func);
     }
 }
 
-void PlayerKill(Player *player)
+void PlayerKill()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     player->respawnTimer = player->respawnCooldown;
@@ -179,7 +175,7 @@ void PlayerKill(Player *player)
     entity->isCollider = SDL_FALSE;
 }
 
-void PlayerRevive(Player *player)
+void PlayerRevive()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     player->respawnTimer = player->respawnCooldown;
@@ -191,7 +187,7 @@ void PlayerRevive(Player *player)
     entity->health = 100;
 }
 
-void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet)
+void PlayerSetSpriteSheet(SpriteSheet spriteSheet)
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     for (int i = 0; i < entity->nDrawables; i++)
@@ -201,12 +197,22 @@ void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet)
     player->spriteSheet = spriteSheet;
 }
 
-Entity *PlayerGetEntity(Player *player)
+Entity *PlayerGetEntity()
 {
     return &ENTITY_ARRAY[*player->entity];
 }
 
-Vec2 *PlayerGetAimFollowP(Player *player)
+SpriteSheet PlayerGetSkin()
+{
+    return player->spriteSheet;
+}
+
+Vec2 *PlayerGetAimFollowP()
 {
     return &player->aimFollow;
+}
+
+void PlayerSetSpawnPoint(Vec2 spawnPoint)
+{
+    player->spawnPoint = spawnPoint;
 }

@@ -2,13 +2,11 @@
 
 struct
 {
-    Player *player;
     Vector *npcs;
 } npcManager;
 
-void NPCManagerInitialize(Player *player)
+void NPCManagerInitialize()
 {
-    npcManager.player = player;
     npcManager.npcs = VectorCreate(sizeof(NPC *), 10);
 }
 void NPCManagerUninitialize()
@@ -40,7 +38,7 @@ void NPCManagerDrawAllNPCS()
 
 void NPCManagerAddNew(Vec2 pos)
 {
-    NPC *_new = NPCCreate(pos, npcManager.player);
+    NPC *_new = NPCCreate(pos);
     VectorPushBack(npcManager.npcs, &_new);
 }
 

@@ -10,6 +10,21 @@ FileIO FileIOCreate(char filename[])
     SDL_memcpy(lfile.path, filename, strlen(filename) + 1);
     return lfile;
 }
+
+void FileIODestroy(FileIO *lfile)
+{
+    FREE(lfile->contents);
+    FREE(lfile->path);
+}
+
+void FileIOCopy(FileIO *file, void *src, size_t size)
+{
+    file->contents = (void *)MALLOC_N(char, size);
+    ALLOC_ERROR_CHECK(file->contents);
+    SDL_memcpy(file->contents, src, size);
+    file->size = size;
+}
+
 SDL_bool FileIOWriteBinary(FileIO *file)
 {
     FILE *f;
@@ -25,6 +40,7 @@ SDL_bool FileIOWriteBinary(FileIO *file)
     fclose(f);
     return SDL_TRUE;
 }
+
 SDL_bool FileIOWrite(FileIO *file)
 {
     FILE *f;
@@ -40,6 +56,7 @@ SDL_bool FileIOWrite(FileIO *file)
     fclose(f);
     return SDL_TRUE;
 }
+
 SDL_bool FileIOReadBinary(FileIO *file)
 {
     long length = 0;
@@ -68,6 +85,7 @@ SDL_bool FileIOReadBinary(FileIO *file)
 #endif
     return SDL_FALSE;
 }
+
 SDL_bool FileIORead(FileIO *file)
 {
     long length = 0;
@@ -94,9 +112,4 @@ SDL_bool FileIORead(FileIO *file)
     log_error("FileIO error reading file: %s", file->path);
 #endif
     return SDL_FALSE;
-}
-void FileIODestroy(FileIO *lfile)
-{
-    FREE(lfile->contents);
-    FREE(lfile->path);
 }

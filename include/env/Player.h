@@ -7,6 +7,7 @@
 #include "EntityManager.h"
 #include "Anim.h"
 #include "Weapon.h"
+#include "Scoreboard.h"
 
 typedef enum PlayerState
 {
@@ -15,35 +16,34 @@ typedef enum PlayerState
     PL_Count
 } PlayerState;
 
-typedef struct Player Player;
-
-//creates a player and a entity
-Player *PlayerCreate();
-
-void PlayerDestroy(Player *player);
+void PlayerInitialize();
+void PlayerUninitialize();
 
 // updates player logic like movement and camera position
-void PlayerUpdate(Player *player);
+void PlayerUpdate();
 // draws the player on the canves
-void PlayerDraw(Player *player);
+void PlayerDraw();
 // moves the camera relative to the player and mouse
-void PlayerCameraUpdate(Player *player);
+void PlayerCameraUpdate();
 // moves the player with keys
-void PlayerMomventUpdate(Player *player);
+void PlayerMomventUpdate();
 // updates the animation
-void PlayerAnimationUpdate(Player *player);
+void PlayerAnimationUpdate();
 // rotates the player relative to the camera
-void PlayerRotateToCamera(Player *player);
+void PlayerRotateToCamera();
 // Player shoot
-void PlayerShoot(Player *player);
+void PlayerShoot();
 // Sets players HP to 0 and state PL_Dead
-void PlayerKill(Player *player);
+void PlayerKill();
 // Sets players HP to max and state PL_Alie
-void PlayerRevive(Player *player);
+void PlayerRevive();
 // Change spritesheet of all animations
-void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet);
+void PlayerSetSpriteSheet(SpriteSheet spriteSheet);
+// Sets the spawnpoint of player
+void PlayerSetSpawnPoint(Vec2 spawnPoint);
 
-Entity *PlayerGetEntity(Player *player);
-Vec2 *PlayerGetAimFollowP(Player *player);
+Entity *PlayerGetEntity();
+SpriteSheet PlayerGetSkin();
+Vec2 *PlayerGetAimFollowP();
 
 #endif
