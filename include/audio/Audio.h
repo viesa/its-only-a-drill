@@ -32,6 +32,8 @@ typedef enum MusicFile
 {
     MF_Test,
     MF_MainMusic,
+    MF_MainMusicTwo,
+    MF_GameMusic,
     MF_Count
 } MusicFile;
 

@@ -122,6 +122,16 @@ void AudioInitialize()
         log_warn("Could not load test.mp3");
     audio.m_music[MF_MainMusic] = mainMusic;
 
+    Mix_Music *mainMusicTwo = Mix_LoadMUS("assets/music/DirtyElectroHouse_1.mp3");
+    if (!mainMusicTwo)
+        log_warn("Could not load DirtyElectroHouse_1.mp3");
+    audio.m_music[MF_MainMusicTwo] = mainMusicTwo;
+
+    Mix_Music *gameMusic = Mix_LoadMUS("assets/music/Formant_2.mp3");
+    if (!gameMusic)
+        log_warn("Could not load Formant_2.mp3");
+    audio.m_music[MF_GameMusic] = gameMusic;
+
     for (int i = 0; i < N_CHANNELS; i++)
         audio.m_availableChannels[i] = SDL_TRUE;
 }
