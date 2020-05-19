@@ -1,6 +1,6 @@
 #include "Weapon.h"
 
-#include "Client.h"
+#include "ClientManager.h"
 
 #define unhitable 500
 #define max_steps 10
@@ -98,16 +98,16 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, vo
     }
     if (closestEntity <= 0)
     {
-        CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, (int)rangeWithOffset.x, (int)rangeWithOffset.y, (SDL_Color){255, 50, 50, 150});
         ShootData shootData = {playerCenter, rangeWithOffset, Vec2Unit(Vec2Sub(rangeWithOffset, playerCenter))};
+        ClientManagerAddShootingLine(shootData);
         ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
     }
     else
     {
         Func(&closestEntity, direction, stats);
-        CameraDrawLine((int)playerCenter.x, (int)playerCenter.y, endPointX, endPointY, (SDL_Color){255, 50, 50, 150});
         Vec2 end = Vec2Create(endPointX, endPointY);
         ShootData shootData = {playerCenter, end, Vec2Unit(Vec2Sub(end, playerCenter))};
+        ClientManagerAddShootingLine(shootData);
         ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
 #ifdef Debug_Weapon_GetHitInfo
         // "Entity" finns inte

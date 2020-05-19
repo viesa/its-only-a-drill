@@ -204,6 +204,11 @@ void ClientManagerClearPlayers()
     }
 }
 
+void ClientManagerAddShootingLine(ShootData shootData)
+{
+    VectorPushBack(clientManager->shootingLines, &shootData);
+}
+
 SDL_bool ClientManagerIsInGame()
 {
     return clientManager->inGame;
@@ -484,7 +489,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket packet)
 void ClientManagerHandlePlayerShootPacket(ParsedPacket packet)
 {
     ShootData shootData = *(ShootData *)packet.data;
-    VectorPushBack(clientManager->shootingLines, &shootData);
+    ClientManagerAddShootingLine(shootData);
 }
 
 void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet)
