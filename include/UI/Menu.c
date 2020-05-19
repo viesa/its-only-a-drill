@@ -133,16 +133,15 @@ void MenuUpdate()
         menu->loopCount = 0;
     }
 
-    if(menu->themecheck == menu->themecheck2) 
+    if (menu->themecheck == menu->themecheck2)
+    {
+        if (menu->themecheck != 0)
         {
-            if(menu->themecheck != 0) 
-            {
-                MusicStop(&menu->GameTheme);
-                MusicPlay(&menu->MenuTheme2, -1);
-                menu->themecheck++;
-            }
-           
+            MusicStop(&menu->GameTheme);
+            MusicPlay(&menu->MenuTheme2, -1);
+            menu->themecheck++;
         }
+    }
 
     //Update text colors
     menu->clr[0] = (SDL_Color){215, 159, 227, 255};
@@ -163,11 +162,11 @@ void MenuUpdate()
     menu->activeIndex += (InputIsKeyPressed(SDL_SCANCODE_S) || InputIsKeyPressed(SDL_SCANCODE_DOWN)) -
                          (InputIsKeyPressed(SDL_SCANCODE_W) || InputIsKeyPressed(SDL_SCANCODE_UP));
 
-    if (menu->lastIndex != menu->activeIndex)
+    if (menu->lastIndex != menu->activeIndex && MenuStateGet() != MS_Splash && MenuStateGet() != MS_Name)
     {
         menu->indexChanged = SDL_TRUE;
         SoundStop(&menu->MenuStep);
-        SoundPlay(&menu->MenuStep,0);
+        SoundPlay(&menu->MenuStep, 0);
     }
     else
     {
@@ -483,11 +482,11 @@ void MenuUpdateHostLobby()
 
     if (menu->startedOutTransition && TransitionIsDone())
     {
-        if(menu->themecheck == 1)  
-        {   
+        if (menu->themecheck == 1)
+        {
             MusicStop(&menu->MenuTheme);
         }
-        else 
+        else
         {
             MusicStop(&menu->MenuTheme2);
         }
