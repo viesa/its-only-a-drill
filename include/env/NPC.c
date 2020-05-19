@@ -149,8 +149,9 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
     Circle tmp;
     tmp.Position = RectMid(entity->drawables[0].dst);
     tmp.Radius = npc->radius;
-    if (CollisionCircelWithPoint(&npc->desiredPos,&tmp))
+    if (CollisionCircleWithPoint(&npc->desiredPos,&tmp))
     {
+        
         npc->desiredPos = Vec2Add( RectMid(entity->drawables[0].dst), npc->movePattern.points[npc->movePatternIndex]);
         npc->movePatternIndex = (npc->movePatternIndex < 10 || npc->movePatternIndex == 11) ? 10 : npc->movePatternIndex + 1;
     }
@@ -179,7 +180,7 @@ void NPCUpdateBehaviorAggressive(NPC *npc)
     Circle tmp;
     tmp.Position = RectMid(entity->drawables[0].dst);
     tmp.Radius = npc->radius;
-    if (CollisionCircelWithPoint(&npc->desiredPos,&tmp))
+    if (CollisionCircleWithPoint(&npc->desiredPos,&tmp))
     {
         npc->desiredPos = Vec2Add( RectMid(entity->drawables[0].dst), npc->movePattern.points[npc->movePatternIndex]);
         npc->movePatternIndex = npc->movePatternIndex >= 7 ? 0 : npc->movePatternIndex + 1;
