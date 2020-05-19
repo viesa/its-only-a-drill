@@ -7,10 +7,18 @@ struct Audio
     Mix_Chunk *m_chunks[SF_Count];
     Mix_Music *m_music[MF_Count];
     SDL_bool m_availableChannels[N_CHANNELS];
+
+    double volumeMaster;
+    Uint8 volumeSFX;
+    Uint8 volumeMusic;
 } audio;
 
 void AudioInitialize()
 {
+    audio.volumeMaster = 1.0;
+    audio.volumeSFX = 64u;
+    audio.volumeMusic = 64u;
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
         log_error("Could configure audio: %s", Mix_GetError());
 
@@ -78,26 +86,56 @@ void AudioFreeChannel(int channel)
     audio.m_availableChannels[channel] = SDL_TRUE;
 }
 
-void AudioSetMaster(double multiplier)
+double AudioGetMasterVolume()
 {
+    return audio.volumeMaster;
+}
+Uint8 AudioGetSFXVolume()
+{
+    return audio.volumeSFX;
+}
+Uint8 AudioGetMusicVolume()
+{
+    return audio.volumeMusic;
+}
+
+void AudioSetMasterVolume(double multiplier)
+{
+    if (multiplier < 0.0)
+        multiplier = 0.0;
+    else if (multiplier > 2.0)
+        multiplier = 2.0;
+
     for (int i = 0; i < SF_Count; i++)
     {
         audio.m_chunks[i]->volume *= multiplier;
     }
-
-    Mix_VolumeMusic(Mix_VolumeMusic(-1) * multiplier);
+    Mix_VolumeMusic(audio.volumeMusic * multiplier);
+    audio.volumeMaster = multiplier;
 }
-void AudioSetSFX(Uint8 volume)
+void AudioSetSFXVolume(Uint8 volume)
 {
+    if (volume < 0)
+        volume = 0;
+    else if (volume > 0)
+        volume = 128;
+
     for (int i = 0; i < SF_Count; i++)
     {
         audio.m_chunks[i]->volume = volume;
     }
+    audio.volumeSFX = volume;
 }
 
-void AudioSetMusic(Uint8 volume)
+void AudioSetMusicVolume(Uint8 volume)
 {
+    if (volume < 0)
+        volume = 0;
+    else if (volume > 0)
+        volume = 64;
+
     Mix_VolumeMusic(volume);
+    audio.volumeMusic = volume;
 }
 
 Mix_Chunk *AudioLoadSound(char *path)

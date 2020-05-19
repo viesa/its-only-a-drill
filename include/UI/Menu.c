@@ -31,10 +31,6 @@ typedef struct Menu
     Anim previewBody;
 
     MapList *mapList;
-
-    double volumeMaster;
-    Uint8 volumeSFX;
-    Uint8 volumeMusic;
 } Menu;
 
 static Menu *menu;
@@ -74,10 +70,6 @@ void MenuInitialize(MapList *mapList)
     menu->previewBody = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, SS_None, 4, 0.05f);
 
     menu->mapList = mapList;
-
-    menu->volumeMaster = 1;
-    menu->volumeSFX = 64;
-    menu->volumeMusic = 64;
 }
 
 void MenuUninitialize()
@@ -164,13 +156,6 @@ void MenuUpdate()
         menu->indexChanged = SDL_FALSE;
     }
     menu->lastIndex = menu->activeIndex;
-
-    //actually do some shit with the volumes?
-    AudioSetSFX(menu->volumeSFX);
-    AudioSetMusic(menu->volumeMusic);
-
-    //MASTER LAST
-    AudioSetMaster(menu->volumeMaster);
 
     //Decides what shall be drawn on top
     switch (MenuStateGet())
@@ -1096,9 +1081,9 @@ void MenuUpdateAudio()
         {"Music"},
         {"Back"}};
 
-    sprintf(options[0], "Master: %d%%", (int)(menu->volumeMaster * 100));
-    sprintf(options[1], "SFX: %u/64", menu->volumeSFX);
-    sprintf(options[2], "Music: %u/64", menu->volumeMusic);
+    sprintf(options[0], "Master: %d%%", (int)(AudioGetMasterVolume() * 100));
+    sprintf(options[1], "SFX: %u/64", AudioGetSFXVolume());
+    sprintf(options[2], "Music: %u/64", AudioGetMusicVolume());
 
     menu->activeIndex = (menu->activeIndex > optionLength - 1) ? 0 : menu->activeIndex;
     menu->activeIndex = (menu->activeIndex < 0) ? optionLength - 1 : menu->activeIndex;
@@ -1108,14 +1093,13 @@ void MenuUpdateAudio()
         switch (menu->activeIndex)
         {
         case 0:
-            menu->volumeMaster -= .1;
+            AudioSetMasterVolume(AudioGetMasterVolume() - 0.1);
             break;
         case 1:
-            menu->volumeSFX -= step;
-            ;
+            AudioSetSFXVolume(AudioGetSFXVolume() - step);
             break;
         case 2:
-            menu->volumeMusic -= step;
+            AudioSetMusicVolume(AudioGetMusicVolume() - step);
             break;
         }
     }
@@ -1125,32 +1109,16 @@ void MenuUpdateAudio()
         switch (menu->activeIndex)
         {
         case 0:
-            menu->volumeMaster += .1;
+            AudioSetMasterVolume(AudioGetMasterVolume() + 0.1);
             break;
         case 1:
-            menu->volumeSFX += step;
+            AudioSetSFXVolume(AudioGetSFXVolume() + step);
             break;
         case 2:
-            menu->volumeMusic += step;
+            AudioSetMusicVolume(AudioGetMusicVolume() + step);
             break;
         }
     }
-
-    // Loop back
-    if (menu->volumeMaster < 0)
-        menu->volumeMaster = 0;
-    if (menu->volumeMaster > 2)
-        menu->volumeMaster = 2;
-
-    if (menu->volumeMusic > 128)
-        menu->volumeMusic = 0;
-    if (menu->volumeSFX > 128)
-        menu->volumeSFX = 0;
-
-    if (menu->volumeMusic > 64)
-        menu->volumeMusic = 64;
-    if (menu->volumeSFX > 64)
-        menu->volumeSFX = 64;
 
     if (InputIsKeyPressed(SDL_SCANCODE_E) || InputIsKeyPressed(SDL_SCANCODE_RETURN))
     {

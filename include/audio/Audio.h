@@ -48,9 +48,13 @@ int AudioGenChannel();
 /// Free a channel when it is no longer used
 void AudioFreeChannel(int channel);
 
-void AudioSetMaster(double multiplier);
-void AudioSetSFX(Uint8 volume);
-void AudioSetMusic(Uint8 volume);
+double AudioGetMasterVolume();
+Uint8 AudioGetMusicVolume();
+Uint8 AudioGetSFXVolume();
+
+void AudioSetMasterVolume(double multiplier);
+void AudioSetSFXVolume(Uint8 volume);
+void AudioSetMusicVolume(Uint8 volume);
 
 Mix_Chunk *AudioLoadSound(char *path);
 Mix_Music *AudioLoadMusic(char *path);
