@@ -34,4 +34,5 @@ char CollisionBoxWithBoxReturnsSide_AABB(SDL_Rect *BoxA, SDL_Rect *BoxB)
     {
         return 0;
     }
+    return 0;
 }
