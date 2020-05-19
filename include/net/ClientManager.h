@@ -70,6 +70,7 @@ void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet);
 void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet);
+void ClientManagerHandleCountdownPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

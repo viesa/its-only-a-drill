@@ -46,6 +46,7 @@ typedef enum PacketType
     PT_CloseAllSessions,  // When server want to close all running sessions
     PT_MatchFinished,     // When server notifying the clients the match is over
     PT_RoundFinished,     // When server notifying the clients the round is over
+    PT_Countdown,         // When server updates client with roundFinished-countdown or matchedFinished-countdown
     PT_None,
     PT_Count
 } PacketType;

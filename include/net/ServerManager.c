@@ -123,19 +123,21 @@ void ServerManagerAdvanceSessionsWithOnePlayerAlive()
                     // Match finished
                     session->finishedMatchCountdown = 5.0f;
                     session->quittingMatch = SDL_TRUE;
+                    ServerTCPBroadcastSession(PT_MatchFinished, session, NULL, 0);
                 }
                 else
                 {
                     // Round finished
                     session->finishedRoundCountdown = 5.0f;
                     session->startingNewRound = SDL_TRUE;
+                    ServerTCPBroadcastSession(PT_RoundFinished, session, NULL, 0);
                 }
             }
 
             if (session->quittingMatch)
             {
                 session->finishedMatchCountdown -= ClockGetDeltaTime();
-                ServerUDPBroadcastSession(PT_MatchFinished, session, &session->finishedMatchCountdown, sizeof(float));
+                ServerUDPBroadcastSession(PT_Countdown, session, &session->finishedMatchCountdown, sizeof(float));
                 if (session->finishedMatchCountdown <= 0.0f)
                 {
                     ServerTCPBroadcastSession(PT_CloseSession, session, NULL, 0);
@@ -146,7 +148,7 @@ void ServerManagerAdvanceSessionsWithOnePlayerAlive()
             else if (session->startingNewRound)
             {
                 session->finishedRoundCountdown -= ClockGetDeltaTime();
-                ServerUDPBroadcastSession(PT_RoundFinished, session, &session->finishedRoundCountdown, sizeof(float));
+                ServerUDPBroadcastSession(PT_Countdown, session, &session->finishedRoundCountdown, sizeof(float));
                 if (session->finishedRoundCountdown <= 0.0f)
                 {
                     ServerTCPBroadcastSession(PT_NewRound, session, &session->currentRound, sizeof(int));
