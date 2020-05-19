@@ -18,7 +18,7 @@ Item ItemCreate(ItemType type, Vec2 Position)
         i.Stats.ammo = 12;
         i.Stats.captivity = 12;
         i.Stats.Damage = 50;
-        i.Stats.falloff = 250;
+        i.Stats.falloff = 500;
         i.Stats.cooldownMS = 500.0f;
         i.Stats.currentTime = 10.0f;
         i.itemAction = SoundCreate(SF_SwordSwing);
@@ -122,11 +122,11 @@ void ItemEquipDraw(Item *item, Vec2 pos)
         Vec2 playerToMouse = Vec2Sub(mousePos, playerPos);
 
         Vec2 forward = Vec2Unit(playerToMouse);
-        
+
         float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), forward));
         float degrees = forward.y > 0.0f ? vecAngle : 360 - vecAngle;
         item->drawable.rot = degrees;
-        item->drawable.rot_anchor =(Vec2){(item->drawable.src.x / 2),(item->drawable.src.y / 2)};
+        item->drawable.rot_anchor = (Vec2){(item->drawable.src.x / 2), (item->drawable.src.y / 2)};
         CameraDraw(item->drawable);
     }
 }
@@ -178,7 +178,7 @@ GroundListItems GroundListCreate(void)
     ground.contents[1] = ItemCreate(ItemMetalSword, (Vec2){200, 400});
     ground.contents[4] = ItemCreate(ItemWoodenSword, (Vec2){300, 200});
     ground.contents[3] = ItemCreate(ItemMetalSword, (Vec2){300, 400});
-    ground.contents[2] = ItemCreate(Pistol, (Vec2){300,300});
+    ground.contents[2] = ItemCreate(Pistol, (Vec2){300, 300});
     ground.top = 5;
     return ground;
 }
