@@ -1,63 +1,74 @@
 #include "Settings.h"
-Settings SettingsCreate(int skin, int resolutionW, int resolutionH, SDL_bool isFullscreen, SDL_bool vsync, size_t fps, SDL_Scancode keys[])
+
+typedef struct Settings
 {
-    Settings settings;
+    SpriteSheet playerSkin;
+    int windowWidth, windowHeight;
+    SDL_bool isFullscreen, vsyncEnabled;
+    size_t desiredFPS;
+    SDL_Scancode bidnings[AC_Count];
+} Settings;
 
-    settings.resolutionW = resolutionW;
-    settings.resolutionH = resolutionH;
+static Settings *settings;
 
-    settings.skin = skin;
-
-    settings.isFullscreen = isFullscreen;
-
-    settings.vsync = vsync;
-
-    settings.fps = fps;
-
-    SDL_memcpy(settings.keys, keys, sizeof(SDL_Scancode) * (AC_Count - 1));
-    return settings;
+void SettingsInitialize()
+{
+    settings = MALLOC(Settings);
+    ALLOC_ERROR_CHECK(settings);
+    *settings = (Settings){0};
 }
-void SettingsSave(Settings settings)
+
+void SettingsUninitialize()
 {
-    FileIO file = FileIOCreate(SETTINGS_PATH);
-    file.contents = (char *)MALLOC(Settings);
-    SDL_memcpy(file.contents, &settings, sizeof(Settings));
-    FileIOWriteBinary(&file);
-    FileIODestroy(&file);
+    FREE(settings);
 }
-void SettingsApply(Player *player)
+
+void SettingsGenerate()
 {
-    Settings settings = SettingsGetFromFile(SETTINGS_PATH);
-    if (settings.resolutionH != 1) // found settings file
+    settings->playerSkin = PlayerGetSkin();
+    settings->windowWidth = WindowGetWidth();
+    settings->windowHeight = WindowGetHeight();
+    settings->isFullscreen = WindowIsFullscreen();
+    settings->vsyncEnabled = WindowIsVSyncEnabled();
+    settings->desiredFPS = FPSManagerGetDesiredFPS();
+    SDL_memcpy(settings->bidnings, KeybindingGetKeys(), sizeof(SDL_Scancode) * AC_Count);
+}
+
+void SettingsApply()
+{
+    Settings notInitialized = {0};
+    if (!SDL_memcmp(settings, &notInitialized, sizeof(Settings)))
     {
-        WindowSetSize(settings.resolutionW, settings.resolutionH); //resolution
-
-        PlayerSetSpriteSheet(player, (SpriteSheet)settings.skin); // skin
-
-        WindowSetFullscreen(settings.isFullscreen); // fullscreen
-
-        WindowSetVSync(settings.vsync); // vsync
-
-        FPSManagerSetDesiredFPS(settings.fps); // fps
-
-        SDL_memcpy(KeybindingGetKeys(), &settings.keys, sizeof(SDL_Scancode) * (AC_Count - 1)); // keybindings
+        if (!SettingsTryLoad(SETTINGS_PATH))
+        {
+            SettingsGenerate();
+        }
     }
-    SettingsDestroy(&settings);
+    PlayerSetSpriteSheet(settings->playerSkin);
+    WindowSetSize(settings->windowWidth, settings->windowHeight);
+    WindowSetFullscreen(settings->isFullscreen);
+    WindowSetVSync(settings->vsyncEnabled);
+    FPSManagerSetDesiredFPS(settings->desiredFPS);
+    SDL_memcpy(KeybindingGetKeys(), &settings->bidnings, sizeof(SDL_Scancode) * (AC_Count - 1));
 }
-Settings SettingsGetFromFile(char path[])
+
+SDL_bool SettingsTryLoad(char *path)
 {
-    Settings settings;
-    settings.resolutionH = 1;
     FileIO file = FileIOCreate(path);
     if (!FileIOReadBinary(&file))
     {
         FileIODestroy(&file);
-        return settings;
+        return SDL_FALSE;
     }
-    settings = *(Settings *)file.contents;
+    *settings = *(Settings *)file.contents;
     FileIODestroy(&file);
-    return settings;
+    return SDL_TRUE;
 }
-void SettingsDestroy(Settings *settings)
+
+void SettingsSave(char *path)
 {
+    FileIO file = FileIOCreate(SETTINGS_PATH);
+    FileIOCopy(&file, settings, sizeof(Settings));
+    FileIOWriteBinary(&file);
+    FileIODestroy(&file);
 }

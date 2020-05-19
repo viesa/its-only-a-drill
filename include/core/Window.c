@@ -55,9 +55,15 @@ void WindowInitialize(const char *title)
 
 void WindowUninitialize()
 {
+    WindowSetFullscreen(SDL_FALSE);
     SDL_DestroyRenderer(window->renderer);
     SDL_DestroyWindow(window->sdl_window);
     SDL_free(window);
+}
+
+void WindowCenter()
+{
+    SDL_SetWindowPosition(window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 int WindowGetWidth()
@@ -118,6 +124,8 @@ void WindowSetVSync(SDL_bool onoff)
 void WindowSetFullscreen(SDL_bool onoff)
 {
     SDL_SetWindowFullscreen(window->sdl_window, (window->isFullscreen = onoff) ? SDL_WINDOW_FULLSCREEN : 0);
+    if (!WindowIsFullscreen())
+        WindowCenter();
 }
 
 void WindowSetTitle(const char *title)
@@ -128,6 +136,7 @@ void WindowSetTitle(const char *title)
 void WindowSetSize(int width, int height)
 {
     SDL_SetWindowSize(window->sdl_window, (window->width = width), (window->height = height));
+    WindowCenter();
 }
 
 void WindowSetIcon(const char *filepath)

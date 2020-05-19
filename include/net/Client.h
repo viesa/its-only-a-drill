@@ -13,7 +13,7 @@
 #define SERVER_TIMEOUT 3.0f
 
 ///\param player: which player the client should pair up with
-void ClientInitialize(Player *player);
+void ClientInitialize();
 void ClientUninitialize();
 
 void ClientUpdate();
@@ -64,7 +64,6 @@ void ClientSetName(char *name);
 // Clear the name with memset
 void ClientClearName();
 
-Player *ClientGetPlayer();
 ParsedPacket *ClientGetInBuffer();
 size_t ClientGetInBufferSize();
 SDL_mutex *ClientGetInBufferMutex();

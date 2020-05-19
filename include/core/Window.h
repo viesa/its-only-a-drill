@@ -12,6 +12,9 @@ void WindowClear();
 /// to display everything on screen
 void WindowPresent();
 
+// Move the window to the center
+void WindowCenter();
+
 int WindowGetWidth();
 int WindowGetHeight();
 SDL_Rect WindowGetScreenRect();

@@ -8,7 +8,6 @@ struct AppClient
 
     GroundListItems groundListItems;
 
-    Player *player;
     MapList *mapList;
 };
 
@@ -29,23 +28,23 @@ AppClient *AppClientCreate(SDL_bool *running)
     GuiInitialize();
     KeybindingInitialize();
     ScoreboardInitialize();
+    PlayerInitialize();
+    SettingsInitialize();
+    NPCManagerInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
     app->mapList = MapListCreate("maps");
-    app->player = PlayerCreate();
     app->middleOfMap = Vec2Create((float)GraphicsGetMapWidth() / 2.0f, (float)GraphicsGetMapHeight() / 2.0f);
     app->groundListItems = GroundListCreate();
 
-    SettingsApply(app->player);
-
     MenuInitialize(app->mapList);
-    ClientInitialize(app->player);
-    NPCManagerInitialize(app->player);
+    ClientInitialize();
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
 
+    SettingsApply();
     return app;
 }
 void AppClientDestroy(AppClient *app)
@@ -58,6 +57,8 @@ void AppClientDestroy(AppClient *app)
     ClientUninitialize();
     MenuUninitialize();
 
+    SettingsUninitialize();
+    PlayerUninitialize();
     ScoreboardUninitialize();
     KeybindingUninitialize();
     GuiUninitialize();
@@ -120,13 +121,13 @@ void AppClientUpdate(AppClient *app)
         CameraUpdate();
 
         NPCManagerUpdate();
-        PlayerUpdate(app->player);
+        PlayerUpdate();
 
         // EntityUpdate most be after input, playerupdate
         EntityManagerUpdate();
 
         // Sends player to server
-        CompressedEntity cEntity = EntityCompress(PlayerGetEntity(app->player));
+        CompressedEntity cEntity = EntityCompress(PlayerGetEntity());
         ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
 
         break;
@@ -147,11 +148,11 @@ void AppClientDraw(AppClient *app)
     {
     case GS_Menu:
     {
-        MenuUpdate(app->player);
+        MenuUpdate();
         GuiOverlayUpdate();
         if (MenuStateGet() == MS_InGameMenu)
         {
-            PlayerDraw(app->player);
+            PlayerDraw();
             ClientManagerDrawConnectedPlayers();
         }
         break;
@@ -160,14 +161,14 @@ void AppClientDraw(AppClient *app)
     case GS_RoundFinished:
     case GS_MatchFinished:
     {
-        CameraSetFollow(PlayerGetAimFollowP(app->player));
+        CameraSetFollow(PlayerGetAimFollowP());
         MapDraw();
 
         NPCManagerDrawAllNPCS();
         ClientManagerDrawConnectedPlayers();
-        PlayerDraw(app->player);
+        PlayerDraw();
         ClientManagerDrawBufferedShootingLines();
-        GuiUpdate(app->player);
+        GuiUpdate();
 
         if (GameStateGet() == GS_RoundFinished)
         {

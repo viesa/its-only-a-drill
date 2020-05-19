@@ -404,7 +404,7 @@ void ClientManagerHandleStartRoundPacket(ParsedPacket packet)
         return;
     Entity *entity = (Entity *)packet.data;
     ClientSetPlayerEntity(entity);
-    PlayerSetSpawnPoint(ClientGetPlayer(), entity->position);
+    PlayerSetSpawnPoint(entity->position);
     MenuStateSet(MS_None);
     GameStateSet(GS_Playing);
     ClientManagerSetInGame(SDL_TRUE);
@@ -455,7 +455,7 @@ void ClientManagerHandleFetchLobbyPacket(ParsedPacket packet)
 void ClientManagerHandlePlayerHitPacket(ParsedPacket packet)
 {
     HitData hitData = *(HitData *)packet.data;
-    Entity *playerEntity = PlayerGetEntity(ClientGetPlayer());
+    Entity *playerEntity = PlayerGetEntity();
     if (playerEntity->id == hitData.id)
     {
         playerEntity->health -= hitData.damage;
@@ -498,7 +498,7 @@ void ClientManagerHandleNewRoundPacket(ParsedPacket packet)
 {
     int round = *(int *)packet.data;
     InstanceSetRound(round);
-    PlayerRevive(ClientGetPlayer());
+    PlayerRevive();
 }
 
 void ClientManagerHandleScoreboardPacket(ParsedPacket packet)
@@ -509,7 +509,7 @@ void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet)
 {
     int points = (int)*(float *)packet.data;
     InstanceSetPoints(points);
-    ScoreboardSetScore(PlayerGetEntity(ClientGetPlayer())->id, points);
+    ScoreboardSetScore(PlayerGetEntity()->id, points);
 }
 
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)

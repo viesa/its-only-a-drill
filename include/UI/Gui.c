@@ -46,7 +46,7 @@ void GuiOverlayUpdate()
     GraphicsDraw(gui->scan);
 }
 
-void GuiUpdate(Player *player)
+void GuiUpdate()
 {
     //Draw overlays
     GraphicsDrawGradientY((SDL_Rect){0, 0, WindowGetWidth(), WindowGetHeight() / 5}, (SDL_Color){0, 0, 0, 255}, (SDL_Color){0, 0, 0, 0});
@@ -55,7 +55,7 @@ void GuiUpdate(Player *player)
     GraphicsDrawGradientX((SDL_Rect){WindowGetWidth() / 5 * 4, 0, WindowGetWidth() / 5, WindowGetHeight()}, (SDL_Color){0, 0, 0, 0}, (SDL_Color){0, 0, 0, 255});
 
     //Points
-    gui->points = ScoreboardGetScore(PlayerGetEntity(player)->id); //Temp Score grej
+    gui->points = ScoreboardGetScore(PlayerGetEntity()->id); //Temp Score grej
 
     //Update loop variables
     if (gui->loopCount < 2 * PI)
