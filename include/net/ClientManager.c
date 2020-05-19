@@ -1,11 +1,5 @@
 #include "ClientManager.h"
 
-typedef struct ShootingLine
-{
-    Vec2 start;
-    Vec2 end;
-} ShootingLine;
-
 typedef struct ClientManager
 {
     Vector *players;
@@ -24,7 +18,7 @@ void ClientManagerInitialize()
     ALLOC_ERROR_CHECK(clientManager);
 
     clientManager->players = VectorCreate(sizeof(EntityIndexP), 100);
-    clientManager->shootingLines = VectorCreate(sizeof(ShootingLine), 10);
+    clientManager->shootingLines = VectorCreate(sizeof(ShootData), 10);
     clientManager->joinList = VectorCreate(sizeof(JoinableSession), 5);
     clientManager->inLobby = SDL_FALSE;
     clientManager->inGame = SDL_FALSE;
@@ -151,12 +145,27 @@ void ClientManagerDrawConnectedPlayers()
 
 void ClientManagerDrawBufferedShootingLines()
 {
+    float shootLen = 35.0f;
     for (int i = 0; i < clientManager->shootingLines->size; i++)
     {
-        ShootingLine line = ((ShootingLine *)clientManager->shootingLines->data)[i];
-        CameraDrawLine(line.start.x, line.start.y, line.end.x, line.end.y, (SDL_Color){200, 200, 200, 255});
+        ShootData *line = &((ShootData *)clientManager->shootingLines->data)[i];
+        Vec2 delta = Vec2MulL(line->dir, shootLen);
+        Vec2 startToEnd = Vec2Sub(line->end, line->start);
+        float step = ClockGetDeltaTime() * 5000.0f;
+
+        if (step + shootLen < Vec2Len(startToEnd))
+        {
+            line->start = Vec2Add(line->start, Vec2MulL(line->dir, step));
+            CameraDrawLine(line->start.x, line->start.y, line->start.x + delta.x, line->start.y + delta.y, (SDL_Color){200, 200, 200, 255});
+        }
+        else
+        {
+            delta = startToEnd;
+            CameraDrawLine(line->start.x, line->start.y, line->start.x + delta.x, line->start.y + delta.y, (SDL_Color){200, 200, 200, 255});
+            VectorErase(clientManager->shootingLines, i);
+            i--;
+        }
     }
-    VectorClear(clientManager->shootingLines);
 }
 
 void ClientManagerDisconnectFromTimeoutServer()
@@ -475,8 +484,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket packet)
 void ClientManagerHandlePlayerShootPacket(ParsedPacket packet)
 {
     ShootData shootData = *(ShootData *)packet.data;
-    ShootingLine shootingLine = {shootData.lineStart, shootData.lineEnd};
-    VectorPushBack(clientManager->shootingLines, &shootingLine);
+    VectorPushBack(clientManager->shootingLines, &shootData);
 }
 
 void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet)

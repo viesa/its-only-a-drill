@@ -161,7 +161,7 @@ void PlayerShoot()
         entity->Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
         void *func = multiplayerHandler;
-        RayScan(player->entity, &unitPlayerToMouse, &item->Stats, func);
+        RayScanClosest(player->entity, &unitPlayerToMouse, &item->Stats, func);
     }
 }
 
