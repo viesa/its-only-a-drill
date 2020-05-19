@@ -30,6 +30,9 @@ void ClientManagerDisconnectFromTimeoutServer();
 void ClientManagerLeaveSessionLocally();
 // Clears the connected players entities
 void ClientManagerClearPlayers();
+// Adds shooting line to shooting line buffer
+// Can be used even if you are in local game
+void ClientManagerAddShootingLine(ShootData shootData);
 
 SDL_bool ClientManagerIsInGame();
 SDL_bool ClientManagerIsInLobby();
@@ -67,6 +70,7 @@ void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet);
 void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet);
+void ClientManagerHandleCountdownPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();

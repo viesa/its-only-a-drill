@@ -51,6 +51,8 @@ void AudioInitialize()
     //------------------ Music files ------------------
     //-------------------------------------------------
     audio.m_music[MF_MainMusic] = AudioLoadMusic("assets/music/Omega Spectrum - Spectrum.mp3");
+    audio.m_music[MF_MainMusicTwo] = AudioLoadMusic("assets/music/DirtyElectroHouse_1.mp3");
+    audio.m_music[MF_GameMusic] = AudioLoadMusic("assets/music/Formant_2.mp3");
 }
 
 void AudioUninitialize()
@@ -115,10 +117,10 @@ void AudioSetMasterVolume(double multiplier)
 }
 void AudioSetSFXVolume(Uint8 volume)
 {
-    if (volume < 0)
+    if (volume > 128)
         volume = 0;
-    else if (volume > 0)
-        volume = 128;
+    else if (volume > 64)
+        volume = 64;
 
     for (int i = 0; i < SF_Count; i++)
     {
@@ -129,9 +131,9 @@ void AudioSetSFXVolume(Uint8 volume)
 
 void AudioSetMusicVolume(Uint8 volume)
 {
-    if (volume < 0)
+    if (volume > 128)
         volume = 0;
-    else if (volume > 0)
+    else if (volume > 64)
         volume = 64;
 
     Mix_VolumeMusic(volume);

@@ -15,8 +15,9 @@ typedef struct HitData
 
 typedef struct ShootData
 {
-    Vec2 lineStart;
-    Vec2 lineEnd;
+    Vec2 start;
+    Vec2 end;
+    Vec2 dir;
 } ShootData;
 
 // updates weapon logik thats needed efter frame like cooldown
