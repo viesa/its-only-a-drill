@@ -52,4 +52,7 @@ void AudioSetMaster(double multiplier);
 void AudioSetSFX(Uint8 volume);
 void AudioSetMusic(Uint8 volume);
 
+Mix_Chunk *AudioLoadSound(char *path);
+Mix_Music *AudioLoadMusic(char *path);
+
 #endif
