@@ -109,7 +109,8 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, vo
         ShootData shootData = {playerCenter, Vec2Create(endPointX, endPointY)};
         ClientTCPSend(PT_PlayerShoot, &shootData, sizeof(shootData));
 #ifdef Debug_Weapon_GetHitInfo
-        log_debug("closest entity[%d] health=%d ", closestEntity, entity->health);
+        // "Entity" finns inte
+        // log_debug("closest entity[%d] health=%d ", closestEntity, entity->health);
 #endif
     }
 }

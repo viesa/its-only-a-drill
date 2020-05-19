@@ -2,8 +2,6 @@
 
 typedef struct Client
 {
-    Player *player;
-
     NetPlayer server;
     UDPsocket udpSocket;
     SDLNet_SocketSet socketSet;
@@ -26,11 +24,10 @@ typedef struct Client
 
 static Client *client;
 
-void ClientInitialize(Player *player)
+void ClientInitialize()
 {
     client = MALLOC(Client);
     ALLOC_ERROR_CHECK(client);
-    client->player = player;
     client->server = NetPlayerCreate(NULL, 0);
     client->udpSocket = NULL;
     client->socketSet = SDLNet_AllocSocketSet(2);
@@ -62,8 +59,7 @@ void ClientUninitialize()
     SDL_DestroyMutex(client->connectMutex);
     client->isInitialized = SDL_FALSE;
     client->receivedPlayerID = SDL_FALSE;
-    if (client->player)
-        PlayerGetEntity(client->player)->id = -1;
+    PlayerGetEntity()->id = -1;
     FREE(client);
 }
 
@@ -268,7 +264,7 @@ int ClientUDPSend(PacketType type, void *data, size_t size)
 
     assert("Attempting to send UDP-packet without client initialization" && client->isInitialized);
 
-    UDPpacket *outgoing = UDPPacketCreate(type, PlayerGetEntity(client->player)->id, data, size);
+    UDPpacket *outgoing = UDPPacketCreate(type, PlayerGetEntity()->id, data, size);
     outgoing->address.host = client->server.ip->host;
     outgoing->address.port = client->server.ip->port;
 
@@ -310,7 +306,7 @@ int ClientTCPSend(PacketType type, void *data, size_t size)
     }
     assert("Attempting to send TCP-packet without client initialization" && client->isInitialized);
 
-    int id = PlayerGetEntity(client->player)->id;
+    int id = PlayerGetEntity()->id;
     TCPpacket *outgoing = TCPPacketCreate(type, id, data, size);
     outgoing->address = client->server.socket;
 
@@ -553,14 +549,14 @@ void ClientReceivedAlivePacket()
 
 void ClientSetPlayerID(int id)
 {
-    PlayerGetEntity(client->player)->id = id;
+    PlayerGetEntity()->id = id;
     client->receivedPlayerID = SDL_TRUE;
 }
 
 void ClientSetPlayerEntity(Entity *entity)
 {
     // Shallow copy the entity to the player
-    *PlayerGetEntity(client->player) = *entity;
+    *PlayerGetEntity() = *entity;
 }
 
 char *ClientGetName()
@@ -578,11 +574,6 @@ void ClientSetName(char *name)
 void ClientClearName()
 {
     SDL_memset(client->name, 0, MAX_PLAYERNAME_SIZE);
-}
-
-Player *ClientGetPlayer()
-{
-    return client->player;
 }
 
 size_t ClientGetInBufferArraySize()

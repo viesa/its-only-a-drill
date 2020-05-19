@@ -3,7 +3,7 @@
 #include "Library.h"
 #include "Client.h"
 
-struct Player
+typedef struct Player
 {
     EntityIndexP entity; // Players borrows an entity to control
     PlayerState state;
@@ -22,12 +22,15 @@ struct Player
     float respawnCooldown;
 
     Vec2 spawnPoint;
-};
+} Player;
 
-Player *PlayerCreate()
+static Player *player;
+
+void PlayerInitialize()
 {
-    Player *player = MALLOC(Player);
+    player = MALLOC(Player);
     ALLOC_ERROR_CHECK(player);
+
     player->entity = EntityManagerAdd(ET_Player, Vec2Create(0.0f, 0.0f));
     player->inventory = InventoryCreate();
     player->spriteSheet = SS_Character_Prisoner;
@@ -40,16 +43,14 @@ Player *PlayerCreate()
     player->respawnCooldown = 500.0f;
     player->respawnTimer = player->respawnCooldown;
     player->spawnPoint = Vec2Create(0.0f, 0.0f);
-
-    return player;
 }
 
-void PlayerDestroy(Player *player)
+void PlayerUninitialize()
 {
     FREE(player);
 }
 
-void PlayerUpdate(Player *player)
+void PlayerUpdate()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     PlayerCameraUpdate(player);
@@ -72,12 +73,12 @@ void PlayerUpdate(Player *player)
     weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
 }
 
-void PlayerDraw(Player *player)
+void PlayerDraw()
 {
     EntityDrawIndex(player->entity);
 }
 
-void PlayerCameraUpdate(Player *player)
+void PlayerCameraUpdate()
 {
     // camera
     Vec2 mousePos = InputLastMousePos();
@@ -92,7 +93,7 @@ void PlayerCameraUpdate(Player *player)
     player->aimFollow = Vec2Add(aim, ENTITY_ARRAY[*player->entity].position);
 }
 
-void PlayerMomventUpdate(Player *player)
+void PlayerMomventUpdate()
 {
     // Movment
     ENTITY_ARRAY[*player->entity].Force.y += 500 * ((InputIsKeyDown(SDL_SCANCODE_S) || InputIsKeyDown(SDL_SCANCODE_DOWN)) -
@@ -101,7 +102,7 @@ void PlayerMomventUpdate(Player *player)
                                                     (InputIsKeyDown(SDL_SCANCODE_A) || InputIsKeyDown(SDL_SCANCODE_LEFT)));
 }
 
-void PlayerAnimationUpdate(Player *player)
+void PlayerAnimationUpdate()
 {
     // animation
     AnimUpdate(&player->leg, ClockGetDeltaTime());
@@ -130,14 +131,14 @@ void PlayerAnimationUpdate(Player *player)
     AnimApplyToDrawable(&player->body, &ENTITY_ARRAY[*player->entity].drawables[1], 1.5f);
 }
 
-void PlayerRotateToCamera(Player *player)
+void PlayerRotateToCamera()
 {
     float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), player->forward));
     float degrees = player->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(player->entity, degrees);
 }
 
-void PlayerShoot(Player *player)
+void PlayerShoot()
 {
     Item *item = &player->inventory.contents[player->inventory.top - 1];
 #ifdef PLAYER_DEBUG
@@ -164,7 +165,7 @@ void PlayerShoot(Player *player)
     }
 }
 
-void PlayerKill(Player *player)
+void PlayerKill()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     player->respawnTimer = player->respawnCooldown;
@@ -174,7 +175,7 @@ void PlayerKill(Player *player)
     entity->isCollider = SDL_FALSE;
 }
 
-void PlayerRevive(Player *player)
+void PlayerRevive()
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     player->respawnTimer = player->respawnCooldown;
@@ -186,7 +187,7 @@ void PlayerRevive(Player *player)
     entity->health = 100;
 }
 
-void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet)
+void PlayerSetSpriteSheet(SpriteSheet spriteSheet)
 {
     Entity *entity = &ENTITY_ARRAY[*player->entity];
     for (int i = 0; i < entity->nDrawables; i++)
@@ -196,17 +197,22 @@ void PlayerSetSpriteSheet(Player *player, SpriteSheet spriteSheet)
     player->spriteSheet = spriteSheet;
 }
 
-Entity *PlayerGetEntity(Player *player)
+Entity *PlayerGetEntity()
 {
     return &ENTITY_ARRAY[*player->entity];
 }
 
-Vec2 *PlayerGetAimFollowP(Player *player)
+SpriteSheet PlayerGetSkin()
+{
+    return player->spriteSheet;
+}
+
+Vec2 *PlayerGetAimFollowP()
 {
     return &player->aimFollow;
 }
 
-void PlayerSetSpawnPoint(Player *player, Vec2 spawnPoint)
+void PlayerSetSpawnPoint(Vec2 spawnPoint)
 {
     player->spawnPoint = spawnPoint;
 }

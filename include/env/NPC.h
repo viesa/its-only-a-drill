@@ -20,7 +20,7 @@ typedef enum NPCState
     NPC_Count
 } NPCState;
 
-NPC *NPCCreate(Vec2 pos, Player *player);
+NPC *NPCCreate(Vec2 pos);
 void NPCDestroy(NPC *npc);
 
 void NPCUpdate(NPC *npc);

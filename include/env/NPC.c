@@ -27,8 +27,6 @@ MovePattern MovePatternCreate()
 
 struct NPC
 {
-    Player *player;
-
     EntityIndexP entity;
     NPCState state;
     SpriteSheet spriteSheet;
@@ -47,11 +45,10 @@ struct NPC
     int DPBoxSize;
 };
 
-NPC *NPCCreate(Vec2 pos, Player *player)
+NPC *NPCCreate(Vec2 pos)
 {
     NPC *npc = MALLOC(NPC);
     ALLOC_ERROR_CHECK(npc);
-    npc->player = player;
     npc->entity = EntityManagerAdd(ET_Player, pos);
     npc->state = NPC_Passive;
     npc->spriteSheet = SS_Character_ChernobylWorker;
@@ -78,7 +75,7 @@ void NPCUpdate(NPC *npc)
     if (npc->state != NPC_Dead)
         NPCUpdateAnimation(npc);
     if (npc->state == NPC_Fight)
-        npc->forward = Vec2Unit(Vec2Sub(PlayerGetEntity(npc->player)->position, ENTITY_ARRAY[*npc->entity].position));
+        npc->forward = Vec2Unit(Vec2Sub(PlayerGetEntity()->position, ENTITY_ARRAY[*npc->entity].position));
     float vecAngle = toDegrees(Vec2Ang(Vec2Create(1.0f, 0.0f), npc->forward));
     float degrees = npc->forward.y > 0.0f ? vecAngle : 360 - vecAngle;
     EntityRotateAll(npc->entity, degrees);
@@ -172,9 +169,9 @@ void NPCUpdateBehaviorFight(NPC *npc)
 {
     NPCShoot(npc);
     Entity *entity = &ENTITY_ARRAY[*npc->entity];
-    Entity *pEntity = PlayerGetEntity(npc->player);
+    Entity *pEntity = PlayerGetEntity();
     Vec2 enemyToPlayer = Vec2Sub(pEntity->position, entity->position);    
-    if (PlayerGetEntity(npc->player)->health < 0)
+    if (PlayerGetEntity()->health < 0)
     {
         npc->state = NPC_Neutral;
     }
@@ -216,7 +213,7 @@ void NPCMoveTo(NPC *npc, Vec2 moveTo)
 void NPCSwitchBehaviorState(NPC *npc)
 {
     Entity *entity = &ENTITY_ARRAY[*npc->entity];
-    Entity *pEntity = PlayerGetEntity(npc->player);
+    Entity *pEntity = PlayerGetEntity();
     if (entity->health <= 0 && npc->state != NPC_Dead)
     {
         NPCKill(npc);
@@ -243,7 +240,7 @@ void NPCShoot(NPC *npc)
     if (item->Stats.currentTime <= 0)
     {
         Entity *entity = &ENTITY_ARRAY[*npc->entity];
-        Entity *pEntity = PlayerGetEntity(npc->player);
+        Entity *pEntity = PlayerGetEntity();
 
         item->Stats.currentTime = item->Stats.cooldownMS;
 

@@ -111,7 +111,7 @@ void MenuSetStartedOutTransistion(SDL_bool started)
     menu->startedOutTransition = started;
 }
 
-void MenuUpdate(Player *player)
+void MenuUpdate()
 {
     menu->mainMenuDblDelta += 20.0f * ClockGetDeltaTime() * menu->mainMenuDblDir;
     menu->mainMenuDbl.src.x = menu->mainMenuDblDelta;
@@ -203,7 +203,7 @@ void MenuUpdate(Player *player)
         MenuUpdateLobby();
         break;
     case MS_Options:
-        MenuUpdateOptions(player);
+        MenuUpdateOptions();
         break;
     case MS_Resolution:
         MenuUpdateResolution();
@@ -218,10 +218,10 @@ void MenuUpdate(Player *player)
         MenuUpdateAudio();
         break;
     case MS_CustomMap:
-        MenuUpdateCustomMap(player);
+        MenuUpdateCustomMap();
         break;
     case MS_Skin:
-        MenuUpdateSkin(player);
+        MenuUpdateSkin();
         break;
     default:
         break;
@@ -746,7 +746,7 @@ void MenuUpdateLobby()
     MenuTitleDraw("Lobby");
 }
 
-void MenuUpdateOptions(Player *player)
+void MenuUpdateOptions()
 {
     //Determine menu options
     int optionLength = 8;
@@ -833,14 +833,9 @@ void MenuUpdateOptions(Player *player)
         }
         case 6:
         {
-            Settings settings = SettingsCreate((int)PlayerGetEntity(player)->drawables[0].spriteSheet,
-                                               WindowGetWidth(),
-                                               WindowGetHeight(),
-                                               WindowIsFullscreen(),
-                                               WindowIsVSyncEnabled(),
-                                               FPSManagerGetDesiredFPS(),
-                                               KeybindingGetKeys());
-            SettingsSave(settings);
+            SettingsGenerate();
+            SettingsSave(SETTINGS_PATH);
+            Notify("Settings saved", 2.0f, NT_GOOD);
             break;
         }
         case 7:
@@ -1173,7 +1168,7 @@ void MenuUpdateAudio()
     MenuTitleDraw("Audio options");
 }
 
-void MenuUpdateCustomMap(Player *player)
+void MenuUpdateCustomMap()
 {
     //Determine menu options
     int optionLength = MapListGetNumMaps(menu->mapList) + 1;
@@ -1216,12 +1211,12 @@ void MenuUpdateCustomMap(Player *player)
         NPCManagerClearNPCS();
         for (int i = 0; i < mapInfo.enemySpawns->size; i++)
             NPCManagerAddNew(MapInfoGetEnemySpawns(&mapInfo)[i].position);
-        Entity *playerEntity = PlayerGetEntity(ClientGetPlayer());
+        Entity *playerEntity = PlayerGetEntity();
         *playerEntity = EntityCreate(Vec2Create(0.0f, 0.0f), ET_Player, playerEntity->id);
         if (mapInfo.enemySpawns->size > 0)
-            PlayerGetEntity(player)->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
+            PlayerGetEntity()->position = MapInfoGetPlayerSpawns(&mapInfo)[0].position;
         else
-            PlayerGetEntity(player)->position = Vec2Create(1000.0f, 1000.0f);
+            PlayerGetEntity()->position = Vec2Create(1000.0f, 1000.0f);
     }
 
     MenuDraw(options, optionLength);
@@ -1254,7 +1249,7 @@ void MenuUpdateCustomMap(Player *player)
     MenuTitleDraw("Local game");
 }
 
-void MenuUpdateSkin(Player *player)
+void MenuUpdateSkin()
 {
     //Determine menu options
     int optionLength = 7;
@@ -1343,7 +1338,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Prisoner;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
             MenuStateSet(MS_MainMenu);
             break;
         }
@@ -1351,7 +1346,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_ChernobylWorker;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1360,7 +1355,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_IronMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1369,7 +1364,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_iDubbbz;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1378,7 +1373,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_OldMan;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;
@@ -1387,7 +1382,7 @@ void MenuUpdateSkin(Player *player)
         {
             SpriteSheet spriteSheet = SS_Character_Sonic;
             ClientTCPSend(PT_ChangeSkin, (void *)&spriteSheet, sizeof(SpriteSheet));
-            PlayerSetSpriteSheet(player, spriteSheet);
+            PlayerSetSpriteSheet(spriteSheet);
 
             MenuStateSet(MS_MainMenu);
             break;

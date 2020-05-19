@@ -9,21 +9,16 @@
 // Only for storage purposes
 #define SETTINGS_PATH "settings.bin"
 
-typedef struct Settings
-{
-    int skin, resolutionW, resolutionH;
-    SDL_bool isFullscreen, vsync;
-    size_t fps;
-    SDL_Scancode keys[BINDINGS];
-} Settings;
-// Generates a settings structure based on the arguments (not allocated)
-Settings SettingsCreate(int skin, int resolutionW, int resolutionH, SDL_bool isFullscreen, SDL_bool vsync, size_t fps, SDL_Scancode keys[]);
-// Generates a settings structure based on the contents of a file (if failed to parse file the resolutionW is 1)
-Settings SettingsGetFromFile(char path[]);
-// Applies the settings to the user
-void SettingsApply(Player *player);
-// Saves the settings to SETTINGS_PATH
-void SettingsSave(Settings settings);
-// Not needed because nothing is allocated in settings
-void SettingsDestroy(Settings *settings);
+void SettingsInitialize();
+void SettingsUninitialize();
+
+// Generates a Settings based on current settings in the game
+void SettingsGenerate();
+// Try generates a Settings based on the contents of a file
+SDL_bool SettingsTryLoad(char *path);
+// Applies the Settings in the Settings structure
+void SettingsApply();
+// Saves the Settings to path
+void SettingsSave(char *path);
+
 #endif

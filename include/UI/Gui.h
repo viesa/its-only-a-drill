@@ -17,7 +17,7 @@ typedef enum GuiWindow
 void GuiInitialize();
 void GuiUninitialize();
 
-void GuiUpdate(Player *player);
+void GuiUpdate();
 void GuiOverlayUpdate();
 
 void GuiDrawFPS();
