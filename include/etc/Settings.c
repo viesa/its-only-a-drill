@@ -7,6 +7,9 @@ typedef struct Settings
     SDL_bool isFullscreen, vsyncEnabled;
     size_t desiredFPS;
     SDL_Scancode bidnings[AC_Count];
+    double volumeMaster;
+    Uint8 volumeSFX;
+    Uint8 volumeMusic;
 } Settings;
 
 static Settings *settings;
@@ -31,6 +34,9 @@ void SettingsGenerate()
     settings->isFullscreen = WindowIsFullscreen();
     settings->vsyncEnabled = WindowIsVSyncEnabled();
     settings->desiredFPS = FPSManagerGetDesiredFPS();
+    settings->volumeMaster = AudioGetMasterVolume();
+    settings->volumeSFX = AudioGetSFXVolume();
+    settings->volumeMusic = AudioGetMusicVolume();
     SDL_memcpy(settings->bidnings, KeybindingGetKeys(), sizeof(SDL_Scancode) * AC_Count);
 }
 
@@ -50,6 +56,9 @@ void SettingsApply()
     WindowSetVSync(settings->vsyncEnabled);
     FPSManagerSetDesiredFPS(settings->desiredFPS);
     SDL_memcpy(KeybindingGetKeys(), &settings->bidnings, sizeof(SDL_Scancode) * (AC_Count - 1));
+    AudioSetMasterVolume(settings->volumeMaster);
+    AudioSetSFXVolume(settings->volumeSFX);
+    AudioSetMusicVolume(settings->volumeMusic);
 }
 
 SDL_bool SettingsTryLoad(char *path)
