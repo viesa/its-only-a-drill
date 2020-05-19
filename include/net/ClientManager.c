@@ -127,6 +127,9 @@ void ClientManagerHandleAllPackets()
         case PT_MatchFinished:
             ClientManagerHandleMatchFinishedPacket(nextPacket);
             break;
+        case PT_Countdown:
+            ClientManagerHandleCountdownPacket(nextPacket);
+            break;
         default:
             break;
         }
@@ -534,7 +537,6 @@ void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet)
 {
     if (clientManager->inGame)
     {
-        RoundSetCountdown(*(float *)packet.data);
         GameStateSet(GS_MatchFinished);
     }
 }
@@ -543,9 +545,13 @@ void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet)
 {
     if (clientManager->inGame)
     {
-        RoundSetCountdown(*(float *)packet.data);
         GameStateSet(GS_RoundFinished);
     }
+}
+
+void ClientManagerHandleCountdownPacket(ParsedPacket packet)
+{
+    RoundSetCountdown(*(float *)packet.data);
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()
