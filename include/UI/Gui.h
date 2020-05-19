@@ -4,7 +4,9 @@
 #include "Dependencies.h"
 #include "Font.h"
 #include "Clock.h"
-#include "Score.h"
+#include "Player.h"
+#include "Scoreboard.h"
+#include "Round.h"
 
 typedef enum GuiWindow
 {
@@ -15,8 +17,11 @@ typedef enum GuiWindow
 void GuiInitialize();
 void GuiUninitialize();
 
-void GuiUpdate();
+void GuiUpdate(Player *player);
 void GuiOverlayUpdate();
+
 void GuiDrawFPS();
+void GuiDrawFinishedRoundMessage();
+void GuiDrawFinishedMatchMessage();
 
 #endif

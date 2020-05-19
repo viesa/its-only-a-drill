@@ -30,6 +30,8 @@ void ServerStopListening();
 void ServerUpdateTimeoutTimers();
 // Sends 'alive' packets to all clients, updating their time-out timer
 void ServerPingClients();
+// Removes all players from session then deleting the session from session list
+void ServerRemoveSession(Session *session);
 
 // Broadcast UDP-packet to connected clients
 void ServerUDPBroadcast(PacketType type, void *data, int size);

@@ -31,5 +31,5 @@ float ClockGetDeltaTimeMS()
 
 float ClockGetFPS()
 {
-    return 1 / ClockGetDeltaTime(appClock);
+    return 1.0f / ClockGetDeltaTime();
 }

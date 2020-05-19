@@ -1,5 +1,5 @@
 #ifndef SESSION_H
-#define SESSIOn_H
+#define SESSION_H
 
 #include "Dependencies.h"
 #include "Vector.h"
@@ -24,6 +24,11 @@ typedef struct Session
 
     int nRounds;
     int currentRound;
+
+    SDL_bool startingNewRound;
+    SDL_bool quittingMatch;
+    float finishedRoundCountdown;
+    float finishedMatchCountdown;
 } Session;
 
 Session SessionCreate(int id, int nRounds, NetPlayer *host, char *rawmap, size_t size);

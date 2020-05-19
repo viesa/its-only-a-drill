@@ -28,6 +28,7 @@ AppClient *AppClientCreate(SDL_bool *running)
     ClientManagerInitialize();
     GuiInitialize();
     KeybindingInitialize();
+    ScoreboardInitialize();
 
     AppClient *app = (AppClient *)SDL_malloc(sizeof(AppClient));
     app->running = running;
@@ -41,9 +42,6 @@ AppClient *AppClientCreate(SDL_bool *running)
     MenuInitialize(app->mapList);
     ClientInitialize(app->player);
     NPCManagerInitialize(app->player);
-
-    ScoreCreate(0);
-    ScoreIncrement(100, 0);
 
     GameStateSet(GS_Menu);
     MenuStateSet(MS_Splash);
@@ -60,6 +58,7 @@ void AppClientDestroy(AppClient *app)
     ClientUninitialize();
     MenuUninitialize();
 
+    ScoreboardUninitialize();
     KeybindingUninitialize();
     GuiUninitialize();
     ClientManagerUninitialize();
@@ -132,9 +131,13 @@ void AppClientUpdate(AppClient *app)
 
         break;
     }
+    case GS_RoundFinished:
+    case GS_MatchFinished:
     default:
         break;
     }
+    if (ConStateGet() == CON_Online)
+        ClientTCPSend(PT_FetchPlayerPoints, NULL, 0);
 }
 
 void AppClientDraw(AppClient *app)
@@ -154,6 +157,8 @@ void AppClientDraw(AppClient *app)
         break;
     }
     case GS_Playing:
+    case GS_RoundFinished:
+    case GS_MatchFinished:
     {
         CameraSetFollow(PlayerGetAimFollowP(app->player));
         MapDraw();
@@ -162,7 +167,17 @@ void AppClientDraw(AppClient *app)
         ClientManagerDrawConnectedPlayers();
         PlayerDraw(app->player);
         ClientManagerDrawBufferedShootingLines();
-        GuiUpdate();
+        GuiUpdate(app->player);
+
+        if (GameStateGet() == GS_RoundFinished)
+        {
+            GuiDrawFinishedRoundMessage();
+        }
+        else if (GameStateGet() == GS_MatchFinished)
+        {
+            GuiDrawFinishedMatchMessage();
+        }
+
         break;
     }
     default:

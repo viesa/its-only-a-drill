@@ -5,14 +5,15 @@
 #include "JoinableSesssion.h"
 #include "Weapon.h"
 
-void ServerManagerInitalize(SDL_bool *isRunning);
-void ServerManagerDestroy();
-
 // Handles all incoming packets
 void ServerManagerHandleAllPackets();
 
 // Kicks all clients that hasn't replied to 'alive' packets before time-out
 void ServerManagerKickTimeoutClients();
+
+void ServerManagerAdvanceSessionsWithOnePlayerAlive();
+
+void ServerManagerStartSession(Session *session);
 
 // Handles different kind of packets
 void ServerManagerHandleTextPacket(ParsedPacket packet);
@@ -27,7 +28,7 @@ void ServerManagerHandleCompressedEntityPacket(ParsedPacket packet);
 void ServerManagerHandleCreateSessionPacket(ParsedPacket packet);
 void ServerManagerHandleJoinSessionPacket(ParsedPacket packet);
 void ServerManagerHandleLeaveSessionPacket(ParsedPacket packet);
-void ServerManagerHandleStartSessionPacket(ParsedPacket packet);
+void ServerManagerHandleStartRoundPacket(ParsedPacket packet);
 void ServerManagerHandleChangeSkinPacket(ParsedPacket packet);
 void ServerManagerHandleFetchLobbyPacket(ParsedPacket packet);
 void ServerManagerHandleFetchSessionsPacket(ParsedPacket packet);

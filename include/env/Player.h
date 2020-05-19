@@ -7,6 +7,7 @@
 #include "EntityManager.h"
 #include "Anim.h"
 #include "Weapon.h"
+#include "Scoreboard.h"
 
 typedef enum PlayerState
 {

@@ -5,6 +5,8 @@ typedef enum GameState
 {
     GS_Menu,
     GS_Playing,
+    GS_RoundFinished,
+    GS_MatchFinished,
     GS_None,
     GS_Count
 } GameState;

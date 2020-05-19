@@ -14,6 +14,7 @@ void WindowPresent();
 
 int WindowGetWidth();
 int WindowGetHeight();
+SDL_Rect WindowGetScreenRect();
 SDL_Renderer *WindowGetRenderer();
 SDL_bool WindowIsFullscreen();
 SDL_bool WindowIsVSyncEnabled();
