@@ -73,7 +73,7 @@ void EntityManagerOnCollision()
                     // Recessive hitbox
                     SDL_Rect rHitbox = EntityGetHitbox(rEntity);
                     // Test intersection
-                    if (SDL_HasIntersection(&dHitbox, &rHitbox))
+                    if (CollisionBoxWithBox_AABB(&dHitbox, &rHitbox))
                     {
                         // Calculating centers
                         Vec2 DominantCenter = RectMid(dHitbox);
@@ -91,7 +91,7 @@ void EntityManagerOnCollision()
                         float massRatioBasedOnDominant = !dEntity->isMovable ? 0.0f : *dMass / (*dMass + *rMass);
 
                         // Carefully step back where the rects did not intesect
-                        for (const float stepSize = 0.05f; SDL_HasIntersection(&dHitbox, &rHitbox);)
+                        for (const float stepSize = 0.05f; CollisionBoxWithBox_AABB(&dHitbox, &rHitbox);)
                         {
                             dEntity->position.x += ResultDirection.x * (1.0f - massRatioBasedOnDominant) * stepSize;
                             dEntity->position.y += ResultDirection.y * (1.0f - massRatioBasedOnDominant) * stepSize;
