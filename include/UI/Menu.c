@@ -238,6 +238,8 @@ void MenuUpdateSplash()
             MenuStateSet(MS_Name);
         }
 
+        menu->mainMenuDbl.dst.w = WindowGetWidth();
+        menu->mainMenuDbl.dst.h = WindowGetHeight();
         GraphicsDraw(menu->mainMenuDbl);
 
         FontDraw3DCustom(TTF_Antilles_XXL, "It's Only a Drill", WindowGetWidth() / 2, WindowGetHeight() / 4, FAL_C, 0, cos(menu->loopCount) * 1.5, sin(menu->loopCount), 10, menu->clr);
@@ -257,6 +259,8 @@ void MenuUpdateSplash()
 
 void MenuUpdateName()
 {
+    menu->mainMenuDbl.dst.w = WindowGetWidth();
+    menu->mainMenuDbl.dst.h = WindowGetHeight();
     GraphicsDraw(menu->mainMenuDbl);
 
     if (InputIsKeyPressed(SDL_SCANCODE_BACKSPACE))
