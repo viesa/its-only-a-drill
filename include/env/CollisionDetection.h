@@ -15,12 +15,9 @@ typedef struct Circle
 } Circle;
 
 //functions
-// Note all functions are for 2D
+// Note all functions are for 2D and all with extension AABB is axis-aligned bounding box
 SDL_bool CollisionPointWithBox_AABB(Vec2 *point, SDL_Rect *Box);
 SDL_bool CollisionBoxWithBox_AABB(SDL_Rect *BoxA, SDL_Rect *BoxB);
-SDL_bool CollisionCircelWithPoint(Vec2 *point, Circle *circle);
-SDL_bool CollisionCircelWithCircel(Circle *circleA, Circle *circleB);
-
-// char is 1 byte preftect to store 4 sides in
-char CollisionBoxWithBoxReturnsSide_AABB(SDL_Rect *BoxA, SDL_Rect *BoxB);
+SDL_bool CollisionCircleWithPoint(Vec2 *point, Circle *circle);
+SDL_bool CollisionCircleWithCircle(Circle *circleA, Circle *circleB);
 #endif

@@ -22,6 +22,7 @@ typedef struct Menu
     Sound MenuStep;
     Music MenuTheme;
     Music MenuTheme2;
+    Music GameTheme;
     int themecheck;
     int themecheck2;
     SDL_Color clr[10];
@@ -65,6 +66,7 @@ void MenuInitialize(MapList *mapList)
     menu->MenuStep = SoundCreate(SF_MenuStep);
     menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->MenuTheme2 = MusicCreate(MF_MainMusicTwo);
+    menu->GameTheme = MusicCreate(MF_GameMusic);
     menu->themecheck = 0;
     menu->themecheck2 = 0;
 
@@ -131,6 +133,16 @@ void MenuUpdate()
         menu->loopCount = 0;
     }
 
+    if (menu->themecheck == menu->themecheck2)
+    {
+        if (menu->themecheck != 0)
+        {
+            MusicStop(&menu->GameTheme);
+            MusicPlay(&menu->MenuTheme2, -1);
+            menu->themecheck++;
+        }
+    }
+
     //Update text colors
     menu->clr[0] = (SDL_Color){215, 159, 227, 255};
     menu->clr[1] = (SDL_Color){215, 139, 207, 255};
@@ -150,11 +162,11 @@ void MenuUpdate()
     menu->activeIndex += (InputIsKeyPressed(SDL_SCANCODE_S) || InputIsKeyPressed(SDL_SCANCODE_DOWN)) -
                          (InputIsKeyPressed(SDL_SCANCODE_W) || InputIsKeyPressed(SDL_SCANCODE_UP));
 
-    if (menu->lastIndex != menu->activeIndex)
+    if (menu->lastIndex != menu->activeIndex && MenuStateGet() != MS_Splash && MenuStateGet() != MS_Name)
     {
         menu->indexChanged = SDL_TRUE;
         SoundStop(&menu->MenuStep);
-        SoundPlay(&menu->MenuStep,0);
+        SoundPlay(&menu->MenuStep, 0);
     }
     else
     {
@@ -212,6 +224,9 @@ void MenuUpdate()
         break;
     case MS_Skin:
         MenuUpdateSkin();
+        break;
+    case MS_Summary:
+        MenuUpdateSummary();
         break;
     default:
         break;
@@ -273,6 +288,7 @@ void MenuUpdateMainMenu()
     {
         MusicPlay(&menu->MenuTheme2, -1);
         menu->themecheck++;
+        menu->themecheck2++;
     }
     //Determine menu options
     int optionLength = 7;
@@ -414,6 +430,9 @@ void MenuUpdateInGameMenu()
     {
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
+        MusicStop(&menu->MenuTheme2);
+        MusicPlay(&menu->GameTheme,-1);
+        menu->themecheck2++;
         menu->startedOutTransition = SDL_FALSE;
     }
     else if ((menu->startedInTransition || menu->startedOutTransition) && !TransitionIsDone())
@@ -475,9 +494,11 @@ void MenuUpdateHostLobby()
 
     if (menu->startedOutTransition && TransitionIsDone())
     {
-
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
+        MusicStop(&menu->MenuTheme2);
+        MusicPlay(&menu->GameTheme, -1);
+        menu->themecheck2++;
         menu->startedOutTransition = SDL_FALSE;
     }
     else if (menu->startedOutTransition && !TransitionIsDone())
@@ -1212,7 +1233,9 @@ void MenuUpdateCustomMap()
     {
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
-        MusicStop(&menu->MenuTheme);
+        MusicStop(&menu->MenuTheme2);
+        MusicPlay(&menu->GameTheme, -1);
+        menu->themecheck2++;
         menu->startedOutTransition = SDL_FALSE;
         // To make in-game menu work properly
         ClientManagerSetInGame(SDL_TRUE);
@@ -1387,6 +1410,64 @@ void MenuUpdateSkin()
         return;
     GraphicsDraw(*menu->previewLeg.active);
     GraphicsDraw(*menu->previewBody.active);
+}
+
+void MenuUpdateSummary()
+{
+
+    menu->mainMenuDbl.dst.w = WindowGetWidth();
+    menu->mainMenuDbl.dst.h = WindowGetHeight();
+    GraphicsDraw(menu->mainMenuDbl);
+
+    ScoreboardEntry *allScores = ScoreboardGetAllScores();
+
+    int playerListLength = 20;
+    if (ScoreboardGetNumPlayers() < 20)
+        playerListLength = ScoreboardGetNumPlayers();
+
+    char playerList[playerListLength][100];
+
+    int playerPlace = 0;
+    for (int i = 0; i < ScoreboardGetNumPlayers(); i++)
+    {
+        if (allScores[i].id == PlayerGetEntity()->id)
+        {
+            playerPlace = i;
+        }
+    }
+
+    //Determine playerlist
+    char playerPlaceStr[100];
+    sprintf(playerPlaceStr, "Finished %d", playerPlace + 1);
+    MenuTitleDraw(playerPlaceStr);
+
+    for (int i = 0; i < playerListLength; i++)
+    {
+        sprintf(playerList[i], "%d: %s [%d pts]", i + 1, allScores[i].name, allScores[i].score);
+    }
+
+    int spacing = 1.5 * FontGetHeight(FontGetDynamicSizing());
+
+    //Draw playerlist
+    for (int i = 0; i < playerListLength; i++)
+    {
+        int yPos = FontGetHeight(TTF_Antilles_XXL) + 50 + spacing * i;
+
+        if (yPos > WindowGetHeight() - 50 - 2 * spacing)
+            continue;
+
+        int xPos = WindowGetWidth() / 20;
+
+        FontDraw3D(FontGetDynamicSizing(), playerList[i], xPos, yPos, FAL_L, 0, 1, F3D_TL, 10, menu->clr);
+    }
+
+    FontCachedDraw(FontGetDynamicSizing(), "Press [Enter] to return to the Main Menu.", WindowGetWidth() / 2, WindowGetHeight() / 4 * 3, FAL_C, 0, menu->clr[9]);
+
+    if (InputIsKeyPressed(SDL_SCANCODE_RETURN))
+    {
+        MenuStateSet(MS_MainMenu);
+        ClientManagerSetInGame(SDL_FALSE);
+    }
 }
 
 void MenuTitleDraw(char title[100])

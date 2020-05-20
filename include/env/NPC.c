@@ -19,8 +19,8 @@ MovePattern MovePatternCreate()
     pattern.points[7] = Vec2Create(-71.0f, 0.0f);
     pattern.points[8] = Vec2Create(-50.0f, -50.0f);
     pattern.points[9] = Vec2Create(0.0f, 0.0f);
-    pattern.points[10] = Vec2Create(30.0f, 30.0f);
-    pattern.points[11] = Vec2Create(-50.0f, -50.0f);
+    pattern.points[10] = Vec2Create(-50.0f, -50.0f);
+    pattern.points[11] = Vec2Create(50.0f, 50.0f);
     pattern.nPoints = 12;
     return pattern;
 }
@@ -42,7 +42,7 @@ struct NPC
 
     float movementSpeed;
     float aggravationRadius;
-    int DPBoxSize;
+    float radius;
 };
 
 NPC *NPCCreate(Vec2 pos)
@@ -50,7 +50,7 @@ NPC *NPCCreate(Vec2 pos)
     NPC *npc = MALLOC(NPC);
     ALLOC_ERROR_CHECK(npc);
     npc->entity = EntityManagerAdd(ET_Player, pos);
-    npc->state = NPC_Passive;
+    npc->state = NPC_Neutral;
     npc->spriteSheet = SS_Character_ChernobylWorker;
     npc->leg = AnimCreate(AN_PlayerLegs, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
     npc->body = AnimCreate(AN_PlayerBody, ANRO_RepeatFromEnd, npc->spriteSheet, 4, 0.05f);
@@ -61,7 +61,7 @@ NPC *NPCCreate(Vec2 pos)
     npc->movePattern = MovePatternCreate();
     npc->movementSpeed = 500.0f;
     npc->aggravationRadius = 150.0f;
-    npc->DPBoxSize = 6;
+    npc->radius = 10.0f;
     return npc;
 }
 void NPCDestroy(NPC *npc)
@@ -145,24 +145,15 @@ void NPCUpdateBehaviorNeutral(NPC *npc)
     Entity *entity = &ENTITY_ARRAY[*npc->entity];
     NPCMoveTo(npc, npc->desiredPos);
 
-    // Box around desired position
-    SDL_Rect boxDP = {(int)npc->desiredPos.x - npc->DPBoxSize / 2,
-                      (int)npc->desiredPos.y - npc->DPBoxSize / 2,
-                      npc->DPBoxSize,
-                      npc->DPBoxSize};
-
-    SDL_Rect hitbox = EntityGetHitbox(entity);
-    if (SDL_HasIntersection(&hitbox, &boxDP))
+    // circle around desired position
+    Circle tmp;
+    tmp.Position = RectMid(entity->drawables[0].dst);
+    tmp.Radius = npc->radius;
+    if (CollisionCircleWithPoint(&npc->desiredPos,&tmp))
     {
-        npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
-        if (npc->movePatternIndex == 11 || npc->movePatternIndex <= 9)
-        {
-            npc->movePatternIndex = 10;
-        }
-        else
-        {
-            npc->movePatternIndex++;
-        }
+        
+        npc->desiredPos = Vec2Add( RectMid(entity->drawables[0].dst), npc->movePattern.points[npc->movePatternIndex]);
+        npc->movePatternIndex = (npc->movePatternIndex < 10 || npc->movePatternIndex == 11) ? 10 : npc->movePatternIndex + 1;
     }
 }
 void NPCUpdateBehaviorFight(NPC *npc)
@@ -185,16 +176,13 @@ void NPCUpdateBehaviorAggressive(NPC *npc)
     Entity *entity = &ENTITY_ARRAY[*npc->entity];
     NPCMoveTo(npc, npc->desiredPos);
 
-    // Box around desired position
-    SDL_Rect boxDP = {(int)npc->desiredPos.x - npc->DPBoxSize / 2,
-                      (int)npc->desiredPos.y - npc->DPBoxSize / 2,
-                      npc->DPBoxSize,
-                      npc->DPBoxSize};
-
-    SDL_Rect hitbox = EntityGetHitbox(entity);
-    if (SDL_HasIntersection(&hitbox, &boxDP))
+    // circle around desired position
+    Circle tmp;
+    tmp.Position = RectMid(entity->drawables[0].dst);
+    tmp.Radius = npc->radius;
+    if (CollisionCircleWithPoint(&npc->desiredPos,&tmp))
     {
-        npc->desiredPos = Vec2Add(entity->position, npc->movePattern.points[npc->movePatternIndex]);
+        npc->desiredPos = Vec2Add( RectMid(entity->drawables[0].dst), npc->movePattern.points[npc->movePatternIndex]);
         npc->movePatternIndex = npc->movePatternIndex >= 7 ? 0 : npc->movePatternIndex + 1;
     }
 }
@@ -222,7 +210,7 @@ void NPCSwitchBehaviorState(NPC *npc)
     {
         Vec2 enemyToPlayer = Vec2Sub(pEntity->position, entity->position);
         //npc->state = NPC_Neutral;
-        if (entity->health < 100)
+        if (entity->health < 100 && npc->state != NPC_Fight)
         {
             npc->state = NPC_Aggressive;
         }

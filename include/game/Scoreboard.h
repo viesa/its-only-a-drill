@@ -15,11 +15,14 @@ typedef struct ScoreboardEntry
 void ScoreboardInitialize();
 void ScoreboardUninitialize();
 
-void ScoreboardAddPlayer(int id, char *name);
+void ScoreboardClear();
+
+void ScoreboardAddPlayer(int id, char *name, int startingScore);
 
 void ScoreboardAddScore(int id, int score);
 void ScoreboardSetScore(int id, int score);
 int ScoreboardGetScore(int id);
+size_t ScoreboardGetNumPlayers();
 
 ScoreboardEntry *ScoreboardGetAllScores();
 

@@ -4,6 +4,7 @@
 #include "Server.h"
 #include "JoinableSesssion.h"
 #include "Weapon.h"
+#include "Scoreboard.h"
 
 // Handles all incoming packets
 void ServerManagerHandleAllPackets();
@@ -35,6 +36,6 @@ void ServerManagerHandleFetchSessionsPacket(ParsedPacket packet);
 void ServerManagerHandlePlayerHitPacket(ParsedPacket packet);
 void ServerManagerHandlePlayerShootPacket(ParsedPacket packet);
 void ServerManagerHandlePlayerDeadPacket(ParsedPacket packet);
-void ServerManagerHandleFetchPlayerPointsPacket(ParsedPacket packet);
+void ServerManagerHandleFetchScoreboardPacket(ParsedPacket packet);
 
 #endif

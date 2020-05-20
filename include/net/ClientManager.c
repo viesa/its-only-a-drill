@@ -1,11 +1,5 @@
 #include "ClientManager.h"
 
-typedef struct ShootingLine
-{
-    Vec2 start;
-    Vec2 end;
-} ShootingLine;
-
 typedef struct ClientManager
 {
     Vector *players;
@@ -24,7 +18,7 @@ void ClientManagerInitialize()
     ALLOC_ERROR_CHECK(clientManager);
 
     clientManager->players = VectorCreate(sizeof(EntityIndexP), 100);
-    clientManager->shootingLines = VectorCreate(sizeof(ShootingLine), 10);
+    clientManager->shootingLines = VectorCreate(sizeof(ShootData), 10);
     clientManager->joinList = VectorCreate(sizeof(JoinableSession), 5);
     clientManager->inLobby = SDL_FALSE;
     clientManager->inGame = SDL_FALSE;
@@ -121,17 +115,17 @@ void ClientManagerHandleAllPackets()
         case PT_NewRound:
             ClientManagerHandleNewRoundPacket(nextPacket);
             break;
-        case PT_Scoreboard:
-            ClientManagerHandleScoreboardPacket(nextPacket);
-            break;
-        case PT_FetchPlayerPoints:
-            ClientManagerHandleFetchPlayerPoints(nextPacket);
-            break;
         case PT_RoundFinished:
             ClientManagerHandleRoundFinishedPacket(nextPacket);
             break;
         case PT_MatchFinished:
             ClientManagerHandleMatchFinishedPacket(nextPacket);
+            break;
+        case PT_Countdown:
+            ClientManagerHandleCountdownPacket(nextPacket);
+            break;
+        case PT_FetchScoreboard:
+            ClientManagerHandleFetchScoreboardPacket(nextPacket);
             break;
         default:
             break;
@@ -151,12 +145,27 @@ void ClientManagerDrawConnectedPlayers()
 
 void ClientManagerDrawBufferedShootingLines()
 {
+    float shootLen = 35.0f;
     for (int i = 0; i < clientManager->shootingLines->size; i++)
     {
-        ShootingLine line = ((ShootingLine *)clientManager->shootingLines->data)[i];
-        CameraDrawLine(line.start.x, line.start.y, line.end.x, line.end.y, (SDL_Color){200, 200, 200, 255});
+        ShootData *line = &((ShootData *)clientManager->shootingLines->data)[i];
+        Vec2 delta = Vec2MulL(line->dir, shootLen);
+        Vec2 startToEnd = Vec2Sub(line->end, line->start);
+        float step = ClockGetDeltaTime() * 5000.0f;
+
+        if (step + shootLen < Vec2Len(startToEnd))
+        {
+            line->start = Vec2Add(line->start, Vec2MulL(line->dir, step));
+            CameraDrawLine(line->start.x, line->start.y, line->start.x + delta.x, line->start.y + delta.y, (SDL_Color){200, 200, 200, 255});
+        }
+        else
+        {
+            delta = startToEnd;
+            CameraDrawLine(line->start.x, line->start.y, line->start.x + delta.x, line->start.y + delta.y, (SDL_Color){200, 200, 200, 255});
+            VectorErase(clientManager->shootingLines, i);
+            i--;
+        }
     }
-    VectorClear(clientManager->shootingLines);
 }
 
 void ClientManagerDisconnectFromTimeoutServer()
@@ -193,6 +202,11 @@ void ClientManagerClearPlayers()
         EntityManagerRemove(CLIENTMANAGER_PLAYERS[i]);
         VectorClear(clientManager->players);
     }
+}
+
+void ClientManagerAddShootingLine(ShootData shootData)
+{
+    VectorPushBack(clientManager->shootingLines, &shootData);
 }
 
 SDL_bool ClientManagerIsInGame()
@@ -259,7 +273,6 @@ void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
     int id = *(int *)packet.data;
     ClientSetPlayerID(id);
-    ScoreboardAddPlayer(id, "Player");
     // Sends a empty packet to signal the server which IP to respond with when sending UDP-packets
     ClientUDPSend(PT_None, NULL, 0);
 }
@@ -341,9 +354,11 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 
 void ClientManagerHandleCloseSessionPacket(ParsedPacket packet)
 {
-    GameStateSet(GS_Menu);
-    MenuStateSet(MS_MainMenu);
-    ClientManagerSetInGame(SDL_FALSE);
+    if (ClientManagerIsInGame())
+    {
+        GameStateSet(GS_Menu);
+        MenuStateSet(MS_Summary);
+    }
 }
 
 void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
@@ -475,8 +490,7 @@ void ClientManagerHandlePlayerHitPacket(ParsedPacket packet)
 void ClientManagerHandlePlayerShootPacket(ParsedPacket packet)
 {
     ShootData shootData = *(ShootData *)packet.data;
-    ShootingLine shootingLine = {shootData.lineStart, shootData.lineEnd};
-    VectorPushBack(clientManager->shootingLines, &shootingLine);
+    ClientManagerAddShootingLine(shootData);
 }
 
 void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet)
@@ -501,17 +515,6 @@ void ClientManagerHandleNewRoundPacket(ParsedPacket packet)
     PlayerRevive();
 }
 
-void ClientManagerHandleScoreboardPacket(ParsedPacket packet)
-{
-}
-
-void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet)
-{
-    int points = (int)*(float *)packet.data;
-    InstanceSetPoints(points);
-    ScoreboardSetScore(PlayerGetEntity()->id, points);
-}
-
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 {
     ClientManagerLeaveSessionLocally();
@@ -521,7 +524,6 @@ void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet)
 {
     if (clientManager->inGame)
     {
-        RoundSetCountdown(*(float *)packet.data);
         GameStateSet(GS_MatchFinished);
     }
 }
@@ -530,8 +532,22 @@ void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet)
 {
     if (clientManager->inGame)
     {
-        RoundSetCountdown(*(float *)packet.data);
         GameStateSet(GS_RoundFinished);
+    }
+}
+
+void ClientManagerHandleCountdownPacket(ParsedPacket packet)
+{
+    RoundSetCountdown(*(float *)packet.data);
+}
+
+void ClientManagerHandleFetchScoreboardPacket(ParsedPacket packet)
+{
+    int nScoreboardEntries = packet.size / sizeof(ScoreboardEntry);
+    for (int i = 0; i < nScoreboardEntries; i++)
+    {
+        ScoreboardEntry entry = ((ScoreboardEntry *)packet.data)[i];
+        ScoreboardAddPlayer(entry.id, entry.name, entry.score);
     }
 }
 

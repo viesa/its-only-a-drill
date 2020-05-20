@@ -14,38 +14,38 @@
 
 typedef enum PacketType
 {
-    PT_Text,              // When plain text is to be sent
-    PT_AreYouAlive,       // When client or server want to check if the other one is still replying/connected
-    PT_IAmAlive,          // When the client or server want to confirm that he is is replying/connected
-    PT_IsPlayerActive,    // When the client wants to check if players in sessions are still there
-    PT_Connect,           // When client connects to server, recieve their name sends out ID
-    PT_UDPRespondIP,      // When client want to notify server which IP-address to asssign it's outgoing UDP-packets with
-    PT_DuplicateName,     // When client has a duplicate name
-    PT_Disconnect,        // When client or server disconnectes
-    PT_NewPlayer,         // When server broadcasts a new player join,
-                          // or when server updates a new client with current players
-    PT_DelPlayer,         // When server broadcasts deletion of a player
-    PT_Entity,            // When sending an entity
-    PT_CompressedEntity,  // When sending a compressed entity
-    PT_CloseSession,      // When server notifies clients that session is closing
-    PT_CreateSession,     // When client wants to create a lobby
-    PT_JoinSession,       // When client wants to join a lobby
-    PT_LeaveSession,      // When client notifies the server it is leaving the session
-    PT_FullSession,       // When the server notifies the client the session is full
-    PT_ChangeSkin,        // When the client changes skins in the lobby
-    PT_HostAssign,        // When the host notfies the ID of the host
-    PT_FetchSessions,     // When client asks server what sessions exists
-    PT_FetchLobby,        // When client asks server which players are in given lobby
-    PT_StartRound,        // When host starts the session from the lobby, server returns the entity of the player
-    PT_PlayerHit,         // When a player is getting shot [0] = id of shot player, [1] = damage
-    PT_PlayerShoot,       // When a player shoots this is sent so other clients can draw the line
-    PT_PlayerDead,        // When a player is killed, it notifies the server with this packet so other players will know too
-    PT_NewRound,          // When everyone died in a round, start a new round
-    PT_Scoreboard,        // When a round is finished and server updates the scoreboard
-    PT_FetchPlayerPoints, // When a player wants to update their own points. Client is only able to fetch their own points
-    PT_CloseAllSessions,  // When server want to close all running sessions
-    PT_MatchFinished,     // When server notifying the clients the match is over
-    PT_RoundFinished,     // When server notifying the clients the round is over
+    PT_Text,             // When plain text is to be sent
+    PT_AreYouAlive,      // When client or server want to check if the other one is still replying/connected
+    PT_IAmAlive,         // When the client or server want to confirm that he is is replying/connected
+    PT_IsPlayerActive,   // When the client wants to check if players in sessions are still there
+    PT_Connect,          // When client connects to server, recieve their name sends out ID
+    PT_UDPRespondIP,     // When client want to notify server which IP-address to asssign it's outgoing UDP-packets with
+    PT_DuplicateName,    // When client has a duplicate name
+    PT_Disconnect,       // When client or server disconnectes
+    PT_NewPlayer,        // When server broadcasts a new player join,
+                         // or when server updates a new client with current players
+    PT_DelPlayer,        // When server broadcasts deletion of a player
+    PT_Entity,           // When sending an entity
+    PT_CompressedEntity, // When sending a compressed entity
+    PT_CloseSession,     // When server notifies clients that session is closing
+    PT_CreateSession,    // When client wants to create a lobby
+    PT_JoinSession,      // When client wants to join a lobby
+    PT_LeaveSession,     // When client notifies the server it is leaving the session
+    PT_FullSession,      // When the server notifies the client the session is full
+    PT_ChangeSkin,       // When the client changes skins in the lobby
+    PT_HostAssign,       // When the host notfies the ID of the host
+    PT_FetchSessions,    // When client asks server what sessions exists
+    PT_FetchLobby,       // When client asks server which players are in given lobby
+    PT_StartRound,       // When host starts the session from the lobby, server returns the entity of the player
+    PT_PlayerHit,        // When a player is getting shot [0] = id of shot player, [1] = damage
+    PT_PlayerShoot,      // When a player shoots this is sent so other clients can draw the line
+    PT_PlayerDead,       // When a player is killed, it notifies the server with this packet so other players will know too
+    PT_NewRound,         // When everyone died in a round, start a new round
+    PT_CloseAllSessions, // When server want to close all running sessions
+    PT_MatchFinished,    // When server notifying the clients the match is over
+    PT_RoundFinished,    // When server notifying the clients the round is over
+    PT_Countdown,        // When server updates client with roundFinished-countdown or matchedFinished-countdown
+    PT_FetchScoreboard,  // When client asks server about everyones score
     PT_None,
     PT_Count
 } PacketType;

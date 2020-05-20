@@ -6,6 +6,7 @@
 #include "EntityManager.h"
 #include "Anim.h"
 #include "Weapon.h"
+#include "CollisionDetection.h"
 
 typedef struct MovePattern MovePattern;
 typedef struct NPC NPC;

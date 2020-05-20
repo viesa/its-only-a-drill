@@ -63,8 +63,8 @@ void ServerManagerHandleAllPackets()
         case PT_PlayerDead:
             ServerManagerHandlePlayerDeadPacket(nextPacket);
             break;
-        case PT_FetchPlayerPoints:
-            ServerManagerHandleFetchPlayerPointsPacket(nextPacket);
+        case PT_FetchScoreboard:
+            ServerManagerHandleFetchScoreboardPacket(nextPacket);
             break;
         default:
             break;
@@ -90,19 +90,21 @@ void ServerManagerKickTimeoutClients()
 
 void ServerManagerAdvanceSessionsWithOnePlayerAlive()
 {
-    for (int i = 0; i < ServerGetNumSessions(); i++)
+    int nSessions = ServerGetNumSessions();
+    int nRemovedSesssions = 0;
+    for (int i = 0; i < nSessions - nRemovedSesssions; i++)
     {
         int nAlivePlayers = 0;
         Session *session = &SERVER_SESSIONS[i];
         if (session->inGame)
         {
             NetPlayer *playerLeft = NULL;
-            for (int i = 0; i < session->playerIDs->size; i++)
+            for (int j = 0; j < session->playerIDs->size; j++)
             {
-                NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+                NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[j]);
                 if (!player)
                 {
-                    ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[i]);
+                    ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[j]);
                     break;
                 }
                 if (player->state == NPS_Alive)
@@ -115,38 +117,43 @@ void ServerManagerAdvanceSessionsWithOnePlayerAlive()
             }
             if (nAlivePlayers <= 1 && !session->quittingMatch && !session->startingNewRound)
             {
-                // Award the winning player with points for winning
-                playerLeft->pointBuffer += (float)(session->playerIDs->size * 10);
+                // Award the winning player with points for winning, if he is alive
+                if (playerLeft)
+                    playerLeft->pointBuffer += (float)(session->playerIDs->size * 10);
 
                 if (++session->currentRound >= session->nRounds || session->playerIDs->size <= 1)
                 {
                     // Match finished
                     session->finishedMatchCountdown = 5.0f;
                     session->quittingMatch = SDL_TRUE;
+                    ServerTCPBroadcastSession(PT_MatchFinished, session, NULL, 0);
                 }
                 else
                 {
                     // Round finished
                     session->finishedRoundCountdown = 5.0f;
                     session->startingNewRound = SDL_TRUE;
+                    ServerTCPBroadcastSession(PT_RoundFinished, session, NULL, 0);
                 }
             }
 
             if (session->quittingMatch)
             {
                 session->finishedMatchCountdown -= ClockGetDeltaTime();
-                ServerUDPBroadcastSession(PT_MatchFinished, session, &session->finishedMatchCountdown, sizeof(float));
+                ServerUDPBroadcastSession(PT_Countdown, session, &session->finishedMatchCountdown, sizeof(float));
                 if (session->finishedMatchCountdown <= 0.0f)
                 {
                     ServerTCPBroadcastSession(PT_CloseSession, session, NULL, 0);
                     ServerRemoveSession(session);
+                    i--;
+                    nRemovedSesssions++;
                     session->quittingMatch = SDL_FALSE;
                 }
             }
             else if (session->startingNewRound)
             {
                 session->finishedRoundCountdown -= ClockGetDeltaTime();
-                ServerUDPBroadcastSession(PT_RoundFinished, session, &session->finishedRoundCountdown, sizeof(float));
+                ServerUDPBroadcastSession(PT_Countdown, session, &session->finishedRoundCountdown, sizeof(float));
                 if (session->finishedRoundCountdown <= 0.0f)
                 {
                     ServerTCPBroadcastSession(PT_NewRound, session, &session->currentRound, sizeof(int));
@@ -611,7 +618,7 @@ void ServerManagerHandlePlayerDeadPacket(ParsedPacket packet)
     ServerTCPBroadcastExclusiveSession(PT_PlayerDead, session, &senderP->id, sizeof(int), packet.sender);
 }
 
-void ServerManagerHandleFetchPlayerPointsPacket(ParsedPacket packet)
+void ServerManagerHandleFetchScoreboardPacket(ParsedPacket packet)
 {
     // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
@@ -619,6 +626,26 @@ void ServerManagerHandleFetchPlayerPointsPacket(ParsedPacket packet)
         return;
     if (senderP->sessionID < 0)
         return;
+    Session *session = ServerGetSessionByID(senderP->sessionID);
+    if (!session)
+        return;
 
-    ServerTCPSend(PT_FetchPlayerPoints, &senderP->pointBuffer, sizeof(int), packet.sender);
+    // Allocate enough for maximum session players
+    ScoreboardEntry allEntries[session->playerIDs->size];
+
+    // Actual added number of players
+    int n = 0;
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        ScoreboardEntry entry = {0};
+        NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+        if (!player)
+            continue;
+        entry.id = player->id;
+        strcpy(entry.name, player->name);
+        entry.score = player->pointBuffer;
+        allEntries[n++] = entry;
+    }
+
+    ServerTCPSend(PT_FetchScoreboard, allEntries, sizeof(ScoreboardEntry) * n, packet.sender);
 }
