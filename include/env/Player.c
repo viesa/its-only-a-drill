@@ -56,8 +56,9 @@ void PlayerUpdate()
     PlayerCameraUpdate(player);
     if (entity->health <= 0)
     {
+        if (player->state != PL_Dead)
+            ClientTCPSend(PT_PlayerDead, NULL, 0);
         PlayerKill(player);
-        ClientTCPSend(PT_PlayerDead, NULL, 0);
     }
     else
     {

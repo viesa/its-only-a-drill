@@ -610,6 +610,9 @@ void ServerManagerHandlePlayerDeadPacket(ParsedPacket packet)
     if (!session)
         return;
 
+    if (senderP->state == NPS_Dead)
+        return;
+
     senderP->state = NPS_Dead;
 
     // Award player with points relative to how many people died before
