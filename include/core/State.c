@@ -39,6 +39,8 @@ CLIState CLIStateGet()
 
 void GameStateSet(GameState newState)
 {
+    if (newState == GS_Playing && GameStateGet() == GS_Menu)
+        ScoreboardClear();
     state.gameState = newState;
 }
 
