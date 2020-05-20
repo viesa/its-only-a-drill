@@ -70,7 +70,7 @@ void GuiUpdate()
     // Disp. Points
 
     long points = gui->points;
-    char pts[10];
+    char pts[20];
     if (points >= 1000000)
     {
         points = 1000000;
