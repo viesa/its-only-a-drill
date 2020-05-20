@@ -162,7 +162,7 @@ void ServerPingClients()
 
 void ServerRemoveSession(Session *session)
 {
-    while (session->playerIDs > 0)
+    while (session->playerIDs->size > 0)
     {
         // This function also remove session completely when last player is removed
         ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[0]);
