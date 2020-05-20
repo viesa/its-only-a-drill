@@ -129,7 +129,6 @@ void AppClientUpdate(AppClient *app)
         // Sends player to server
         CompressedEntity cEntity = EntityCompress(PlayerGetEntity());
         ClientUDPSend(PT_CompressedEntity, &cEntity, sizeof(CompressedEntity));
-
         break;
     }
     case GS_RoundFinished:
@@ -138,7 +137,7 @@ void AppClientUpdate(AppClient *app)
         break;
     }
     if (ConStateGet() == CON_Online)
-        ClientTCPSend(PT_FetchPlayerPoints, NULL, 0);
+        ClientTCPSend(PT_FetchScoreboard, NULL, 0);
 }
 
 void AppClientDraw(AppClient *app)

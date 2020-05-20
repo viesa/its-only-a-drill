@@ -115,12 +115,6 @@ void ClientManagerHandleAllPackets()
         case PT_NewRound:
             ClientManagerHandleNewRoundPacket(nextPacket);
             break;
-        case PT_Scoreboard:
-            ClientManagerHandleScoreboardPacket(nextPacket);
-            break;
-        case PT_FetchPlayerPoints:
-            ClientManagerHandleFetchPlayerPoints(nextPacket);
-            break;
         case PT_RoundFinished:
             ClientManagerHandleRoundFinishedPacket(nextPacket);
             break;
@@ -129,6 +123,9 @@ void ClientManagerHandleAllPackets()
             break;
         case PT_Countdown:
             ClientManagerHandleCountdownPacket(nextPacket);
+            break;
+        case PT_FetchScoreboard:
+            ClientManagerHandleFetchScoreboardPacket(nextPacket);
             break;
         default:
             break;
@@ -276,7 +273,6 @@ void ClientManagerHandleConnectPacket(ParsedPacket packet)
 {
     int id = *(int *)packet.data;
     ClientSetPlayerID(id);
-    ScoreboardAddPlayer(id, "Player");
     // Sends a empty packet to signal the server which IP to respond with when sending UDP-packets
     ClientUDPSend(PT_None, NULL, 0);
 }
@@ -358,9 +354,11 @@ void ClientManagerHandleCompressedEntityPacket(ParsedPacket packet)
 
 void ClientManagerHandleCloseSessionPacket(ParsedPacket packet)
 {
-    GameStateSet(GS_Menu);
-    MenuStateSet(MS_MainMenu);
-    ClientManagerSetInGame(SDL_FALSE);
+    if (ClientManagerIsInGame())
+    {
+        GameStateSet(GS_Menu);
+        MenuStateSet(MS_Summary);
+    }
 }
 
 void ClientManagerHandleCreateSessionPacket(ParsedPacket packet)
@@ -517,17 +515,6 @@ void ClientManagerHandleNewRoundPacket(ParsedPacket packet)
     PlayerRevive();
 }
 
-void ClientManagerHandleScoreboardPacket(ParsedPacket packet)
-{
-}
-
-void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet)
-{
-    int points = (int)*(float *)packet.data;
-    InstanceSetPoints(points);
-    ScoreboardSetScore(PlayerGetEntity()->id, points);
-}
-
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet)
 {
     ClientManagerLeaveSessionLocally();
@@ -552,6 +539,16 @@ void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet)
 void ClientManagerHandleCountdownPacket(ParsedPacket packet)
 {
     RoundSetCountdown(*(float *)packet.data);
+}
+
+void ClientManagerHandleFetchScoreboardPacket(ParsedPacket packet)
+{
+    int nScoreboardEntries = packet.size / sizeof(ScoreboardEntry);
+    for (int i = 0; i < nScoreboardEntries; i++)
+    {
+        ScoreboardEntry entry = ((ScoreboardEntry *)packet.data)[i];
+        ScoreboardAddPlayer(entry.id, entry.name, entry.score);
+    }
 }
 
 EntityIndexP *ClientManagerGetPlayersArray()

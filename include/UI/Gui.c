@@ -109,14 +109,14 @@ void GuiDrawFinishedRoundMessage()
 {
     GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
     char buffer[100] = {0};
-    sprintf(buffer, "Round Finished! New round starting: %.1f", RoundGetCountdown());
-    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
+    sprintf(buffer, "Round finished! New round starting. [%.0f]", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){40, 180, 184, 255});
 }
 
 void GuiDrawFinishedMatchMessage()
 {
     GraphicsDrawRect(WindowGetScreenRect(), (SDL_Color){0, 0, 0, 120}, SDL_TRUE);
     char buffer[100] = {0};
-    sprintf(buffer, "Finished Match. Returning to Main Menu: %.1f", RoundGetCountdown());
-    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){255, 255, 255, 255});
+    sprintf(buffer, "Finished match. [%.0f]", RoundGetCountdown());
+    FontDraw(FontGetDynamicSizing(), buffer, WindowGetWidth() / 2, WindowGetHeight() / 2, FAL_C, 0, (SDL_Color){40, 180, 184, 255});
 }

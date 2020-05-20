@@ -29,6 +29,7 @@ typedef enum MenuState
     MS_Audio,
     MS_CustomMap,
     MS_Skin,
+    MS_Summary,
     MS_None,
     MS_Count
 } MenuState;

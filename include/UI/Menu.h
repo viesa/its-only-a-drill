@@ -53,6 +53,7 @@ void MenuUpdateAudio();
 
 void MenuUpdateCustomMap();
 void MenuUpdateSkin();
+void MenuUpdateSummary();
 void MenuTitleDraw(char title[100]);
 void MenuDrawPreviewMap();
 void MenuDraw(char options[][100], int optionLength);

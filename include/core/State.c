@@ -48,6 +48,10 @@ void MenuStateSet(MenuState newState)
     MenuResetFetchLobbyTimer();
     MenuResetFetchSessionsTimer();
 
+    if (newState == MS_MainMenu)
+    {
+        ScoreboardClear();
+    }
     if (newState == MS_Name)
     {
         InputClearPortalContent();

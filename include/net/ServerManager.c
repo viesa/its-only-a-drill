@@ -63,8 +63,8 @@ void ServerManagerHandleAllPackets()
         case PT_PlayerDead:
             ServerManagerHandlePlayerDeadPacket(nextPacket);
             break;
-        case PT_FetchPlayerPoints:
-            ServerManagerHandleFetchPlayerPointsPacket(nextPacket);
+        case PT_FetchScoreboard:
+            ServerManagerHandleFetchScoreboardPacket(nextPacket);
             break;
         default:
             break;
@@ -90,19 +90,21 @@ void ServerManagerKickTimeoutClients()
 
 void ServerManagerAdvanceSessionsWithOnePlayerAlive()
 {
-    for (int i = 0; i < ServerGetNumSessions(); i++)
+    int nSessions = ServerGetNumSessions();
+    int nRemovedSesssions = 0;
+    for (int i = 0; i < nSessions - nRemovedSesssions; i++)
     {
         int nAlivePlayers = 0;
         Session *session = &SERVER_SESSIONS[i];
         if (session->inGame)
         {
             NetPlayer *playerLeft = NULL;
-            for (int i = 0; i < session->playerIDs->size; i++)
+            for (int j = 0; j < session->playerIDs->size; j++)
             {
-                NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+                NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[j]);
                 if (!player)
                 {
-                    ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[i]);
+                    ServerRemovePlayerFromSession(session, SessionGetPlayerIDs(session)[j]);
                     break;
                 }
                 if (player->state == NPS_Alive)
@@ -115,8 +117,9 @@ void ServerManagerAdvanceSessionsWithOnePlayerAlive()
             }
             if (nAlivePlayers <= 1 && !session->quittingMatch && !session->startingNewRound)
             {
-                // Award the winning player with points for winning
-                playerLeft->pointBuffer += (float)(session->playerIDs->size * 10);
+                // Award the winning player with points for winning, if he is alive
+                if (playerLeft)
+                    playerLeft->pointBuffer += (float)(session->playerIDs->size * 10);
 
                 if (++session->currentRound >= session->nRounds || session->playerIDs->size <= 1)
                 {
@@ -142,6 +145,8 @@ void ServerManagerAdvanceSessionsWithOnePlayerAlive()
                 {
                     ServerTCPBroadcastSession(PT_CloseSession, session, NULL, 0);
                     ServerRemoveSession(session);
+                    i--;
+                    nRemovedSesssions++;
                     session->quittingMatch = SDL_FALSE;
                 }
             }
@@ -613,7 +618,7 @@ void ServerManagerHandlePlayerDeadPacket(ParsedPacket packet)
     ServerTCPBroadcastExclusiveSession(PT_PlayerDead, session, &senderP->id, sizeof(int), packet.sender);
 }
 
-void ServerManagerHandleFetchPlayerPointsPacket(ParsedPacket packet)
+void ServerManagerHandleFetchScoreboardPacket(ParsedPacket packet)
 {
     // If player doesnt actually exist in server player array, discard packet
     NetPlayer *senderP = ServerGetPlayerByID(packet.sender.id);
@@ -621,6 +626,26 @@ void ServerManagerHandleFetchPlayerPointsPacket(ParsedPacket packet)
         return;
     if (senderP->sessionID < 0)
         return;
+    Session *session = ServerGetSessionByID(senderP->sessionID);
+    if (!session)
+        return;
 
-    ServerTCPSend(PT_FetchPlayerPoints, &senderP->pointBuffer, sizeof(int), packet.sender);
+    // Allocate enough for maximum session players
+    ScoreboardEntry allEntries[session->playerIDs->size];
+
+    // Actual added number of players
+    int n = 0;
+    for (int i = 0; i < session->playerIDs->size; i++)
+    {
+        ScoreboardEntry entry = {0};
+        NetPlayer *player = ServerGetPlayerByID(SessionGetPlayerIDs(session)[i]);
+        if (!player)
+            continue;
+        entry.id = player->id;
+        strcpy(entry.name, player->name);
+        entry.score = player->pointBuffer;
+        allEntries[n++] = entry;
+    }
+
+    ServerTCPSend(PT_FetchScoreboard, allEntries, sizeof(ScoreboardEntry) * n, packet.sender);
 }

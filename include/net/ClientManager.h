@@ -66,11 +66,11 @@ void ClientManagerHandlePlayerShootPacket(ParsedPacket packet);
 void ClientManagerHandlePlayerDeadPacket(ParsedPacket packet);
 void ClientManagerHandleNewRoundPacket(ParsedPacket packet);
 void ClientManagerHandleScoreboardPacket(ParsedPacket packet);
-void ClientManagerHandleFetchPlayerPoints(ParsedPacket packet);
 void ClientManagerHandleCloseAllSessionsPacket(ParsedPacket packet);
 void ClientManagerHandleMatchFinishedPacket(ParsedPacket packet);
 void ClientManagerHandleRoundFinishedPacket(ParsedPacket packet);
 void ClientManagerHandleCountdownPacket(ParsedPacket packet);
+void ClientManagerHandleFetchScoreboardPacket(ParsedPacket packet);
 
 EntityIndexP *ClientManagerGetPlayersArray();
 JoinableSession *ClientManagerGetJoinListArray();
