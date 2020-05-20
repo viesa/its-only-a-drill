@@ -22,7 +22,6 @@ typedef struct Menu
     Sound MenuStep;
     Music MenuTheme;
     Music MenuTheme2;
-    Music GameTheme;
     int themecheck;
     int themecheck2;
     SDL_Color clr[10];
@@ -66,7 +65,6 @@ void MenuInitialize(MapList *mapList)
     menu->MenuStep = SoundCreate(SF_MenuStep);
     menu->MenuTheme = MusicCreate(MF_MainMusic);
     menu->MenuTheme2 = MusicCreate(MF_MainMusicTwo);
-    menu->GameTheme = MusicCreate(MF_GameMusic);
     menu->themecheck = 0;
     menu->themecheck2 = 0;
 
@@ -132,17 +130,6 @@ void MenuUpdate()
     {
         menu->loopCount = 0;
     }
-
-    if(menu->themecheck == menu->themecheck2) 
-        {
-            if(menu->themecheck != 0) 
-            {
-                MusicStop(&menu->GameTheme);
-                MusicPlay(&menu->MenuTheme2, -1);
-                menu->themecheck++;
-            }
-           
-        }
 
     //Update text colors
     menu->clr[0] = (SDL_Color){215, 159, 227, 255};
@@ -282,6 +269,11 @@ void MenuUpdateName()
 
 void MenuUpdateMainMenu()
 {
+    if(menu->themecheck == 1) 
+    {
+        MusicPlay(&menu->MenuTheme2, -1);
+        menu->themecheck++;
+    }
     //Determine menu options
     int optionLength = 7;
     char options[7][100] = {
@@ -483,16 +475,7 @@ void MenuUpdateHostLobby()
 
     if (menu->startedOutTransition && TransitionIsDone())
     {
-        if(menu->themecheck == 1)  
-        {   
-            MusicStop(&menu->MenuTheme);
-        }
-        else 
-        {
-            MusicStop(&menu->MenuTheme2);
-        }
-        MusicPlay(&menu->GameTheme, -1);
-        menu->themecheck2++;
+
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
         menu->startedOutTransition = SDL_FALSE;
