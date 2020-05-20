@@ -68,8 +68,23 @@ void GuiUpdate()
     }
 
     // Disp. Points
+
+    int points = gui->points;
     char pts[10];
-    sprintf(pts, "%ld pts", gui->points);
+    if (points >= 1000000)
+    {
+        points = 1000000;
+        sprintf(pts, ">%ld pts", gui->points);
+    }
+    else if (points <= -1000000)
+    {
+        points = -1000000;
+        sprintf(pts, "<%ld pts", gui->points);
+    }
+    else
+    {
+        sprintf(pts, "%ld pts", gui->points);
+    }
     SDL_Color vitalsColor[10] = {
         {225, 159, 227, 255},
         {225, 139, 207, 255},
