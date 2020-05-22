@@ -284,7 +284,7 @@ void MenuUpdateName()
 
 void MenuUpdateMainMenu()
 {
-    if(menu->themecheck == 1) 
+    if (menu->themecheck == 1)
     {
         MusicPlay(&menu->MenuTheme2, -1);
         menu->themecheck++;
@@ -431,7 +431,7 @@ void MenuUpdateInGameMenu()
         MenuStateSet(MS_None);
         GameStateSet(GS_Playing);
         MusicStop(&menu->MenuTheme2);
-        MusicPlay(&menu->GameTheme,-1);
+        MusicPlay(&menu->GameTheme, -1);
         menu->themecheck2++;
         menu->startedOutTransition = SDL_FALSE;
     }
