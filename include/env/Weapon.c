@@ -70,7 +70,7 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, vo
     void (*Func)(int *, Vec2 *, WeaponStats *);
     Func = pointerToFunc;
     int tmpPosX, tmpPosY, tmpPointX, tmpPointY, closestEntity = 0, endPointX, endPointY;
-    float closestLenght = 99999.0f, testLenght; // there isen't a weapon that kan shoot longer than 99999 units, yet....
+    float closestLength = 99999.0f, testLength; // there isen't a weapon that kan shoot longer than 99999 units, yet....
     Vec2 playerCenter = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 range = Vec2MulL(*direction, stats->falloff);
     Vec2 rangeWithOffset = Vec2Add(playerCenter, range);
@@ -86,12 +86,13 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, vo
             { // reduce accuracy
                 tmpPosX = ENTITY_ARRAY[i].drawables[0].dst.x - tmpPointX;
                 tmpPosY = ENTITY_ARRAY[i].drawables[0].dst.y - tmpPointY;
-                testLenght = sqrt(pow(tmpPosX, 2) + pow(tmpPosX, 2));
-                if (testLenght < closestLenght)
+                testLength = sqrt(pow(tmpPosX, 2) + pow(tmpPosX, 2));
+                if (testLength < closestLength)
                 {
                     closestEntity = i;
                     endPointX = tmpPointX;
                     endPointY = tmpPointY;
+                    closestLength = testLength;
                 }
             }
         }
