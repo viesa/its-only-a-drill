@@ -7,6 +7,9 @@
 #include "Items.h"
 #include "EntityManager.h"
 
+#define UNINHABITABLE 500
+#define MAX_STEPS 10
+
 typedef struct HitData
 {
     int id;
@@ -21,23 +24,23 @@ typedef struct ShootData
 } ShootData;
 
 // updates weapon logik thats needed efter frame like cooldown
-void weaponUpdate(Item *item);
+void WeaponUpdate(Item *item);
 
 //how to handle output data
-const void multiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats);
-const void singelplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats);
+const void WeaponMultiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats);
+const void WeaponSingleplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats);
 
 //**************[Diffrent shooting types]**************
 // casts a ray test what collides with it (sends data to server)
-void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc);
+void WeaponRayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc);
 // takes steps intil collision
-void rayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc);
+void WeaponRayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc);
 /// gives the maximum distans before collision
 ///\param index: index == zero to not test with anything
 /// otherwise ignore index entity
-float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance);
+float WeaponMaxDistanceBeforeColision(Vec2 point, EntityIndexP index, float maxDistance);
 /// returns 1 if a hit and changes data, returns 0 if failed
-SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage);
+SDL_bool WeaponTestLineWithEntities(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage);
 // casts a ray and changes data on closest hit
 void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stat, void *pointerToFunc);
 // skapar en projektil *unsused/not updated

@@ -2,17 +2,14 @@
 
 #include "ClientManager.h"
 
-#define unhitable 500
-#define max_steps 10
-
-void weaponUpdate(Item *item)
+void WeaponUpdate(Item *item)
 {
     // counts the cooldown
     item->Stats.currentTime -= ClockGetDeltaTimeMS();
     item->Stats.currentTime = (item->Stats.currentTime <= 0.0f) ? -1 : item->Stats.currentTime;
 }
 
-const void multiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
+const void WeaponMultiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
 {
     Entity *entity = &ENTITY_ARRAY[*index];
     if (entity->type == ET_Player)
@@ -29,14 +26,14 @@ const void multiplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
     entity->Force.y += direction->y * (float)(Stats->falloff / 10);
 }
 
-const void singelplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
+const void WeaponSingleplayerHandler(int *index, Vec2 *direction, WeaponStats *Stats)
 {
     ENTITY_ARRAY[*index].health -= Stats->Damage;
     ENTITY_ARRAY[*index].Force.x += direction->x * (float)(Stats->falloff / 10);
     ENTITY_ARRAY[*index].Force.y += direction->y * (float)(Stats->falloff / 10);
 }
 
-void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
+void WeaponRayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
 {
     void (*Func)(int *, Vec2 *, WeaponStats *);
     Func = pointerToFunc;
@@ -65,7 +62,7 @@ void RayScan(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *poi
     }
 }
 
-void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
+void WeaponRayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
 {
     void (*Func)(int *, Vec2 *, WeaponStats *);
     Func = pointerToFunc;
@@ -117,29 +114,29 @@ void RayScanClosest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, vo
     }
 }
 
-void rayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
+void WeaponRayMarchingTest(EntityIndexP source, Vec2 *direction, WeaponStats *stats, void *pointerToFunc)
 {
     Vec2 RayOrgin = RectMid(ENTITY_ARRAY[*source].drawables[0].dst);
     Vec2 point;
     float StepSize = 0.0f, DirectionScale = 0.0f;
     Vec2 previousPoint = RayOrgin;
     float reach = stats->falloff;
-    for (int i = 0; i < max_steps; i++)
+    for (int i = 0; i < MAX_STEPS; i++)
     {
         point = Vec2Add(previousPoint, Vec2MulL(*direction, StepSize));
-        DirectionScale = maxDistenBeforeColision(point, source, reach);
+        DirectionScale = WeaponMaxDistanceBeforeColision(point, source, reach);
         StepSize += DirectionScale;
         reach -= fabsf(DirectionScale);
 
         CameraDrawLine(RayOrgin.x, RayOrgin.y, point.x, point.y, (SDL_Color){255, 50, 50, 150});
         // if testLineWithEntitys is true you hit something, if reach is >0 you hit the max distance, stepsize if the step is too big, DirectionScale you hit something unhitable
-        if (testLineWithEntitys(previousPoint, point, source, &stats->Damage) || reach <= 0 || StepSize > unhitable || DirectionScale <= 0)
+        if (WeaponTestLineWithEntities(previousPoint, point, source, &stats->Damage) || reach <= 0 || StepSize > UNINHABITABLE || DirectionScale <= 0)
             break;
         previousPoint = point;
     }
 }
 
-float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance)
+float WeaponMaxDistanceBeforeColision(Vec2 point, EntityIndexP index, float maxDistance)
 {
     Vec2 vector;
     float VectorLength;
@@ -156,7 +153,7 @@ float maxDistenBeforeColision(Vec2 point, EntityIndexP index, float maxDistance)
     return closestObject = (closestObject > maxDistance) ? maxDistance : closestObject;
 }
 
-SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage)
+SDL_bool WeaponTestLineWithEntities(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, int *damage)
 {
     for (int i = 0; i < ENTITY_ARRAY_SIZE; i++)
     {
@@ -178,15 +175,4 @@ SDL_bool testLineWithEntitys(Vec2 start, Vec2 end, EntityIndexP ignoreEntity, in
         }
     }
     return 0;
-}
-
-// void bullet(int index, Vec2 Destination, SDL_Point point, Item item, Vec2 Direction)
-// {
-//     // to create offset so you don't shoot your self
-//     Vec2 creationWithOffset = Vec2MulL(Direction, 50);
-//     EntityManagerAdd(ET_Bullet, creationWithOffset);
-// }
-
-void DectectIntersectionKeep()
-{
 }

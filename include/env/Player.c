@@ -71,7 +71,7 @@ void PlayerUpdate()
                 PlayerShoot(player);
         }
     }
-    weaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
+    WeaponUpdate(&player->inventory.contents[player->inventory.top - 1]);
 }
 
 void PlayerDraw()
@@ -161,8 +161,8 @@ void PlayerShoot()
         entity->Force.x -= item->Stats.falloff;
         entity->Force.y -= item->Stats.falloff;
         //bullet(index, mousePos, point, item, unitPlayerToMouse);
-        void *func = multiplayerHandler;
-        RayScanClosest(player->entity, &unitPlayerToMouse, &item->Stats, func);
+        void *func = WeaponMultiplayerHandler;
+        WeaponRayScanClosest(player->entity, &unitPlayerToMouse, &item->Stats, func);
     }
 }
 
